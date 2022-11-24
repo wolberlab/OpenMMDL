@@ -115,10 +115,10 @@ def post_md_file_movement(protein_name, ligand):
         shutil.rmtree("MD_Postprocessing/2_MDAnalysis")
         os.mkdir("MD_Postprocessing/2_MDAnalysis")
 
-    os.rename(f'centered_topology.pdb', f'MD_Postprocessing/2_MDAnalysis/centered_topology.pdb')
-    os.rename(f'centered_trajectory.dcd', f'MD_Postprocessing/2_MDAnalysis/centered_trajectory.dcd')
-    os.rename(f'protein_ligand_topology.pdb', f'MD_Postprocessing/2_MDAnalysis/protein_ligand_topology.pdb')
-    os.rename(f'protein_ligand_trajectory.dcd', f'MD_Postprocessing/2_MDAnalysis/protein_ligand_trajectory.dcd')
+    os.rename(f'centered_top.pdb', f'MD_Postprocessing/2_MDAnalysis/centered_top.pdb')
+    os.rename(f'centered_trj.dcd', f'MD_Postprocessing/2_MDAnalysis/centered_traj.dcd')
+    os.rename(f'prot_lig_top.pdb', f'MD_Postprocessing/2_MDAnalysis/prot_lig_top.pdb')
+    os.rename(f'prot_lig_traj.dcd', f'MD_Postprocessing/2_MDAnalysis/prot_lig_traj.dcd')
     
     # Checkpoints
     if not os.path.exists("Checkpoints"):
