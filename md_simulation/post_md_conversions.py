@@ -32,7 +32,7 @@ def mdtraj_conversion(pdb_file):
     mdtraj_frames.image_molecules()
     mdtraj_frames.save_dcd(f'centered_old_coordinates.dcd')
     mdtraj_first_frame = mdtraj_frames[0:1]
-    mdtraj_first_frame.save_pdb(f'centered_old_coorinates.pdb')
+    mdtraj_first_frame.save_pdb(f'centered_old_coordinates.pdb')
     
 def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, ligand_name):
     """
