@@ -37,7 +37,7 @@ def post_md_file_movement(protein_name, ligand):
         os.mkdir("Input_Files")
 
     shutil.copy(f"{ligand}", f"Input_Files/{ligand}")
-    shutil.copy(f"{protein}", f"Input_Files/{protein}")
+    shutil.copy(f"{protein_name}", f"Input_Files/{protein_name}")
     
     # MD Simulation Files
     # Pre Simulation Files
@@ -72,7 +72,7 @@ def post_md_file_movement(protein_name, ligand):
         os.mkdir("MD_Files/Minimization_Equilibration")
     
     os.rename(f'Energyminimization_{protein_name}', f"MD_Files/Minimization_Equilibration/Energyminimization_{protein_name}")
-    os.rename(f'Equilibration_{protein}', f"MD_Files/Minimization_Equilibration/Equilibration_{protein}")
+    os.rename(f'Equilibration_{protein_name}', f"MD_Files/Minimization_Equilibration/Equilibration_{protein_name}")
     
     
     # Simulation Output Files
