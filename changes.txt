@@ -1,3 +1,5 @@
+This is now deprecated, since we use git for every change from now.
+
 14 November 2022:
 	protein_ligand_prep.py:
 		prepare_ligand
