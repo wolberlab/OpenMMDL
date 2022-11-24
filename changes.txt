@@ -35,3 +35,6 @@ This is now deprecated, since we use git for every change from now.
 		Added MDAnalysis Tab with RMSD calculation + Interactions analysis
 	post_md_conversion.py:
 		Added rmsd_for_atomgroups, RMSD_dist_frames, atomic_distance
+
+24 November 2022:
+        Cleaned up git and assured tha verybody uses git
