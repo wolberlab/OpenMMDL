@@ -1,0 +1,473 @@
+{% extends "layout.html" %}
+{% block title %}Simulation Options{% endblock %}
+
+{% macro choice(id, title, options, changefunc="optionChanged") %}
+    <select name="{{ id }}" id="{{ id }}" title="{{ title }}" class="form-control" onchange="{{ changefunc }}()">
+        {% for option in options %}
+            <option value="{{ option[0] }}" title="{{ option[2] }}" {{ 'selected' if session[id] == option[0] else '' }}>{{ option[1] }}</option>
+        {% endfor %}
+    </select>
+{% endmacro %}
+
+{% macro textfield(id, title) %}
+    <input type="text" name="{{ id }}" id="{{ id }}" value="{{ session[id] }}" class="form-control" oninput="optionChanged()" title="{{ title }}"/>
+{% endmacro %}
+
+{% macro datafieldbox(id, name, title) %}
+    <label title="{{ title }}"><input type="checkbox" name="dataFields" value="{{ id }}" oninput="optionChanged()" {{ 'checked' if id in session['dataFields'] else '' }}> {{ name }}</label><br/>
+{% endmacro %}
+
+{% block body %}
+<form method="post" id="optionsForm" action="{{ url_for('setSimulationOptions') }}">
+    <div class="row">
+    <div class="col-md-4">
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#system">System</a></li>
+            <li><a data-toggle="tab" href="#integrator">Integrator</a></li>
+            <li><a data-toggle="tab" href="#simulation">Simulation</a></li>
+            <li><a data-toggle="tab" href="#output">Output</a></li>
+            <li><a data-toggle="tab" href="#manual">Manual Box</a></li>
+        </ul>
+        <div class="tab-content">
+            <div id="system" class="tab-pane fade in active">
+            <p/>
+            <div class="form-group">
+            <label for="nonbondedMethod">Nonbonded Method</label>
+            {% if 'forcefield' in session and session['forcefield'].startswith('amoeba') %}
+                {{ choice('nonbondedMethod', 'Select how to compute long range nonbonded interactions.', [
+                    ('NoCutoff', 'No cutoff', 'The system is not periodic, and no cutoff is applied to nonbonded interactions.'),
+                    ('PME', 'PME', 'Periodic boundary conditions are used.  Long range interactions are computed with Particle Mesh Ewald.')]) }}
+            {% else %}
+                {{ choice('nonbondedMethod', 'Select how to compute long range nonbonded interactions.', [
+                    ('NoCutoff', 'No cutoff', 'The system is not periodic, and no cutoff is applied to nonbonded interactions.'),
+                    ('CutoffNonPeriodic', 'Cutoff, non-periodic', 'The system is not periodic.  Long range interactions are cut off with the reaction field method.'),
+                    ('CutoffPeriodic', 'Cutoff, periodic', 'Periodic boundary conditions are used.  Long range interactions are cut off with the reaction field method.'),
+                    ('PME', 'PME', 'Periodic boundary conditions are used.  Long range interactions are computed with Particle Mesh Ewald.')]) }}
+            {% endif %}
+            </div>
+            <div class="form-group" id="cutoffRow">
+            <label for="cutoff">Cutoff Distance (nm)</label>
+            {{ textfield('cutoff', 'Nonbonded interactions beyond this distance will be ignored.') }}
+            </div>
+            <div class="form-group" id="ewaldTolRow">
+            <label for="ewaldTol">Ewald Error Tolerance</label>
+            {{ textfield('ewaldTol', 'This determines the accuracy of interactions computed with PME.') }}
+            </div>
+            <div class="form-group">
+            <label for="constraints">Constraints</label>
+            {{ choice('constraints', 'Select which bonds to replace with rigid constraints.', [
+                ('none', 'None', 'No degrees of freedom are constrained.'),
+                ('water', 'Water only', 'Water molecules are kept rigid, but no other degrees of freedom are constrained.'),
+                ('hbonds', 'Bonds involving hydrogen', 'The lengths of bonds involving a hydrogen atom are kept fixed.  Water molecules are kept rigid.'),
+                ('allbonds', 'All bonds', 'All bond lengths are kept fixed.  Water molecules are kept rigid.')]) }}
+            </div>
+            <div class="form-group" id="constraintTolRow">
+            <label for="constraintTol">Constraint Error Tolerance</label>
+            {{ textfield('constraintTol', 'The maximum allowed relative error in constrained distance.') }}
+            </div>
+            <div class="form-group">
+            <label><input type="checkbox" name="hmr" id="hmr" oninput="optionChanged()" {{ 'checked' if session['hmr'] else '' }}> Hydrogen Mass Repartitioning</label>
+            </div>
+            <div class="form-group" id="hmrOptions">
+                <label for="hmrMass">Hydrogen Mass (amu)</label>
+                {{ textfield('hmrMass', 'The mass of hydrogen atoms.') }}
+            </div>
+            </div>
+            <div id="integrator" class="tab-pane fade">
+            <p/>
+            <div class="form-group">
+            <label for="dt">Step Size (ps)</label>
+            {{ textfield('dt', 'The size of the time steps used by the integrator.') }}
+            </div>
+            <div class="form-group">
+            <label for="ensemble">Statistical Ensemble</label>
+            {{ choice('ensemble', 'Select the statistical ensemble to simulate.  This describes how the system interacts with the surrounding environment.', [
+                ('npt', 'Constant pressure, temperature', 'The simulation includes a thermostat and barostat to sample a constant pressure, constant temperature (NPT) ensemble.'),
+                ('nvt', 'Constant volume, temperature', 'The simulation includes a thermostat so it samples a constant volume, constant temperature (NVT) ensemble.')]) }}
+            </div>
+            <div class="form-group" id="temperatureRow">
+            <label for="temperature">Temperature (K)</label>
+            {{ textfield('temperature', 'The temperature at which the system is simulated.') }}
+            </div>
+            <div class="form-group" id="frictionRow">
+            <label for="friction">Friction Coefficient (ps<sup>-1</sup>)</label>
+            {{ textfield('friction', 'The friction coefficient coupling the system to the thermostat.') }}
+            </div>
+            <div class="form-group" id="pressureRow">
+            <label for="pressure">Pressure (atm)</label>
+            {{ textfield('pressure', 'The pressure at which the system is simulated.') }}
+            </div>
+            <div class="form-group" id="barostatIntervalRow">
+            <label for="barostatInterval">Barostat Interval (steps)</label>
+            {{ textfield('barostatInterval', 'The interval at which the barostat attempts to change the box volume, measured in time steps.') }}
+            </div>
+            </div>
+        
+            <div id="simulation" class="tab-pane fade">
+            <p/>
+            <div class="form-group">
+            <label for="steps">Simulation Length (steps)</label>
+            {{ textfield('steps', 'The total length of the simulation, measured in time steps.') }}
+            </div>
+            <div class="form-group">
+            <label for="equilibrationSteps">Equilibration Length (steps)</label>
+            {{ textfield('equilibrationSteps', 'The number of time steps of equilibration to run before starting the main simulation.') }}
+            </div>
+            <div class="form-group">
+            <label for="platform">Platform</label>
+            {{ choice('platform', 'Select the platform to use.  This must match the hardware you plan to run the simulation on.', [
+                ('Reference', 'Reference', 'The Reference platform is useful for testing, but not recommended for production simulations.'),
+                ('CPU', 'CPU', 'Run the simulation on a conventional CPU'),
+                ('CUDA', 'CUDA', 'Run the simulation on an NVIDIA GPU'),
+                ('OpenCL', 'OpenCL', 'The OpenCL platform on various kinds of hardware, including NVIDIA, AMD, and Intel GPUs')]) }}
+            </div>
+            <div class="form-group" id="precisionRow">
+            <label for="precision">Precision</label>
+            {{ choice('precision', 'Select the level of numerical precision to use.', [
+                ('single', 'Single', 'Most calculations are done in single precision.  This is the fastest option.'),
+                ('mixed', 'Mixed', 'Use a mix of single and double precision to give reasonably high performance, but better energy conservation than single precision.  This is recommended for constant energy simulations.'),
+                ('double', 'Double', 'All calculations are done in double precision.  This can be very slow.')]) }}
+            </div>
+            </div>
+
+            <div id="manual" class="tab-pane fade">
+            <p/>         
+            <div class="form-group">
+            <label for="ligand_select">ligand select</label>
+            {{ choice('ligand_select', 'Select if you want to have an ligand in your MD Simulation', [
+                ('yes', 'yes', 'MD Simulation with ligand'),
+                ('no', 'no', 'MD Simulation without ligand')]) }}
+            </div>
+            <div class="form-group" id="sdf_file">
+            <label for="sdf_file">SDF File name</label>
+            {{ textfield('sdf_file', 'The mass of hydrogen atoms.') }}
+            </div>
+            <div class="form-group" id="minimization">
+            <label for="minimization">SDF Minimization</label>
+            {{ choice('minimization', 'Select which bonds to replace with rigid constraints.', [
+                ('True', 'Yes', 'The ligand will be minimized with MMFF94 Forcefield.'),
+                ('False', 'No', 'No minimization')]) }}
+            </div>
+            <div class="form-group">
+            <label for="manual_sys">Manual System</label>
+            {{ choice('manual_sys', 'Select the prefered system.', [
+                ('no', 'no', 'no'),
+                ('yes', 'yes', 'yes')]) }}
+            </div>
+            <div class="form-group">
+            <label for="box_choice">Water/Membrane System</label>
+            {{ choice('box_choice', 'Select the prefered system.', [
+                ('water', 'water', 'Water System.'),
+                ('no_solvent', 'No Solvent', 'Water System.'),
+                ('membrane', 'membrane', 'Membrane System')]) }}
+            </div>
+            <div class="form-group">
+            <label for="water_type_system">Select Water Box Type </label>
+            {{ choice('water_type_system', 'Select the prefered system.', [
+                ('Absolute', 'Absolute', 'Select Dimensions directly.'),
+                ('Buffer', 'Buffer', 'Add Padding distance')]) }}
+            </div>
+            <div class="form-group" id="wat_padding">
+            <label for="wat_padding">Water Padding Distance (nm)</label>
+            {{ textfield('wat_padding', 'Membrane Padding Distance in nm') }}
+            </div>
+            <div class="form-group" id="box_vector_x">
+            <label for="box_vector_x">Water Box Dimension x Distance (nm)</label>
+            {{ textfield('box_vector_x', 'Water Box Dimension x Distance in nm') }}
+            </div>
+            <div class="form-group" id="box_vector_y">
+            <label for="box_vector_y">Water Box Dimension y Distance (nm)</label>
+            {{ textfield('box_vector_y', 'Water Box Dimension y Distance in nm') }}
+            </div>
+            <div class="form-group" id="box_vector_z">
+            <label for="box_vector_z">Water Box Dimension z Distance (nm)</label>
+            {{ textfield('box_vector_z', 'Water Box Dimension z Distance in nm') }}
+            </div>
+            <div class="form-group" id="membrane_type_system">
+            <label for="membrane_type_system">Select Lipid System</label>
+            {{ choice('membrane_type_system', 'Select the Lipid system.', [
+                ('POPC', 'POPC', 'POPC'),
+                ('POPE', 'POPE', 'POPE'),
+                ('DLPC', 'DLPC', 'DLPC'),
+                ('DLPE', 'DLPE', 'DLPE'),
+                ('DMPC', 'DMPC', 'DMPC'),
+                ('DOPC', 'DOPC', 'DOPC'),
+                ('DPPC', 'DPPC', 'DPPC')]) }}
+            </div>
+            <div class="form-group" id="mem_padding">
+            <label for="mem_padding">Membrane Padding Distance (nm)</label>
+            {{ textfield('mem_padding', 'Membrane Padding Distance in nm') }}
+            </div>
+            <div class="form-group" id="ionic_str">
+            <label for="ionic_str">Ionic strength (molar)</label>
+            {{ textfield('ionic_str', 'Ionic strength in molar') }}
+            </div>
+            <div class="form-group" id="positive_ion">
+            <label for="positive_ion">Positive Ion</label>
+            {{ choice('positive_ion', 'Select Positive ion.', [
+                ('Cs', 'Cs+', 'Cs+'),
+                ('K', 'K+', 'K+'),
+                ('Li', 'Li+', 'Li+'),
+                ('Na', 'Na+', 'Na+'),
+                ('Rb', 'Rb+', 'Rb+')]) }}
+            </div>
+            <div class="form-group" id="negative_ion">
+            <label for="negative_ion">Negative Ion</label>
+            {{ choice('negative_ion', 'Select negative ion.', [
+                ('Cl', 'Cl-', 'Cl-'),
+                ('Br', 'Br-', 'Br-'),
+                ('F', 'F-', 'F-'),
+                ('I', 'I-', 'I-')]) }}
+            </div>                   
+            </div>
+
+            <div id="output" class="tab-pane fade">
+            <p/>
+            <div class="form-group">
+            <label><input type="checkbox" name="writeDCD" id="writeDCD" oninput="optionChanged()" {{ 'checked' if session['writeDCD'] else '' }}> Save trajectory to a DCD file</label>
+            </div>
+            <div id="dcdFileOptions">
+                <div class="form-group">
+                <label for="dcdFilename">DCD Filename</label>
+                {{ textfield('dcdFilename', 'The filename for the trajectory file.') }}
+                </div>
+                <div class="form-group">
+                <label for="dcdInterval">DCD Output Interval (steps)</label>
+                {{ textfield('dcdInterval', 'The interval at which to write frames to the trajectory, measured in time steps.') }}
+                </div>
+                <div class="form-group">
+                <label for="pdbinterval">PDB Output Interval (steps)</label>
+                {{ textfield('pdbinterval', 'The interval at which to write frames to the trajectory, measured in time steps.') }}
+                </div>
+            </div>
+            <div class="form-group">
+            <label><input type="checkbox" name="writeData" id="writeData" oninput="optionChanged()" {{ 'checked' if session['writeData'] else '' }}> Save data to a log file</label>
+            </div>
+            <div id="logFileOptions">
+                <div class="form-group">
+                <label for="davaFilename">Data Filename</label>
+                {{ textfield('dataFilename', 'The filename for the log file.') }}
+                </div>
+                <div class="form-group">
+                <label for="dataInterval">Data Output Interval (steps)</label>
+                {{ textfield('dataInterval', 'The interval at which to write frames to the log file, measured in time steps.') }}
+                </div>
+                <label>Data to Write</label>
+                <div class="form-group">
+                <div class="col-md-6">
+                {{ datafieldbox('step', 'Step', 'The number of time steps completed.') }}
+                {{ datafieldbox('time', 'Time', 'The amount of time simulated so far.') }}
+                {{ datafieldbox('speed', 'Speed', 'The speed at which the simulation is running.') }}
+                {{ datafieldbox('progress', 'Progress', 'The fraction of the simulation completed so far.') }}
+                {{ datafieldbox('elapsedTime', 'Elapsed Time', 'The elapsed clock time so far.') }}
+                {{ datafieldbox('remainingTime', 'Remaining Time', 'An estimate of the remaining clock time needed to complete the simulation.') }}
+                </div>
+                <div class="col-md-6">
+                {{ datafieldbox('potentialEnergy', 'Potential Energy', 'The current potential energy of the system.') }}
+                {{ datafieldbox('kineticEnergy', 'Kinetic Energy', 'The current kinetic energy of the system.') }}
+                {{ datafieldbox('totalEnergy', 'Total Energy', 'The current total energy of the system.') }}
+                {{ datafieldbox('temperature', 'Temperature', 'The instantaneous temperature of the system.') }}
+                {{ datafieldbox('volume', 'Volume', 'The current volume of the periodic box.') }}
+                {{ datafieldbox('density', 'Density', 'The current density of the system.') }}
+                </div>
+                </div>
+            </div>
+            <div class="form-group">
+            <label><input type="checkbox" name="writeCheckpoint" id="writeCheckpoint" oninput="optionChanged()" {{ 'checked' if session['writeCheckpoint'] else '' }}> Save checkpoints to a file</label>
+            </div>
+            <div id="checkpointFileOptions">
+                <div class="form-group">
+                <label for="checkpointFilename">Checkpoint Filename</label>
+                {{ textfield('checkpointFilename', 'The filename for the checkpoint file.') }}
+                </div>
+                <div class="form-group">
+                <label for="checkpointInterval">Checkpoint Interval (steps)</label>
+                {{ textfield('checkpointInterval', 'The interval at which to write checkpoints, measured in time steps.') }}
+                </div>
+            </div>
+            <div class="form-group">
+            <label><input type="checkbox" name="writeSimulationXml" id="writeSimulationXml" oninput="optionChanged()" {{ 'checked' if session['writeSimulationXml'] else '' }}> Save simulation setup as XML files</label>
+            </div>
+            <div id="xmlFileOptions">
+                <div class="form-group">
+                <label for="systemXmlFilename">System XML Output Filename</label>
+                {{ textfield('systemXmlFilename', 'The filename for the output XML file.') }}
+                </div>
+                <div class="form-group">
+                <label for="integratorXmlFilename">Integrator XML Output Filename</label>
+                {{ textfield('integratorXmlFilename', 'The filename for the output XML file.') }}
+                </div>
+            </div>
+            <div class="form-group">
+            <label><input type="checkbox" name="writeFinalState" id="writeFinalState" oninput="optionChanged()" {{ 'checked' if session['writeFinalState'] else '' }}> Save final simulation state</label>
+            </div>
+            <div id="writeFinalStateOptions">
+                <div class="form-group">
+                <label for="finalStateFileType">Output File Type</label>
+                {{ choice('finalStateFileType', 'Select the file type for the final state output.', [
+                    ('stateXML', 'OpenMM State XML', 'Write an OpenMM state XML file. This includes most details about the simulation, but not internal information like state of the pseudorandom number generator.' ),
+                    ('checkpoint', 'OpenMM Checkpoint', 'Write an OpenMM checkpoint file. This allows an exact continuation of the simulation, but is specific to the particular hardware and OpenMM version used to run the simulation.'),
+                    ('pdbx', 'PDBx/mmCIF (no velocities)', 'Write a PDBx/mmCIF file, which can be loaded by many programs. Only positions and topology information will be stored.') ], 'outputFiletypeChanged') }}
+                </div>
+                <div class="form-group">
+                <label for="finalStateFilename">Output Filename</label>
+                {{ textfield('finalStateFilename', 'Filename for simulation final state output.') }}
+                </div>
+            </div>
+            <div class="form-group" id="md_postprocessing">
+            <label for="md_postprocessing">MD Simulation Postprocessing</label>
+            {{ choice('md_postprocessing', 'Centering of Protein and separate saving of pdb and dcd with only ligand and protein.', [
+                ('True', 'Yes', 'The Centering will be performed'),
+                ('False', 'No', 'No post MD Simulation Analysis')]) }}
+            </div>
+            <div class="form-group" id="mdtraj_remove">
+            <label for="mdtraj_remove">MDTraj Removal</label>
+            {{ choice('mdtraj_remove', 'Removing of MDTraj Files.', [
+                ('True', 'Yes', 'The Files will be removed'),
+                ('False', 'No', 'No the files will stay')]) }}
+            </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="form-group">
+            <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('downloadScript') }}')"
+                title="Save the script.  To run the simulation, put the script in the directory containing the input files and execute it.">Save Script</button>
+            {% if 'cleanup' in session and session['cleanup'] == 'yes' %}
+            <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('downloadPDB') }}')"
+                title="Save the processed PDB file.  This is the file the script loads as its input.">Save Processed PDB File</button>
+            {% endif %}
+            <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('downloadPackage') }}')"
+                title="Save an archive containing both the script and the input files.  To run the simulation, expand the archive and execute the script.">Save All Files</button>
+            <button type="button" class="btn btn-default"
+                title="Run the simulation now, displaying results in your browser." onclick="runSimulation()">Run Simulation</button>
+        </div>
+        <pre id="scriptContainer"><code id="script" class="python" style="overflow:scroll; white-space:pre"></code></pre>
+    </div>
+    </div>
+
+    <div id="illegalPlatformModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Platform Not Available</h4>
+          </div>
+          <div class="modal-body">
+            <p>
+                You have selected the <span id="selectedPlatformName"></span> platform, which is not available on this computer.
+                To run the simulation on this computer, select one of the following platforms: <span id="availablePlatforms"></span>.
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+</form>
+
+<script>
+function outputFiletypeChanged() {
+    // Used when <select> for finalStateFileType changes. This changes the
+    // extension of the file depending on the selected output filetype.
+    var fileLabel = document.getElementById("finalStateFilename");
+    var newExt = {
+        'checkpoint': 'chk',
+        'stateXML': 'xml',
+        'pdbx': 'pdbx',
+    }[document.getElementById("finalStateFileType").value];
+    var asSplit = fileLabel.value.split(".");
+    if (asSplit.length > 1) asSplit.pop();
+    if (asSplit[0] == "") asSplit[0] = "final_state";  // set default if empty
+    asSplit.push(newExt);
+    fileLabel.value = asSplit.join(".");
+
+    optionChanged();
+}
+
+function optionChanged() {
+    // Update UI elements.
+    
+    ligand_select = document.getElementById("ligand_select").value;
+    document.getElementById("sdf_file").hidden = (ligand_select != 'yes');
+    document.getElementById("minimization").hidden = (ligand_select != 'yes');
+    manual_sys = document.getElementById("manual_sys").value;
+    box_choice = document.getElementById("box_choice").value;
+    document.getElementById("water_type_system").hidden = (box_choice != 'water');
+    water_type_system = document.getElementById("water_type_system").value;
+    document.getElementById("box_vector_x").hidden = (box_choice != 'water');
+    document.getElementById("box_vector_y").hidden = (box_choice != 'water');
+    document.getElementById("box_vector_z").hidden = (box_choice != 'water');
+    document.getElementById("wat_padding").hidden = (box_choice != 'water');
+    document.getElementById("membrane_type_system").hidden = (box_choice != 'membrane');
+    document.getElementById("mem_padding").hidden = (box_choice != 'membrane');
+    nonbondedMethod = document.getElementById("nonbondedMethod").value;
+    document.getElementById("cutoffRow").hidden = (nonbondedMethod == 'NoCutoff');
+    document.getElementById("ewaldTolRow").hidden = (nonbondedMethod != 'PME');
+    constraints = document.getElementById("constraints").value;
+    document.getElementById("constraintTolRow").hidden = (constraints == 'none');
+    hmr = document.getElementById("hmr").checked;
+    document.getElementById("hmrOptions").hidden = !hmr;
+    ensemble = document.getElementById("ensemble").value;
+    document.getElementById("pressureRow").hidden = (ensemble != 'npt');
+    document.getElementById("barostatIntervalRow").hidden = (ensemble != 'npt');
+    platform = document.getElementById("platform").value;
+    document.getElementById("precisionRow").hidden = (platform != 'CUDA' && platform != 'OpenCL');
+    writeDCD = document.getElementById("writeDCD").checked;
+    document.getElementById("dcdFileOptions").hidden = !writeDCD;
+    writeData = document.getElementById("writeData").checked;
+    document.getElementById("logFileOptions").hidden = !writeData;
+    writeCheckpoint = document.getElementById("writeCheckpoint").checked;
+    document.getElementById("checkpointFileOptions").hidden = !writeCheckpoint;
+    writeSimulationXml = document.getElementById("writeSimulationXml").checked;
+    document.getElementById("xmlFileOptions").hidden = !writeSimulationXml;
+    writeFinalState = document.getElementById("writeFinalState").checked;
+    document.getElementById("writeFinalStateOptions").hidden = !writeFinalState;
+    
+    // Submit the form.
+    
+    form = document.getElementById("optionsForm");
+    var request = new XMLHttpRequest();
+    var data = new FormData(form);
+    request.addEventListener("load", function(event) {
+        document.getElementById("script").textContent = event.target.responseText;
+        hljs.highlightBlock(document.getElementById("scriptContainer"));
+        updateScriptSize();
+    });
+    request.open("POST", "{{ url_for('setSimulationOptions') }}");
+    request.send(data);
+}
+
+function updateScriptSize() {
+    container = document.getElementById("scriptContainer");
+    height = window.innerHeight-container.getBoundingClientRect().top-15;
+    if (height > 250)
+        container.style.height = height+"px";
+    else
+        container.style.height = "100%";
+}
+
+function runSimulation() {
+    platforms = [
+        {% for i in range(mm.Platform.getNumPlatforms()) %}
+            '{{ mm.Platform.getPlatform(i).getName() }}',
+        {% endfor %}
+    ];
+    platform = document.getElementById("platform").value;
+    if (platforms.indexOf(platform) == -1) {
+        document.getElementById("selectedPlatformName").textContent = platform;
+        document.getElementById("availablePlatforms").textContent = platforms.join(', ');
+        $('a[href="#simulation"]').tab('show');
+        $('#illegalPlatformModal').modal('show');
+    }
+    else
+        window.open('{{ url_for('showRunSimulation') }}');
+}
+
+// Configure the page based on initial values
+
+window.addEventListener("resize", updateScriptSize);
+updateScriptSize();
+optionChanged();
+</script>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "layout.html" %}
+
+{% macro fileinput(id) %}
+    <div class="input-group">
+        <label class="btn btn-default btn-file input-group-addon">
+            Browse... <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" onchange="optionChanged()"/>
+        </label>
+        <span id="{{ id }}_label" class="form-control"/>
+    </div>
+{% endmacro %}
+
+{% block title %}Select Input Files{% endblock %}
+{% block body %}
+</style>
+
+
+Select the pdb input file and options for how to model it.
+<p/>
+
+<form method="post" enctype="multipart/form-data" action="{{ url_for('configureFiles') }}" class="form-horizontal">
+    <div class="form-group">
+    <label for="filename" class="control-label col-md-2">Input File</label>
+        <div class="col-md-10">{{ fileinput('file') }}</div>
+    </div>
+    <div class="form-group">
+    <label for="forcefield" class="control-label col-md-2">Force Field</label>
+    <div class="col-md-10"><select name="forcefield" id="forcefield" class="form-control" onchange="optionChanged()">
+        <option value="AMBER14" selected>AMBER14</option>
+        <option value="AMBER99SB">AMBER99SB</option>
+        <option value="AMBER99SB-ILDN">AMBER99SB-ILDN</option>
+        <option value="AMBER03">AMBER03</option>
+        <option value="AMBER10">AMBER10</option>
+        <option value="CHARMM36">CHARMM36</option>
+    </select></div>
+    </div>
+    <div id="waterModelRow" class="form-group">
+        <label for="waterModel" class="control-label col-md-2">Water Model</label>
+        <div class="col-md-10"><select name="waterModel" id="waterModel" class="form-control"></select></div>
+    </div>
+    <p>PDB files often need to be cleaned up before they can be simulated.  For example, you may need to
+    add missing atoms, remove unwanted chains, or add a water box.  Do you want to do this now?</p>
+    <div style="margin-left:50px"><label class="control-label"><input type="radio" name="cleanup" value="no" checked/> No.</label> My file is all ready to simulate.</div>
+    <div style="margin-left:50px"><label class="control-label"><input type="radio" name="cleanup" value="yes"/> Yes.</label> Let's clean it up now.</div>
+    <br/>
+    <input type="submit" value="Continue" id="continue" class="btn" disabled="true"/>
+</form>
+<script>
+var amber14WaterModels = [
+        ["TIP3P", "TIP3P", false],
+        ["TIP3P-FB", "TIP3P-FB", true],
+        ["SPC/E", "SPC/E", false],
+        ["TIP4P-Ew", "TIP4P-Ew", false],
+        ["TIP4P-FB", "TIP4P-FB", false],
+]
+
+var charmm36WaterModels = [
+        ["CHARMM default", "CHARMM default", true],
+        ["TIP3P-PME-B", "TIP3P-PME-B", false],
+        ["TIP3P-PME-F", "TIP3P-PME-F", false],
+        ["SPC/E", "SPC/E", false],
+        ["TIP4P-Ew", "TIP4P-Ew", false],
+        ["TIP4P-2005", "TIP4P-2005", false],
+        ["TIP5P", "TIP5P", false],
+        ["TIP5P-Ew", "TIP5P-Ew", false],
+]
+
+var oldAmberWaterModels = [
+        ["TIP3P", "TIP3P", false],
+        ["TIP3P-FB", "TIP3P-FB", true],
+        ["SPC/E", "SPC/E", false],
+        ["TIP4P-Ew", "TIP4P-Ew", false],
+        ["TIP5P", "TIP5P", false],
+]
+
+var amoebaWaterModels = [
+        ["Explicit", "Explicit", true],
+        ["Implicit", "Implicit", false]
+]
+
+function optionChanged() {
+    // Update UI elements.
+
+    forcefield = document.getElementById("forcefield").value;
+    waterSelect = document.getElementById("waterModel");
+    currentWater = waterSelect.value;
+    if (forcefield == 'CHARMMPOLAR2019')
+        document.getElementById("waterModelRow").hidden = true;
+    else {
+        document.getElementById("waterModelRow").hidden = false;
+        if (forcefield == "AMBER14")
+            models = amber14WaterModels;
+        else if (forcefield == "CHARMM36")
+            models = charmm36WaterModels;
+        else if (forcefield == "AMOEBA2018")
+            models = amoebaWaterModels;
+        else
+            models = oldAmberWaterModels;
+        while (waterSelect.length > 0)
+            waterSelect.remove(0)
+        for (i = 0; i < models.length; i++) {
+            option = document.createElement("option");
+            option.value = models[i][0];
+            option.text = models[i][1];
+            waterSelect.add(option);
+        }
+        for (i = 0; i < models.length; i++)
+            if (models[i][2])
+                waterSelect.selectedIndex = i;
+        for (i = 0; i < models.length; i++)
+            if (currentWater == models[i][0])
+                waterSelect.selectedIndex = i;
+    }
+    files = document.getElementById("file").files;
+    document.getElementById("file_label").textContent = (files.length == 0 ? "" : files[0].name);
+    document.getElementById('continue').disabled = !document.getElementById("file").value;
+}
+optionChanged()
+</script>
+{% endblock %}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>OpenMMDL Setup: {% block title %}{% endblock %}</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+        <style>
+            #progressParent {
+                position: fixed;
+                top: 40%;
+                left: 50%;
+                margin-top: -75px;
+                margin-left: -125px
+            }
+            #overlay {
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                top: 0px;
+                left: 0px;
+                background-color: rgba(255,255,255);
+                visibility:hidden;
+            }
+            #progressMessage {
+                width: 100%;
+                position: fixed;
+                top: 40%;
+                margin-top: 90px;
+                text-align: center
+            }
+        </style>
+        <script>
+            function submitWithSpinner(formName) {
+                animateSpinner.animateIndex = 0
+                var parent = document.getElementById('progressParent')
+                while (parent.firstChild)
+                    parent.removeChild(parent.firstChild)
+                for (var i = 0; i < 12; i++) {
+                    var element = document.createElement('div')
+                    var angle = 30*i
+                    var x = Math.round(Math.sin(i*Math.PI/6)*80+120)
+                    var y = Math.round(-Math.cos(i*Math.PI/6)*80)
+                    element.id = 'progress'+i
+                    element.style = 'width:10px;height:80px;border-radius:5px;border:2px;position:absolute;transform:rotate('+angle+'deg);left:'+x+'px;top:'+y+'px'
+                    parent.appendChild(element)
+                }
+                setTimeout(function() {animateSpinner();document.getElementById('overlay').style.visibility='visible';}, 500)
+                document.getElementById(formName).submit()
+            }
+            function animateSpinner() {
+                for (var i = 0; i < 12; i++) {
+                    var bar = document.getElementById("progress"+i)
+                    if (i == animateSpinner.animateIndex)
+                        bar.style.backgroundColor = "black"
+                    else
+                        bar.style.backgroundColor = "lightgray"
+                }
+                animateSpinner.animateIndex = (animateSpinner.animateIndex+1)%12
+                setTimeout(function() {animateSpinner()}, 1000)
+            }
+        </script>
+    </head>
+    <body>
+        <div class="container-fluid">
+            <noscript>
+                <div style='color:red'>
+                    <h1>Javascript Disabled</h1>
+                    This application requires Javascript to operate.  Please enable Javascript in your browser, then reload this page.
+                </div>
+            </noscript>
+            <form method="get" action="{{ url_for('headerControls') }}">
+            <div>
+            <img src="{{ url_for('static', filename='Icon.svg') }}" width='900' margin-left='20%'"/> 
+            <span style="float:right; margin-top:30px">
+            {% block startover %}
+            <input type="submit" class="btn" name="startOver" value="Start Over"/>
+            {% endblock %}
+            <input type="submit" class="btn" name="quit" value="Quit"/>
+            </span>
+            </div>
+            </form>
+            {% block body %}{% endblock %}
+        </div>
+        <div id="overlay">
+            <div id="progressParent"></div>
+            <div id="progressMessage">
+                <div style="font-size:xx-large">Processing</div>
+                This may take some time.
+            </div>
+        </div>
+    </body>
+</html>

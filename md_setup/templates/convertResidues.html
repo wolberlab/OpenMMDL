@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block title %}Convert Residues{% endblock %}
+{% block body %}
+This PDB file contains non-standard residues.  Do you want to convert them to standard residues?
+<p/>
+<form method="post" action="{{ url_for('convertResidues') }}">
+    <table class="table" id="table">
+        <tr><th>Chain</th><th>Residue</th><th>Convert To</th><th>Convert?</th></tr>
+        {% for residue in residues %}
+            <tr>
+                <td>{{ residue[0] }}</td>
+                <td>{{ residue[1] }} {{ residue[2] }}</td>
+                <td><select name="residue{{ loop.index0 }}">
+                {% for option in residue[3] %}
+                    <option value="{{ option }}" {{ 'selected' if option == residue[4] else '' }}>{{ option }}</option>' % (res, selected, res)
+                {% endfor %}
+                </select></td>
+                <td><input type="checkbox" name="convert" value="{{ loop.index0 }}" checked></td>
+            </tr>
+        {% endfor %}
+    </table>
+    <div class="form-group">
+        <button type="button" id="start" class="btn btn-default" onclick="setCheckboxes(true)">Select All</button>
+        <button type="button" id="start" class="btn btn-default" onclick="setCheckboxes(false)">Select None</button>
+    </div>
+    <input type="submit" value="Continue" id="continue" class="btn"/>
+</form>
+
+<script>
+function setCheckboxes(selected) {
+    checkboxes = document.getElementById("table").getElementsByTagName("input")
+    for (var i = 0; i < checkboxes.length; i++)
+        checkboxes[i].checked = selected
+}
+</script>
+{% endblock %}

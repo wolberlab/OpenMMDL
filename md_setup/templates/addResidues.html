@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block title %}Add Residues{% endblock %}
+{% block body %}
+The sequence records in this PDB file include residues that are missing from the atom data section.  Do you want to add the missing residues?
+<p/>
+<form method="post" action="{{ url_for('addResidues') }}">
+    <table class="table" id="table">
+        <tr><th>Chain</th><th>Residue Positions</th><th>Sequence</th><th>Add?</th></tr>
+        {% for span in spans %}
+            <tr>
+                <td>{{ span[0] }}</td>
+                <td>{{ span[1] }} to {{ span[2] }}</td>
+                <td>{{ span[3] }}</td>
+                <td><input type="checkbox" name="add" value="{{ loop.index0 }}"></td>
+            </tr>
+        {% endfor %}
+    </table>
+    <div class="form-group">
+        <button type="button" id="start" class="btn btn-default" onclick="setCheckboxes(true)">Select All</button>
+        <button type="button" id="start" class="btn btn-default" onclick="setCheckboxes(false)">Select None</button>
+    </div>
+    <input type="submit" value="Continue" id="continue" class="btn"/>
+</form>
+
+<script>
+function setCheckboxes(selected) {
+    checkboxes = document.getElementById("table").getElementsByTagName("input")
+    for (var i = 0; i < checkboxes.length; i++)
+        checkboxes[i].checked = selected
+}
+</script>
+{% endblock %}

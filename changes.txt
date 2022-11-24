@@ -1,0 +1,32 @@
+14 November 2022:
+	protein_ligand_prep.py:
+		prepare_ligand
+			rdkitmol = Chem.SDMolSupplier(sdf_file, sanitize = False)  # added sanitize = False, Reason = Error with sulfur discovered by Yu
+	openMMDL_setup.py:
+	            script.append("""
+				with open(f'Energyminimization_{protein_name}', 'w') as outfile:
+    					PDBFile.writeFile(modeller.topology, modeller.positions, outfile)
+    				""")
+    		    script.append("""
+				with open(f'Equilibration_{protein_name}', 'w') as outfile:
+    					PDBFile.writeFile(modeller.topology, modeller.positions, outfile)
+    					""")
+    										# added Topology/Positions after Minimization&Equilibration, Reason = Suggested by Yu
+    										
+    										
+20 November 2022:
+	protein_ligand_prep.py:
+		added membrane_builder, water_absolute_solvent_builder, water_padding_solvent_builder
+		removed prepare_protein
+		added descriptions
+	cleaning_procedures.py:
+		modified accordingly to output files
+		added descriptions
+	openMMDL_setup.py:
+		cleaned up code --> moved functions to protein_ligand_prep.py
+	
+22 November 2022:
+	OpenMMDL_Setup:
+		Added MDAnalysis Tab with RMSD calculation + Interactions analysis
+	post_md_conversion.py:
+		Added rmsd_for_atomgroups, RMSD_dist_frames, atomic_distance

@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{% block title %}Select Chains{% endblock %}
+{% block body %}
+This PDB file contains {{ chains|length }} chains.  Select which ones to include.
+<p/>
+<form method="post" action="{{ url_for('selectChains') }}">
+    <div class="row">
+    <div class="col-md-6">
+    <table class="table" id="table">
+        <tr><th>Chain</th><th># Residues</th><th>Content</th><th>Include?</th></tr>
+        {% for chain in chains %}
+            <tr>
+                <td>{{ chain[0] }}</td>
+                <td>{{ chain[1] }}</td>
+                <td>{{ chain[2] }}</td>
+                <td><input type="checkbox" name="include" value="{{ loop.index0 }}" onchange="optionChanged()" checked></td>
+            </tr>
+        {% endfor %}
+    </table>
+    <div class="form-group">
+        <button type="button" id="start" class="btn btn-default" onclick="setCheckboxes(true)">Select All</button>
+        <button type="button" id="start" class="btn btn-default" onclick="setCheckboxes(false)">Select None</button>
+    </div>
+    <p/>
+    A heterogen is any residue other than a standard amino acid or nucleotide.  Do you want to delete heterogens?
+    <p/>
+    <select name="heterogens" id="heterogens" class="form-control" onchange="optionChanged()">
+        <option value="all" selected>Keep all heterogens</option>
+        <option value="water">Delete heterogens except water</option>
+        <option value="none">Delete all heterogens</option>
+    </select>
+    <p/>
+    <input type="submit" value="Continue" id="continue" class="btn"/>
+    </div>
+    <div class="col-md-6" id="viewport" style="width:500px; height:500px">
+    </div>
+    </div>
+</form>
+
+<script src="{{ url_for('static', filename='ngl.js') }}"></script>
+    
+<script>
+function optionChanged() {
+    // Update UI elements.
+
+    checkboxes = document.getElementById("table").getElementsByTagName("input")
+    var any = false
+    for (var i = 0; i < checkboxes.length; i++)
+        any |= checkboxes[i].checked
+    document.getElementById('continue').disabled = !any;
+    if (window['molStructure'] != undefined) {
+        heterogens = document.getElementById('heterogens').value
+        molStructure.clearRepresentations();
+        {% for chain in chains %}
+        if (checkboxes[{{ loop.index0 }}].checked) {
+            selection = ":"+String.fromCharCode({{ loop.index0+65 }})
+            if (heterogens == 'water')
+                selection += " and (protein or nucleic or water)"
+            if (heterogens == 'none')
+                selection += " and (protein or nucleic)"
+            molStructure.addRepresentation("{{ "cartoon" if chain[2] in ('DNA', 'Protein') else "ball+stick" }}",
+                                           {sele:selection});
+        }
+        {% endfor %}
+    }
+}
+function setCheckboxes(selected) {
+    checkboxes = document.getElementById("table").getElementsByTagName("input")
+    for (var i = 0; i < checkboxes.length; i++)
+        checkboxes[i].checked = selected
+    optionChanged()
+}
+document.addEventListener( "DOMContentLoaded", function(){
+    stage = new NGL.Stage("viewport");
+    stage.loadFile("{{ url_for('getCurrentStructure') }}", {ext:"pdb"}).then(function(o) {
+        molStructure = o;
+        optionChanged();
+        o.centerView();
+    });
+} );
+</script>
+{% endblock %}
