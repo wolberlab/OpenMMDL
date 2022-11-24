@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% macro fileinput(id) %}
+    <div class="input-group">
+        <label class="btn btn-default btn-file input-group-addon">
+            Browse... <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" onchange="optionChanged()"/>
+        </label>
+        <span id="{{ id }}_label" class="form-control"/>
+    </div>
+{% endmacro %}
+
+{% block title %}Select Input Files{% endblock %}
+{% block body %}
+Select the input files.
+<p/>
+<form method="post" enctype="multipart/form-data" action="{{ url_for('configureFiles') }}" class="form-horizontal">
+    <div class="form-group">
+    <label for="prmtopFile" class="control-label col-md-2">Prmtop File</label>
+    <div class="col-md-10">{{ fileinput('prmtopFile') }}</div>
+    </div>
+    <div class="form-group">
+    <label for="inpcrdFile" class="control-label col-md-2">Inpcrd File</label>
+    <div class="col-md-10">{{ fileinput('inpcrdFile') }}</div>
+    </div>
+    <input type="submit" value="Continue" id="continue" class="btn" disabled="true"/>
+</form>
+<script>
+function optionChanged() {
+    // Update UI elements.
+
+    prmtopFiles = document.getElementById("prmtopFile").files;
+    inpcrdFiles = document.getElementById("inpcrdFile").files;
+    document.getElementById("prmtopFile_label").textContent = (prmtopFiles.length == 0 ? "" : prmtopFiles[0].name);
+    document.getElementById("inpcrdFile_label").textContent = (inpcrdFiles.length == 0 ? "" : inpcrdFiles[0].name);
+    document.getElementById('continue').disabled = !document.getElementById("prmtopFile").value || !document.getElementById("inpcrdFile").value;
+}
+optionChanged()
+</script>
+{% endblock %}
