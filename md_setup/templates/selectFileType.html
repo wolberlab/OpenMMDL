@@ -8,6 +8,8 @@ What kind of file or files do you have describing the system to simulate?
 <form method="get" action="{{ url_for('selectFiles') }}">
     <label class="control-label"><input type="radio" name="type" value="pdb" checked/> PDB</label>
     <p style="margin-left:50px">A PDB or PDBx/mmCIF file</p>
+    <label class="control-label"><input type="radio" name="type" value="amber"/> Amber</label>
+    <p style="margin-left:50px">Amber prmtop and inpcrd files</p>
     <input type="submit" value="Continue" class="btn"/>
 </form>
 
