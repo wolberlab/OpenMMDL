@@ -116,7 +116,7 @@ def post_md_file_movement(protein_name, ligand):
         os.mkdir("MD_Postprocessing/2_MDAnalysis")
 
     os.rename(f'centered_top.pdb', f'MD_Postprocessing/2_MDAnalysis/centered_top.pdb')
-    os.rename(f'centered_trj.dcd', f'MD_Postprocessing/2_MDAnalysis/centered_traj.dcd')
+    os.rename(f'centered_traj.dcd', f'MD_Postprocessing/2_MDAnalysis/centered_traj.dcd')
     os.rename(f'prot_lig_top.pdb', f'MD_Postprocessing/2_MDAnalysis/prot_lig_top.pdb')
     os.rename(f'prot_lig_traj.dcd', f'MD_Postprocessing/2_MDAnalysis/prot_lig_traj.dcd')
     
@@ -134,3 +134,16 @@ def post_md_file_movement(protein_name, ligand):
     if os.path.exists(f'100x_checkpoint.chk'):
         os.rename(f'100x_checkpoint.chk', f'Checkpoints/100x_checkpoint.chk')  
     
+    # Analysis
+
+    if os.path.exists(f'RMSD_over_time.csv'):
+        if not os.path.exists("Analysis"):
+            os.mkdir("Analysis")    
+        else:
+            shutil.rmtree("Analysis")
+            os.mkdir("Analysis") 
+
+    if os.path.exists(f'RMSD_over_time.csv'):
+        os.rename(f'RMSD_over_time.csv', f'Analysis/RMSD_over_time.csv')
+        os.rename(f'RMSD_between_the_frames.png', f'Analysis/RMSD_between_the_frames.png')
+        os.rename(f'RMSD_over_time.png', f'Analysis/RMSD_over_time.png')
