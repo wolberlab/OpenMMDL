@@ -28,7 +28,7 @@ def mdtraj_conversion(pdb_file):
     'centered_old_coord.pdb': pdb file
         pdb file, the first frame of recentered MD trajectories
     """    
-    mdtraj_frames = md.load(pdb_file)
+    mdtraj_frames = md.load_dcd("trajectory.dcd", top=pdb_file)
     mdtraj_frames.image_molecules()
     mdtraj_frames.save_dcd(f'centered_old_coordinates.dcd')
     mdtraj_first_frame = mdtraj_frames[0:1]

@@ -990,7 +990,7 @@ with open(f'Equilibration_{protein}', 'w') as outfile:
         script.extend(lines)
     
     if session ['md_postprocessing'] == 'True':
-            script.append("mdtraj_conversion(f'output_{protein}')")
+            script.append("mdtraj_conversion(f'Equilibration_{protein}')")
             script.append("MDanalysis_conversion(f'centered_old_coordinates.pdb', f'centered_old_coordinates.dcd', ligand_name='UNK')")
     
     if session['rmsd'] == 'True':
