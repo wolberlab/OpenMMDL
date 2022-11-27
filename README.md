@@ -78,8 +78,22 @@ Command line example with ligand
 
 There are two Systems prepared for the testing of the simulation.
 
+ 1: A 10ns simulation of the 6b73 Protein-ligand complex with POPC membrane and TIP3P-FB water. To run the testing of 6b73 enter following command line:
+
+```bash
+    openmmdl-simulation -f 6b73_testing_simulation -p ~/openmmdl/openmmdl_simulation/testing_sytems/6b73_membrane/6b73-moe-processed_openMMDL.pdb -s ~/openmmdl/openmmdl_simulation/testing_sytems/6b73_membrane/6b73_simulation.py -l  ~/openmmdl/openmmdl_simulation/testing_sytems/6b73_membrane/6b73_lig.sdf
+```
 
 
+ 1: A 10ns simulation of the 5wyz Protein-ligand complex with TIP3P water. To run the testing of 5wyz enter following command line:
+
+```bash
+    openmmdl-simulation -f 5wyz_testing_simulation -p ~/openmmdl/openmmdl_simulation/testing_sytems/5wyz_solvent/5wyz-moe-processed_openMMDL.pdb -s ~/openmmdl/openmmdl_simulation/testing_sytems/5wyz_solvent/5wyz_simulation.py -l  ~/openmmdl/openmmdl_simulation/testing_sytems/5wyz_solvent/5VF.sdf
+```
+
+
+## Copyright
+Copyright (c) 2022, Valerij Talagayev & Yu Chen
 
 #### Acknowledgements
 
