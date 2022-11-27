@@ -1,0 +1,35 @@
+name: test
+channels:
+
+  - conda-forge
+
+  - defaults
+dependencies:
+    # Base depends
+  - python
+  - pip
+  - numpy
+  - pandas  
+  - matplotlib
+  - requests
+  - mdtraj
+  - rdkit
+  - mdanalysis
+  
+  - pdbfixer
+  - openff-toolkit
+  - openmmforcefields
+  - cudatoolkit
+  - cuda-python
+  - pytest-shutil
+  - flask
+  
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov
+
+    # Pip-only installs
+  #- pip:
+  #  - codecov
+
