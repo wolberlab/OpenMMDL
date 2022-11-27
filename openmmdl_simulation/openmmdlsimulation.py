@@ -38,7 +38,7 @@ if __name__ == "__main__":
     else:
         shutil.rmtree(args.folder)
         os.mkdir(args.folder)
-    script_dir = os.path.abspath( os.path.dirname( __file__ ) )
+    script_dir = os.path.abspath( os.path.dirname( __file__ ))
     if os.path.exists(args.folder):
         if input_formats[0] in args.script:
             if os.path.exists(args.script):
@@ -61,5 +61,5 @@ if __name__ == "__main__":
             else:
                 print("Wrong Format, don't forget the .pdb of the pdb file")
         shutil.copytree(f"{script_dir}/scripts", f"{args.folder}/scripts")
-        os.system(f"python3  {args.folder}/{args.script}")
+        os.system(f"python3 {args.folder}/{args.script}")
 
