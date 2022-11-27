@@ -60,6 +60,6 @@ if __name__ == "__main__":
                     print("Wrong pdb file path, try the absolute path")
             else:
                 print("Wrong Format, don't forget the .pdb of the pdb file")
-        shutil.copytree("./openmmdl/md_simulation", f"{args.folder}/scripts")
+        shutil.copytree("~/openmmdl/md_simulation/scripts", f"{args.folder}/scripts")
         os.system(f"python3  {args.folder}/{args.script}")
 
