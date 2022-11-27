@@ -61,5 +61,6 @@ if __name__ == "__main__":
             else:
                 print("Wrong Format, don't forget the .pdb of the pdb file")
         shutil.copytree(f"{script_dir}/scripts", f"{args.folder}/scripts")
-        os.system(f"python3 {args.folder}/{args.script}")
+        os.chdir(args.folder)
+        os.system(f"python3 {args.script}")
 
