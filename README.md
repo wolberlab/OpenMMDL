@@ -26,7 +26,9 @@ OpenMMDL is written in python 3.10 and uses diverse packages, which can be easil
 
 #### Create alias for setup and simulation for your bash
 ```bash
-    
+    echo 'alias openmmdl-setup="python3 ~/openmmdl/openmmdl_setup/openmmdlsetup.py"' >> ~/.bashrc
+    echo 'alias openmmdl-simulation="python3 ~/openmmdl/openmmdl_simulation/openmmdlsimulation.py"' >> ~/.bashrc
+```
 
 #### Acknowledgements
 
