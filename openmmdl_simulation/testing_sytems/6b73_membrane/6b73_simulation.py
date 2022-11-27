@@ -81,7 +81,7 @@ barostatInterval = 25
 
 # Simulation Options
 
-steps = 125000
+steps = 1250000
 equilibrationSteps = 1000
 platform = Platform.getPlatformByName('CUDA')
 platformProperties = {'Precision': 'single'}
