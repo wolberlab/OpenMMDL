@@ -76,6 +76,10 @@ Command line example with ligand
 
 ## Running OpenMMDL-Simulation test simulations
 
+There are two Systems prepared for the testing of the simulation.
+
+
+
 
 #### Acknowledgements
 
