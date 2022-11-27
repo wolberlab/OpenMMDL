@@ -36,7 +36,7 @@ def mdtraj_conversion(pdb_file):
     
 def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, ligand_name):
     """
-    translate the trajectoy so that all frames conincdie its center of geomertry
+    translate the trajectory so that all frames coincide with its center of geometry
 
     Parameters
     ----------
@@ -50,18 +50,18 @@ def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, ligand_nam
     Returns
     -------
     'centered_traj.dcd': dcd file
-        dcd file containing all particles, including protein, ligand, solvent, ions.
+        dcd file containing all particles, including protein, ligand, solvent and ions.
     'centered_top.pdb': pdb file
-        pdb file containing all particiles. This is used to stroe the topology information
+        pdb file containing all particles. This is used to store the topology information
     'prot_lig_traj.dcd': dcd file
         dcd file containing only the complex, i.e, protein and ligand.
     'prot_lig_top.pdb'
-        pdb file containing only the complex. This is used to stroe the topology information
+        pdb file containing only the complex. This is used to store the topology information
 
     """    
     topology_trajectory = mda.Universe(post_mdtraj_pdb_file, post_mdtraj_dcd_file)
     topology_trajectory_all_atoms = topology_trajectory.select_atoms("all")
-    # translate the trajectoy so that all frames conincdie its center of geomertry
+    # translate the trajectoy so that all frames coincide with its center of geometry
     topology_trajectory_all_atoms.atoms.translate(topology_trajectory_all_atoms.center_of_mass())
     topology_trajectory_protein_ligand = topology_trajectory.select_atoms(f'protein or resname {ligand_name}')
 
@@ -124,7 +124,7 @@ def RMSD_dist_frames(prot_lig_top_file, prot_lig_traj_file, lig):
     prot_lig_traj_file:
         name of the dcd file, i.e. 'prot_lig_traj.dcd'.
     lig: str
-        ligand name saved in above pdb file. Selection string for the atomgroup to be investigated, also used during alignment.
+        ligand name saved in the above pdb file. Selection string for the atomgroup to be investigated, also used during alignment.
 
     Returns
     -------
@@ -170,7 +170,7 @@ def atomic_distance(
     lig_id, 
     lig_atom_name):
     """ 
-    calculate the distance between the interested pair atoms, and plot the distance vaule along the trajectory.
+    calculate the distance between the interested pair atoms, and plot the distance value along the trajectory.
 
     Parameters
     ----------

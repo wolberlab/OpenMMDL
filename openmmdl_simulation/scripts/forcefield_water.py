@@ -34,7 +34,7 @@ def ff_selection(ff):
 
 def water_forecfield_selection(water, forcefield_selection):
     """
-    Selects the required Watermodel forcefield .xml file according to water selection and previous force field selection.
+    Selects the required Water model forcefield .xml file according to water selection and previous force field selection.
     Parameters
     ----------
     water : str
@@ -44,7 +44,7 @@ def water_forecfield_selection(water, forcefield_selection):
     Returns
     -------
     water_forcefield: str
-    	Watermodel forcefield .xml File.
+    	Water model forcefield .xml File.
     """    
     old_amber = {'amber99sb.xml', 'amber99sbildn.xml', 'amber03.xml', 'amber10.xml'}
     
@@ -104,7 +104,7 @@ def water_forecfield_selection(water, forcefield_selection):
 
 def water_model_selection(water, forcefield_selection):
     """
-    Selects the required Watermodel forcefield .xml file according to water selection and previous force field selection.
+    Selects the required Water model forcefield .xml file according to water selection and previous force field selection.
     Parameters
     ----------
     water : str
@@ -114,7 +114,7 @@ def water_model_selection(water, forcefield_selection):
     Returns
     -------
     water_model: str
-    	Watermodel forcefield .xml File.
+    	Water model forcefield .xml File.
     """
     old_amber = {'amber99sb.xml', 'amber99sbildn.xml', 'amber03.xml', 'amber10.xml'}
     
@@ -183,13 +183,13 @@ def generate_forcefield(protein_ff, solvent_ff, add_membrane, rdkit_mol=None):
     solvent_ff: str
         Input of selected water model forcefield .xml File
     add_membrane = bool
-    	Selection if the system should be build with a membrane
+    	Selection if the system should be built with a membrane
     rdkit_mol: rdkit.Chem.rdchem.Mol
         Small molecule to register in the force field.
     Returns
     -------
     forcefield: simtk.openmm.app.Forcefield
-        Forcefield with registered small molecule.
+        Forcefield with a registered small molecule.
     """
     old_amber = {'amber99sb.xml', 'amber99sbildn.xml', 'amber03.xml', 'amber10.xml'}
     
@@ -202,7 +202,7 @@ def generate_forcefield(protein_ff, solvent_ff, add_membrane, rdkit_mol=None):
     else:
         forcefield = app.ForceField(protein_ff,solvent_ff)
     
-    # If a ligand is present, an Forcefield with GAFF will be created for the ligand 
+    # If a ligand is present, a Forcefield with GAFF will be created for the ligand 
     if rdkit_mol is not None:
         gaff = GAFFTemplateGenerator(
             molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True), forcefield = 'gaff-2.11'
@@ -228,7 +228,7 @@ def generate_transitional_forcefield(protein_ff, solvent_ff, add_membrane, rdkit
     Returns
     -------
     transitional_forcefield: simtk.openmm.app.Forcefield
-        Transitional forcefield with tip3p water and registered small molecule.
+        A transitional forcefield with tip3p water and a registered small molecule.
     """
     old_amber = {'amber99sb.xml', 'amber99sbildn.xml', 'amber03.xml', 'amber10.xml'}
     
@@ -241,7 +241,7 @@ def generate_transitional_forcefield(protein_ff, solvent_ff, add_membrane, rdkit
     else:
         transitional_forcefield = app.ForceField(protein_ff,solvent_ff)
     
-    # If a ligand is present, an Forcefield with GAFF will be created for the ligand 
+    # If a ligand is present, a Forcefield with GAFF will be created for the ligand 
     if rdkit_mol is not None:
         gaff = GAFFTemplateGenerator(
             molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True), forcefield = 'gaff-2.11'
