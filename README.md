@@ -30,6 +30,19 @@ OpenMMDL is written in python 3.10 and uses diverse packages, which can be easil
     echo 'alias openmmdl-simulation="python3 ~/openmmdl/openmmdl_simulation/openmmdlsimulation.py"' >> ~/.bashrc
 ```
 
+## Using OpenMMDL-Setup
+
+Start the Setup by excecuting the command:
+
+```bash
+    openmmdl-setup
+```
+
+The setup interface is displayed through a web browser, but it is still a single user desktop application, not a web application. It should automatically open a web browser displaying the user interface. If for any reason that does not happen, open a browser yourself and point it to the address displayed in the console window (usually http://127.0.0.1:5000).
+
+
+Download the processed PDB File and python script, which serve as input for the simulation script.
+
 #### Acknowledgements
 
 The Script is based upon the OpenMM Toolkit [OpenMM](https://github.com/openmm)
