@@ -88,7 +88,7 @@ There are two Systems prepared for the testing of the simulation.
 
 
 ## Copyright
-Copyright (c) 2022, Valerij Talagayev & Yu Chen
+Copyright (c) 2022, Valerij Talagayev & Yu Chen (Wolber lab)
 
 #### Acknowledgements
 
