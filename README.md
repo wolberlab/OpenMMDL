@@ -3,7 +3,6 @@
 
 # OpenMMDL Simulation
 
-
 Interface to OpenMM for the easy setup of molecular dynamic simulations of protein-ligand complexes
 
 ## Install
@@ -16,7 +15,6 @@ Open a new terminal and clone this repository
     git clone 
 
 #### Install all required dependencies in a separate environment
-
 
 OpenMMDL is written in python 3.10 and uses diverse packages, which can be easily installed on a separate environment using conda:
 
@@ -33,7 +31,6 @@ OpenMMDL is written in python 3.10 and uses diverse packages, which can be easil
 Activate conda environment:
 
     conda activate openmmdl
-
 
 Start the Setup by executing the command:
 
