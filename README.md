@@ -1,4 +1,4 @@
-<img src="https://openmm.org/images/logo.svg" height="200">
+<img src="https://github.com/pacificore/OpenMMDL/blob/main/openmmdl_setup/static/OpenMMDL_logo.svg" height="250">
 
 
 # OpenMMDL @ Molecular Design Lab
