@@ -11,6 +11,7 @@ Interface to OpenMM for the easy setup of molecular dynamic simulations of prote
 #### Clone this repository
 
 Open a new terminal and clone this repository
+
     cd ~
     git clone 
 
@@ -44,10 +45,6 @@ Download the processed PDB File and python script, which serve as input for the 
 
 ## Using OpenMMDL-Simulation
 
-Activate conda environment if not activated:
-
-    conda activate openmmdl
-
 Start the Simulation with the following Inputs:
 Mandatory:
 -f = Name of the folder, where the MD simulation files will be stored
@@ -55,10 +52,6 @@ Mandatory:
 -s = Python script from the Setup including the path
 Optional:
 -l = SDF File of the ligand, if the ligand was selected during the Setup. sdf file name should be consistent with the input in setup
-
-Command line example without ligand
-
-    openmmdl-simulation -f {path/to/folder_name} -p {path/to/protein.pdb} -s {path/to/script.py}
 
 Command line example with ligand
 
