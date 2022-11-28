@@ -501,6 +501,11 @@ os.chdir(outputDir)""")
     script.append('import os')
     script.append('import shutil')
     
+if session['fileType'] == 'amber':
+    script.append('from openmm import *')
+    script.append('from openmm.app import *')
+    script.append('from openmm.unit import *')
+
    
     # Input files
     
@@ -523,7 +528,7 @@ os.chdir(outputDir)""")
     elif fileType == 'amber':
         script.append("prmtop = AmberPrmtopFile('%s')" % uploadedFiles['prmtopFile'][0][1])
         script.append("inpcrd = AmberInpcrdFile('%s')" % uploadedFiles['inpcrdFile'][0][1])
-
+        script.append('protein = "%s"' % uploadedFiles['prmtopFile'][0][1])
     script.append('''\n############# Ligand and Protein Preparation ###################\n''')
     script.append('protein_prepared = "Yes"')
     
