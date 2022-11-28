@@ -18,7 +18,10 @@ try:
 except:
     long_description = "\n".join(short_description[2:])
 
-
+########################
+__version__ = '1.0'
+VERSION = __version__
+########################
 
 requirements = [
 'numpy>=1.23.3',
@@ -37,8 +40,7 @@ requirements = [
 
 setup(
     name='OpenmMMDL',
-    version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
+    version=__version__,
     description="Script for preparation and simulation of protein-ligand complexes with OpenMM",
     license="MIT",
     author="Valerij Talagayev & Yu Chen",
