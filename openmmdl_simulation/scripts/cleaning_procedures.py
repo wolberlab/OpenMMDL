@@ -72,8 +72,10 @@ def post_md_file_movement(protein_name, ligand=None):
         shutil.rmtree("MD_Files/Minimization_Equilibration")
         os.mkdir("MD_Files/Minimization_Equilibration")
     
-    os.rename(f'Energyminimization_{protein_name}', f"MD_Files/Minimization_Equilibration/Energyminimization_{protein_name}")
-    os.rename(f'Equilibration_{protein_name}', f"MD_Files/Minimization_Equilibration/Equilibration_{protein_name}")
+    if   os.path.exists(f'Energyminimization_{protein_name}'):
+        os.rename(f'Energyminimization_{protein_name}', f"MD_Files/Minimization_Equilibration/Energyminimization_{protein_name}")
+    if   os.path.exists(f'Equilibration_{protein_name}'):
+        os.rename(f'Equilibration_{protein_name}', f"MD_Files/Minimization_Equilibration/Equilibration_{protein_name}")
     
     
     # Simulation Output Files
