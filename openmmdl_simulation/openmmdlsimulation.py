@@ -29,7 +29,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='openmmdl', description=logo, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-f', dest='folder', type=str, help='Folder Name for MD Simulation', required=True,)
     parser.add_argument('-s', dest='script', type=str, help='MD Simulation script', required=True,)
-    parser.add_argument('-p', dest='protein', help='Protein Topology PDB/Amber File', required=True)
+    parser.add_argument('-t', dest='topology', help='Protein Topology PDB/Amber File', required=True)
     parser.add_argument('-l', dest='ligand', help='SDF File of Ligand', default=None)
     parser.add_argument('-c', dest='coordinate', help='Amber coordinates file', default=None)
     input_formats = ['.py', '.pdb', '.sdf', '.prmtop', '.inpcrd'] 
@@ -46,13 +46,20 @@ if __name__ == "__main__":
                 shutil.copy(args.script, args.folder)
             else:
                 print("Wrong python script path, try the absolute path")
-        if input_formats[1,3] in args.protein:
-            if os.path.exists(args.protein):
-                shutil.copy(args.protein, args.folder)
+        if input_formats[1] in args.topology:
+            if os.path.exists(args.topology):
+                shutil.copy(args.topology, args.folder)
             else:
                 print("Wrong topology file path, try the absolute path")
         else:
-            print("Wrong Format, don't forget the .pdb/.prmtop of the file")
+            print("Wrong Format, don't forget the .pdb of the file")
+        if input_formats[3] in args.topology:
+            if os.path.exists(args.topology):
+                shutil.copy(args.topology, args.folder)
+            else:
+                print("Wrong topology file path, try the absolute path")
+        else:
+            print("Wrong Format, don't forget the .prmtop of the file")
         if args.ligand != None:
             if input_formats[2] in args.ligand:
                 if os.path.exists(args.ligand):
