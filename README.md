@@ -69,6 +69,8 @@ Mandatory:
 Optional:
 -l = SDF File of the ligand, if the ligand was selected during the
 Setup. sdf file name should be consistent with the input in setup
+-c = Cooridnates file of Amber
+
 
 Command line example with ligand
 
