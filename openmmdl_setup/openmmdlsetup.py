@@ -997,7 +997,7 @@ with open(f'Equilibration_{protein}', 'w') as outfile:
         if fileType == "pdb":
             script.append("mdtraj_conversion(f'Equilibration_{protein}')")
             script.append("MDanalysis_conversion(f'centered_old_coordinates.pdb', f'centered_old_coordinates.dcd', ligand_name='UNK')")
-        elif fileType == "pdb":
+        elif fileType == "amber":
             script.append("mdtraj_conversion(prmtop)")
     
     if session['rmsd'] == 'True':
@@ -1005,6 +1005,8 @@ with open(f'Equilibration_{protein}', 'w') as outfile:
             script.append("RMSD_dist_frames(f'prot_lig_top.pdb', f'prot_lig_traj.dcd', lig='UNK')")
     if fileType == "pdb":
         script.append('post_md_file_movement(protein,ligand_sdf)')
+    elif fileType == "amber":
+        script.append('post_md_file_movement(protein,ligand=None)')
     return "\n".join(script)
 
 
