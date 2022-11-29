@@ -13,7 +13,7 @@ protein-ligand complexes
 Open a new terminal and clone this repository
 
     cd ~
-    git clone <clone url>
+    git clone https://github.com/wolberlab/OpenMMDL
 
 #### Install all required dependencies in a separate environment
 
