@@ -501,10 +501,9 @@ os.chdir(outputDir)""")
     script.append('import os')
     script.append('import shutil')
     
-if session['fileType'] == 'amber':
-    script.append('from openmm import *')
-    script.append('from openmm.app import *')
-    script.append('from openmm.unit import *')
+    if session['fileType'] == 'amber':
+        script.append('from openmm import *')
+        script.append('from openmm.app import *')
 
    
     # Input files
@@ -995,14 +994,19 @@ with open(f'Equilibration_{protein}', 'w') as outfile:
         script.extend(lines)
     
     if session ['md_postprocessing'] == 'True':
+        if fileType == "pdb":
             script.append("mdtraj_conversion(f'Equilibration_{protein}')")
             script.append("MDanalysis_conversion(f'centered_old_coordinates.pdb', f'centered_old_coordinates.dcd', ligand_name='UNK')")
+        elif fileType == "amber":
+            script.append("mdtraj_conversion(protein)")
     
     if session['rmsd'] == 'True':
             script.append("rmsd_for_atomgroups(f'prot_lig_top.pdb', f'prot_lig_traj.dcd', selection1='backbone', selection2=['protein', 'resname UNK'])")
             script.append("RMSD_dist_frames(f'prot_lig_top.pdb', f'prot_lig_traj.dcd', lig='UNK')")
-    
-    script.append('post_md_file_movement(protein,ligand_sdf)')
+    if fileType == "pdb":
+        script.append('post_md_file_movement(protein,ligand_sdf)')
+    elif fileType == "amber":
+        script.append('post_md_file_movement(protein,ligand=None)')
     return "\n".join(script)
 
 
