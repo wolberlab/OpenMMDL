@@ -501,10 +501,10 @@ os.chdir(outputDir)""")
     script.append('import os')
     script.append('import shutil')
     
-if session['fileType'] == 'amber':
-    script.append('from openmm import *')
-    script.append('from openmm.app import *')
-    script.append('from openmm.unit import *')
+    if session['fileType'] == 'amber':
+        script.append('from openmm import *')
+        script.append('from openmm.app import *')
+        script.append('from openmm.unit import *')
 
    
     # Input files
