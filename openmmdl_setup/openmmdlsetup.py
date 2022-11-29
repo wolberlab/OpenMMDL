@@ -1003,8 +1003,8 @@ with open(f'Equilibration_{protein}', 'w') as outfile:
     if session['rmsd'] == 'True':
             script.append("rmsd_for_atomgroups(f'prot_lig_top.pdb', f'prot_lig_traj.dcd', selection1='backbone', selection2=['protein', 'resname UNK'])")
             script.append("RMSD_dist_frames(f'prot_lig_top.pdb', f'prot_lig_traj.dcd', lig='UNK')")
-    
-    script.append('post_md_file_movement(protein,ligand_sdf)')
+    if fileType == "pdb":
+        script.append('post_md_file_movement(protein,ligand_sdf)')
     return "\n".join(script)
 
 
