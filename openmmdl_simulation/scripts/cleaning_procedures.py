@@ -16,7 +16,7 @@ def cleanup(protein_name):
     os.remove(f'centered_old_coordinates.dcd')
     print("It's done")
     
-def post_md_file_movement(protein_name, ligand):
+def post_md_file_movement(protein_name, ligand=None):
     """
     Moves the files to the required folders
 
@@ -36,7 +36,8 @@ def post_md_file_movement(protein_name, ligand):
         shutil.rmtree("Input_Files")
         os.mkdir("Input_Files")
 
-    shutil.copy(f"{ligand}", f"Input_Files/{ligand}")
+    if   os.path.exists(f"{ligand}"):
+            shutil.copy(f"{ligand}", f"Input_Files/{ligand}")
     shutil.copy(f"{protein_name}", f"Input_Files/{protein_name}")
     
     # MD Simulation Files
