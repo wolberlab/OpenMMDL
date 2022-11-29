@@ -997,6 +997,8 @@ with open(f'Equilibration_{protein}', 'w') as outfile:
         if fileType == "pdb":
             script.append("mdtraj_conversion(f'Equilibration_{protein}')")
             script.append("MDanalysis_conversion(f'centered_old_coordinates.pdb', f'centered_old_coordinates.dcd', ligand_name='UNK')")
+        elif fileType == "pdb":
+            script.append("mdtraj_conversion(prmtop)")
     
     if session['rmsd'] == 'True':
             script.append("rmsd_for_atomgroups(f'prot_lig_top.pdb', f'prot_lig_traj.dcd', selection1='backbone', selection2=['protein', 'resname UNK'])")
