@@ -30,8 +30,8 @@ After installation, activate the conda environment:
 
 #### Create alias for setup and simulation for your bash
 
-    echo 'alias openmmdl-setup="python3 ~/openmmdl/openmmdl_setup/openmmdlsetup.py"' >> ~/.bashrc
-    echo 'alias openmmdl-simulation="python3 ~/openmmdl/openmmdl_simulation/openmmdlsimulation.py"' >> ~/.bashrc
+    echo 'alias openmmdl-setup="python3 ~/OpenMMDL/openmmdl_setup/openmmdlsetup.py"' >> ~/.bashrc
+    echo 'alias openmmdl-simulation="python3 ~/OpenMMDL/openmmdl_simulation/openmmdlsimulation.py"' >> ~/.bashrc
 
 ## OpenMMDL-Setup
 
