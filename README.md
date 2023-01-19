@@ -21,7 +21,7 @@ OpenMMDL is written in python 3.10 and uses several packages, which can
 be easily installed on a separate environment using conda (we recommend
 using miniconda):
 
-    cd openmmdl
+    cd OpenMMDL
     conda create -n openmmdl --file requirements.txt
 
 After installation, activate the conda environment:
@@ -82,11 +82,11 @@ There are two Systems prepared for the testing of the simulation.
 
  1: A 10ns simulation of the 6b73 Protein-ligand complex with POPC membrane and TIP3P-FB water. To run the testing of 6b73 enter the following command line:
 
-    openmmdl-simulation -f 6b73_testing_simulation -t ~/openmmdl/openmmdl_simulation/testing_sytems/6b73_membrane/6b73-moe-processed_openMMDL.pdb -s ~/openmmdl/openmmdl_simulation/testing_sytems/6b73_membrane/6b73_simulation.py -l  ~/openmmdl/openmmdl_simulation/testing_sytems/6b73_membrane/6b73_lig.sdf
+    openmmdl-simulation -f 6b73_testing_simulation -t ~/OpenMMDL/openmmdl_simulation/testing_sytems/6b73_membrane/6b73-moe-processed_openMMDL.pdb -s ~/OpenMMDL/openmmdl_simulation/testing_sytems/6b73_membrane/6b73_simulation.py -l  ~/OpenMMDL/openmmdl_simulation/testing_sytems/6b73_membrane/6b73_lig.sdf
 
  1: A 10ns simulation of the 5wyz Protein-ligand complex with TIP3P water. To run the testing of 5wyz enter the following command line:
 
-    openmmdl-simulation -f 5wyz_testing_simulation -t ~/openmmdl/openmmdl_simulation/testing_sytems/5wyz_solvent/5wyz-moe-processed_openMMDL.pdb -s ~/openmmdl/openmmdl_simulation/testing_sytems/5wyz_solvent/5wyz_simulation.py -l  ~/openmmdl/openmmdl_simulation/testing_sytems/5wyz_solvent/5VF.sdf
+    openmmdl-simulation -f 5wyz_testing_simulation -t ~/OpenMMDL/openmmdl_simulation/testing_sytems/5wyz_solvent/5wyz-moe-processed_openMMDL.pdb -s ~/OpenMMDL/openmmdl_simulation/testing_sytems/5wyz_solvent/5wyz_simulation.py -l  ~/OpenMMDL/openmmdl_simulation/testing_sytems/5wyz_solvent/5VF.sdf
 
 
 ## Copyright
