@@ -91,12 +91,15 @@ There are two Systems prepared for the testing of the simulation.
 ## Running OpenMMDL-Simulations using slurm in multiple replicas
 
 Two scripts are needed to run simulations via slurm. Start using the runOpenMM_slurm.sh bash script when being in the repository folder. It has several inputs. For help just type: 
+
     Bash runOpenMM_slurm.sh
+    
 without any flags, it will list the flags needed. The simplest way to run a simulation is to use the "-i" flag, which takes an input directory including the simulationscript, the topology and optionally the ligand file and it will create the outputs folder within the given directory. NOTE: ake sure only one topology is present in the input folder, so that it finds it automatically.
 
 The script calls a second script (you don't need to do that) that is used for slurms "sbatch" command to run multiple replicas. The second script can be left where it is and named how it is (SlurmWrap.sh). 
 
 One example line of how to start a five replicas on cn-gpus would be: 
+
     bash runOpenMM.sh -i /mdspace/leon-moveWIP/Ligand-search-stability-check/ALk2R206H-D207Q-backmut/simulation -n 5 -c
 
 ## Copyright
