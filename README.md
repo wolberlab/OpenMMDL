@@ -88,7 +88,7 @@ There are two Systems prepared for the testing of the simulation.
 
     openmmdl-simulation -f 5wyz_testing_simulation -t ~/OpenMMDL/openmmdl_simulation/testing_sytems/5wyz_solvent/5wyz-moe-processed_openMMDL.pdb -s ~/OpenMMDL/openmmdl_simulation/testing_sytems/5wyz_solvent/5wyz_simulation.py -l  ~/OpenMMDL/openmmdl_simulation/testing_sytems/5wyz_solvent/5VF.sdf
 
-## Running OpenMMDL-Simulations using slurm in multiple replicas
+## Running OpenMMDL-Simulations using slurm (multiple replicas are possible)
 
 Two scripts are needed to run simulations via slurm. Start using the runOpenMM_slurm.sh bash script when being in the repository folder. It has several inputs. For help just type: 
 
