@@ -3,7 +3,8 @@
 {% macro fileinput(id) %}
     <div class="input-group">
         <label class="btn btn-default btn-file input-group-addon">
-            Browse... <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" onchange="optionChanged()"/>
+            <span title="Select File"style=" font-weight: 700;">Browse... </span>
+            <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" onchange="optionChanged()"/>
         </label>
         <span id="{{ id }}_label" class="form-control"/>
     </div>
@@ -19,12 +20,12 @@ Select the pdb input file and options for how to model it.
 
 <form method="post" enctype="multipart/form-data" action="{{ url_for('configureFiles') }}" class="form-horizontal">
     <div class="form-group">
-    <label for="filename" class="control-label col-md-2">Input File</label>
+    <label for="filename" class="control-label col-md-2">PDB File</label>
         <div class="col-md-10">{{ fileinput('file') }}</div>
     </div>
     <div class="form-group">
     <label for="forcefield" class="control-label col-md-2">Force Field</label>
-    <div class="col-md-10"><select name="forcefield" id="forcefield" class="form-control" onchange="optionChanged()">
+    <div class="col-md-10"><select name="forcefield" id="forcefield" class="form-control" title="CHARMM force field does not support ligands. Select Amber force fields for ligand-protein MD simulations" onchange="optionChanged()">
         <option value="AMBER14" selected>AMBER14</option>
         <option value="AMBER99SB">AMBER99SB</option>
         <option value="AMBER99SB-ILDN">AMBER99SB-ILDN</option>
@@ -35,12 +36,34 @@ Select the pdb input file and options for how to model it.
     </div>
     <div id="waterModelRow" class="form-group">
         <label for="waterModel" class="control-label col-md-2">Water Model</label>
-        <div class="col-md-10"><select name="waterModel" id="waterModel" class="form-control"></select></div>
+        <div class="col-md-10"><select name="waterModel" id="waterModel" class="form-control" title="TIP3P, TIP3P-FB and SPC/E are the most tested water models in OpenMMDL "></select></div>
+    </div>
+    <p>
+    Optional : Add ligand SDF file to the MD simulation (Default: No ligand)
+    </p>
+    <div class="form-group">
+    <label for="filename" class="control-label col-md-2">SDF File</label>
+        <div class="col-md-10"> {{fileinput('sdfFile') }}</div>
+    </div>
+    <div class="form-group">
+    <label for="ligandMinimization" class="control-label col-md-2">Ligand Minimization</label>
+    <div class="col-md-10"><select name="ligandMinimization" id="ligandMinimization" class="form-control" title="Minimize ligand with MMFF94 rdkit without protein" onchange="optionChanged()">
+        <option value="False" selected>No</option>
+        <option value="True">Yes</option>
+    </select></div>
+    </div>
+    <div class="form-group">
+    <label for="ligandSanitization" class="control-label col-md-2">
+        <span style=" font-weight: 700" title="Depending on the ligand the Sanitization can be required for OpenMM or may lead to errors in case of specific ligand substructures (example: Thiopene)"">Ligand Sanitization</span>
+    </label>
+    <div class="col-md-10"><select name="ligandSanitization" id="ligandSanitization" class="form-control" title="Sanitize ligand with rdkit" onchange="optionChanged()">
+        <option value="False" selected>No</option>
+        <option value="True">Yes</option>
+    </select></div>
     </div>
     <p>PDB files often need to be cleaned up before they can be simulated.  For example, you may need to
     add missing atoms, remove unwanted chains, or add a water box.  Do you want to do this now?</p>
-    <div style="margin-left:50px"><label class="control-label"><input type="radio" name="cleanup" value="no" checked/> No.</label> My file is all ready to simulate.</div>
-    <div style="margin-left:50px"><label class="control-label"><input type="radio" name="cleanup" value="yes"/> Yes.</label> Let's clean it up now.</div>
+    <div style="margin-left:50px"><label class="control-label"><input type="radio" name="cleanup" value="yes" checked/> Yes.</label> Let's clean it up now.</div>
     <br/>
     <input type="submit" value="Continue" id="continue" class="btn" disabled="true"/>
 </form>
@@ -111,7 +134,9 @@ function optionChanged() {
                 waterSelect.selectedIndex = i;
     }
     files = document.getElementById("file").files;
+    sdfFile = document.getElementById("sdfFile").files;
     document.getElementById("file_label").textContent = (files.length == 0 ? "" : files[0].name);
+    document.getElementById("sdfFile_label").textContent = (sdfFile.length == 0 ? "" : sdfFile[0].name);
     document.getElementById('continue').disabled = !document.getElementById("file").value;
 }
 optionChanged()

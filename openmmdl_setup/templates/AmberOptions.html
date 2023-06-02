@@ -1,0 +1,771 @@
+{% extends "layout.html" %}
+{% block title %}Prepare Amber Files{% endblock %}
+
+{% macro fileinput(id) %}
+<div class="input-group">
+    <label class="btn btn-default btn-file input-group-addon" >
+        Browse... <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" onchange="optionChanged()" />
+    </label>
+    <span id="{{ id }}_label" class="form-control" style="overflow: hidden;overflow-wrap: anywhere;" title=""/>
+</div>
+{% endmacro %}
+
+{% macro choice(id, title, options, changefunc="optionChanged") %}
+<select name="{{ id }}" id="{{ id }}" title="{{ title }}" class="form-control" onchange="{{ changefunc }}()">
+    {% for option in options %}
+    <option value="{{ option[0] }}" title="{{ option[2] }}" {{ 'selected' if session[id]==option[0] else '' }}>{{
+        option[1] }}</option>
+    {% endfor %}
+</select>
+{% endmacro %}
+
+
+{% macro textfield(id, title, attr) %}
+<input type="text" name="{{ id }}" id="{{ id }}" value="{{ session[id] }}" class="form-control"
+    oninput="optionChanged()" title="{{ title }}" />
+{% endmacro %}
+
+{% macro datafieldbox(id, name, title) %}
+<label title="{{ title }}"><input type="checkbox" name="dataFields" value="{{ id }}" oninput="optionChanged()"
+        {{ 'checked' if id in session['dataFields'] else '' }}> {{ name }}</label><br />
+{% endmacro %}
+
+{% block body %}
+<form method="post" id="optionsForm" action="{{ url_for('setAmberOptions') }}">
+  <div class="row">
+    <div class="col-md-5">
+      <ul class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" href="#input">Input</a></li>
+        <li><a data-toggle="tab" href="#rcpParam">Receptor</a></li>
+        <li><a data-toggle="tab" href="#ligParam">Ligand</a></li>
+        <li><a data-toggle="tab" href="#addWatMem">Add Water/Membrane</a></li>
+      </ul>
+      <div class="tab-content">
+        <div id="input" class="tab-pane fade in active">
+          <p>Select the PDB file that contains all the components to be modelled.</p>
+        <div class="form-group">
+            <label for="pdbFile" class="control-label col-md-2">PDB File</label>
+        <div class="col-md-10">{{ fileinput('pdbFile') }}</div>            
+        </div>
+        </div>
+
+        <div id="rcpParam" class="tab-pane fade">
+          <p>Select receptor type:</p>
+
+          <!-- Proteins-->
+          <div class="form-group">
+            <label><input type="radio" name="rcpType" value='protRcp' id="protRcp" oninput="optionChanged()" checked> Proteins
+            </label>
+          </div>
+
+          <div id="protOptions">
+            <div class="form-group">
+              <div class="row">
+                <div class="col-lg-4" style="padding-left: 30px">
+                  <label for="protLabel"> Receptor File Name </label>
+                  {{ fileinput('protFile') }}
+                </div>
+
+                <div class="col-lg-4" >
+                  <label for="prot_ff"> Force Field </label>
+                  <select name="prot_ff" id="prot_ff" class="form-control" onchange="optionChanged()">
+                    <option value="leaprc.protein.ff14SB" selected>ff14SB</option>
+                    <option value="leaprc.protein.ff19SB">ff19SB</option>
+                    <option value="leaprc.ff99SB">ff99SB</option>
+                    <option value="leaprc.protein.ff14SBonlysc">ff14SBonlysc</option>
+                    <option value="leaprc.protein.ff19ipq">ff19ipq</option>
+                    <option value="leaprc.mimetic.ff15ipq">ff15ipq</option>
+                    <option value="leaprc.protein.fb15">fb15</option>
+                    <option value="leaprc.protein.ff03.r1">ff03.r1</option>
+                    <option value="leaprc.protein.ff03ua">ff03ua</option>
+                    <option value="other_prot_ff">other</option>
+                  </select>
+                </div>
+            
+                <!-- Add a container for the text field and hide it by default-->
+                <div class="col-lg-4" id="other_prot_ff_container" style="display: none;">
+                  <label for="other_prot_ff_input" style="color:grey;">Other Force Fields</label>
+                  {{ textfield('other_prot_ff_input', 'See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`')}}
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- DNA-->
+          <div class="form-group">
+            <label><input type="radio" name="rcpType" value='dnaRcp' id="dnaRcp" oninput="optionChanged()" > DNA
+            </label>
+          </div>
+
+          <div id="dnaOptions">
+            <div class="form-group">
+              <div class="row">
+                <div class="col-lg-4" style="padding-left: 30px">
+                  <label for="dnaFile"> Receptor File Name </label>
+                  {{ fileinput('dnaFile') }}
+                </div>
+          
+                <div class="col-lg-4">
+                  <label for="dna_ff"> Force Field</label>
+                  <select name="dna_ff" id="dna_ff" class="form-control" onchange="optionChanged()">
+                    <option value="leaprc.DNA.OL15" selected>OL15</option>
+                    <option value="leaprc.DNA.bsc1">bsc1</option>
+                    <option value="other_dna_ff">other</option>
+                  </select>
+                </div>
+          
+                <!-- Add a container for the text field and hide it by default-->
+                <div class="col-lg-4" id="other_dna_ff_container" style="display: none;">
+                  <label for="other_dna_ff_input" style="color:grey;">Other Force Fields</label>
+                  {{ textfield('other_dna_ff_input', 'See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`')}}
+                </div>
+          
+              </div>
+            </div>
+          </div>
+
+          <!-- RNA-->
+          <div class="form-group">
+            <label><input type="radio" name="rcpType" value='rnaRcp' id="rnaRcp" oninput="optionChanged()"> RNA
+            </label>
+          </div>
+          
+          <div id="rnaOptions">
+            <div class="form-group">
+              <div class="row">
+                <div class="col-lg-4" style="padding-left: 30px">
+                  <label for="rnaFile"> Receptor File Name </label>
+                  {{ fileinput('rnaFile') }}
+                </div>
+          
+                <div class="col-lg-4">
+                  <label for="rna_ff"> Force Field</label>
+                  <select name="rna_ff" id="rna_ff" class="form-control" onchange="optionChanged()">
+                    <option value="leaprc.RNA.OL3" selected>OL3</option>
+                    <option value="leaprc.RNA.LJbb">LJbb</option>
+                    <option value="leaprc.RNA.YIL">YIL</option>
+                    <option value="leaprc.RNA.ROC">ROC</option>
+                    <option value="leaprc.RNA.Shaw">Shaw</option>
+                    <option value="other_rna_ff">other</option>
+                  </select>
+                </div>
+          
+                <!-- Add a container for the text field and hide it by default-->
+                <div class="col-lg-4" id="other_rna_ff_container" style="display: none;">
+                  <label for="other_rna_ff_input" style="color:grey;">Other Force Fields</label>
+                  {{ textfield('other_rna_ff_input', 'See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`')}}
+                </div>
+          
+              </div>
+            </div>
+          </div>
+
+          <!--Carbohydrates-->
+          <div class="form-group">
+            <label><input type="radio" name="rcpType" value='carboRcp' id="carboRcp" oninput="optionChanged()"> Carbohydrates
+            </label>
+          </div>
+          
+          <div id="carboOptions">
+            <div class="form-group">
+              <div class="row">
+                <div class="col-lg-4" style="padding-left: 30px">
+                  <label for="carboFile"> Receptor File Name </label>
+                  {{ fileinput('carboFile') }}
+                </div>
+          
+                <div class="col-lg-4">
+                  <label for="carbo_ff"> Force Field</label>
+                  <select name="carbo_ff" id="carbo_ff" class="form-control" onchange="optionChanged()">
+                    <option value="leaprc.GLYCAM_06j" selected>GLYCAM_06j</option>
+                    <option value="leaprc.GLYCAM_06EPb">GLYCAM_06EPb</option>
+                    <option value="other_carbo_ff">other</option>
+                  </select>
+                </div>
+          
+                <!-- Add a container for the text field and hide it by default-->
+                <div class="col-lg-4" id="other_carbo_ff_container" style="display: none;">
+                  <label for="other_carbo_ff_input" style="color:grey;">Other Force Fields</label>
+                  {{ textfield('other_carbo_ff_input', 'See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`')}}
+                </div>
+          
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div id="ligParam" class="tab-pane fade">
+
+          <!-- for normal ligand -->
+          <div class="form-group">
+            <label><input type="checkbox" name="nmLig" id="nmLig" oninput="optionChanged()" {{ 'checked' if session['nmLig'] else '' }}> Normal Ligand 
+              <span style="color:grey; font-weight: normal;">(refers to the chemical space is made up of C, N, O, S, P, H, F, Cl, Br and I)</span>
+            </label>
+          </div>
+
+          <div id="nmLigOptions">
+            <div id="nmLigContainer">
+              <!-- Ligand 1-->
+              <div id="nmLig1">
+                <div class="col-lg-2">
+                  <label> Ligand 1 </label>
+                </div>
+
+                <div class="col-lg-5">
+                  <div class="form-group">
+                    <label for="nmLigFile1">PDB File</label>
+                    {{ fileinput('nmLigFile') }}
+                  </div>
+
+                  <div class="form-group">
+                    <label for="lig_ff1">Ligand Force Field</label>
+                    {{choice('lig_ff', 'Select the force filed for ligand.', [
+                    ('gaff', 'GAFF'),
+                    ('gaff2', 'GAFF2')
+                    ])}}
+                  </div>
+                </div>
+                
+                <div class="col-lg-5">
+                  <div class="form-group">
+                    <label for="charge_value1">Charge Value</label>
+                    {{ textfield('charge_value', 'Enter the net molecular charge of the ligand as integer (e.g. 1 or -2). The charge value can be checked via text editor, MOE, Pymol, etc.') }}
+                  </div>
+                  <div class="form-group">
+                    <label for="charge_method1">Charge Method</label>
+                    {{choice('charge_method', 'Select the charge method that antechamber will adopt.', [
+                    ('bcc', 'AM1-BCC'),
+                    ('resp', 'RESP'),
+                    ('cm1', 'CM1'),
+                    ('cm2', 'CM2'),
+                    ('esp', 'ESP(Kollman)'),
+                    ('mul', 'Mulliken'),
+                    ('gas', 'Gasteriger'),
+                    ('rc', 'Read in charge'),
+                    ('wc', 'Write out charge'),
+                    ('dc', 'Delete charge')
+                    ])}}
+                  </div>
+                </div> 
+              </div>              
+            </div>
+            
+            <div class="form-group">
+              <button type="button" class="btn btn-default float-right" id="addNmLig1" onclick="addNmLig()">+ Add Normal Ligand</button>
+            </div>
+          </div>
+                                
+          <!-- for special ligand -->
+          <div class="form-group">
+            <label><input type="checkbox" name="spLig" id="spLig" oninput="optionChanged()" {{ 'checked' if
+                  session['spLig'] else '' }}> Special Ligand </label>
+          </div>
+
+          <div id="spLigOptions">
+            <p>To get AMBER parameters for special ligands:</p>
+            <ol>
+              <li>Go to the <a href="http://amber.manchester.ac.uk/" target="_blank">AMBER parameter database</a></li>
+              <li>Find the components you need in the database</li>
+              <li>Download the corresponding parameter set (i.e. both the <code>.prepc</code> and <code>.frcmod</code> files)</li>
+              <li>Save the files locally</li>
+              <li>Select the files below</li>
+            </ol>
+            <hr>
+
+            <div id="spLigContainer">
+              <div id="spLig1">
+                <div class="col-lg-2">
+                  <label> Ligand 1 </label>
+                </div>
+
+                <div class="col-lg-10">
+                  <div class="form-group">
+                    <label for="spLigFile1" class=" control-label col-md-3">PDB File</label>
+                    <div class="col-md-9" style="margin-bottom: 15px">{{ fileinput('spLigFile') }}</div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="prepcFile1" class="control-label col-md-3">Prepc File</label>
+                    <div class="col-md-9" style="margin-bottom: 15px" >{{ fileinput('prepcFile') }}</div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="frcmodFile1" class="control-label col-md-3">Frcmod File</label>
+                    <div class="col-md-9" style="margin-bottom: 15px">{{ fileinput('frcmodFile') }}</div>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+
+            <div class="form-group">
+              <button type="button" class="btn btn-default" id="addSpLig1" onclick="addSpLig()">+ Add Special Ligand</button>
+            </div>
+
+          </div>
+        </div>
+
+        <div id="addWatMem" class="tab-pane fade">                   
+          <!-- Water Box -->          
+          <p>tleap in AmberTools is used to create water boxes around solute. For more information, see <a
+              href="https://ambermd.org/AmberTools.php" class="alert-link" target="_blank">AmberTools22 </a>.
+          </p>
+
+          <p>PACKMOL-Memgen is used to build the membrane in this application. For more information, see <a
+              href="https://pubs.acs.org/doi/10.1021/acs.jcim.9b00269" class="alert-link" target="_blank">the literature</a>.
+          </p>
+          <div class="alert alert-warning" role="alert">
+            <p> Warning: The input structure must first be aligned to its corresponding PDB structure in the <a
+                href="https://opm.phar.umich.edu/" class="alert-link" target="_blank">OPM database</a> in order for
+              the membrane to be added properly using this application. </p>
+          </div>
+          <hr>
+
+
+          <div class="form-group">
+            <label class="control-label"><input type="radio" name="addType" id="addWater" value="addWater" oninput="optionChanged()" checked> Add Water Box </label>
+          </div>
+
+          <div id="waterBoxOptions">            
+
+            <div class="form-group">
+              <div class="row">
+                <div class="col-lg-6" style="padding-left: 30px">
+                  <label for="boxType"> Box Type </label>
+                  <select id="boxType" name="boxType" class="form-control" onchange="optionChanged()">
+                    <option value="cube" selected="selected" 
+                      title="creates a cuboid box and the field 'Distance (Å)' means the minimum distance between any atom originally present in solute and the edge of the periodic box"> 
+                      Cube </option>
+                    <option value="octahedron" title ="creates a truncated octahedron box and the field 'Distance (Å)' means the minimum distance between any atom originally present in solute and the edge of the periodic box"> 
+                      Truncated Octahedron </option>
+                    <option value="cap" title=" creates a large solvent sphere with a radius of radius Å. In development!">  
+                      Cap </option>
+                    <option value="shell" title="creates a large solvent box that can contain the entire solute and a shell thickness Å thick">
+                      Shell </option>
+                  </select>
+                </div>
+          
+                <div class="col-lg-6">
+                  <label id="distanceLabel" for="dist"> Distance (Å)</label>
+                  {{ textfield('dist', 
+                  'When Cube or Truncated Octahedron is selected, this field means the minimum distance between any atom originally present in solute and the edge of the periodic box; 
+                  When Cap is selected, this field means the radius of the sphere;
+                  When Shell is selected, this field means the thickness of the shell') }}
+                </div>
+              </div>  
+            </div>
+          </div>
+          
+          <!-- Membrane Box -->
+          <div class="form-group">
+            <label class="control-label"><input type="radio" name="addType" id="addMembrane" value="addMembrane" oninput="optionChanged()"> Add Membrane and Water</label>
+          </div>
+
+          <div id="memOptions">
+            <div class="form-group">
+              <div class="row">           
+                <div class="col-lg-6" style="padding-left: 30px">
+                  <label for="lipid_tp" title="">Lipid Type</label>
+                  <select name="lipid_tp" id="lipid_tp" class="form-control" onchange="optionChanged()">
+                    <option value="POPC" selected>POPC</option>
+                    <option value="POPE">POPE</option>
+                    <option value="DLPC">DLPC</option>
+                    <option value="DLPE">DLPE</option>
+                    <option value="DMPC">DMPC</option>
+                    <option value="DOPC">DOPC</option>
+                    <option value="DPPC">DPPC</option>
+                    <option value="other_lipid_tp">Other Type or Mixture</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Add a container for the text field and hide it by default-->
+              <div class="row">
+                <div class="col-lg-6" id="other_lipid_tp_container" style="display: none; color:grey; padding-left: 30px">
+                  <label for=" other_lipid_tp_input" >Other Types or Mixture</label>
+                  {{ textfield('other_lipid_tp_input', 'The command to check supported lipids: packmol-memgen --available_lipids') }}
+                </div>
+            
+                <div class="col-lg-6" id="lipid_ratio" style="display: none; color:grey;">
+                  <label for="lipid_ratio" >Lipid Ratio</label>
+                  {{ textfield('lipid_ratio', 'The orders of the colon-separated lists of lipids and ratio correspond to each other. Set to 1 if only one lipid required.') }}
+                </div>
+              </div>
+            </div>
+
+
+            <div class="form-group">
+              <div class="row">
+                <div class="col-lg-6" style="padding-left: 30px">
+                  <label for="lipid_ff">Lipid Force Field</label>
+                  <select name="lipid_ff" id="lipid_ff" class="form-control" onchange="optionChanged()">
+                    <option value="lipid21" selected>lipid21</option>
+                    <option value="lipid17">lipid17</option>
+                    <option value="lipid14">lipid14</option>
+                    <option value="lipid11">lipid11</option>
+                    <option value="other_lipid_ff">other</option>
+                  </select>
+                </div>
+            
+                <!-- Add a container for the text field and hide it by default-->
+                <div class="col-lg-6" id="other_lipid_ff_container" style="display: none; color:grey;">
+                  <label for="other_lipid_ff_input">Other Lipid Force Fields</label>
+                  {{ textfield('other_lipid_ff_input', 'See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`') }}
+                </div>
+              </div>  
+            </div>
+
+            <div class="form-group">
+              <div class="row">
+                <div class="col-lg-6" id="dist2Border" style="padding-left: 30px">
+                  <label for=" dist2Border" >Minimum Distance to Box Border (Å)</label>
+                  {{ textfield('dist2Border', 'specifys the minimum distance between the maxmin values for x y and z to the box boundaries. Flag --dist')
+                  }}
+                </div>
+            
+                <div class="col-lg-6" id="padDist" >
+                  <label for="padDist" >Water Layer (Å)</label>
+                  {{ textfield('padDist', 'specifys the width of the water layer over the membrane or protein in the z axis. Flag --dist_wat') }}
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <hr>
+
+          <!--water and ion-->
+          <div class="form-group">
+            <label>Water and Ions Setting</label>
+            <p>Ions will be added to neutralize the model.</p>
+          </div>
+          
+          <div class="form-group">
+            <div class="row">
+              <div class="col-lg-6" style="padding-left: 30px">
+                  <label for="water_ff">Water Force Field</label>
+                  <select name="water_ff" id="water_ff" class="form-control" onchange="optionChanged()">
+                    <option value="tip3p" selected>TIP3P</option>
+                    <option value="fb3">TIP3P-FB</option>
+                    <option value="spce">SPC/E</option>
+                    <option value="tip4pew">TIP4P-Ew</option>
+                    <option value="fb4">TIP4P-FB</option>
+                    <option value="opc">OPC</option>
+                    <option value="opc3">OPC3</option>
+                    <option value="other_water_ff">other</option>
+                  </select>
+              </div>
+          
+              <!-- Add a container for the text field and hide it by default-->
+              <div class="col-lg-6" id="other_water_ff_container" style="display: none; color:grey;">
+                <label for=" other_water_ff_input">Other Water Force Fields</label>
+                {{ textfield('other_water_ff_input', 'See the supported force fields in the original file at
+                `$AMBERHOME/dat/leap/cmd/`') }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <div class="row">
+              <div class="col-lg-6" style="padding-left: 30px">
+                <label for="pos_ion">Positive Ion</label>
+                <select name="pos_ion" id="pos_ion" class="form-control" onchange="optionChanged()">
+                  <option value="Na+" selected>Na+</option>
+                  <option value="K+">K+</option>
+                  <option value="Ca2+">Ca2+</option>
+                  <option value="Mg2+">Mg2+</option>
+                  <option value="other_pos_ion">other</option>
+                </select>
+              </div>
+            
+              <!-- Add a container for the text field and hide it by default-->
+              <div class="col-lg-6" id="other_pos_ion_container" style="display: none; color:grey;">
+                <label for=" other_pos_ion_input">Other Positive Ions</label>
+                {{ textfield('other_pos_ion_input', 'In development!') }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <div class="row">
+              <div class="col-lg-6" style="padding-left: 30px">
+                <label for="neg_ion">Negative Ion</label>
+                <select name="neg_ion" id="neg_ion" class="form-control" onchange="optionChanged()">
+                  <option value="Cl-" selected>Cl-</option>
+                  <option value="F-">F-</option>
+                  <option value="Br-">Br-</option>
+                  <option value="I-">I-</option>
+                  <option value="other_neg_ion">other</option>
+                </select>
+              </div>
+            
+              <!-- Add a container for the text field and hide it by default-->
+              <div class="col-lg-6" id="other_neg_ion_container" style="display: none; color:grey;">
+                <label for=" other_neg_ion_input">Other Negative Ions</label>
+                {{ textfield('other_neg_ion_input', 'In development!') }}
+              </div>
+            </div>
+          </div>
+            
+          <div class="form-group">
+            <div class="row">
+              <div class="col-lg-6" style="padding-left: 30px">               
+                <label for="ionConc" title="Ion concentration">Ion Concentration (molar)</label>
+                {{ textfield('ionConc', '') }}
+              </div>
+            </div>
+          </div>
+                            
+        </div>
+
+      </div>
+    </div>
+
+    <div class="col-md-7">
+      <div class="form-group">
+        <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('downloadAmberBashScript')}}')"
+          title="Save the script.  To run the simulation, put the script in the directory containing the input files and execute it.">Save Script</button>
+          <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('getAmberOutput')}}')"
+          title="Continue to the simulations configuration.">Continue</button>
+        {% if 'cleanup' in session and session['cleanup'] == 'yes' %}
+        {% endif %}
+      </div>
+      <pre id="scriptContainer"><code id="script" class="bash" style="overflow:scroll; white-space:pre"></code></pre>
+    </div>
+  </div>  
+
+  <div id="illegalPlatformModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Platform Not Available</h4>
+        </div>
+        <div class="modal-body">
+          <p>
+              You have selected the <span id="selectedPlatformName"></span> platform, which is not available on this computer.
+              To run the simulation on this computer, select one of the following platforms: <span id="availablePlatforms"></span>.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</form>
+
+<script>
+function optionChanged() {
+  // Update UI elements:
+  // select the input file from the user's device;
+  pdbFile = document.getElementById("pdbFile").files;
+  document.getElementById("pdbFile_label").textContent = (pdbFile.length == 0 ? "" : pdbFile[0].name);
+  
+  // for tab 'Ligand';
+  nmLig = document.getElementById("nmLig").checked;
+  document.getElementById('nmLigOptions').hidden = !nmLig;
+  spLig = document.getElementById("spLig").checked;
+  document.getElementById('spLigOptions').hidden = !spLig;
+
+  nmLigFile = document.getElementById("nmLigFile").files;
+  document.getElementById("nmLigFile_label").textContent = (nmLigFile.length == 0 ? "" : nmLigFile[0].name);
+  spLigFile = document.getElementById("spLigFile").files;
+  document.getElementById("spLigFile_label").textContent = (spLigFile.length == 0 ? "" : spLigFile[0].name);
+  prepcFile = document.getElementById("prepcFile").files;
+  document.getElementById("prepcFile_label").textContent = (prepcFile.length == 0 ? "" : prepcFile[0].name);
+  frcmodFile = document.getElementById("frcmodFile").files;
+  document.getElementById("frcmodFile_label").textContent = (frcmodFile.length == 0 ? "" : frcmodFile[0].name);
+  
+
+  //for tab 'Receptor'
+  protRcp = document.getElementById("protRcp").checked;
+  document.getElementById('protOptions').hidden = !protRcp;
+  dnaRcp = document.getElementById("dnaRcp").checked;
+  document.getElementById('dnaOptions').hidden = !dnaRcp;
+  rnaRcp = document.getElementById("rnaRcp").checked;
+  document.getElementById('rnaOptions').hidden = !rnaRcp;
+  carboRcp = document.getElementById("carboRcp").checked;
+  document.getElementById('carboOptions').hidden = !carboRcp;
+
+  protFile = document.getElementById("protFile").files;
+  document.getElementById("protFile_label").textContent = (protFile.length == 0 ? "" : protFile[0].name);
+  dnaFile = document.getElementById("dnaFile").files;
+  document.getElementById("dnaFile_label").textContent = (dnaFile.length == 0 ? "" : dnaFile[0].name);
+  rnaFile = document.getElementById("rnaFile").files;
+  document.getElementById("rnaFile_label").textContent = (rnaFile.length == 0 ? "" : rnaFile[0].name);
+  carboFile = document.getElementById("carboFile").files;
+  document.getElementById("carboFile_label").textContent = (carboFile.length == 0 ? "" : carboFile[0].name);
+
+  //for tab 'Add Water/Membrane'
+  addWater = document.getElementById("addWater").checked;
+  document.getElementById('waterBoxOptions').hidden = !addWater;
+  addMembrane = document.getElementById("addMembrane").checked;
+  document.getElementById('memOptions').hidden = !addMembrane;
+
+    // for radio 'Add Water Box'
+    // Get the selected option from the dropdown menu
+    const selectedOption = document.getElementById('boxType').value;
+
+    // Update the label for the text field based on the selected option
+    if (selectedOption === 'cube' || selectedOption === 'octahedron') {
+      document.getElementById('distanceLabel').innerHTML = 'Distance (Å)';
+    } else if (selectedOption === 'cap') {
+      document.getElementById('distanceLabel').innerHTML = 'Radius (Å)';
+    } else if (selectedOption === 'shell') {
+      document.getElementById('distanceLabel').innerHTML = 'Thickness (Å)';
+    }
+  
+  // Submit the form.
+
+  form = document.getElementById("optionsForm");
+  var request = new XMLHttpRequest();
+  var data = new FormData(form);
+  request.addEventListener("load", function (event) {
+    document.getElementById("script").textContent = event.target.responseText;
+    hljs.highlightBlock(document.getElementById("scriptContainer"));
+    updateScriptSize();
+  });
+  request.open("POST", "{{ url_for('setAmberOptions') }}");
+  request.send(data);
+
+  // When 'other' is selected
+    var elements = [
+    { id: 'lig_ff', containerId: 'other_lig_ff_container' },
+
+    { id: 'prot_ff', containerId: 'other_prot_ff_container' },
+    { id: 'dna_ff', containerId: 'other_dna_ff_container' },
+    { id: 'rna_ff', containerId: 'other_rna_ff_container' },
+    { id: 'carbo_ff', containerId: 'other_carbo_ff_container' },
+
+    { id: 'lipid_tp', containerId: 'other_lipid_tp_container' },
+    { id: 'lipid_tp', containerId: 'lipid_ratio' },
+    { id: 'lipid_ff', containerId: 'other_lipid_ff_container' },
+    
+    { id: 'water_ff', containerId: 'other_water_ff_container' },     
+    { id: 'pos_ion', containerId: 'other_pos_ion_container' },
+    { id: 'neg_ion', containerId: 'other_neg_ion_container' }
+
+  ];
+
+  for (var i = 0; i < elements.length; i++){
+      (function(element){
+          var select = document.getElementById(element.id);
+          var container = document.getElementById(element.containerId);
+          
+          select.addEventListener('change', function () {
+              if (select.value === `other_${element.id}`) {
+                  container.style.display = 'block';
+              } else {
+                  container.style.display = 'none';
+              }
+          });            
+      })(elements[i]);
+  }
+}
+optionChanged();
+
+// normal ligand options
+let nmLigCounter = 1;
+
+function addNmLig() {
+  nmLigCounter++;
+  const container = document.getElementById('nmLigContainer');
+  const newLigand = document.createElement('div');
+  newLigand.id = `ligand${nmLigCounter}`;
+  newLigand.innerHTML = `
+    <div class="col-lg-2">
+      <label> Ligand ${nmLigCounter} </label>
+      <button type="button" class="btn btn-default" id="delNmLig${nmLigCounter}" onclick="delNmLig(${nmLigCounter})">-</button>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="form-group">
+        <label for="nmLigFile${nmLigCounter}">PDB File</label>
+        {{ fileinput('nmLigFile') }}
+      </div>
+
+      <div class="form-group">
+        <label for="lig_ff${nmLigCounter}">Ligand Force Field</label>
+        {{choice('lig_ff', 'Select the force filed for ligand.', [
+        ('gaff', 'GAFF'),
+        ('gaff2', 'GAFF2')
+        ])}}
+      </div>
+    </div>
+     
+    <div class="col-lg-5">
+      <div class="form-group">
+        <label for="charge_value${nmLigCounter}">Charge Value</label>
+        {{ textfield('charge_value', 'Enter the net molecular charge of the ligand as integer (e.g. 1 or -2). The charge value can be checked via text editor, MOE, Pymol, etc.') }}
+      </div>
+
+      <div class="form-group">
+        <label for="charge_method${nmLigCounter}">Charge Method</label>
+        {{choice('charge_method', 'Select the charge method that antechamber will adopt.', [
+        ('bcc', 'AM1-BCC'),
+        ('resp', 'RESP'),
+        ('cm1', 'CM1'),
+        ('cm2', 'CM2'),
+        ('esp', 'ESP(Kollman)'),
+        ('mul', 'Mulliken'),
+        ('gas', 'Gasteriger'),
+        ('rc', 'Read in charge'),
+        ('wc', 'Write out charge'),
+        ('dc', 'Delete charge')
+        ])}}
+      </div>  
+    </div>
+  `;
+  container.appendChild(newLigand);
+}
+
+function delNmLig(nmLigCounter) {
+  const container = document.getElementById('nmLigContainer');
+  const ligandToDelete = document.getElementById(`ligand${nmLigCounter}`);
+  container.removeChild(ligandToDelete);
+}
+
+//special ligand options
+let spLigCounter = 1;
+
+function addSpLig(){
+  spLigCounter++;
+  const container = document.getElementById('spLigContainer');
+  const newLigand = document.createElement('div');
+  newLigand.id = `ligand${spLigCounter}`;
+  newLigand.innerHTML = `
+    <div class="col-lg-2">
+      <label> Ligand ${spLigCounter} </label>
+      <button type="button" class="btn btn-default" id="delSpLig${spLigCounter}" onclick="delSpLig(${spLigCounter})">-</button>
+    </div>
+
+    <div class="col-lg-10">
+      <div class="form-group">
+        <label for="spLigFile${spLigCounter} class="control-label col-md-3"> PDB File</label> 
+        <div class="col-md-9" style="margin-bottom: 15px">{{ fileinput('spLigFile') }}</div>        
+      </div>
+      
+      <div class="form-group">
+        <label for="prepcFile${spLigCounter}" class="control-label col-md-3">Prepc File</label>
+        <div class="col-md-9" style="margin-bottom: 15px">{{ fileinput('prepcFile') }}</div>
+      </div>
+
+      <div class="form-group">
+        <label for="frcmodFile${spLigCounter}" class="control-label col-md-3">Frcmod File</label>
+        <div class="col-md-9" style="margin-bottom: 15px">{{ fileinput('frcmodFile') }}</div>
+      </div>
+    </div>
+  `;
+  container.appendChild(newLigand);
+}
+
+function delSpLig(spLigCounter){
+  const container = document.getElementById('spLigContainer');
+  const ligandToDelete = document.getElementById(`ligand${spLigCounter}`);
+  container.removeChild(ligandToDelete);
+}
+
+</script>
+{% endblock %}
