@@ -31,8 +31,10 @@ def mdtraj_conversion(pdb_file):
     mdtraj_frames = md.load_dcd("trajectory.dcd", top=pdb_file)
     mdtraj_frames.image_molecules()
     mdtraj_frames.save_dcd(f'centered_old_coordinates.dcd')
+    mdtraj_frames.save_xtc(f'centered_old_coordinates.xtc')
     mdtraj_first_frame = mdtraj_frames[0:1]
-    mdtraj_first_frame.save_pdb(f'centered_old_coordinates.pdb')
+    mdtraj_first_frame.save_pdb(f'centered_old_coordinates_top.pdb')
+    mdtraj_first_frame.save_gro(f'centered_old_coordinates_top.gro')
     
 def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, ligand_name):
     """
@@ -69,11 +71,21 @@ def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, ligand_nam
         for ts in topology_trajectory.trajectory[1:]:
             w.write(topology_trajectory_all_atoms)
     topology_trajectory_all_atoms.write(f'centered_top.pdb')
+
+    with mda.Writer(f'centered_traj.xtc', topology_trajectory_all_atoms.n_atoms) as w:
+        for ts in topology_trajectory.trajectory[1:]:
+            w.write(topology_trajectory_all_atoms)
+    topology_trajectory_all_atoms.write(f'centered_top.gro')
     
     with mda.Writer(f'prot_lig_traj.dcd', topology_trajectory_protein_ligand.n_atoms) as w:
         for ts in topology_trajectory.trajectory[1:]:
             w.write(topology_trajectory_protein_ligand)
     topology_trajectory_protein_ligand.write(f'prot_lig_top.pdb')
+
+    with mda.Writer(f'prot_lig_traj.xtc', topology_trajectory_protein_ligand.n_atoms) as w:
+        for ts in topology_trajectory.trajectory[1:]:
+            w.write(topology_trajectory_protein_ligand)
+    topology_trajectory_protein_ligand.write(f'prot_lig_top.gro')
 
 
 # RMSD calculation
@@ -137,7 +149,6 @@ def RMSD_dist_frames(prot_lig_top_file, prot_lig_traj_file, lig):
     universe=mda.Universe(prot_lig_top_file, prot_lig_traj_file)
     pairwise_rmsd_prot = diffusionmap.DistanceMatrix(universe, select="protein").run().dist_matrix
     pairwise_rmsd_lig = diffusionmap.DistanceMatrix(universe, f"resname {lig}").run().dist_matrix
-    print(type(pairwise_rmsd_lig))
 
     max_dist = max(np.amax(pairwise_rmsd_lig), np.amax(pairwise_rmsd_prot))
     
