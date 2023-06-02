@@ -26,7 +26,6 @@
             <li><a data-toggle="tab" href="#integrator">Integrator</a></li>
             <li><a data-toggle="tab" href="#simulation">Simulation</a></li>
             <li><a data-toggle="tab" href="#output">Output</a></li>
-            <li><a data-toggle="tab" href="#manual">Manual Box</a></li>
             <li><a data-toggle="tab" href="#mdanalysis">MDAnalysis</a></li>
         </ul>
         <div class="tab-content">
@@ -131,98 +130,6 @@
             </div>
             </div>
 
-            <div id="manual" class="tab-pane fade">
-            <p/>         
-            <div class="form-group">
-            <label for="ligand_select">ligand select</label>
-            {{ choice('ligand_select', 'Select if you want to have an ligand in your MD Simulation', [
-                ('yes', 'yes', 'MD Simulation with ligand'),
-                ('no', 'no', 'MD Simulation without ligand')]) }}
-            </div>
-            <div class="form-group" id="sdf_file">
-            <label for="sdf_file">SDF File name</label>
-            {{ textfield('sdf_file', 'The mass of hydrogen atoms.') }}
-            </div>
-            <div class="form-group" id="minimization">
-            <label for="minimization">SDF Minimization</label>
-            {{ choice('minimization', 'Select which bonds to replace with rigid constraints.', [
-                ('True', 'True', 'The ligand will be minimized with MMFF94 Forcefield.'),
-                ('False', 'False', 'No minimization')]) }}
-            </div>
-            <div class="form-group">
-            <label for="manual_sys">Manual System</label>
-            {{ choice('manual_sys', 'Select the prefered system.', [
-                ('no', 'no', 'no'),
-                ('yes', 'yes', 'yes')]) }}
-            </div>
-            <div class="form-group">
-            <label for="box_choice">Water/Membrane System</label>
-            {{ choice('box_choice', 'Select the prefered system.', [
-                ('water', 'water', 'Water System.'),
-                ('no_solvent', 'No Solvent', 'Water System.'),
-                ('membrane', 'membrane', 'Membrane System')]) }}
-            </div>
-            <div class="form-group">
-            <label for="water_type_system">Select Water Box Type </label>
-            {{ choice('water_type_system', 'Select the prefered system.', [
-                ('Absolute', 'Absolute', 'Select Dimensions directly.'),
-                ('Buffer', 'Buffer', 'Add Padding distance')]) }}
-            </div>
-            <div class="form-group" id="wat_padding">
-            <label for="wat_padding">Water Padding Distance (nm)</label>
-            {{ textfield('wat_padding', 'Membrane Padding Distance in nm') }}
-            </div>
-            <div class="form-group" id="box_vector_x">
-            <label for="box_vector_x">Water Box Dimension x Distance (nm)</label>
-            {{ textfield('box_vector_x', 'Water Box Dimension x Distance in nm') }}
-            </div>
-            <div class="form-group" id="box_vector_y">
-            <label for="box_vector_y">Water Box Dimension y Distance (nm)</label>
-            {{ textfield('box_vector_y', 'Water Box Dimension y Distance in nm') }}
-            </div>
-            <div class="form-group" id="box_vector_z">
-            <label for="box_vector_z">Water Box Dimension z Distance (nm)</label>
-            {{ textfield('box_vector_z', 'Water Box Dimension z Distance in nm') }}
-            </div>
-            <div class="form-group" id="membrane_type_system">
-            <label for="membrane_type_system">Select Lipid System</label>
-            {{ choice('membrane_type_system', 'Select the Lipid system.', [
-                ('POPC', 'POPC', 'POPC'),
-                ('POPE', 'POPE', 'POPE'),
-                ('DLPC', 'DLPC', 'DLPC'),
-                ('DLPE', 'DLPE', 'DLPE'),
-                ('DMPC', 'DMPC', 'DMPC'),
-                ('DOPC', 'DOPC', 'DOPC'),
-                ('DPPC', 'DPPC', 'DPPC')]) }}
-            </div>
-            <div class="form-group" id="mem_padding">
-            <label for="mem_padding">Membrane Padding Distance (nm)</label>
-            {{ textfield('mem_padding', 'Membrane Padding Distance in nm') }}
-            </div>
-            <div class="form-group" id="ionic_str">
-            <label for="ionic_str">Ionic strength (molar)</label>
-            {{ textfield('ionic_str', 'Ionic strength in molar') }}
-            </div>
-            <div class="form-group" id="positive_ion">
-            <label for="positive_ion">Positive Ion</label>
-            {{ choice('positive_ion', 'Select Positive ion.', [
-                ('Cs+', 'Cs+', 'Cs+'),
-                ('K+', 'K+', 'K+'),
-                ('Li+', 'Li+', 'Li+'),
-                ('Na+', 'Na+', 'Na+'),
-                ('Rb+', 'Rb+', 'Rb+')]) }}
-            </div>
-            <div class="form-group" id="negative_ion">
-            <label for="negative_ion">Negative Ion</label>
-            {{ choice('negative_ion', 'Select negative ion.', [
-                ('Cl-', 'Cl-', 'Cl-'),
-                ('Br-', 'Br-', 'Br-'),
-                ('F-', 'F-', 'F-'),
-                ('I-', 'I-', 'I-')]) }}
-            </div>                   
-            </div>
-            
-
             <div id="output" class="tab-pane fade">
             <p/>
             <div class="form-group">
@@ -325,18 +232,6 @@
             <div class="form-group" id="restart_step">
             <label for="restart_step">Restart_step</label>
             {{ textfield('restart_step', 'Enter Restart step.') }}
-            </div>
-            <div class="form-group" id="md_postprocessing">
-            <label for="md_postprocessing">MD Simulation Postprocessing</label>
-            {{ choice('md_postprocessing', 'Centering of Protein and separate saving of pdb and dcd with only ligand and protein.', [
-                ('True', 'True', 'The Centering will be performed'),
-                ('False', 'False', 'No post MD Simulation Analysis')]) }}
-            </div>
-            <div class="form-group" id="mdtraj_remove">
-            <label for="mdtraj_remove">MDTraj Removal</label>
-            {{ choice('mdtraj_remove', 'Removing of MDTraj Files.', [
-                ('True', 'True', 'The Files will be removed'),
-                ('False', 'False', 'No the files will stay')]) }}
             </div>
             </div>
             
@@ -445,10 +340,6 @@ function outputFiletypeChanged() {
 
 function optionChanged() {
     // Update UI elements.
-    
-    ligand_select = document.getElementById("ligand_select").value;
-    document.getElementById("sdf_file").hidden = (ligand_select != 'yes');
-    document.getElementById("minimization").hidden = (ligand_select != 'yes');
     interaction_analysis = document.getElementById("interaction_analysis").value;
     document.getElementById("protein_res_id").hidden = (interaction_analysis != 'True');
     document.getElementById("protein_atom_name").hidden = (interaction_analysis != 'True');
@@ -456,16 +347,6 @@ function optionChanged() {
     document.getElementById("ligand_atom_name").hidden = (interaction_analysis != 'True');
     restart_checkpoint = document.getElementById("restart_checkpoint").value;
     document.getElementById("restart_step").hidden = (restart_checkpoint != 'yes');
-    manual_sys = document.getElementById("manual_sys").value;
-    box_choice = document.getElementById("box_choice").value;
-    document.getElementById("water_type_system").hidden = (box_choice != 'water');
-    water_type_system = document.getElementById("water_type_system").value;
-    document.getElementById("box_vector_x").hidden = (box_choice != 'water');
-    document.getElementById("box_vector_y").hidden = (box_choice != 'water');
-    document.getElementById("box_vector_z").hidden = (box_choice != 'water');
-    document.getElementById("wat_padding").hidden = (box_choice != 'water');
-    document.getElementById("membrane_type_system").hidden = (box_choice != 'membrane');
-    document.getElementById("mem_padding").hidden = (box_choice != 'membrane');
     nonbondedMethod = document.getElementById("nonbondedMethod").value;
     document.getElementById("cutoffRow").hidden = (nonbondedMethod == 'NoCutoff');
     document.getElementById("ewaldTolRow").hidden = (nonbondedMethod != 'PME');
