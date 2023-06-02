@@ -16,7 +16,7 @@ def cleanup(protein_name):
     os.remove(f'centered_old_coordinates.dcd')
     print("It's done")
     
-def post_md_file_movement(protein_name, ligand=None):
+def post_md_file_movement(protein_name, prmtop=None, inpcrd=None, ligand=None):
     """
     Moves the files to the required folders
 
@@ -35,10 +35,14 @@ def post_md_file_movement(protein_name, ligand=None):
     else:
         shutil.rmtree("Input_Files")
         os.mkdir("Input_Files")
-
     if   os.path.exists(f"{ligand}"):
             shutil.copy(f"{ligand}", f"Input_Files/{ligand}")
     shutil.copy(f"{protein_name}", f"Input_Files/{protein_name}")
+    if   os.path.exists(f"{prmtop}"):
+            shutil.copy(f"{prmtop}", f"Input_Files/{prmtop}")
+    if   os.path.exists(f"{inpcrd}"):
+            shutil.copy(f"{inpcrd}", f"Input_Files/{inpcrd}")
+
     
     # MD Simulation Files
     # Pre Simulation Files
@@ -48,15 +52,18 @@ def post_md_file_movement(protein_name, ligand=None):
     else:
         shutil.rmtree("MD_Files")
         os.mkdir("MD_Files")
+    
+    if os.path.exists(f'prepared_no_solvent_{protein_name}'):
+    	if not os.path.exists("MD_Files/Pre_MD"):
+            os.mkdir("MD_Files/Pre_MD")    
+    	else:
+            shutil.rmtree("MD_Files/Pre_MD")
+            os.mkdir("MD_Files/Pre_MD")
         
-    if not os.path.exists("MD_Files/Pre_MD"):
-        os.mkdir("MD_Files/Pre_MD")    
-    else:
-        shutil.rmtree("MD_Files/Pre_MD")
-        os.mkdir("MD_Files/Pre_MD")
+
     
-    os.rename(f'prepared_no_solvent_{protein_name}', f"MD_Files/Pre_MD/prepared_no_solvent_{protein_name}")
-    
+    if   os.path.exists(f'prepared_no_solvent_{protein_name}'):
+         os.rename(f'prepared_no_solvent_{protein_name}', f"MD_Files/Pre_MD/prepared_no_solvent_{protein_name}")
     if   os.path.exists(f'solvent_padding_{protein_name}'):
          os.rename(f'solvent_padding_{protein_name}', f'MD_Files/Pre_MD/solvent_padding_{protein_name}')
     elif os.path.exists(f'solvent_absolute_{protein_name}'):
@@ -66,11 +73,13 @@ def post_md_file_movement(protein_name, ligand=None):
     
     
     # Topology files after Minimization and Equilibration
-    if not os.path.exists("MD_Files/Minimization_Equilibration"):
-        os.mkdir("MD_Files/Minimization_Equilibration")    
-    else:
-        shutil.rmtree("MD_Files/Minimization_Equilibration")
-        os.mkdir("MD_Files/Minimization_Equilibration")
+    if   os.path.exists(f'Energyminimization_{protein_name}'):
+    	if not os.path.exists("MD_Files/Minimization_Equilibration"):
+    	    os.mkdir("MD_Files/Minimization_Equilibration")    
+    	else:
+    	    shutil.rmtree("MD_Files/Minimization_Equilibration")
+    	    os.mkdir("MD_Files/Minimization_Equilibration")
+    
     
     if   os.path.exists(f'Energyminimization_{protein_name}'):
         os.rename(f'Energyminimization_{protein_name}', f"MD_Files/Minimization_Equilibration/Energyminimization_{protein_name}")
@@ -100,16 +109,22 @@ def post_md_file_movement(protein_name, ligand=None):
         os.mkdir("MD_Postprocessing")
     
     # MDtraj Files
-    if  os.path.exists(f'centered_old_coordinates.pdb'):
+    if  os.path.exists(f'centered_old_coordinates_top.pdb'):
         if not os.path.exists("MD_Postprocessing/1_MDTraj"):
             os.mkdir("MD_Postprocessing/1_MDTraj")    
         else:
             shutil.rmtree("MD_Postprocessing/1_MDTraj")
             os.mkdir("MD_Postprocessing/1_MDTraj")
-        os.rename(f'centered_old_coordinates.pdb', f'MD_Postprocessing/1_MDTraj/centered_old_coordinates.pdb')
+        os.rename(f'centered_old_coordinates_top.pdb', f'MD_Postprocessing/1_MDTraj/centered_old_coordinates_top.pdb')
     
     if  os.path.exists(f'centered_old_coordinates.dcd'):
         os.rename(f'centered_old_coordinates.dcd', f'MD_Postprocessing/1_MDTraj/centered_old_coordinates.dcd')
+        
+    if  os.path.exists(f'centered_old_coordinates_top.gro'):
+        os.rename(f'centered_old_coordinates_top.gro', f'MD_Postprocessing/1_MDTraj/centered_old_coordinates_top.gro')
+    
+    if  os.path.exists(f'centered_old_coordinates.xtc'):
+        os.rename(f'centered_old_coordinates.xtc', f'MD_Postprocessing/1_MDTraj/centered_old_coordinates.xtc')    
     
     # MDAnalysis Files
     if not os.path.exists("MD_Postprocessing/2_MDAnalysis"):
@@ -122,6 +137,16 @@ def post_md_file_movement(protein_name, ligand=None):
     os.rename(f'centered_traj.dcd', f'MD_Postprocessing/2_MDAnalysis/centered_traj.dcd')
     os.rename(f'prot_lig_top.pdb', f'MD_Postprocessing/2_MDAnalysis/prot_lig_top.pdb')
     os.rename(f'prot_lig_traj.dcd', f'MD_Postprocessing/2_MDAnalysis/prot_lig_traj.dcd')
+    
+    
+    if  os.path.exists(f'centered_top.gro'):
+        os.rename(f'centered_top.gro', f'MD_Postprocessing/2_MDAnalysis/centered_top.gro')
+    if  os.path.exists(f'centered_traj.xtc'):
+        os.rename(f'centered_traj.xtc', f'MD_Postprocessing/2_MDAnalysis/centered_traj.xtc')
+    if  os.path.exists(f'prot_lig_top.gro'):
+        os.rename(f'prot_lig_top.gro', f'MD_Postprocessing/2_MDAnalysis/prot_lig_top.gro')
+    if  os.path.exists(f'prot_lig_traj.xtc'):
+        os.rename(f'prot_lig_traj.xtc', f'MD_Postprocessing/2_MDAnalysis/prot_lig_traj.xtc')
     
     # Checkpoints
     if not os.path.exists("Checkpoints"):
