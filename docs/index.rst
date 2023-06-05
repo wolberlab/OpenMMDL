@@ -14,7 +14,7 @@ Interface to OpenMM for easy setup of molecular dynamic simulations of protein-l
 
 .. raw:: html
    <p align="center">
-   <img src="https://github.com/talagayev/OpenMMDL/openmmdl_setup/static/Icon.png" alt="OpenMMDL" width="400"/>
+   <img src="openmmdl_setup/static/Icon.png" alt="OpenMMDL" width="400"/>
    <br>
    <font size="1">
    OpenMMDL.
