@@ -6,6 +6,10 @@
 OpenMMDL!
 =========================================================
 Interface to OpenMM for easy setup of molecular dynamic simulations of protein-ligand complexes
+.. image::
+   https://img.shields.io/badge/License-MIT-blue.svg
+   :target: https://opensource.org/licenses/MIT
+
 .. raw:: html
    <p align="center">
    <img src="https://github.com/talagayev/OpenMMDL/openmmdl_setup/static/Icon.png" alt="Dynophore 3D visualization" width="400"/>
