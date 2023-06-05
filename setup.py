@@ -28,8 +28,6 @@ requirements = [
 'requests>=2.28.1',
 'rdkit>=2022.03.5',
 'mdtraj==1.9.7',
-'openff-toolkit==0.11.1',
-'openmmforcefields==0.11.2',
 'cudatoolkit>=11.7.0',
 'cuda-python>=11.7.1',
 'MDAnalysis>=2.3.0',
