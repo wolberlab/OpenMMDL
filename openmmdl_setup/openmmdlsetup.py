@@ -1094,7 +1094,12 @@ forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=wate
 complex_topology, complex_positions = merge_protein_and_ligand(protein_pdb, omm_ligand)
 print("Complex topology has", complex_topology.getNumAtoms(), "atoms.")     ''')
         elif session['sdfFile'] == '':
-            script.append('''      
+            script.append('''
+protein_pdb = PDBFile(protein)     
+forcefield_selected = ff_selection(ff)
+water_selected = water_forecfield_selection(water=water,forcefield_selection=ff_selection(ff))
+model_water = water_model_selection(water=water,forcefield_selection=ff_selection(ff))
+print("Forcefield and Water Model Selected")
 if water_selected != None:
     forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, rdkit_mol=None) 
 else:
