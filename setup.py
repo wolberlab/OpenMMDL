@@ -28,7 +28,7 @@ requirements = [
 'requests>=2.28.1',
 'rdkit>=2022.03.5',
 'mdtraj==1.9.7',
-'pdbfixer==1.8.1',
+'pdbfixer>=1.0.0',
 'openff-toolkit==0.11.1',
 'openmmforcefields==0.11.2',
 'cudatoolkit>=11.7.0',
