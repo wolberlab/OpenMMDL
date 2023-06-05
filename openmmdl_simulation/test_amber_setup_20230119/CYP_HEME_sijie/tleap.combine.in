@@ -1,0 +1,9 @@
+
+rcp = loadpdb protein_amber_f.pdb
+nmLig = loadpdb rename_ligand.pdb 
+spLig = loadpdb hem_amber.pdb 
+comp = combine{rcp nmLig spLig}
+savepdb comp comp.pdb
+
+quit
+
