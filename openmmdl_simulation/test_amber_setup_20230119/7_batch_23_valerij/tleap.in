@@ -1,0 +1,21 @@
+
+source leaprc.protein.ff14SB
+source leaprc.water.tip3p
+source leaprc.gaff
+
+loadamberprep ligand.prepc
+loadamberparams ligand.frcmod
+
+system = loadpdb comp.pdb
+
+solvatebox system TIP3PBOX 10 
+addions2 system Cl- 0
+addions2 system Na+ 0
+check system 
+charge system
+
+savepdb system system.tip3p.pdb
+saveamberparm system system.tip3p.prmtop system.tip3p.inpcrd
+
+quit
+

@@ -1,0 +1,37 @@
+Remark line goes here
+MASS
+
+BOND
+
+ANGLE
+n2-cc-ss   63.400     122.640   same as nc-cc-ss, penalty score=  2.8
+n2-cc-na   70.600     121.950   same as na-cc-nc, penalty score=  2.8
+hn-na-n2   49.800     119.550   same as hn-na-nc, penalty score=  2.8
+
+DIHE
+n2-cc-ss-c3   2    2.200       180.000           2.000      same as X -c2-ss-X , penalty score=232.0
+na-cc-ss-c3   2    2.200       180.000           2.000      same as X -c2-ss-X , penalty score=232.0
+ss-cc-n2-na   2    9.500       180.000           2.000      same as X -cc-nc-X , penalty score=218.5
+na-cc-n2-na   2    9.500       180.000           2.000      same as X -cc-nc-X , penalty score=218.5
+c3-cc-ss-cc   2    2.200       180.000           2.000      same as X -c2-ss-X , penalty score=232.0
+h4-cc-ss-cc   2    2.200       180.000           2.000      same as X -c2-ss-X , penalty score=232.0
+cd-cc-ss-cc   2    2.200       180.000           2.000      same as X -c2-ss-X , penalty score=232.0
+
+IMPROPER
+ca-ca-ca-ha         1.1          180.0         2.0          Using general improper torsional angle  X- X-ca-ha, penalty score=  6.0)
+n2-na-cc-ss         1.1          180.0         2.0          Using the default value
+cc-hn-na-n2         1.1          180.0         2.0          Using the default value
+cd-na-cc-na         1.1          180.0         2.0          Using the default value
+cc-cd-cd-na         1.1          180.0         2.0          Using the default value
+cd-cd-na-hn         1.1          180.0         2.0          Using general improper torsional angle  X- X-na-hn, penalty score=  6.0)
+cc-h4-cd-na         1.1          180.0         2.0          Using the default value
+cc-cd-cc-ha         1.1          180.0         2.0          Same as X -X -ca-ha, penalty score= 38.9 (use general term))
+cc-cd-cd-ha         1.1          180.0         2.0          Same as X -X -ca-ha, penalty score= 38.9 (use general term))
+c3-cc-na-cc         1.1          180.0         2.0          Using the default value
+c3-cd-cc-ss         1.1          180.0         2.0          Using the default value
+cd-h4-cc-ss         1.1          180.0         2.0          Using the default value
+
+NONBON
+
+
+
