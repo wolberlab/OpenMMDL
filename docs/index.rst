@@ -17,7 +17,7 @@ OpenMMDL!
 **OpenMMDL** is a interface, that allows an easy setup of **OpenMM** molecular dynamic simulations of protein-ligand complexes.
 
 
-**OpenMMDL** consits of:
+OpenMMDL consits of:
    **OpenMMDL_Setup** - A webserver tool that allows to modify the Protein and generate Input Files for MD Simulations.
    **OpenMMDL_Simulation** - A script that performs a OpenMM MD Simulation with your Input files and further postprocesses the MD Simulation with MDTraj and MDAnalysis.
 
