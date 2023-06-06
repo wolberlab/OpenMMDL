@@ -1,6 +1,7 @@
 name: docs
 channels:
   - defaults
+  - anaconda
 dependencies:
     # Base depends
   - python
