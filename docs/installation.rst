@@ -8,7 +8,7 @@ The first step of the installation of OpenMMDL on your device, consists in the c
 This can be accoplished by using the following command lines:
 
 
-.. prompt:: bash $
+.. code-block:: text
 
     cd ~
     git clone https://github.com/wolberlab/OpenMMDL
@@ -19,7 +19,7 @@ OpenMMDL is written in python 3.10 and uses several packages, which can be easil
 
 
 
-.. prompt:: bash $
+.. code-block:: text
 
     cd OpenMMDL
     conda create -n openmmdl --file requirements.txt
