@@ -1,5 +1,7 @@
 name: docs
 channels:
+  - defaults
+  - conda-forge
 dependencies:
     # Base depends
   - python
