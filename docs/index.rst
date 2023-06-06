@@ -27,7 +27,6 @@ OpenMMDL  @ Molecular Design Lab
    :caption: User guide:
 
    installation
-   api
 
 .. toctree::
    :maxdepth: 1
@@ -47,6 +46,13 @@ OpenMMDL  @ Molecular Design Lab
    
    tutorial_pdb_path
    tutorial_amber_path
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Developers:
+
+   api
 
 
 
