@@ -58,3 +58,21 @@ There are two Systems prepared for the testing of the simulation.
     openmmdl-simulation -f 5wyz_testing_simulation -t ~/OpenMMDL/openmmdl_simulation/testing_sytems/5wyz_solvent/5wyz-moe-processed_openMMDL.pdb -s ~/OpenMMDL/openmmdl_simulation/testing_sytems/5wyz_solvent/5wyz_simulation.py -l  ~/OpenMMDL/openmmdl_simulation/testing_sytems/5wyz_solvent/5VF.sdf
 
 Each of the command lines should generate a folder, where the script and the input data will be moved and further perform a MD simulation and postprocessing of the systems.
+
+Running OpenMMDL-Simulations using slurm
+------------------------------
+Two scripts are needed to run simulations via slurm. Start using the runOpenMM_slurm.sh bash script when being in the repository folder. It has several inputs. For help just type:
+
+.. code-block:: text
+
+    Bash runOpenMM_slurm.sh
+    
+without any flags, it will list the flags needed. The simplest way to run a simulation is to use the "-i" flag, which takes an input directory including the simulationscript, the topology and optionally the ligand file and it will create the outputs folder within the given directory. NOTE: ake sure only one topology is present in the input folder, so that it finds it automatically.
+
+The script calls a second script (you don't need to do that) that is used for slurms "sbatch" command to run multiple replicas. The second script can be left where it is and named how it is (SlurmWrap.sh).
+
+One example line of how to start a five replicas on cn-gpus would be:
+
+.. code-block:: text
+
+    bash runOpenMM.sh -i /path/to/Input/Folder -n 5 -c
