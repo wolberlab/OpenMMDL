@@ -33,13 +33,13 @@ OpenMMDL  @ Molecular Design Lab
    :maxdepth: 1
    :caption: OpenMMDL-Setup
    
-   installation
+   openmmdl_setup
 
 .. toctree::
    :maxdepth: 1
    :caption: OpenMMDL-Simulation
    
-   Openmmdl_simulation
+   openmmdl_simulation
 
 .. toctree::
    :maxdepth: 1
