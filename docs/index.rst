@@ -39,7 +39,7 @@ OpenMMDL  @ Molecular Design Lab
    :maxdepth: 1
    :caption: OpenMMDL-Simulation
    
-   installation
+   Openmmdl_simulation
 
 .. toctree::
    :maxdepth: 1
