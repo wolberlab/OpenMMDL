@@ -1,6 +1,5 @@
 name: docs
 channels:
-  - defaults
 dependencies:
     # Base depends
   - python
