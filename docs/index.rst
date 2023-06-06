@@ -12,7 +12,8 @@ Interface to OpenMM for easy setup of molecular dynamic simulations of protein-l
    https://img.shields.io/badge/License-MIT-blue.svg
    :target: https://opensource.org/licenses/MIT
 
-.. image:: https://github.com/talagayev/OpenMMDL/blob/main/docs/_static/Icon.svg
+.. image:: 
+   https://github.com/talagayev/OpenMMDL/blob/main/openmmdl_setup/static/OpenMMDL_logo.svg
    :width: 350
 
 
