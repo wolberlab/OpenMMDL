@@ -5,7 +5,7 @@ dependencies:
   - python
   - pip
   
-  - numpy>=1.23.3
+  - numpy=1.23.3
   - requests>=2.28.1
   - rdkit>=2022.03.5
   - mdtraj=1.9.7
