@@ -7,11 +7,6 @@ dependencies:
   - pip
   
   - pdbfixer
-  - openff-toolkit
-  - openmmforcefields
-  - cudatoolkit
-  - numpy
-  - requests
 
     # Pip-only installs
   #- pip:
