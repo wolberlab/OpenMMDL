@@ -29,6 +29,25 @@ OpenMMDL  @ Molecular Design Lab
    installation
    api
 
+.. toctree::
+   :maxdepth: 1
+   :caption: OpenMMDL-Setup
+   
+   installation
+
+.. toctree::
+   :maxdepth: 1
+   :caption: OpenMMDL-Simulation
+   
+   installation
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Application Examples
+   
+   installation
+
+
 
 
 Indices and tables
