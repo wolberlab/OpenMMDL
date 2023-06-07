@@ -10,3 +10,9 @@ The system that we will use for this tutorial the Toll-like receptor 8.
    :align: center
 
 sus
+
+.. figure:: /_static/images/tutorials/PDB_Path/Selectfiles2.png
+   :figwidth: 700px
+   :align: center
+
+sus2
