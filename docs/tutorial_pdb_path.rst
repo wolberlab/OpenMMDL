@@ -19,7 +19,7 @@ sus2
 
    
 .. figure:: /_static/images/tutorials/PDB_Path/Selectfiles3.png
-   :figwidth: 800px
+   :figwidth: 750px
    :align: center
 
 sus3
