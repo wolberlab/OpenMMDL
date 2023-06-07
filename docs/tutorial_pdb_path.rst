@@ -67,3 +67,26 @@ sus9
 
 sus10
 
+.. figure:: /_static/images/tutorials/PDB_Path/Simulationoptions1.png
+   :figwidth: 725px
+   :align: center
+
+sus11
+
+.. figure:: /_static/images/tutorials/PDB_Path/Simulationoptions2.png
+   :figwidth: 725px
+   :align: center
+
+sus12
+
+.. figure:: /_static/images/tutorials/PDB_Path/Simulationoptions3.png
+   :figwidth: 725px
+   :align: center
+
+sus13
+
+.. figure:: /_static/images/tutorials/PDB_Path/Simulationoptions4.png
+   :figwidth: 725px
+   :align: center
+
+sus14
