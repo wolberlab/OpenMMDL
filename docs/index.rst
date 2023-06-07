@@ -27,6 +27,7 @@ OpenMMDL  @ Molecular Design Lab
    :caption: User guide:
 
    installation
+   faq
 
 .. toctree::
    :maxdepth: 1
