@@ -37,5 +37,19 @@ sus4
 sus5
 
 
+.. figure:: /_static/images/tutorials/PDB_Path/Addresidues1.png
+   :figwidth: 725px
+   :align: center
+
+sus6
+
+
+.. figure:: /_static/images/tutorials/PDB_Path/Addresidues2.png
+   :figwidth: 725px
+   :align: center
+
+sus6
+
+
 
 
