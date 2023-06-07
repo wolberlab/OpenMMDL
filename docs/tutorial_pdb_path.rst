@@ -79,15 +79,20 @@ sus11
 
 sus12
 
-.. figure:: /_static/images/tutorials/PDB_Path/Inputfiles1.png
+.. figure:: /_static/images/tutorials/PDB_Path/Inputfiles.png
    :figwidth: 725px
    :align: center
 
 sus13
 
-.. figure:: /_static/images/tutorials/PDB_Path/Inputfiles2.png
+.. figure:: /_static/images/tutorials/PDB_Path/Outputfiles1.png
    :figwidth: 725px
    :align: center
 
 sus14
 
+.. figure:: /_static/images/tutorials/PDB_Path/Outputfiles2.png
+   :figwidth: 725px
+   :align: center
+
+sus15
