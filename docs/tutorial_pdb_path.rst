@@ -23,3 +23,19 @@ sus2
    :align: center
 
 sus3
+
+.. figure:: /_static/images/tutorials/PDB_Path/Selectchains1.png
+   :figwidth: 725px
+   :align: center
+
+sus4
+
+.. figure:: /_static/images/tutorials/PDB_Path/Selectchains2.png
+   :figwidth: 725px
+   :align: center
+
+sus5
+
+
+
+
