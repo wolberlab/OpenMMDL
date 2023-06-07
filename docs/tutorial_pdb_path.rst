@@ -48,7 +48,13 @@ sus6
    :figwidth: 725px
    :align: center
 
-sus6
+sus7
+
+.. figure:: /_static/images/tutorials/PDB_Path/Heavyatoms.png
+   :figwidth: 725px
+   :align: center
+
+sus8
 
 
 
