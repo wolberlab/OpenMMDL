@@ -78,15 +78,3 @@ sus11
    :align: center
 
 sus12
-
-.. figure:: /_static/images/tutorials/PDB_Path/Simulationoptions3.png
-   :figwidth: 725px
-   :align: center
-
-sus13
-
-.. figure:: /_static/images/tutorials/PDB_Path/Simulationoptions4.png
-   :figwidth: 725px
-   :align: center
-
-sus14
