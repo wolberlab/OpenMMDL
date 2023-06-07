@@ -43,7 +43,6 @@ sus5
 
 sus6
 
-
 .. figure:: /_static/images/tutorials/PDB_Path/Addresidues2.png
    :figwidth: 725px
    :align: center
@@ -56,6 +55,15 @@ sus7
 
 sus8
 
+.. figure:: /_static/images/tutorials/PDB_Path/Addwater1.png
+   :figwidth: 725px
+   :align: center
 
+sus9
 
+.. figure:: /_static/images/tutorials/PDB_Path/Addwater2.png
+   :figwidth: 725px
+   :align: center
+
+sus10
 
