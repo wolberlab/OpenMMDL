@@ -14,10 +14,12 @@ sus
 .. figure:: /_static/images/tutorials/PDB_Path/Selectfiles2.png
    :figwidth: 700px
    :align: center
-   
-   
-.. figure:: /_static/images/tutorials/PDB_Path/Selectfiles3.png
-   :figwidth: 700px
-   :align: center
 
 sus2
+
+   
+.. figure:: /_static/images/tutorials/PDB_Path/Selectfiles3.png
+   :figwidth: 800px
+   :align: center
+
+sus3
