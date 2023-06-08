@@ -14,3 +14,13 @@ Now that we have activated the openmmdl environment we can start OpenMMDL-Setup.
 .. code-block:: text
 
     openmmdl-setup
+
+This will open the OpenMMDL-Setup, which you can use for the creation of the input files for OpenMMDL-Simulation.
+
+Here is the table of the currently avaiable Forcefields and Watermodels. 
+
+.. figure:: /_static/images/Forcefield_watermodels.png
+   :figwidth: 725px
+   :align: center
+
+sus5
