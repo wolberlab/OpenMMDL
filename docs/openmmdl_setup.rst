@@ -24,6 +24,12 @@ The tutorial for the PDB Path can be found here:
 
 * :doc:`PDB Path Tutorial </tutorial_pdb_path>`
 
+2. The Amber Path, where Amber prmtop and inpcrd are used the preparation and simulation. This path allows to either use already prepared prmtop and inpcrd as an input or create the prmtop and inpcrd from an PDB File
+
+The tutorial for the Amber Path can be found here:
+
+* :doc:`Amber Path Tutorial </tutorial_amber_path>`
+
 Here is the table of the currently avaiable Forcefields and Watermodels for the PDB Path: 
 
 .. figure:: /_static/images/Forcefield_watermodels.png
