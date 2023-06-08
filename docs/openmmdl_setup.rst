@@ -17,10 +17,15 @@ Now that we have activated the openmmdl environment we can start OpenMMDL-Setup.
 
 This will open the OpenMMDL-Setup, which you can use for the creation of the input files for OpenMMDL-Simulation.
 
-Here is the table of the currently avaiable Forcefields and Watermodels. 
+There are two possible options to create the input files for OpenMMDL-Simulation:
+
+1. The PDB Path, where an PDB of the protein is used as an Input for the preparation and simulation.
+The tutorial for the PDB Path can be found here:
+[PDB Path Tutorial](#tutorial_pdb_path)
+
+Here is the table of the currently avaiable Forcefields and Watermodels for the PDB Path: 
 
 .. figure:: /_static/images/Forcefield_watermodels.png
    :figwidth: 725px
    :align: center
 
-sus5
