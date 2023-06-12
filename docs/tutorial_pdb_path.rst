@@ -5,11 +5,39 @@ This is a tutorial how to use the PDB Path
 The system that we will use for this tutorial the Toll-like receptor 8.
 
 
+We start the tutorial by creating an folder where we will copy all the input files and later run the MD Simulation.
+
+To create a new folder we enter the following command lines:
+
+
+.. code-block:: text
+
+    mkdir openmmdl_pdb_tutorial
+
+
+activating our openmmdl environment to start the OpenMMDL-Setup.
+To start the OpenMMDL-Setup we need to activate the openmmdl environment. to do this we have to enter the following command lines:
+
+.. code-block:: text
+
+    conda activate openmmdl
+
+Now that we have activated the openmmdl environment we can start OpenMMDL-Setup. To do this you need to type the following:
+
+.. code-block:: text
+
+    openmmdl-setup
+
+This will open the OpenMMDL-Setup, which you can use for the creation of the input files for OpenMMDL-Simulation.
+
+
+
 .. figure:: /_static/images/tutorials/PDB_Path/Selectfiletype.png
    :figwidth: 725px
    :align: center
 
-sus
+We select the PDB File Option and press continue.
+This leads us to 
 
 .. figure:: /_static/images/tutorials/PDB_Path/Selectfiles1.png
    :figwidth: 725px
