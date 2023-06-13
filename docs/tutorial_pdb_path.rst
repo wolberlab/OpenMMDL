@@ -133,13 +133,15 @@ For this we go to the Simulation Tab and Change Simulation lenght (steps) to 250
 
 If you want to have a longer or shorter simulation you can increase or reduce the amount of steps.
 
-Now that we changed the amount of steps we select the Save Script button to save the script for the simulation and Save Processed PDF File to save the PDB File that will be the input for the MD simulation.
+
 
 .. figure:: /_static/images/tutorials/PDB_Path/Simulationoptions2.png
    :figwidth: 725px
    :align: center
 
-sus12
+Now that we changed the amount of steps we select the Save Script button to save the script for the simulation.
+
+Select the Save Processed PDF File to save the PDB File that will be the input for the MD simulation.
 
 .. figure:: /_static/images/tutorials/PDB_Path/Inputfiles.png
    :figwidth: 725px
