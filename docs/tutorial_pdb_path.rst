@@ -67,6 +67,7 @@ The next page shows us the protein with all of the chains that are in the pdb fi
    :figwidth: 725px
    :align: center
 
+
 During this simulation we only require the chains A and B, thus we deselect the remaining chains.
 
 
