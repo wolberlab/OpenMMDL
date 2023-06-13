@@ -90,13 +90,15 @@ We add the missing residues from 101 to 111 and from 435/438 to 460 in the chain
    :figwidth: 725px
    :align: center
 
-sus7
+Now that we selected the residues that we want to add we continue to the next page.
+
+The next page shows the heavy atoms that are missing and need to be added
 
 .. figure:: /_static/images/tutorials/PDB_Path/Addheavyatoms.png
    :figwidth: 725px
    :align: center
 
-sus8
+We press continue and go to the next page.
 
 .. figure:: /_static/images/tutorials/PDB_Path/Addwater1.png
    :figwidth: 725px
