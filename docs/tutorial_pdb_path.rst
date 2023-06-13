@@ -176,10 +176,16 @@ As the Input for the MD simulation we used the -t to select 5wyz-processed_openM
    :figwidth: 725px
    :align: center
 
-sus14
+During and after simulation you can open the folder to see the progress.
+
+After the simulation is finished the tutorial_simulation should look like the picture below.
 
 .. figure:: /_static/images/tutorials/PDB_Path/Outputfiles2.png
    :figwidth: 725px
    :align: center
 
-sus15
+If there are files or folders missing, repeat the MD simulation.
+
+This concludes the Tutorial for the OpenMMDL PDB Path simulations.
+
+To see what the separate files in the Output represent follow this page:
