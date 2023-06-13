@@ -61,6 +61,8 @@ The page should look like the page below.
 Now that we selected the PDB and SDF File we select continue and go to the next page.
 
 The next page shows us the protein with all of the chains that are in the pdb file.
+
+
 .. figure:: /_static/images/tutorials/PDB_Path/Modifychains1.png
    :figwidth: 725px
    :align: center
