@@ -75,14 +75,16 @@ During this simulation we only require the chains A and B, thus we deselect the 
    :figwidth: 725px
    :align: center
 
-sus5
+Now that we have only the chains A and B selected we select Continue and go to the next page.
 
 
 .. figure:: /_static/images/tutorials/PDB_Path/Addresidues1.png
    :figwidth: 725px
    :align: center
 
-sus6
+The PDB File is missing some residues, thus we need to add the missing residues for the MD Simulation.
+
+We add the missing residues from 101 to 111 and from 435/438 to 460 in the chains A and B.
 
 .. figure:: /_static/images/tutorials/PDB_Path/Addresidues2.png
    :figwidth: 725px
