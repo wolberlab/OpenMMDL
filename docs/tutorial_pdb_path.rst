@@ -60,13 +60,15 @@ Go to the SDF File Browse button and select the 5VF.sdf file in the folder.
 
 The page should look like the page below.
 
-
    
 .. figure:: /_static/images/tutorials/PDB_Path/Selectfiles2.png
    :figwidth: 725px
    :align: center
 
 Now that we selected the PDB and SDF File we select continue and go to the next page.
+
+Selecting Chains
+------------------------------
 
 The next page shows us the protein with all of the chains that are in the pdb file.
 
@@ -85,12 +87,14 @@ During this simulation we only require the chains A and B, thus we deselect the 
 
 Now that we have only the chains A and B selected we select Continue and go to the next page.
 
+Optional: Adding Residues
+------------------------------
+
+The next page shows that the PDB is missing residues, which can be added.
 
 .. figure:: /_static/images/tutorials/PDB_Path/Addresidues1.png
    :figwidth: 725px
    :align: center
-
-The PDB File is missing some residues, thus we need to add the missing residues for the MD Simulation.
 
 We add the missing residues from 101 to 111 and from 435/438 to 460 in the chains A and B.
 
@@ -100,7 +104,10 @@ We add the missing residues from 101 to 111 and from 435/438 to 460 in the chain
 
 Now that we selected the residues that we want to add we continue to the next page.
 
-The next page shows the heavy atoms that are missing and need to be added
+Optional: Adding Heavy Atoms
+------------------------------
+
+The next page shows the heavy atoms that are missing and need to be added.
 
 .. figure:: /_static/images/tutorials/PDB_Path/Addheavyatoms.png
    :figwidth: 725px
