@@ -115,7 +115,9 @@ Additionally we want to add a Water Box, so we select the Water Box Option. In t
    :figwidth: 725px
    :align: center
 
-sus10
+Now that we selected the following options we continue to the next page.
+
+The final page displays the MD simulation options.
 
 .. figure:: /_static/images/tutorials/PDB_Path/Simulationoptions1.png
    :figwidth: 725px
