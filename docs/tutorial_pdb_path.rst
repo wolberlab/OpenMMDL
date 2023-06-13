@@ -151,7 +151,26 @@ The SDF File should be the same that was used as an input for the Openmm-Setup.
    :figwidth: 725px
    :align: center
 
-sus13
+Now that we have the files in one folder we can start the MD simulation.
+
+For this we start by activating the environment
+
+.. code-block:: text
+
+    conda activate openmmdl
+
+Now that activated the environment we start the simulation.
+
+For this enter the following command
+
+
+.. code-block:: text
+
+    openmmdl-simulation -f tutorial_simulation -s OpenMMDL_Simulation.py -t 5wyz-processed_openMMDL.pdb -l 5VF.sdf
+
+By entering the command we create a folder called tutorial_simulation, where the Output of the MD simulation will appear.
+
+As the Input for the MD simulation we used the -t to select 5wyz-processed_openMMDL.pdb as the topology file for the simulation, -l to select the ligand 5VF.sdf and -s to specify the OpenMMDL_Simulation.py script that will run the MD simulation.
 
 .. figure:: /_static/images/tutorials/PDB_Path/Outputfiles1.png
    :figwidth: 725px
