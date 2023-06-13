@@ -42,9 +42,11 @@ Here We select the PDB File Option and press continue.
 
 This leads us to the next page, where we can see the selection of the PDB and SDF File of the protein and ligand respectively.
 
+
 .. figure:: /_static/images/tutorials/PDB_Path/Selectfiles1.png
    :figwidth: 725px
    :align: center
+
 
 Go to the PDB File Browse button and select 5wyz.pdb in the folder. Afterwards go to the SDF File Browse button and select the 5VF.sdf file in the folder.
 
