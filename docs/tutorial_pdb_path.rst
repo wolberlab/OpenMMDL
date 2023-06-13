@@ -127,7 +127,13 @@ The final page displays the MD simulation options.
    :figwidth: 725px
    :align: center
 
-sus11
+We will simulate the protein for 10 ns.
+
+For this we go to the Simulation Tab and Change Simulation lenght (steps) to 250000.
+
+If you want to have a longer or shorter simulation you can increase or reduce the amount of steps.
+
+Now that we changed the amount of steps we select the Save Script button to save the script for the simulation and Save Processed PDF File to save the PDB File that will be the input for the MD simulation.
 
 .. figure:: /_static/images/tutorials/PDB_Path/Simulationoptions2.png
    :figwidth: 725px
