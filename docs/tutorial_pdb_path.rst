@@ -143,6 +143,10 @@ Now that we changed the amount of steps we select the Save Script button to save
 
 Select the Save Processed PDF File to save the PDB File that will be the input for the MD simulation.
 
+Create a separate folder and copy the Simulation script, Processed PDB File and the Ligand SDF File into the folder.
+
+The SDF File should be the same that was used as an input for the Openmm-Setup.
+
 .. figure:: /_static/images/tutorials/PDB_Path/Inputfiles.png
    :figwidth: 725px
    :align: center
