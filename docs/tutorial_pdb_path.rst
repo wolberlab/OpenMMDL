@@ -48,7 +48,9 @@ This leads us to the next page, where we can see the selection of the PDB and SD
    :align: center
 
 
-Go to the PDB File Browse button and select 5wyz.pdb in the folder. Afterwards go to the SDF File Browse button and select the 5VF.sdf file in the folder.
+Go to the PDB File Browse button and select 5wyz.pdb in the folder. 
+
+Go to the SDF File Browse button and select the 5VF.sdf file in the folder.
 
 The page should look like the page below.
 
@@ -109,7 +111,9 @@ The next page allows us to add the missing hydrogens and add a water box or an m
 
 We need to add hydrogens for the MD Simulation at a pH at 7.4 so we change the number from 7.0 to 7.4.
 
-Additionally we want to add a Water Box, so we select the Water Box Option. In the Water Box we also change the Ionic strenght to 0.15.
+Additionally we want to add a Water Box, so we select the Water Box Option.
+
+In the Water Box we also change the Ionic strenght to 0.15.
 
 .. figure:: /_static/images/tutorials/PDB_Path/Addwater2.png
    :figwidth: 725px
