@@ -4,6 +4,8 @@
 This is a tutorial how to use the PDB Path
 The system that we will use for this tutorial the Toll-like receptor 8.
 
+Starting OpenMMDL-Setup
+------------------------------
 
 We start the tutorial by creating an folder where we will copy all the input files and later run the MD Simulation.
 
@@ -27,6 +29,10 @@ Now that we have activated the openmmdl environment we can start OpenMMDL-Setup.
 .. code-block:: text
 
     openmmdl-setup
+
+
+Selectig Input Files
+------------------------------
 
 This will open the OpenMMDL-Setup, which you can use for the creation of the input files for OpenMMDL-Simulation.
 
@@ -133,8 +139,6 @@ For this we go to the Simulation Tab and Change Simulation lenght (steps) to 250
 
 If you want to have a longer or shorter simulation you can increase or reduce the amount of steps.
 
-
-
 .. figure:: /_static/images/tutorials/PDB_Path/Simulationoptions2.png
    :figwidth: 725px
    :align: center
@@ -162,7 +166,6 @@ For this we start by activating the environment
 Now that activated the environment we start the simulation.
 
 For this enter the following command
-
 
 .. code-block:: text
 
