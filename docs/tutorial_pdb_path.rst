@@ -100,11 +100,16 @@ The next page shows the heavy atoms that are missing and need to be added
 
 We press continue and go to the next page.
 
+The next page allows us to add the missing hydrogens and add a water box or an membrane.
+
 .. figure:: /_static/images/tutorials/PDB_Path/Addwater1.png
    :figwidth: 725px
    :align: center
 
-sus9
+
+We need to add hydrogens for the MD Simulation at a pH at 7.4 so we change the number from 7.0 to 7.4.
+
+Additionally we want to add a Water Box, so we select the Water Box Option. In the Water Box we also change the Ionic strenght to 0.15.
 
 .. figure:: /_static/images/tutorials/PDB_Path/Addwater2.png
    :figwidth: 725px
