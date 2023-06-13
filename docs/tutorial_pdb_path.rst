@@ -31,7 +31,7 @@ Now that we have activated the openmmdl environment we can start OpenMMDL-Setup.
     openmmdl-setup
 
 
-Selectig Input Files
+Selecting Input Files
 ------------------------------
 
 This will open the OpenMMDL-Setup, which you can use for the creation of the input files for OpenMMDL-Simulation.
@@ -115,12 +115,14 @@ The next page shows the heavy atoms that are missing and need to be added.
 
 We press continue and go to the next page.
 
+Adding Hydrogens and Water Box
+------------------------------
+
 The next page allows us to add the missing hydrogens and add a water box or an membrane.
 
 .. figure:: /_static/images/tutorials/PDB_Path/Addwater1.png
    :figwidth: 725px
    :align: center
-
 
 We need to add hydrogens for the MD Simulation at a pH at 7.4 so we change the number from 7.0 to 7.4.
 
@@ -133,6 +135,9 @@ In the Water Box we also change the Ionic strenght to 0.15.
    :align: center
 
 Now that we selected the following options we continue to the next page.
+
+Adjusting MD Simulation Options
+------------------------------
 
 The final page displays the MD simulation options.
 
@@ -153,6 +158,9 @@ If you want to have a longer or shorter simulation you can increase or reduce th
 Now that we changed the amount of steps we select the Save Script button to save the script for the simulation.
 
 Select the Save Processed PDF File to save the PDB File that will be the input for the MD simulation.
+
+Running Tutorial OpenMMDL-Simulation
+------------------------------
 
 Create a separate folder and copy the Simulation script, Processed PDB File and the Ligand SDF File into the folder.
 
