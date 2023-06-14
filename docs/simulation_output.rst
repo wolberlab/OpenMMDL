@@ -6,7 +6,8 @@ The OpenMMDL Simulation script creates output folders and files during and after
 The following list contains an detailed overview of the folders and files:
 The Optional files are highlighted with an *asteriks**
 
-
+Analysis
+------------------------------
 **Analysis**: A folder that contains RMSD Analysis of the MD Simulation performed with MDAnaylsis:
 
 
@@ -23,7 +24,8 @@ The Optional files are highlighted with an *asteriks**
    * - RMSD_over_time.csv
      -  Displays the Data used in RMSD_over_time.png.
 
-
+Checkpoints
+------------------------------
 
 **Checkpoints**: A folder that contains Checkpoints, which can be used to restart the MD Simulation.
 
@@ -41,7 +43,8 @@ The Optional files are highlighted with an *asteriks**
    * - 100x_checkpoint.chk*
      - Checkpoint saved every 1000000 steps.
 
-
+Input_Files
+------------------------------
 **Input_Files**: A folder that contains the PDF and SDF files, which served as Input Files for the MD Simulation.
 
 
@@ -58,7 +61,8 @@ The Optional files are highlighted with an *asteriks**
      - Ligand SDF File that served as the input for the MD Simulation.
 
 
-
+MD_Files
+------------------------------
 **MD_Files**: A folder that contains the files that were generated during the MD Simulation. This folder contains 3 subfolders.
 
 *Pre_MD*: Folder that contains the files that were prepared by the script before the MD Simulation.
@@ -106,6 +110,8 @@ The Optional files are highlighted with an *asteriks**
      - Trajectory of the OpenMM Simulation.
 
 
+MD_Postprocessing
+------------------------------
 **MD_Postprocessing**: A folder that contains the postprocessing files after the MD Simulation. This folder contains 2 subfolders.
 
 *1_MDTraj*: Folder that contains the centered topology files with old coordinates.
