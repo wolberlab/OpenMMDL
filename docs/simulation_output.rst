@@ -88,10 +88,22 @@ The Optional files are highlighted with an *asteriks**
      - Description
    * - Energyminimization_protein_name.pdb
      - Prepared PDB File after OpenMM energy minimization.
-   * - Equilibration_protein_name.pdb*
+   * - Equilibration_protein_name.pdb
      - Prepared PDB File after OpenMM energy minimization and equilibration.
 
 *MD_Output*: Folder that contains the Output trajectory files generated during the MD Simulation.
+
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Name
+     - Description
+   * - output_protein_name.pdb
+     - PDB Topology File of the first frame of the simulation.
+   * - trajectory.dcd
+     - Trajectory of the OpenMM Simulation.
 
 
 
