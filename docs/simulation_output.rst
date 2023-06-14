@@ -150,11 +150,11 @@ MD_Postprocessing
      - Trajectory File of the centered protein in DCD Format with all atoms and new coordinates.
    * - centered_traj.xtc
      - Trajectory File of the centered protein in XTC Format with all atoms and new coordinates.
-   * - prot_lig_top.pdb
+   * - prot_lig_top.pdb*
      - Topology File of the centered protein in PDB Format with only protein and ligand atoms and new coordinates.
-   * - prot_lig_top.gro
+   * - prot_lig_top.gro*
      - Topology File of the centered protein in Gromacs GRO Format with only protein and ligand atoms and new coordinates.
-   * - prot_lig_traj.dcd
+   * - prot_lig_traj.dcd*
      - Trajectory File of the centered protein in DCD Format with only protein and ligand atoms and new coordinates.
-   * - prot_lig_traj.xtc
+   * - prot_lig_traj.xtc*
      - Trajectory File of the centered protein in XTC Format with only protein and ligand atoms and new coordinates.
