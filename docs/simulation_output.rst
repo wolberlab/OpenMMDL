@@ -108,7 +108,7 @@ The Optional files are highlighted with an *asteriks**
 
 **MD_Postprocessing**: A folder that contains the postprocessing files after the MD Simulation. This folder contains 2 subfolders.
 
-*1_MDTraj*: Folder that contains the centered topology files.
+*1_MDTraj*: Folder that contains the centered topology files with old coordinates.
 
 
 .. list-table::
@@ -125,3 +125,30 @@ The Optional files are highlighted with an *asteriks**
      - Trajectory File of the centered protein in DCD Format.
    * - centered_old_coordinates.xtc
      - Trajectory File of the centered protein in XTC Format.
+     
+     
+*2_MDTraj*: Folder that contains the centered topology files with new coordinates according to the center of mass.
+
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Name
+     - Description
+   * - centered_top.pdb
+     - Topology File of the centered protein in PDB Format with all atoms and new coordinates.
+   * - centered_top.gro
+     - Topology File of the centered protein in Gromacs GRO Format with all atoms and new coordinates.
+   * - centered_traj.dcd
+     - Trajectory File of the centered protein in DCD Format with all atoms and new coordinates.
+   * - centered_traj.xtc
+     - Trajectory File of the centered protein in XTC Format with all atoms and new coordinates.
+   * - prot_lig_top.pdb
+     - Topology File of the centered protein in PDB Format with only protein and ligand atoms and new coordinates.
+   * - prot_lig_top.gro
+     - Topology File of the centered protein in Gromacs GRO Format with only protein and ligand atoms and new coordinates.
+   * - prot_lig_traj.dcd
+     - Trajectory File of the centered protein in DCD Format with only protein and ligand atoms and new coordinates.
+   * - prot_lig_traj.xtc
+     - Trajectory File of the centered protein in XTC Format with only protein and ligand atoms and new coordinates.
