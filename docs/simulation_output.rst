@@ -4,6 +4,7 @@
 The OpenMMDL Simulation script creates output folders and files during and after the simulation.
 
 The following list contains an detailed overview of the folders and files:
+The Optional files are highlighted with an *asteriks**
 
 
 **Analysis**: A folder that contains RMSD Analysis of the MD Simulation performed with MDAnaylsis:
@@ -37,7 +38,7 @@ The following list contains an detailed overview of the folders and files:
      - Checkpoint saved every 10000 steps.
    * - 10x_checkpoint.chk
      - Checkpoint saved every 100000 steps.
-   * - 100x_checkpoint.chk
+   * - 100x_checkpoint.chk*
      - Checkpoint saved every 1000000 steps.
 
 
@@ -51,9 +52,9 @@ The following list contains an detailed overview of the folders and files:
 
    * - Name
      - Description
-   * - Protein_name.pdb
+   * - Protein_name.pdb*
      - Protein PDB File that served as the input for the MD Simulation.
-   * - ligand_name.sdf
+   * - ligand_name.sdf*
      - Ligand SDF File that served as the input for the MD Simulation.
 
 
@@ -61,6 +62,22 @@ The following list contains an detailed overview of the folders and files:
 **MD_Files**: A folder that contains the files that were generated during the MD Simulation. This folder contains 3 subfolders.
 
 *Pre_MD*: Folder that contains the files that were prepared by the script before the MD Simulation.
+
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Name
+     - Description
+   * - prepared_no_solvent_protein_name.pdb
+     - Prepared PDB File without solvent or membrane.
+   * - solvent_padding_protein_name.pdb*
+     - Prepared PDB File with padding solvent.
+   * - solvent_absoulte_protein_name.pdb*
+     - Prepared PDB File with absolute solvent.
+   * - membrane_protein_name.pdb*
+     - Prepared PDB File with membrane.
 
 *Minimization_Equilibration*: Folder that contains topology files after the minimization and equilibration of OpenMM.
 
