@@ -52,6 +52,19 @@ The following list contains an detailed overview of the folders and files:
    * - Name
      - Description
    * - Protein_name.pdb
-     - Protein that served as the input for the MD Simulation.
+     - Protein PDB File that served as the input for the MD Simulation.
    * - ligand_name.sdf
-     - Ligand that served as the input for the MD Simulation.
+     - Ligand SDF File that served as the input for the MD Simulation.
+
+
+
+**MD_Files**: A folder that contains the files that were generated during the MD Simulation. This folder contains 3 subfolders.
+
+*Pre_MD*: Folder that contains the files that were prepared by the script before the MD Simulation.
+
+*Minimization_Equilibration*: Folder that contains topology files after the minimization and equilibration of OpenMM.
+
+*MD_Output*: Folder that contains the Output trajectory files generated during the MD Simulation.
+
+
+
