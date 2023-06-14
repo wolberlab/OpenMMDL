@@ -106,4 +106,22 @@ The Optional files are highlighted with an *asteriks**
      - Trajectory of the OpenMM Simulation.
 
 
+**MD_Postprocessing**: A folder that contains the postprocessing files after the MD Simulation. This folder contains 2 subfolders.
 
+*1_MDTraj*: Folder that contains the centered topology files.
+
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Name
+     - Description
+   * - centered_old_coordinates_top.pdb
+     - Topology File of the centered protein in PDB Format.
+   * - centered_old_coordinates_top.gro
+     - Topology File of the centered protein in Gromacs GRO Format.
+   * - centered_old_coordinates.dcd
+     - Trajectory File of the centered protein in DCD Format.
+   * - centered_old_coordinates.xtc
+     - Trajectory File of the centered protein in XTC Format.
