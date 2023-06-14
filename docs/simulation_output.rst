@@ -39,3 +39,19 @@ The following list contains an detailed overview of the folders and files:
      - Checkpoint saved every 100000 steps.
    * - 100x_checkpoint.chk
      - Checkpoint saved every 1000000 steps.
+
+
+**Input_Files**: A folder that contains the PDF and SDF files, which served as Input Files for the MD Simulation.
+
+
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Name
+     - Description
+   * - Protein_name.pdb
+     - Protein that served as the input for the MD Simulation.
+   * - ligand_name.sdf
+     - Ligand that served as the input for the MD Simulation.
