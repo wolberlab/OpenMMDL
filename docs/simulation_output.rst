@@ -11,7 +11,7 @@ The following list contains an detailed overview of the folders and files:
 
 .. list-table::
    :header-rows: 1
-   :widths: 25 75
+   :widths: 25 50
 
    * - Name
      - Description
