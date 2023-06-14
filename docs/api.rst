@@ -4,5 +4,5 @@ API Documentation
 .. autosummary::
    :toctree: autosummary
 
-   scripts
+   cleaning_procedures
    forecfield_water
