@@ -63,7 +63,6 @@ The Optional files are highlighted with an *asteriks**
 
 *Pre_MD*: Folder that contains the files that were prepared by the script before the MD Simulation.
 
-
 .. list-table::
    :header-rows: 1
    :widths: 25 75
@@ -80,6 +79,17 @@ The Optional files are highlighted with an *asteriks**
      - Prepared PDB File with membrane.
 
 *Minimization_Equilibration*: Folder that contains topology files after the minimization and equilibration of OpenMM.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Name
+     - Description
+   * - Energyminimization_protein_name.pdb
+     - Prepared PDB File after OpenMM energy minimization.
+   * - Equilibration_protein_name.pdb*
+     - Prepared PDB File after OpenMM energy minimization and equilibration.
 
 *MD_Output*: Folder that contains the Output trajectory files generated during the MD Simulation.
 
