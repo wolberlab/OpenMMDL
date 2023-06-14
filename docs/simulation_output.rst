@@ -13,3 +13,10 @@ The following list contains an detailed overview of the folders and files:
   
   1.3 **RMSD_over_time.csv**: Displays the Data used in RMSD_over_time.png.
 
+**Checkpoints**: A folder that contains Checkpoints, which can be used to restart the MD Simulation.
+
+  1.1 **checkpoint.chk**: Checkpoint saved every 10000 steps.
+  
+  1.2 **10x_checkpoint.chk**: Checkpoint saved every 100000 steps.
+  
+  1.2 **100x_checkpoint.chk**: Checkpoint saved every 1000000 steps.
