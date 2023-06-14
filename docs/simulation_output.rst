@@ -26,13 +26,10 @@ The following list contains an detailed overview of the folders and files:
 
 **Checkpoints**: A folder that contains Checkpoints, which can be used to restart the MD Simulation.
 
-  1.1 **checkpoint.chk**: Checkpoint saved every 10000 steps.
-  
-  1.2 **10x_checkpoint.chk**: Checkpoint saved every 100000 steps.
-  
-  1.2 **100x_checkpoint.chk**: Checkpoint saved every 1000000 steps.
 
-
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
 
    * - Name
      - Description
