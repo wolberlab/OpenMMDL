@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 autodoc_mock_imports = ["openmmdl"]
 
-
+extensions = ['sphinx.ext.autodoc','sphinxcontrib-httpdomain']
 
 # -- Project information -----------------------------------------------------
 
