@@ -4,4 +4,4 @@ API Documentation
 .. autosummary::
    :toctree: autosummary
 
-   cleaning_procedures.canvas
+   cleaning_procedures
