@@ -17,7 +17,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-autodoc_mock_imports = ["cleaning_procedures"]
+import openmmdl_simulation
 
 
 # -- Project information -----------------------------------------------------
