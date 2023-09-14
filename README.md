@@ -32,6 +32,7 @@ After installation, activate the conda environment:
 
     echo 'alias openmmdl-setup="python3 ~/OpenMMDL/openmmdl_setup/openmmdlsetup.py"' >> ~/.bashrc
     echo 'alias openmmdl-simulation="python3 ~/OpenMMDL/openmmdl_simulation/openmmdlsimulation.py"' >> ~/.bashrc
+    echo 'alias openmmdl-analysis="python3 ~/OpenMMDL/openmmdl_analysis/openmmdlanalysis.py"' >> ~/.bashrc
 
 ## OpenMMDL-Setup
 
@@ -76,6 +77,28 @@ Command line example with ligand
 
     openmmdl-simulation -f {path/to/folder_name} -t {path/to/topology} -s {path/to/script} -l {path/to/ligand}
 
+## OpenMMDL-Analysis
+
+OpenMMDL-Analysis performs an analysis of the MD simulation obtained from OpenMMDL-Simulation.
+It analyzes the protein-ligand complex interactions throughout the whole MD trajectory, delivering the list of
+all possible interactions. In addition, it generates interaction fingerprints, provides the most occurring binding modes
+and displays the transitions between the separate binding modes.
+
+### Usage
+
+Start the analysis with the following Inputs:
+
+Mandatory:
+-t = Topology file
+-d = Trajectory file
+-s = SDF File of the ligand
+-l = Smiles File of the ligand
+Optional:
+-b = Binding mode treshold, which is used to remove interactions under a certain procentual occurence treshold from the binding mode generation, default is 40 (values: 0-100)
+-df = Dataframe File, if all of the interaction already were calculated. The default name of this file is interactions_gathered.csv
+-m = Minimal Transition, which is a treshold applied for the display of the binding mode transitions via a markov chains network figure, the defaul value is 1.
+
+
 ## Running OpenMMDL-Simulation test simulations
 
 There are two Systems prepared for the testing of the simulation.
@@ -92,7 +115,7 @@ There are two Systems prepared for the testing of the simulation.
 
 Two scripts are needed to run simulations via slurm. Start using the runOpenMM_slurm.sh bash script when being in the repository folder. It has several inputs. For help just type: 
 
-    Bash runOpenMM_slurm.sh
+    bash runOpenMM_slurm.sh
     
 without any flags, it will list the flags needed. The simplest way to run a simulation is to use the "-i" flag, which takes an input directory including the simulationscript, the topology and optionally the ligand file and it will create the outputs folder within the given directory. NOTE: ake sure only one topology is present in the input folder, so that it finds it automatically.
 
