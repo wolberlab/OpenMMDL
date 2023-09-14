@@ -89,14 +89,18 @@ and displays the transitions between the separate binding modes.
 Start the analysis with the following Inputs:
 
 Mandatory:
--t = Topology file
+-p = Topology file
 -d = Trajectory file
 -s = SDF File of the ligand
 -l = Smiles File of the ligand
 Optional:
 -b = Binding mode treshold, which is used to remove interactions under a certain procentual occurence treshold from the binding mode generation, default is 40 (values: 0-100)
--df = Dataframe File, if all of the interaction already were calculated. The default name of this file is interactions_gathered.csv
+-df = Dataframe File, if all of the interaction already were calculated. The default name of this file, which is obtained after calculating the interactions is interactions_gathered.csv
 -m = Minimal Transition, which is a treshold applied for the display of the binding mode transitions via a markov chains network figure, the defaul value is 1.
+
+Command line example with default values
+
+    openmmdl-simulation -p {path/to/topology} -d {path/to/trajectory} -s {path/to/sdf_ligand} -l {path/to/smi_ligand}
 
 
 ## Running OpenMMDL-Simulation test simulations
