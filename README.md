@@ -89,10 +89,10 @@ and displays the transitions between the separate binding modes.
 Start the analysis with the following Inputs:
 
 Mandatory:
--p = Topology file
+-t = Topology file
 -d = Trajectory file
--s = SDF File of the ligand
--l = Smiles File of the ligand
+-l = SDF File of the ligand
+-n = Name of the ligand in the pdf file
 Optional:
 -b = Binding mode treshold, which is used to remove interactions under a certain procentual occurence treshold from the binding mode generation, default is 40 (values: 0-100)
 -df = Dataframe File, if all of the interaction already were calculated. The default name of this file, which is obtained after calculating the interactions is interactions_gathered.csv
@@ -100,7 +100,7 @@ Optional:
 
 Command line example with default values
 
-    openmmdl-simulation -p {path/to/topology} -d {path/to/trajectory} -s {path/to/sdf_ligand} -l {path/to/smi_ligand}
+    openmmdl-analysis -t {path/to/topology} -d {path/to/trajectory} -l {path/to/sdf_ligand} -n {Ligand_name}
 
 
 ## Running OpenMMDL-Simulation test simulations
