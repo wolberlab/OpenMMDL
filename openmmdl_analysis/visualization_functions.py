@@ -140,7 +140,7 @@ def visualization(json_file_path,pdb_file_path, dcd_file_path, interacting_water
         view._js(js)
     view.layout.width = width
     view.layout.height = height
-    view.display(gui=True, style="ngl")
+    return view
 
         
 
