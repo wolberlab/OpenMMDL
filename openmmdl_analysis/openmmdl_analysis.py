@@ -404,10 +404,10 @@ if __name__ == "__main__":
         halogen_dict = {key: (1.0, 0.0, 0.9) for key in highlighted_halogen}
 
         # Generate a dictionary for negative ionizables
-        ni_dict = {key: (0.0, 0.0, 1.0) for key in highlighted_saltbridge}
+        ni_dict = {key: (0.0, 0.0, 1.0) for key in highlighted_ni}
 
         # Generate a dictionary for negative ionizables
-        pi_dict = {key: (1.0, 0.0, 0.0) for key in highlighted_saltbridge}
+        pi_dict = {key: (1.0, 0.0, 0.0) for key in highlighted_pi}
 
         # Generate a dictionary for pication
         pication_dict = {key: (0.0, 0.0, 1.0) for key in highlighted_pication}
