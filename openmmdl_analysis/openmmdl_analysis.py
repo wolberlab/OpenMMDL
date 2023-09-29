@@ -49,13 +49,13 @@ if __name__ == "__main__":
         print("DCD is missing, try the absolute path")
     if input_formats[2] not in args.ligand_sdf:
         print("SDF is missing, try the absolute path")
-    if args.ligand == None:
+    if args.ligand_name == None:
         print("Ligand Name is Missing, Add Ligand Name")
 
     topology = args.topology
     trajectory = args.trajectory
     ligand_sdf = args.ligand_sdf
-    ligand = args.ligand
+    ligand = args.ligand_name
     treshold = int(args.binding)
     dataframe = args.dataframe
     min_transition = args.min_transition
