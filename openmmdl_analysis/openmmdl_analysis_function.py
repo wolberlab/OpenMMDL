@@ -630,12 +630,12 @@ def highlight_numbers(split_data, starting_idx):
             entity_name = parts[0]
             numeric_codes = parts[1:-2]
             interaction_type = parts[-1]
-            saltbridge_type = parts[-2]
-	    if saltbridge_type == "NI":
+            saltbridge_type = parts[-2] 
+            if saltbridge_type == "NI":
                 highlighted_ni.append(atom_index)
                 for code in numeric_codes:
                     atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
-	    elif saltbridge_type == "PI":
+            elif saltbridge_type == "PI":
                 highlighted_pi.append(atom_index)
                 for code in numeric_codes:
                     atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
