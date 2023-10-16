@@ -41,7 +41,7 @@ the needed files for running the simulation)
 
 Start the setup process by executing the command:
 
-    openmmdl-setup
+    openmmdl_setup
 
 The setup interface is displayed through a web browser, but it is still
 a single-user desktop application, not a web application. It should
@@ -73,7 +73,7 @@ Setup. sdf file name should be consistent with the input in setup
 
 Command line example with ligand
 
-    openmmdl-simulation -f {path/to/folder_name} -t {path/to/topology} -s {path/to/script} -l {path/to/ligand}
+    openmmdl_simulation -f {path/to/folder_name} -t {path/to/topology} -s {path/to/script} -l {path/to/ligand}
 
 ## OpenMMDL-Analysis
 
@@ -99,7 +99,7 @@ Optional:
 
 Command line example with default values
 
-    openmmdl-analysis -t {path/to/topology} -d {path/to/trajectory} -l {path/to/sdf_ligand} -n {Ligand_name}
+    openmmdl_analysis -t {path/to/topology} -d {path/to/trajectory} -l {path/to/sdf_ligand} -n {Ligand_name}
 
 ## Copyright
 Copyright (c) 2022, Valerij Talagayev, Yu Chen & Niklas Doering (Wolber lab)
