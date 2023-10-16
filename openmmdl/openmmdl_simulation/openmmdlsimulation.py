@@ -25,7 +25,7 @@ logo = '\n'.join(["     ,-----.    .-------.     .-''-.  ,---.   .--.,---.    ,-
 
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(prog='openmmdl', description=logo, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-f', dest='folder', type=str, help='Folder Name for MD Simulation', required=True,)
     parser.add_argument('-s', dest='script', type=str, help='MD Simulation script', required=True,)
@@ -77,4 +77,7 @@ if __name__ == "__main__":
         shutil.copytree(f"{script_dir}/scripts", f"{args.folder}/scripts")
         os.chdir(args.folder)
         os.system(f"python3 *.py")
+        
+if __name__ == "__main__":
+    main()
 
