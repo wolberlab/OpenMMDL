@@ -101,7 +101,7 @@ def highlight_numbers(split_data, starting_idx):
         elif interaction_type == 'waterbridge':
             parts = item.split()
             protein_partner_name = parts[0]
-            numeric_codes = parts[1:-1]
+            numeric_codes = parts[1:-2]
             interaction_type = parts[-1]
             for code in numeric_codes:
                 atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
