@@ -46,7 +46,6 @@ def convert_ligand_to_smiles(input_sdf, output_smi):
         for mol in mol_supplier:
             if mol is not None:  # Make sure the molecule was successfully read
                 smiles = Chem.MolToSmiles(mol)
-                print(smiles)
                 output_file.write(smiles + "\n")
             else:
             	print("nono")
