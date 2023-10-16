@@ -60,8 +60,8 @@ def main():
         print("PDB is missing, try the absolute path")
     if input_formats[1] not in args.trajectory:
         print("DCD is missing, try the absolute path")
-    # if input_formats[2] not in args.ligand_sdf:
-    #    print("SDF is missing, try the absolute path")
+    if input_formats[2] not in args.ligand_sdf:
+        print("SDF is missing, try the absolute path")
     if args.ligand_name == None:
         print("Ligand Name is Missing, Add Ligand Name")
 
@@ -106,7 +106,6 @@ def main():
     for atom_ring in lig_rd_ring.AtomRings():
         updated_ring = increase_ring_indices(atom_ring, lig_index)
         ligand_rings.append(updated_ring)
-        print(ligand_rings)
     print("\033[1mLigand ring data gathered\033[0m")
     
     convert_ligand_to_smiles(ligand_sdf,output_smi="lig.smi")
