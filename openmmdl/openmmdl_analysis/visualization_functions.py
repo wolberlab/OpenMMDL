@@ -181,3 +181,9 @@ def visualization(json_file_path, pdb_file_path, dcd_file_path, interacting_wate
     view.layout.width = width
     view.layout.height = height
     return view
+
+
+def run_visualization():
+    package_dir = os.path.dirname(__file__)
+    notebook_path = os.path.join(package_dir, 'visualization.ipynb')
+    subprocess.run(['jupyter', 'notebook', notebook_path])
