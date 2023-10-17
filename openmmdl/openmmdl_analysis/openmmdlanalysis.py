@@ -116,6 +116,10 @@ def main():
 
     interaction_list["Prot_partner"] = interaction_list["RESNR"].astype(str) + interaction_list["RESTYPE"] + interaction_list["RESCHAIN"]
 
+    interaction_list = fill_missing_frames(interaction_list, md_len=len(pdb_md.trajectory)-1)
+
+    interaction_list.to_csv("missing_frames_filled.csv")
+
     interaction_list = interaction_list.reset_index(drop=True)
 
     unique_columns_rings_grouped = gather_interactions(interaction_list, ligand_rings)
