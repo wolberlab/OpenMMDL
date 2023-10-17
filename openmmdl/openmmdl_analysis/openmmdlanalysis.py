@@ -112,7 +112,7 @@ def main():
     
     interaction_list = pd.DataFrame(columns=["RESNR", "RESTYPE", "RESCHAIN", "RESNR_LIG", "RESTYPE_LIG", "RESCHAIN_LIG", "DIST", "LIGCARBONIDX", "PROTCARBONIDX", "LIGCOO", "PROTCOO"])
 
-    interaction_list = process_trajectory(pdb_md, dataframe=dataframe, num_processes=cpu_count)
+    interaction_list = process_trajectory(pdb_md, dataframe=dataframe, num_processes=cpu_count, lig_name=ligand)
 
     interaction_list["Prot_partner"] = interaction_list["RESNR"].astype(str) + interaction_list["RESTYPE"] + interaction_list["RESCHAIN"]
 
