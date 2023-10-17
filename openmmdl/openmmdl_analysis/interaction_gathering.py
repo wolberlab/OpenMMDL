@@ -119,7 +119,7 @@ def create_df_from_binding_site(selected_site_interactions, interaction_type="hb
     return df
 
 
-def process_frame(frame, pdb_md):
+def process_frame(frame, pdb_md, lig_name):
     """
     Process a single frame of MD simulation.
 
@@ -135,7 +135,7 @@ def process_frame(frame, pdb_md):
     pd.DataFrame :
         A dataframe conatining the interaction data for the processed frame.
     """
-    atoms_selected = pdb_md.select_atoms("protein or resname UNK or (resname HOH and around 10 resname UNK)")
+    atoms_selected = pdb_md.select_atoms(f"protein or resname {lig_name} or (resname HOH and around 10 resname {lig_name})")
     for num in pdb_md.trajectory[(frame):(frame+1)]:
         atoms_selected.write(f'processing_frame_{frame}.pdb')
     interactions_by_site = retrieve_plip_interactions(f"processing_frame_{frame}.pdb")
@@ -173,12 +173,12 @@ def process_frame_wrapper(args):
     tuple :
         tuple containing the frame index and the result of from `process_frame(frame_idx, pdb_md)`.
     """
-    frame_idx, pdb_md = args
+    frame_idx, pdb_md, lig_name = args
 
-    return frame_idx, process_frame(frame_idx, pdb_md)
+    return frame_idx, process_frame(frame_idx, pdb_md, lig_name)
 
 
-def process_trajectory(pdb_md, dataframe, num_processes=4):
+def process_trajectory(pdb_md, dataframe, num_processes, lig_name):
     """
     Process protein-ligand trajectory with multiple CPUs in parallel.
 
@@ -202,7 +202,7 @@ def process_trajectory(pdb_md, dataframe, num_processes=4):
         total_frames = len(pdb_md.trajectory) - 1
 
         with Pool(processes=num_processes) as pool:
-            frame_args = [(i, pdb_md) for i in range(1, total_frames + 1)]
+            frame_args = [(i, pdb_md, lig_name) for i in range(1, total_frames + 1)]
             
             # Initialize the progress bar with the total number of frames
             pbar = tqdm(total=total_frames, ascii=True, desc="Analyzing frames")
