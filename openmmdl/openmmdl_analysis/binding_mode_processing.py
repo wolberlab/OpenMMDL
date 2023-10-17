@@ -116,7 +116,6 @@ def gather_interactions(df, ligand_rings):
         frame_value = row['FRAME']
         if frame_value not in unique_columns_rings_grouped:
             unique_columns_rings_grouped[frame_value] = {}
-        print(row['INTERACTION'])
         if row['INTERACTION'] != 'skip':
             unique_columns_rings_grouped[frame_value][index] = col_name
             # Add the column name and its value to the dictionary
