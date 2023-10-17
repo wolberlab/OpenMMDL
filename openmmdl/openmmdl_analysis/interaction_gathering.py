@@ -230,3 +230,28 @@ def process_trajectory(pdb_md, dataframe, num_processes=4):
     print("\033[1mProtein-ligand trajectory processed\033[0m")
     
     return interaction_list
+
+def fill_missing_frames(df, md_len):
+    # Create a set containing all unique values in the 'FRAME' column
+    existing_frames = set(df['FRAME'])
+    
+    # Create a list to store new rows for missing numbers
+    missing_rows = []
+    
+    # Iterate through numbers from 0 to 1000
+    for frame_number in range(1, md_len):
+        if frame_number not in existing_frames:
+            # Create a new row with 'FRAME' set to the missing number and other columns set to "skip"
+            missing_row = {'FRAME': frame_number}
+            for col in df.columns:
+                if col != 'FRAME':
+                    missing_row[col] = "skip"
+            missing_rows.append(missing_row)
+    
+    # Concatenate the missing rows with the original DataFrame
+    df = pd.concat([df, pd.DataFrame(missing_rows)], ignore_index=True)
+    
+    # Sort the DataFrame by the 'FRAME' column
+    df.sort_values(by='FRAME', inplace=True)
+    
+    return df
