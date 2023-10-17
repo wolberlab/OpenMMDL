@@ -90,9 +90,9 @@ all possible interactions. In addition, it generates interaction fingerprints, p
 Start the analysis with the following Inputs:
 
 #### Mandatory:
--t = Topology file
+-t = Topology file (PDB)
 
--d = Trajectory file
+-d = Trajectory file (DCD)
 
 -l = SDF File of the ligand
 
@@ -111,6 +111,14 @@ Start the analysis with the following Inputs:
 
     openmmdl_analysis -t {path/to/topology} -d {path/to/trajectory} -l {path/to/sdf_ligand} -n {Ligand_name}
 
+
+#### Visualization
+Most of the analysis outputs are JEPG images and do not need any further preparation to be viewed.
+
+For the visualization of your trajectory with interaction pointclouds you can use the jupyter notebook prepared in the OpenMMDL repository.
+```
+jupyter notebook /YOUR_SAVE_PATH/OpenMMDL/visualization.ipynb
+```
 ## Copyright
 Copyright (c) 2022, Valerij Talagayev, Yu Chen & Niklas Doering (Wolber lab)
 
