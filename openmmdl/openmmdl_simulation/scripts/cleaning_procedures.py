@@ -8,7 +8,11 @@ def cleanup(protein_name):
     Parameters
     ----------
     protein_name: str
-        Name of the protein pdb.    
+        Name of the protein pdb.
+
+    Returns
+    ----------
+    None
     """ 
     print("Cleaning Up :)")
     os.remove(f'output_{protein_name}')
@@ -17,6 +21,18 @@ def cleanup(protein_name):
     print("It's done")
     
 def create_directory_if_not_exists(directory_path):
+    """
+    Create a directory if it doesn't exist, or overwrite it if already does.
+
+    Parameters
+    ----------
+    directory_path: str
+        Path of the directory that you want to create.
+
+    Returns
+    ----------
+    None
+    """ 
     if not os.path.exists(directory_path):
         os.mkdir(directory_path)
     else:
@@ -24,15 +40,60 @@ def create_directory_if_not_exists(directory_path):
         os.mkdir(directory_path)
 
 def move_file(src, dest):
+    """
+    Copy a file to the destination path.
+
+    Parameters
+    ----------
+    src: str
+        Path of the file that needs to be copied.
+    dest: str
+        Path of destination where the file needs to be copied to.
+
+    Returns
+    ----------
+    None
+    """ 
     if os.path.exists(src):
         shutil.copy(src, dest)
 
 def organize_files(source, destination):
+    """
+    Organizes the files and moves them from the source to the destination directory.
+
+    Parameters
+    ----------
+    source: str
+        Path of the file that needs to be moved.
+    destination: str
+        Path of destination where the file needs to be moved to.
+
+    Returns
+    ----------
+    None
+    """ 
     for file in source:
         if os.path.exists(file):
             os.rename(file, os.path.join(destination, os.path.basename(file)))
 
 def post_md_file_movement(protein_name, prmtop=None, inpcrd=None, ligand=None):
+    """
+    Organizes and moves the files after the MD simulation to their respective directories.
+    Parameters
+    ----------
+    protein_name : str
+        Name of the protein pdb.
+    prmtop : str (optional)
+        Path to the AMBER topology file.
+    inpcrd : str (optional)
+        Path to the AMBER coordinate file.
+    ligand : str (optional)
+        Path to the ligand file.
+
+    Returns
+    ----------
+    None
+    """ 
     # Create necessary directories
     create_directory_if_not_exists("Input_Files")
     create_directory_if_not_exists("MD_Files")
