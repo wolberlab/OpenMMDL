@@ -238,13 +238,28 @@ def process_trajectory(pdb_md, dataframe, num_processes, lig_name):
     return interaction_list
 
 def fill_missing_frames(df, md_len):
+    """
+    Fills the frames with no interactions in the DataFrame with placeholder values.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The input DataFrame with frames that have no Interactions
+    md_len : int
+        The value that indicates the number of frames, thus allowing the function to loop through the DataFrame
+
+    Returns
+    -------
+    pd.DataFrame :
+        DataFrame with placeholder values in the frames with no interactions.
+    """
     # Create a set containing all unique values in the 'FRAME' column
     existing_frames = set(df['FRAME'])
     
     # Create a list to store new rows for missing numbers
     missing_rows = []
     
-    # Iterate through numbers from 0 to 1000
+    # Iterate through numbers from 0 to md_len
     for frame_number in range(1, md_len):
         if frame_number not in existing_frames:
             # Create a new row with 'FRAME' set to the missing number and other columns set to "skip"
