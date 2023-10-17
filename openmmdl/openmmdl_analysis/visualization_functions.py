@@ -5,6 +5,7 @@ import MDAnalysis as mda
 import pickle
 import nglview as nv
 import subprocess
+import os
 
 from openmmdl.openmmdl_analysis.barcode_generation import waterids_barcode_generator
 
