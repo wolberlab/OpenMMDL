@@ -1,0 +1,191 @@
+{% extends "layout.html" %}
+{% block title %}Add Hydrogens and Water{% endblock %}
+{% block body %}
+<form method="post" id="form" enctype="multipart/form-data" action="{{ url_for('addHydrogens') }}" class="form-horizontal">
+    <h2>Add Missing Hydrogens</h2>
+    PDB files often do not include hydrogen atoms.  Do you want to add missing hydrogens?  The set of hydrogens that gets added
+    will depend on what pH you want to simulate the system at.
+    <p>
+    <label class="control-label"><input type="checkbox" id="addHydrogens" name="addHydrogens" onchange="optionChanged()" checked> Add hydrogens</label>
+    <div class="form-group" id="pHrow">
+    <label class="control-label col-md-2">pH</label>
+    <div class="col-md-10"><input type="text" id="phfield" name="ph" value="7.0" class="form-control"></div>
+    </div>
+    <h2>Add Water/Membrane</h2>
+    Add a water box or membrane surrounding the model?
+    <p>
+    <label class="control-label"><input type="checkbox" id="addWater" name="addWater" onchange="waterBoxChanged()"> Add water box</label>
+    <p>
+    <label class="control-label"><input type="checkbox" id="addMembrane" name="addMembrane" onchange="membraneBoxChanged()"> Add membrane and water</label>
+    <div id="waterInputs" class="col-md-offset-1">
+        How do you want to select the size of the water box?
+        <p/>
+        <label class="control-label"><input id="customBoxRadio" type="radio" name="boxType" value="custom" onchange="optionChanged()"> Specify the box dimensions directly</label>
+        <br/>
+        <label class="control-label"><input id="geometricBoxRadio" type="radio" name="boxType" value="geometry" onchange="optionChanged()" checked> Specify a padding distance</label>
+        <p/>
+        <div id="customBoxDimensions">
+            <div class="form-group">
+            <label class="control-label col-md-3">Box Dimensions (nm)</label>
+            <div class="col-md-2"><input type="text" id="boxxfield" name="boxx" class="form-control" value="{{ '%.3f' % (boundingBox[0]+2.0) }}"></div>
+            <div class="col-md-2"><input type="text" id="boxyfield" name="boxy" class="form-control" value="{{ '%.3f' % (boundingBox[1]+2.0) }}"></div>
+            <div class="col-md-2"><input type="text" id="boxzfield" name="boxz" class="form-control" value="{{ '%.3f' % (boundingBox[2]+2.0) }}"></div>
+            </div>
+            {% if unitCell is not none %}
+            <div class="form-group">
+            <label class="control-label col-md-3">Crystallographic unit cell</label>
+            <div class="col-md-2" style="text-align:right">{{ '%.3f' % unitCell[0] }}</div>
+            <div class="col-md-2" style="text-align:right">{{ '%.3f' % unitCell[1] }}</div>
+            <div class="col-md-2" style="text-align:right">{{ '%.3f' % unitCell[2] }}</div>
+            </div>
+            {% endif %}
+            <div class="form-group">
+            <label class="control-label col-md-3">Box Containing All Atoms</label>
+            <div class="col-md-2" style="text-align:right">{{ '%.3f' % boundingBox[0] }}</div>
+            <div class="col-md-2" style="text-align:right">{{ '%.3f' % boundingBox[1] }}</div>
+            <div class="col-md-2" style="text-align:right">{{ '%.3f' % boundingBox[2] }}</div>
+            </div>
+        </div>
+        <div id="paddedBoxDimensions">
+            The diameter of a sphere containing the model will be determined, and the specified padding will be added to it.
+            <div class="form-group">
+            <label class="control-label col-md-3">Padding Distance (nm)</label>
+            <div class="col-md-9"><input type="text" id="geomPadding" name="geomPadding" class="form-control" value="1.0"></div>
+            </div>
+            <div class="form-group">
+            <label class="control-label col-md-3">Box Shape</label>
+            <div class="col-md-9">
+            <select id="geometryDropdown" name="geometryDropdown" class="form-control">
+                <option value="cube" selected="selected">Cube</option>
+                <option value="octahedron">Truncated octahedron</option>
+                <option value="dodecahedron">Rhombic dodecahedron</option>
+            </select>
+            </div>
+            </div>
+        </div>
+    </div>
+    <div id="membraneInputs" class="col-md-offset-1">
+        The membrane will lie in the XY plane and be centered at Z=0.  Make sure the protein is properly oriented and positioned.
+        When possible, it is easiest to use a PDB file from <a href="http://opm.phar.umich.edu/">OPM</a> since they are already properly positioned.
+        <p>
+        <div class="form-group">
+            <label class="control-label col-md-3" for="lipidType">Lipid type:</label>
+            <div class="col-md-9"><select id="lipidType" name="lipidType" class="form-control">
+                <option value="POPC" selected="selected">POPC</option>
+                <option value="POPE">POPE</option>
+                <option value="DLPC">DLPC</option>
+                <option value="DLPE">DLPE</option>
+                <option value="DMPC">DMPC</option>
+                <option value="DOPC">DOPC</option>
+                <option value="DPPC">DPPC</option>
+            </select></div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-md-3" for="membranePadding">Minimum padding around protein (nm):</label>
+            <div class="col-md-9"><input type="text" id="membranePadding" name="membranePadding" value="1.0" size="5" class="form-control"></div>
+        </div>
+    </div>
+    <div id="ionInputs">
+    <p>
+    Ions will be added to neutralize the model.  You can optionally add more ions based on a desired bulk ionic strength.
+    <p>
+    <div class="form-group">
+        <label class="control-label col-md-3" for="ionicstrengthfield">Ionic strength (molar)</label><div class="col-md-9"><input type="text" id="ionicstrengthfield" name="ionicstrength" value="0.15" class="form-control"></div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-md-3" for="positiveion">Positive ion</label><div class="col-md-9"><select name="positiveion" id="positiveion" class="form-control"><option value="Cs">Cs+</option><option value="K">K+</option><option value="Li">Li+</option><option value="Na" selected>Na+</option><option value="Rb">Rb+</option></select></div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-md-3" for="negativeion">Negative ion</label><div class="col-md-9"><select name="negativeion" id="negativeion" class="form-control"><option value="Cl" selected>Cl-</option><option value="Br">Br-</option><option value="F">F-</option><option value="I">I-</option></select></div>
+    </div>
+    </div>
+    <p>
+    <input type="button" value="Continue" class="btn" onclick="if (validateForm()) submitWithSpinner('form')"/>
+
+    <div id="validationErrorModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Invalid Entry</h4>
+          </div>
+          <div class="modal-body">
+            <p id="errorMessage"/>
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+</form>
+<script>
+function showError(message) {
+    document.getElementById("errorMessage").textContent = message;
+    $('#validationErrorModal').modal('show');
+}
+
+function validateForm() {
+    if (document.getElementById("addHydrogens").checked) {
+        var ph = document.getElementById("phfield").value
+        if (!(ph > 0 && ph < 14)) {
+            showError("pH must be a number between 0 and 14.")
+            return false
+        }
+    }
+    if (document.getElementById("addWater").checked) {
+        var custombox = document.getElementById("customBoxRadio").checked
+        var xsize = document.getElementById("boxxfield").value
+        var ysize = document.getElementById("boxyfield").value
+        var zsize = document.getElementById("boxzfield").value
+        if (custombox && !(xsize > 0 && ysize > 0 && zsize > 0)) {
+            showError("Box dimensions must be positive numbers.")
+            return false
+        }
+        var geombox = document.getElementById("geometricBoxRadio").checked
+        var padsize = document.getElementById("geomPadding").value
+        if (geombox && padsize < 0) {
+            showError("Box padding cannot be negative.")
+            return false
+        }
+        var strength = document.getElementById("ionicstrengthfield").value
+        if (strength < 0) {
+            showError("Ionic strength cannot be negative.")
+            return false
+        }
+    }
+    if (document.getElementById("addMembrane").checked) {
+        var padsize = document.getElementById("membranePadding").value
+        if (padsize < 0) {
+            showError("Membrane padding cannot be negative.")
+            return false
+        }
+    }
+    return true
+}
+
+function waterBoxChanged() {
+    document.getElementById("addMembrane").checked = false;
+    optionChanged()
+}
+
+function membraneBoxChanged() {
+    document.getElementById("addWater").checked = false;
+    optionChanged()
+}
+
+function optionChanged() {
+    // Update UI elements.
+
+    water = document.getElementById("addWater").checked;
+    membrane = document.getElementById("addMembrane").checked;
+    document.getElementById("pHrow").hidden = !document.getElementById("addHydrogens").checked;
+    document.getElementById("waterInputs").hidden = !water;
+    document.getElementById("membraneInputs").hidden = !membrane;
+    document.getElementById("ionInputs").hidden = !(water || membrane);
+    document.getElementById("customBoxDimensions").hidden = !document.getElementById("customBoxRadio").checked;
+    document.getElementById("paddedBoxDimensions").hidden = !document.getElementById("geometricBoxRadio").checked;
+}
+optionChanged()
+</script>
+{% endblock %}

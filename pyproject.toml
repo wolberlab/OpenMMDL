@@ -1,0 +1,92 @@
+[build-system]
+requires = ["setuptools>=61.0", "versioningit~=2.0"]
+build-backend = "setuptools.build_meta"
+
+# Self-descriptive entries which should always be present
+# https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
+[project]
+name = "openmmdl"
+description = "Easy preparation and simulation of protein-ligand complexes with OpenMM"
+dynamic = ["version"]
+readme = "README.md"
+authors = [
+    { name = "Molecular Design Lab", email = "v.talagayev@fu-berlin.de" }
+]
+license = { text = "MIT" }
+# See https://pypi.org/classifiers/
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+requires-python = ">=3.8"
+# Declare any run-time dependencies that should be installed with the package.
+dependencies = [
+
+]
+
+# Update the urls once the hosting is set up.
+#[project.urls]
+#"Source" = "https://github.com/<username>/openmmdlanalysis/"
+#"Documentation" = "https://openmmdlanalysis.readthedocs.io/"
+
+[project.optional-dependencies]
+test = [
+  "pytest>=6.1.2",
+  "pytest-runner"
+]
+
+[tool.setuptools]
+# This subkey is a beta stage development and keys may change in the future, see https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html for more details
+#
+# As of version 0.971, mypy does not support type checking of installed zipped
+# packages (because it does not actually import the Python packages).
+# We declare the package not-zip-safe so that our type hints are also available
+# when checking client code that uses our (installed) package.
+# Ref:
+# https://mypy.readthedocs.io/en/stable/installed_packages.html?highlight=zip#using-installed-packages-with-mypy-pep-561
+zip-safe = false
+# Let setuptools discover the package in the current directory,
+# but be explicit about non-Python files.
+# See also:
+#   https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#setuptools-specific-configuration
+# Note that behavior is currently evolving with respect to how to interpret the
+# "data" and "tests" subdirectories. As of setuptools 63, both are automatically
+# included if namespaces is true (default), even if the package is named explicitly
+# (instead of using 'find'). With 'find', the 'tests' subpackage is discovered
+# recursively because of its __init__.py file, but the data subdirectory is excluded
+# with include-package-data = false and namespaces = false.
+include-package-data = true
+[tool.setuptools.packages.find]
+namespaces = true
+where = ["."]
+
+# Ref https://setuptools.pypa.io/en/latest/userguide/datafiles.html#package-data
+[tool.setuptools.package-data]
+openmmdl = [
+    "py.typed"
+]
+
+[tool.versioningit]
+default-version = "0.0.1"
+
+[tool.versioningit.format]
+distance = "{base_version}+{distance}.{vcs}{rev}"
+dirty = "{base_version}+{distance}.{vcs}{rev}.dirty"
+distance-dirty = "{base_version}+{distance}.{vcs}{rev}.dirty"
+
+[tool.versioningit.vcs]
+# The method key:
+method = "git"  # <- The method name
+# Parameters to pass to the method:
+match = ["*"]
+default-tag = "1.0.0"
+
+[tool.versioningit.write]
+file = "openmmdl/_version.py"
+
+[project.scripts]
+openmmdl_setup = "openmmdl.openmmdl_setup.openmmdlsetup:main"
+openmmdl_simulation = "openmmdl.openmmdl_simulation.openmmdlsimulation:main"
+openmmdl_analysis = "openmmdl.openmmdl_analysis.openmmdlanalysis:main"
+openmmdl_visualization = "openmmdl.openmmdl_analysis.visualization_functions:run_visualization"
+
