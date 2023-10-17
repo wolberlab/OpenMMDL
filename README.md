@@ -1,4 +1,4 @@
-<img src="https://github.com/pacificore/OpenMMDL/blob/main/openmmdl_setup/static/OpenMMDL_logo.svg" height="250">
+<img src="https://github.com/wolberlab/OpenMMDL/blob/main/openmmdl/openmmdl_setup/static/OpenMMDL_logo.svg" height="250">
 
 
 # OpenMMDL @ Molecular Design Lab
@@ -28,7 +28,7 @@ After installation, activate the conda environment:
 
     conda activate openmmdl
 
-#### Install openmmdl entry points with pip
+#### Install the openmmdl package with pip
 
     pip install .
 
@@ -45,8 +45,7 @@ Start the setup process by executing the command:
 
 The setup interface is displayed through a web browser, but it is still
 a single-user desktop application, not a web application. It should
-automatically open a web browser displaying the user interface. If for
-any reason that does not happen, open a browser yourself and point it to
+automatically open a web browser displaying the user interface. If that does not happen for any reason, open a browser and point it to
 the address displayed in the console window (e.g. http://127.0.0.1:5000).
 
 Download the processed PDB File and python script, which serve as input
@@ -61,43 +60,54 @@ from OpenMMDL-Setup
 
 Start the simulation with the following Inputs:
 
-Mandatory:
+#### Mandatory:
 -f = name of the folder, where the MD simulation files are stored
+
 -t = Topology file of your protein from the setup including the path
+
 -s = Python script from the setup including the path
-Optional:
+
+#### Optional:
 -l = SDF File of the ligand, if the ligand was selected during the
-Setup. sdf file name should be consistent with the input in setup
--c = Cooridnates file of Amber
+Setup. The SDF file name should be consistent with the input in the setup
+
+-c = Coordinates file of Amber
 
 
-Command line example with ligand
+#### Command line example with ligand
 
     openmmdl_simulation -f {path/to/folder_name} -t {path/to/topology} -s {path/to/script} -l {path/to/ligand}
 
 ## OpenMMDL-Analysis
 
 OpenMMDL-Analysis performs an analysis of the MD simulation obtained from OpenMMDL-Simulation.
-It analyzes the protein-ligand complex interactions throughout the whole MD trajectory, delivering the list of
+It analyzes the protein-ligand complex interactions throughout the MD trajectory, delivering the list of
 all possible interactions. In addition, it generates interaction fingerprints, provides the most occurring binding modes
-and displays the transitions between the separate binding modes.
+, and displays the transitions between the separate binding modes.
 
 ### Usage
 
 Start the analysis with the following Inputs:
 
-Mandatory:
+#### Mandatory:
 -t = Topology file
+
 -d = Trajectory file
+
 -l = SDF File of the ligand
+
 -n = Name of the ligand in the pdf file
-Optional:
+
+#### Optional:
 -b = Binding mode treshold, which is used to remove interactions under a certain procentual occurence treshold from the binding mode generation, default is 40 (values: 0-100)
+
 -df = Dataframe File, if all of the interaction already were calculated. The default name of this file, which is obtained after calculating the interactions is interactions_gathered.csv
+
 -m = Minimal Transition, which is a treshold applied for the display of the binding mode transitions via a markov chains network figure, the defaul value is 1.
+
 -c = CPU count, which will be used to calculate interactions. The default value is half of the CPU count.
 
-Command line example with default values
+#### Command line example with default values
 
     openmmdl_analysis -t {path/to/topology} -d {path/to/trajectory} -l {path/to/sdf_ligand} -n {Ligand_name}
 
@@ -116,7 +126,7 @@ especially [dominiquesydow](https://github.com/dominiquesydow/), [schallerdavid]
 
 The Setup script is a modified version of [openmm-setup](https://github.com/openmm/openmm-setup).
  
-Project is based on the 
+This Project is based on the 
 [Computational Molecular Science Python Cookiecutter](https://github.com/molssi/cookiecutter-cms) version 1.1.
 
 
