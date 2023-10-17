@@ -129,6 +129,8 @@ def process_frame(frame, pdb_md, lig_name):
         The number of the frame that is going to be processed.
     pdb_md : mda.Universe
         The MDAnalysis Universe class representation of the topology and the trajectory of the file that is being processed.
+    lig_name : str
+        Name of the Ligand in the complex that will be analyzed.
 
     Returns
     -------
@@ -167,7 +169,9 @@ def process_frame_wrapper(args):
             Integer representing the index of the processing frame.
         - pdb_md : mda.Universe
             The MDAnalysis Universe class representation of the topology and the trajectory of the file that is being processed.
-        
+        - lig_name : str
+            Name of the Ligand in the complex that will be analyzed
+            
     Returns
     -------
     tuple :
@@ -189,7 +193,9 @@ def process_trajectory(pdb_md, dataframe, num_processes, lig_name):
     dataframe : str
         Name of a CSV file as str, where the interaction data will be read from if not None.
     num_processes : int (optional)
-        The number of CPUs that will be used for the processing of the protein-ligand trajectory
+        The number of CPUs that will be used for the processing of the protein-ligand trajectory.
+    lig_name : str
+        Name of the Ligand in the complex that will be analyzed.
         
     Returns
     -------
