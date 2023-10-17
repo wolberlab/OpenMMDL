@@ -116,9 +116,12 @@ Start the analysis with the following Inputs:
 Most of the analysis outputs are JEPG images and do not need any further preparation to be viewed.
 
 For the visualization of your trajectory with interaction pointclouds you can use the jupyter notebook prepared in the OpenMMDL repository.
+
+Or use this command:
 ```
-jupyter notebook /YOUR_SAVE_PATH/OpenMMDL/visualization.ipynb
+openmmdl_visualization
 ```
+Then edit the notebook to include the output of your analyis.
 ## Copyright
 Copyright (c) 2022, Valerij Talagayev, Yu Chen & Niklas Doering (Wolber lab)
 
