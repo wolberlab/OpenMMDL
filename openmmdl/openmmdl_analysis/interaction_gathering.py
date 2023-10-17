@@ -137,8 +137,8 @@ def process_frame(frame, pdb_md):
     """
     atoms_selected = pdb_md.select_atoms("protein or resname UNK or (resname HOH and around 10 resname UNK)")
     for num in pdb_md.trajectory[(frame):(frame+1)]:
-        atoms_selected.write(f'{frame}.pdb')
-    interactions_by_site = retrieve_plip_interactions(f"{frame}.pdb")
+        atoms_selected.write(f'processing_frame_{frame}.pdb')
+    interactions_by_site = retrieve_plip_interactions(f"processing_frame_{frame}.pdb")
     index_of_selected_site = -1
     selected_site = list(interactions_by_site.keys())[index_of_selected_site]
 
@@ -151,7 +151,7 @@ def process_frame(frame, pdb_md):
         tmp_interaction['INTERACTION'] = interaction_type
         interaction_list = pd.concat([interaction_list, tmp_interaction])
 
-    os.remove(f"{frame}.pdb")
+    os.remove(f"processing_frame_{frame}.pdb")
 
     return interaction_list
 
