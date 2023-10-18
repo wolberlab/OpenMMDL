@@ -268,7 +268,8 @@ def create_and_merge_images(binding_mode, occurrence_percent, split_data, merged
             line, = ax.plot(x, y, label=data, color=(1.0, 0.6, 0.6), linewidth=5.0)
         else:
             line, = ax.plot(x, y, label=data)
-        lines.append(line)
+        if label != 'FRAME':
+            lines.append(line)
 
     # Create a separate figure for the legend
     figlegend = pylab.figure(figsize=(8, 6))
