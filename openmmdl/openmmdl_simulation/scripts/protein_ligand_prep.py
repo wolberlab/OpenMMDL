@@ -341,6 +341,5 @@ def water_conversion(model_water, modeller_pre_conversion, protein_name):
     # Writes out the pdb of the postconverted pdb
     with open(f'converted_{protein_name}', 'w') as outfile:
         PDBFile.writeFile(modeller.topology, modeller.positions, outfile)
-
     
     return modeller
