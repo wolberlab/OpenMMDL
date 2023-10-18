@@ -15,22 +15,16 @@ def ff_selection(ff):
     forcefield_selection: str
         Selected xml forcefield file.
     """
-    if ff == 'AMBER14':
-        forcefield_selection = 'amber14-all.xml'
-    elif ff == 'AMBER99SB':
-        forcefield_selection = 'amber99sb.xml'
-    elif ff == 'AMBER99SB-ILDN':
-        forcefield_selection = 'amber99sbildn.xml'
-    elif ff == 'AMBER03':
-        forcefield_selection = 'amber03.xml'
-    elif ff == 'AMBER10':
-        forcefield_selection = 'amber10.xml'
-    elif ff == 'CHARMM36':
-        forcefield_selection = 'charmm36.xml'
-    else:
-        return None
+    forcefield_dict = {
+        'AMBER14': 'amber14-all.xml',
+        'AMBER99SB': 'amber99sb.xml',
+        'AMBER99SB-ILDN': 'amber99sbildn.xml',
+        'AMBER03': 'amber03.xml',
+        'AMBER10': 'amber10.xml',
+        'CHARMM36': 'charmm36.xml',
+    }
 
-    return forcefield_selection
+    return forcefield_dict.get(ff, None)
 
 def water_forecfield_selection(water, forcefield_selection):
     """
