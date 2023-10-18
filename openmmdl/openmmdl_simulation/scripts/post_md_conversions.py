@@ -19,14 +19,11 @@ def mdtraj_conversion(pdb_file):
     Parameters
     ----------
     pdb_file: str
-        name of the pdb file, i.e. "output...pdb". This pdb file actually stores the whole extracted frames from the MD trajectory"
+        name of the pdb file. This pdb file stores the extracted frames from the MD trajectory.
 
     Returns
     -------
-    'centered_old_coord.dcd': dcd file
-        dcd file containing the recentered coordinates
-    'centered_old_coord.pdb': pdb file
-        pdb file, the first frame of recentered MD trajectories
+    None
     """    
     mdtraj_frames = md.load_dcd("trajectory.dcd", top=pdb_file)
     mdtraj_frames.image_molecules()
@@ -38,28 +35,20 @@ def mdtraj_conversion(pdb_file):
     
 def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, ligand_name):
     """
-    translate the trajectory so that all frames coincide with its center of geometry
+    translate the trajectory so that all frames coincide with its center of geometry.
 
     Parameters
     ----------
-    post_mdtraj_pdb_file: pdb file
-        name of the pdb file, i.e. 'centered_old_coord.pdb'
+    post_mdtraj_pdb_file: str
+        Name of the post-MDtraj PDB file.
     post_mdtraj_dcd_file: dcd file
-        name of the dcd file, i.e. 'centered_old_coord.dcd'
+        Name of the post-MDtraj DCD File.
     ligand_name: str
-        ligand name saved in above pdb file.
+        ligand name saved in PDB file.
 
     Returns
     -------
-    'centered_traj.dcd': dcd file
-        dcd file containing all particles, including protein, ligand, solvent and ions.
-    'centered_top.pdb': pdb file
-        pdb file containing all particles. This is used to store the topology information
-    'prot_lig_traj.dcd': dcd file
-        dcd file containing only the complex, i.e, protein and ligand.
-    'prot_lig_top.pdb'
-        pdb file containing only the complex. This is used to store the topology information
-
+    None
     """    
     topology_trajectory = mda.Universe(post_mdtraj_pdb_file, post_mdtraj_dcd_file)
     topology_trajectory_all_atoms = topology_trajectory.select_atoms("all")
@@ -94,10 +83,10 @@ def rmsd_for_atomgroups(prot_lig_top_file, prot_lig_traj_file, selection1, selec
 
     Parameters
     ----------
-    prot_lig_top_file: pdb file
-        name of the pdb file, i.e. 'prot_lig_top.pdb'
-    prot_lig_traj_file:
-        name of the dcd file, i.e. 'prot_lig_traj.dcd'
+    prot_lig_top_file: str
+        name of the PDB input file.
+    prot_lig_traj_file: str
+        name of the DCD input file.
     selection1: str
         Selection string for main atom group, also used during alignment.
     selection2: list of str, optional
@@ -131,10 +120,10 @@ def RMSD_dist_frames(prot_lig_top_file, prot_lig_traj_file, lig):
 
     Parameters
     ----------
-    prot_lig_top_file: pdb file
-        name of the pdb file, i.e. 'prot_lig_top.pdb'.
-    prot_lig_traj_file:
-        name of the dcd file, i.e. 'prot_lig_traj.dcd'.
+    prot_lig_top_file: str
+        name of the PDB file.
+    prot_lig_traj_file: str
+        name of the DCD file.
     lig: str
         ligand name saved in the above pdb file. Selection string for the atomgroup to be investigated, also used during alignment.
 
@@ -185,14 +174,24 @@ def atomic_distance(
 
     Parameters
     ----------
-    prot_lig_top_file: pdb file
-        name of the pdb file, i.e. 'prot_lig_top.pdb'.
-    prot_lig_traj_file:
-        name of the dcd file, i.e. 'prot_lig_traj.dcd'.
+    prot_lig_top_file: str
+        Name of the PDB file.
+    prot_lig_traj_file: str
+        Name of the DCD file.
+    prot_resid: int
+        Residue ID of the protein.
+    prot_atom_name : str
+        Name of the protei atom.
+    lig_name : str
+        Name of the ligand.
+    lig_id : int
+        ID of the ligand.
+    lig_atom_name: str
+        Name of the ligand atom.
 
     Returns
     -------
-
+    None
     """
     # select the atomgroup of protein and ligand separately.
     universe=mda.Universe(prot_lig_top_file, prot_lig_traj_file)
