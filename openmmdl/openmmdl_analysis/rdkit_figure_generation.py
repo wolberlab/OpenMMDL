@@ -268,14 +268,13 @@ def create_and_merge_images(binding_mode, occurrence_percent, split_data, merged
             line, = ax.plot(x, y, label=data, color=(1.0, 0.6, 0.6), linewidth=5.0)
         else:
             line, = ax.plot(x, y, label=data)
-        if label != 'FRAME':
-            lines.append(line)
+        lines.append(line)
 
     # Create a separate figure for the legend
     figlegend = pylab.figure(figsize=(8, 6))
 
     # Add a legend to the subplot (ax) using the lines and full entries as labels
-    legend = figlegend.legend(lines, split_data, loc='center')
+    legend = figlegend.legend(lines, filtered_split_data, loc='center')
 
     # Set the linewidth of the legend lines to be thicker
     for line in legend.get_lines():
