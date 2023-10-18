@@ -899,7 +899,7 @@ os.chdir(outputDir)""")
                                                                                                       
                                                                                                       
 ''')
-    script.append('from scripts.forcefield_water import ff_selection, water_forecfield_selection, water_model_selection, generate_forcefield, generate_transitional_forcefield')
+    script.append('from scripts.forcefield_water import ff_selection, water_forcefield_selection, water_model_selection, generate_forcefield, generate_transitional_forcefield')
     script.append('from scripts.protein_ligand_prep import protein_choice, prepare_ligand, rdkit_to_openmm, merge_protein_and_ligand, water_padding_solvent_builder, water_absolute_solvent_builder, membrane_builder, water_conversion')
     script.append('from scripts.post_md_conversions import mdtraj_conversion, MDanalysis_conversion, rmsd_for_atomgroups, RMSD_dist_frames, atomic_distance')
     script.append('from scripts.cleaning_procedures import cleanup, post_md_file_movement \n')
@@ -1085,7 +1085,7 @@ ligand_prepared = prepare_ligand(ligand,minimize_molecule=minimization)
 omm_ligand = rdkit_to_openmm(ligand_prepared, ligand_name)
 protein_pdb = protein_choice(protein_is_prepared=protein_prepared,protein=protein)
 forcefield_selected = ff_selection(ff)
-water_selected = water_forecfield_selection(water=water,forcefield_selection=ff_selection(ff))
+water_selected = water_forcefield_selection(water=water,forcefield_selection=ff_selection(ff))
 model_water = water_model_selection(water=water,forcefield_selection=ff_selection(ff))
 print("Forcefield and Water Model Selected")
 if add_membrane == True:
@@ -1097,7 +1097,7 @@ print("Complex topology has", complex_topology.getNumAtoms(), "atoms.")     ''')
             script.append('''
 protein_pdb = PDBFile(protein)     
 forcefield_selected = ff_selection(ff)
-water_selected = water_forecfield_selection(water=water,forcefield_selection=ff_selection(ff))
+water_selected = water_forcefield_selection(water=water,forcefield_selection=ff_selection(ff))
 model_water = water_model_selection(water=water,forcefield_selection=ff_selection(ff))
 print("Forcefield and Water Model Selected")
 if water_selected != None:
