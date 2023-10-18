@@ -258,7 +258,8 @@ def create_and_merge_images(binding_mode, occurrence_percent, split_data, merged
 
     # Plot lines on the same axis and collect them into a list
     lines = []
-    for i, data in enumerate(split_data):
+    filtered_split_data = [entry for entry in split_data if 'FRAME' not in entry]
+    for i, data in enumerate(filtered_split_data):
         y = data_points[i]
         label = data.split()[-1]
         if label == 'hydrophobic':
