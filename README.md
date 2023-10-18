@@ -96,7 +96,7 @@ Start the analysis with the following Inputs:
 
 -l = SDF File of the ligand
 
--n = Name of the ligand in the pdf file
+-n = Name of the ligand in the PDB file
 
 #### Optional:
 -b = Binding mode treshold, which is used to remove interactions under a certain procentual occurence treshold from the binding mode generation, default is 40 (values: 0-100)
