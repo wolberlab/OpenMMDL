@@ -81,76 +81,57 @@ def water_forcefield_selection(water, forcefield_selection):
         
     return water_model
 
+
 def water_model_selection(water, forcefield_selection):
     """
-    Selects the required Water model forcefield .xml file according to water selection and previous force field selection.
+    Selects the required water model forcefield .xml file according to water selection and previous force field selection.
+    
     Parameters
     ----------
     water : str
-    	Input of water model
+        Water model input.
     forcefield_selection : str
-    	Input of selected forcefield .xml File
+        Input of selected forcefield .xml file.
+    
     Returns
-    -------
-    water_model: str
-    	Water model forcefield .xml File.
+    ----------
+    water_model : str
+        Water model forcefield .xml file.
     """
     old_amber = {'amber99sb.xml', 'amber99sbildn.xml', 'amber03.xml', 'amber10.xml'}
-    
+
+    water_model_mapping = {
+        'TIP3P': 'tip3p',
+        'TIP3P-FB': 'tip3pfb',
+        'SPC/E': 'spce',
+        'TIP4P-Ew': 'tip4pew',
+        'TIP4P-FB': 'tip4pfb',
+    }
+
     if forcefield_selection in old_amber:
-        if water == 'TIP3P':
-            water_model = 'tip3p'
-        elif water == 'TIP3P-FB':
-            water_model = 'tip3pfb'
-        elif water == "SPC/E":
-            water_model = "spce"
-        elif water == "TIP4P-Ew":
-            water_model = "tip4pew"
-        elif water == "TIP4P-FB":
-            water_model = "tip4pfb"
-        elif water == "TIP5P":
-            water_model = "tip5p"
-        else:
-            return None
-    
+        water_model = water_model_mapping.get(water)
     elif forcefield_selection == 'amber14-all.xml':
-        if water == 'TIP3P':
-            water_model = 'tip3p'
-        elif water == "TIP3P-FB":
-            water_model = 'tip3pfb'
-        elif water == "SPC/E":
-            water_model = "spce"
-        elif water == "TIP4P-Ew":
-            water_model = "tip4pew"
-        elif water == "TIP4P-FB":
-            water_model = "tip4pfb"
-        else:
-            return None
-    
+        if water == 'TIP5P':
+            return None  # 'TIP5P' is not available in 'amber14-all.xml'
+        water_model = water_model_mapping.get(water)
     elif forcefield_selection == 'charmm36.xml':
-        if water == 'CHARMM default':
-            water_model = "charmm"
-        elif water == "TIP3P-PME-B":
-            water_model = "charmm"
-        elif water == "TIP3P-PME-F":
-            water_model = "charmm"
-        elif water == "SPC/E":
-            water_model = "charmm"
-        elif water == "TIP4P-Ew":
-            water_model = "tip4pew"
-        elif water == "TIP4P-2005":
-            water_model = "tip4pew"
-        elif water == "TIP5P":
-            water_model = "tip5p"
-        elif water == "TIP5P-Ew":
-            water_model = "tip5p"
-        else:
-            return None
+        charmm_water_mapping = {
+            'CHARMM default': 'charmm',
+            'TIP3P-PME-B': 'charmm',
+            'TIP3P-PME-F': 'charmm',
+            'SPC/E': 'charmm',
+            'TIP4P-Ew': 'tip4pew',
+            'TIP4P-2005': 'tip4pew',
+            'TIP5P': 'tip5p',
+            'TIP5P-Ew': 'tip5p',
+        }
+        water_model = charmm_water_mapping.get(water)
     else:
         return None
 
     return water_model
-    
+
+
 def generate_forcefield(protein_ff, solvent_ff, add_membrane, rdkit_mol=None):
     """
     Generate an OpenMM Forcefield object and register a small molecule.
