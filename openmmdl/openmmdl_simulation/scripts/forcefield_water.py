@@ -182,8 +182,8 @@ def generate_transitional_forcefield(protein_ff, solvent_ff, add_membrane, rdkit
     solvent_ff: str
         Name of the water model force field in xml format.
     add_membrane = bool
-    	Selection if the system should be build with a membrane
-    rdkit_mol: rdkit.Chem.rdchem.Mol
+    	Selection if the system should be built with a membrane
+    rdkit_mol: rdkit.Chem.rdchem.Mol, optional
         Small molecule to register in the force field.    
     Returns
     -------
