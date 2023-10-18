@@ -10,7 +10,6 @@ import pdbfixer
 
 
 def protein_choice(protein_is_prepared, protein):
-
     """
     Converts the protein string file to PDBFixer
 
@@ -26,7 +25,6 @@ def protein_choice(protein_is_prepared, protein):
     prepared_protein: pdbfixer.pdbfixer.PDBFixer
     	Prepared protein system.
     """
-
     if protein_is_prepared == "Yes":
         prepared_protein = pdbfixer.PDBFixer(str(protein))
     
@@ -42,6 +40,7 @@ def prepare_ligand(sdf_file, minimize_molecule=True):
         User input of SDF File
     minimize_molecule: bool
         Minimization of ligand.
+        
     Returns
     -------
     rdkitmolh: rdkit.Chem.rdchem.Mol
@@ -76,6 +75,7 @@ def rdkit_to_openmm(rdkit_mol, name):
         RDKit molecule to convert.
     name: str
         Molecule name.
+        
     Returns
     -------
     omm_molecule: simtk.openmm.app.Modeller
@@ -109,7 +109,6 @@ def rdkit_to_openmm(rdkit_mol, name):
 
     # combine topology and positions in modeller object
     omm_mol = app.Modeller(mol_topology, new_mol_positions * unit.nanometers)
-
 
     return omm_mol
     
@@ -148,7 +147,6 @@ def merge_protein_and_ligand(protein, ligand):
     complex_positions[len(protein.positions) :] = ligand.positions  # add ligand positions
 
     return complex_topology, complex_positions
-
 
 def water_padding_solvent_builder(model_water, forcefield, water_padding_distance, protein_pdb, modeller, water_positive_ion, water_negative_ion, water_ionicstrength, protein_name):
     """
@@ -198,7 +196,6 @@ def water_padding_solvent_builder(model_water, forcefield, water_padding_distanc
         PDBFile.writeFile(modeller.topology, modeller.positions, outfile)     
     print(f"Protein with buffer solvent prepared")
     
-    
     return modeller
 
 def water_absolute_solvent_builder(model_water, forcefield, water_box_x, water_box_y, water_box_z, protein_pdb, modeller, water_positive_ion, water_negative_ion, water_ionicstrength, protein_name):
@@ -230,7 +227,6 @@ def water_absolute_solvent_builder(model_water, forcefield, water_box_x, water_b
     protein_name: str
         Protein file name.
 
-
     Returns
     -------
     modeller: openmm.app.modeller.Modeller
@@ -254,7 +250,6 @@ def water_absolute_solvent_builder(model_water, forcefield, water_box_x, water_b
     with open(f'solvent_absolute_{protein_name}', 'w') as outfile:
         PDBFile.writeFile(modeller.topology, modeller.positions, outfile)     
     print(f"Protein with absolute solvent prepared")
-    
     
     return modeller
 
@@ -286,7 +281,6 @@ def membrane_builder(ff, model_water, forcefield, transitional_forcefield, prote
         Ionic strength.
     protein_name: str
         Protein file name.
-
 
     Returns
     -------
@@ -336,7 +330,6 @@ def water_conversion(model_water, modeller_pre_conversion, protein_name):
     modeller: openmm.app.modeller.Modeller
         The converted object.
     """
-    
     # Writes out the PDB of the preconverted pdb
     with open(f'pre_converted_{protein_name}', 'w') as outfile:
         PDBFile.writeFile(modeller_pre_conversion.topology, modeller_pre_conversion.positions, outfile)
