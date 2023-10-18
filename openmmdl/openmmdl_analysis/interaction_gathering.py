@@ -33,7 +33,7 @@ def characterize_complex(pdb_file: str, binding_site_id: str) -> PLInteraction:
     return pdb_complex.interaction_sets[binding_site_id]
 
 
-def retrieve_plip_interactions(pdb_file):
+def retrieve_plip_interactions(pdb_file, lig_name):
     """
     Retrieves the interactions from PLIP.
 
@@ -50,7 +50,8 @@ def retrieve_plip_interactions(pdb_file):
     protlig = PDBComplex()
     protlig.load_pdb(pdb_file)  # load the pdb file
     for ligand in protlig.ligands:
-        protlig.characterize_complex(ligand)  # find ligands and analyze interactions
+        if str(ligand.longname) == lig_name:
+            protlig.characterize_complex(ligand)  # find ligands and analyze interactions
     sites = {}
     # loop over binding sites
     for key, site in sorted(protlig.interaction_sets.items()):
@@ -140,7 +141,7 @@ def process_frame(frame, pdb_md, lig_name):
     atoms_selected = pdb_md.select_atoms(f"protein or resname {lig_name} or (resname HOH and around 10 resname {lig_name})")
     for num in pdb_md.trajectory[(frame):(frame+1)]:
         atoms_selected.write(f'processing_frame_{frame}.pdb')
-    interactions_by_site = retrieve_plip_interactions(f"processing_frame_{frame}.pdb")
+    interactions_by_site = retrieve_plip_interactions(f"processing_frame_{frame}.pdb", lig_name)
     index_of_selected_site = -1
     selected_site = list(interactions_by_site.keys())[index_of_selected_site]
 
