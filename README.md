@@ -123,7 +123,7 @@ openmmdl_visualization
 ```
 Then edit the notebook to include the output of your analyis.
 ## Copyright
-Copyright (c) 2022, Valerij Talagayev, Yu Chen & Niklas Doering (Wolber lab)
+Copyright (c) 2022, Valerij Talagayev, Yu Chen & Niklas Piet Doering (Wolber lab)
 
 #### Acknowledgements
 
