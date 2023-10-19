@@ -1,5 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 import os
 
 def min_transition_calculation(min_transition):
@@ -61,6 +62,19 @@ def binding_site_markov_network(total_frames, min_transitions, combined_dict, fo
     part2_node_occurrences = {node: part2_data.count(node) for node in set(part2_data)}
     part3_node_occurrences = {node: part3_data.count(node) for node in set(part3_data)}
 
+    # Create the legend
+    legend_labels = {
+        'Blue': 'Binding mode not in top 10 occurence',
+        'Green': 'Binding Mode occurence mostly in first third of frames',
+        'Orange': 'Binding Mode occurence mostly in second third of frames',
+        'Red': 'Binding Mode occurence mostly in third third of frames',
+        'Yellow': 'Binding Mode occures throughout all trajectory equally'
+    }
+
+    legend_colors = ['skyblue', 'green', 'orange', 'red', 'yellow']
+
+    legend_handles = [Patch(color=color, label=label) for color, label in zip(legend_colors, legend_labels.values())]  
+    
     # Get the top 10 nodes with the most occurrences
     node_occurrences = {node: combined_dict['all'].count(node) for node in set(combined_dict['all'])}
     top_10_nodes = sorted(node_occurrences, key=node_occurrences.get, reverse=True)[:10]
@@ -108,8 +122,8 @@ def binding_site_markov_network(total_frames, min_transitions, combined_dict, fo
             forward_transition = (start_state, end_state)
             backward_transition = (end_state, start_state)
 
-            transition_probabilities_forward[forward_transition] = count / node_occurrences[start_state]
-            transition_probabilities_backward[backward_transition] = count / node_occurrences[end_state]
+            transition_probabilities_forward[forward_transition] = count / len(combined_dict['all']) * 100
+            transition_probabilities_backward[backward_transition] = count / len(combined_dict['all']) * 100
 
         # Calculate self-loop probabilities
         self_loop_probabilities = {}
@@ -185,6 +199,9 @@ def binding_site_markov_network(total_frames, min_transitions, combined_dict, fo
 
         nx.draw_networkx_labels(G, pos, labels=node_labels, font_size=font_size, font_color='black', verticalalignment="center")
 
+        # Add the legend to the plot
+        plt.legend(handles=legend_handles, loc='upper right')
+        
         plt.axis('off')
         plt.tight_layout()
 
