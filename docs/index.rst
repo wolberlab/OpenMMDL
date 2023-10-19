@@ -11,7 +11,7 @@ OpenMMDL  @ Molecular Design Lab
    :target: https://opensource.org/licenses/MIT
 
 .. image:: 
-   https://github.com/talagayev/OpenMMDL/blob/main/openmmdl_setup/static/OpenMMDL_logo.svg
+   https://github.com/wolberlab/OpenMMDL/blob/main/openmmdl/openmmdl_setup/static/OpenMMDL_logo.svg
    :width: 350
 
 **OpenMMDL** is an workflow, that allows an easy setup of **OpenMM** molecular dynamic simulations of protein-ligand complexes. **OpenMMDL** consists of:
