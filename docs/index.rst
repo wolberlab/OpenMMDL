@@ -11,7 +11,7 @@ OpenMMDL  @ Molecular Design Lab
    :target: https://opensource.org/licenses/MIT
 
 .. image:: 
-   https://github.com/wolberlab/OpenMMDL/blob/main/openmmdl/openmmdl_setup/static/OpenMMDL_logo.svg
+   https://github.com/wolberlab/OpenMMDL/blob/main/openmmdl/openmmdl_setup/static/OpenMMDL_logo.png
    :figwidth: 725px
    :align: center
 
