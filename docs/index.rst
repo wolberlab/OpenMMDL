@@ -49,6 +49,12 @@ OpenMMDL  @ Molecular Design Lab
 
 .. toctree::
    :maxdepth: 1
+   :caption: OpenMMDL-Analysis
+   
+   openmmdl_analysis
+
+.. toctree::
+   :maxdepth: 1
    :caption: Tutorials
    
    tutorial_pdb_path
