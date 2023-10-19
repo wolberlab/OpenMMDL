@@ -142,3 +142,4 @@ This Project is based on the
 
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Documentation Status](https://readthedocs.org/projects/openmmdl/badge/?version=latest)](https://openmmdl.readthedocs.io/en/latest/?badge=latest)
