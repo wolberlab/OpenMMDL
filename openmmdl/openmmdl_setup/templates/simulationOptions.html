@@ -22,96 +22,22 @@
     <div class="row">
     <div class="col-md-4">
         <ul class="nav nav-tabs">
-            <li class="active"><a data-toggle="tab" href="#system">System</a></li>
-            <li><a data-toggle="tab" href="#integrator">Integrator</a></li>
-            <li><a data-toggle="tab" href="#simulation">Simulation</a></li>
+            <li class="active"><a data-toggle="tab" href="#simulation">System</a></li>
             <li><a data-toggle="tab" href="#output">Output</a></li>
             <li><a data-toggle="tab" href="#mdanalysis">MDAnalysis</a></li>
+            <li><a data-toggle="tab" href="#system">Simulation</a></li>
+            <li><a data-toggle="tab" href="#integrator">Integrator</a></li>
         </ul>
         <div class="tab-content">
-            <div id="system" class="tab-pane fade in active">
+            <div id="simulation" class="tab-pane fade in active">
             <p/>
             <div class="form-group">
-            <label for="nonbondedMethod">Nonbonded Method</label>
-            {% if 'forcefield' in session and session['forcefield'].startswith('amoeba') %}
-                {{ choice('nonbondedMethod', 'Select how to compute long range nonbonded interactions.', [
-                    ('NoCutoff', 'No cutoff', 'The system is not periodic, and no cutoff is applied to nonbonded interactions.'),
-                    ('PME', 'PME', 'Periodic boundary conditions are used.  Long range interactions are computed with Particle Mesh Ewald.')]) }}
-            {% else %}
-                {{ choice('nonbondedMethod', 'Select how to compute long range nonbonded interactions.', [
-                    ('NoCutoff', 'No cutoff', 'The system is not periodic, and no cutoff is applied to nonbonded interactions.'),
-                    ('CutoffNonPeriodic', 'Cutoff, non-periodic', 'The system is not periodic.  Long range interactions are cut off with the reaction field method.'),
-                    ('CutoffPeriodic', 'Cutoff, periodic', 'Periodic boundary conditions are used.  Long range interactions are cut off with the reaction field method.'),
-                    ('PME', 'PME', 'Periodic boundary conditions are used.  Long range interactions are computed with Particle Mesh Ewald.')]) }}
-            {% endif %}
-            </div>
-            <div class="form-group" id="cutoffRow">
-            <label for="cutoff">Cutoff Distance (nm)</label>
-            {{ textfield('cutoff', 'Nonbonded interactions beyond this distance will be ignored.') }}
-            </div>
-            <div class="form-group" id="ewaldTolRow">
-            <label for="ewaldTol">Ewald Error Tolerance</label>
-            {{ textfield('ewaldTol', 'This determines the accuracy of interactions computed with PME.') }}
+            <label for="sim_length">Simulation Length (ns)</label>
+            {{ textfield('sim_length', 'The total length of the simulation in ns.') }}
             </div>
             <div class="form-group">
-            <label for="constraints">Constraints</label>
-            {{ choice('constraints', 'Select which bonds to replace with rigid constraints.', [
-                ('none', 'None', 'No degrees of freedom are constrained.'),
-                ('water', 'Water only', 'Water molecules are kept rigid, but no other degrees of freedom are constrained.'),
-                ('hbonds', 'Bonds involving hydrogen', 'The lengths of bonds involving a hydrogen atom are kept fixed.  Water molecules are kept rigid.'),
-                ('allbonds', 'All bonds', 'All bond lengths are kept fixed.  Water molecules are kept rigid.')]) }}
-            </div>
-            <div class="form-group" id="constraintTolRow">
-            <label for="constraintTol">Constraint Error Tolerance</label>
-            {{ textfield('constraintTol', 'The maximum allowed relative error in constrained distance.') }}
-            </div>
-            <div class="form-group">
-            <label><input type="checkbox" name="hmr" id="hmr" oninput="optionChanged()" {{ 'checked' if session['hmr'] else '' }}> Hydrogen Mass Repartitioning</label>
-            </div>
-            <div class="form-group" id="hmrOptions">
-                <label for="hmrMass">Hydrogen Mass (amu)</label>
-                {{ textfield('hmrMass', 'The mass of hydrogen atoms.') }}
-            </div>
-            </div>
-            <div id="integrator" class="tab-pane fade">
-            <p/>
-            <div class="form-group">
-            <label for="dt">Step Size (ps)</label>
-            {{ textfield('dt', 'The size of the time steps used by the integrator.') }}
-            </div>
-            <div class="form-group">
-            <label for="ensemble">Statistical Ensemble</label>
-            {{ choice('ensemble', 'Select the statistical ensemble to simulate.  This describes how the system interacts with the surrounding environment.', [
-                ('npt', 'Constant pressure, temperature', 'The simulation includes a thermostat and barostat to sample a constant pressure, constant temperature (NPT) ensemble.'),
-                ('nvt', 'Constant volume, temperature', 'The simulation includes a thermostat so it samples a constant volume, constant temperature (NVT) ensemble.')]) }}
-            </div>
-            <div class="form-group" id="temperatureRow">
-            <label for="temperature">Temperature (K)</label>
-            {{ textfield('temperature', 'The temperature at which the system is simulated.') }}
-            </div>
-            <div class="form-group" id="frictionRow">
-            <label for="friction">Friction Coefficient (ps<sup>-1</sup>)</label>
-            {{ textfield('friction', 'The friction coefficient coupling the system to the thermostat.') }}
-            </div>
-            <div class="form-group" id="pressureRow">
-            <label for="pressure">Pressure (atm)</label>
-            {{ textfield('pressure', 'The pressure at which the system is simulated.') }}
-            </div>
-            <div class="form-group" id="barostatIntervalRow">
-            <label for="barostatInterval">Barostat Interval (steps)</label>
-            {{ textfield('barostatInterval', 'The interval at which the barostat attempts to change the box volume, measured in time steps.') }}
-            </div>
-            </div>
-        
-            <div id="simulation" class="tab-pane fade">
-            <p/>
-            <div class="form-group">
-            <label for="steps">Simulation Length (steps)</label>
-            {{ textfield('steps', 'The total length of the simulation, measured in time steps.') }}
-            </div>
-            <div class="form-group">
-            <label for="equilibrationSteps">Equilibration Length (steps)</label>
-            {{ textfield('equilibrationSteps', 'The number of time steps of equilibration to run before starting the main simulation.') }}
+            <label for="equilibration_length">Equilibration Length (ns)</label>
+            {{ textfield('equilibration_length', 'The length of the equilibration in ns.') }}
             </div>
             <div class="form-group">
             <label for="platform">Platform</label>
@@ -131,110 +57,109 @@
             </div>
 
             <div id="output" class="tab-pane fade">
-            <p/>
-            <div class="form-group">
-            <label><input type="checkbox" name="writeDCD" id="writeDCD" oninput="optionChanged()" {{ 'checked' if session['writeDCD'] else '' }}> Save trajectory to a DCD file</label>
-            </div>
-            <div id="dcdFileOptions">
+                <p/>
                 <div class="form-group">
-                <label for="dcdFilename">DCD Filename</label>
-                {{ textfield('dcdFilename', 'The filename for the trajectory file.') }}
+                <label><input type="checkbox" name="writeDCD" id="writeDCD" oninput="optionChanged()" {{ 'checked' if session['writeDCD'] else '' }}> Save trajectory to a DCD file</label>
                 </div>
-                <div class="form-group">
-                <label for="dcdInterval">DCD Output Interval (steps)</label>
-                {{ textfield('dcdInterval', 'The interval at which to write frames to the trajectory, measured in time steps.') }}
-                </div>
-                <div class="form-group">
-                <label for="pdbinterval">PDB Output Interval (steps)</label>
-                {{ textfield('pdbinterval', 'The interval at which to write frames to the trajectory, measured in time steps.') }}
-                </div>
-            </div>
-            <div class="form-group">
-            <label><input type="checkbox" name="writeData" id="writeData" oninput="optionChanged()" {{ 'checked' if session['writeData'] else '' }}> Save data to a log file</label>
-            </div>
-            <div id="logFileOptions">
-                <div class="form-group">
-                <label for="davaFilename">Data Filename</label>
-                {{ textfield('dataFilename', 'The filename for the log file.') }}
+                <div id="dcdFileOptions">
+                    <div class="form-group">
+                    <label for="dcdFilename">DCD Filename</label>
+                    {{ textfield('dcdFilename', 'The filename for the trajectory file.') }}
+                    </div>
+                    <div class="form-group">
+                    <label for="dcdFrames">DCD Frames </label>
+                    {{ textfield('dcdFrames', 'The amount of Frames which to write to the trajectory DCD file.') }}
+                    </div>
+                    <div class="form-group">
+                    <label for="pdbinterval_ns">PDB Output Interval (ns)</label>
+                    {{ textfield('pdbinterval_ns', 'The interval of PDB Output.') }}
+                    </div>
                 </div>
                 <div class="form-group">
-                <label for="dataInterval">Data Output Interval (steps)</label>
-                {{ textfield('dataInterval', 'The interval at which to write frames to the log file, measured in time steps.') }}
+                <label><input type="checkbox" name="writeData" id="writeData" oninput="optionChanged()" {{ 'checked' if session['writeData'] else '' }}> Save data to a log file</label>
                 </div>
-                <label>Data to Write</label>
-                <div class="form-group">
-                <div class="col-md-6">
-                {{ datafieldbox('step', 'Step', 'The number of time steps completed.') }}
-                {{ datafieldbox('time', 'Time', 'The amount of time simulated so far.') }}
-                {{ datafieldbox('speed', 'Speed', 'The speed at which the simulation is running.') }}
-                {{ datafieldbox('progress', 'Progress', 'The fraction of the simulation completed so far.') }}
-                {{ datafieldbox('elapsedTime', 'Elapsed Time', 'The elapsed clock time so far.') }}
-                {{ datafieldbox('remainingTime', 'Remaining Time', 'An estimate of the remaining clock time needed to complete the simulation.') }}
-                </div>
-                <div class="col-md-6">
-                {{ datafieldbox('potentialEnergy', 'Potential Energy', 'The current potential energy of the system.') }}
-                {{ datafieldbox('kineticEnergy', 'Kinetic Energy', 'The current kinetic energy of the system.') }}
-                {{ datafieldbox('totalEnergy', 'Total Energy', 'The current total energy of the system.') }}
-                {{ datafieldbox('temperature', 'Temperature', 'The instantaneous temperature of the system.') }}
-                {{ datafieldbox('volume', 'Volume', 'The current volume of the periodic box.') }}
-                {{ datafieldbox('density', 'Density', 'The current density of the system.') }}
-                </div>
-                </div>
-            </div>
-            <div class="form-group">
-            <label><input type="checkbox" name="writeCheckpoint" id="writeCheckpoint" oninput="optionChanged()" {{ 'checked' if session['writeCheckpoint'] else '' }}> Save checkpoints to a file</label>
-            </div>
-            <div id="checkpointFileOptions">
-                <div class="form-group">
-                <label for="checkpointFilename">Checkpoint Filename</label>
-                {{ textfield('checkpointFilename', 'The filename for the checkpoint file.') }}
-                </div>
-                <div class="form-group">
-                <label for="checkpointInterval">Checkpoint Interval (steps)</label>
-                {{ textfield('checkpointInterval', 'The interval at which to write checkpoints, measured in time steps.') }}
-                </div>
-            </div>
-            <div class="form-group">
-            <label><input type="checkbox" name="writeSimulationXml" id="writeSimulationXml" oninput="optionChanged()" {{ 'checked' if session['writeSimulationXml'] else '' }}> Save simulation setup as XML files</label>
-            </div>
-            <div id="xmlFileOptions">
-                <div class="form-group">
-                <label for="systemXmlFilename">System XML Output Filename</label>
-                {{ textfield('systemXmlFilename', 'The filename for the output XML file.') }}
+                <div id="logFileOptions">
+                    <div class="form-group">
+                    <label for="davaFilename">Data Filename</label>
+                    {{ textfield('dataFilename', 'The filename for the log file.') }}
+                    </div>
+                    <div class="form-group">
+                    <label for="dataInterval">Data Output Interval (steps)</label>
+                    {{ textfield('dataInterval', 'The interval at which to write frames to the log file, measured in time steps.') }}
+                    </div>
+                    <label>Data to Write</label>
+                    <div class="form-group">
+                    <div class="col-md-6">
+                    {{ datafieldbox('step', 'Step', 'The number of time steps completed.') }}
+                    {{ datafieldbox('time', 'Time', 'The amount of time simulated so far.') }}
+                    {{ datafieldbox('speed', 'Speed', 'The speed at which the simulation is running.') }}
+                    {{ datafieldbox('progress', 'Progress', 'The fraction of the simulation completed so far.') }}
+                    {{ datafieldbox('elapsedTime', 'Elapsed Time', 'The elapsed clock time so far.') }}
+                    {{ datafieldbox('remainingTime', 'Remaining Time', 'An estimate of the remaining clock time needed to complete the simulation.') }}
+                    </div>
+                    <div class="col-md-6">
+                    {{ datafieldbox('potentialEnergy', 'Potential Energy', 'The current potential energy of the system.') }}
+                    {{ datafieldbox('kineticEnergy', 'Kinetic Energy', 'The current kinetic energy of the system.') }}
+                    {{ datafieldbox('totalEnergy', 'Total Energy', 'The current total energy of the system.') }}
+                    {{ datafieldbox('temperature', 'Temperature', 'The instantaneous temperature of the system.') }}
+                    {{ datafieldbox('volume', 'Volume', 'The current volume of the periodic box.') }}
+                    {{ datafieldbox('density', 'Density', 'The current density of the system.') }}
+                    </div>
+                    </div>
                 </div>
                 <div class="form-group">
-                <label for="integratorXmlFilename">Integrator XML Output Filename</label>
-                {{ textfield('integratorXmlFilename', 'The filename for the output XML file.') }}
+                <label><input type="checkbox" name="writeCheckpoint" id="writeCheckpoint" oninput="optionChanged()" {{ 'checked' if session['writeCheckpoint'] else '' }}> Save checkpoints to a file</label>
                 </div>
-            </div>
-            <div class="form-group">
-            <label><input type="checkbox" name="writeFinalState" id="writeFinalState" oninput="optionChanged()" {{ 'checked' if session['writeFinalState'] else '' }}> Save final simulation state</label>
-            </div>
-            <div id="writeFinalStateOptions">
-                <div class="form-group">
-                <label for="finalStateFileType">Output File Type</label>
-                {{ choice('finalStateFileType', 'Select the file type for the final state output.', [
-                    ('stateXML', 'OpenMM State XML', 'Write an OpenMM state XML file. This includes most details about the simulation, but not internal information like state of the pseudorandom number generator.' ),
-                    ('checkpoint', 'OpenMM Checkpoint', 'Write an OpenMM checkpoint file. This allows an exact continuation of the simulation, but is specific to the particular hardware and OpenMM version used to run the simulation.'),
-                    ('pdbx', 'PDBx/mmCIF (no velocities)', 'Write a PDBx/mmCIF file, which can be loaded by many programs. Only positions and topology information will be stored.') ], 'outputFiletypeChanged') }}
+                <div id="checkpointFileOptions">
+                    <div class="form-group">
+                    <label for="checkpointFilename">Checkpoint Filename</label>
+                    {{ textfield('checkpointFilename', 'The filename for the checkpoint file.') }}
+                    </div>
+                    <div class="form-group">
+                    <label for="checkpointInterval">Checkpoint Interval (steps)</label>
+                    {{ textfield('checkpointInterval', 'The interval at which to write checkpoints, measured in time steps.') }}
+                    </div>
                 </div>
                 <div class="form-group">
-                <label for="finalStateFilename">Output Filename</label>
-                {{ textfield('finalStateFilename', 'Filename for simulation final state output.') }}
+                <label><input type="checkbox" name="writeSimulationXml" id="writeSimulationXml" oninput="optionChanged()" {{ 'checked' if session['writeSimulationXml'] else '' }}> Save simulation setup as XML files</label>
                 </div>
-            </div>
-            <div class="form-group">
-            <label for="restart_checkpoint">restart_checkpoint</label>
-            {{ choice('restart_checkpoint', 'Restart MD Simulation from checkpoint', [
-                ('yes', 'yes', 'Restart from checkpoint'),
-                ('no', 'no', 'Dont restart')]) }}
-            </div>
-            <div class="form-group" id="restart_step">
-            <label for="restart_step">Restart_step</label>
-            {{ textfield('restart_step', 'Enter Restart step.') }}
-            </div>
-            </div>
-            
+                <div id="xmlFileOptions">
+                    <div class="form-group">
+                    <label for="systemXmlFilename">System XML Output Filename</label>
+                    {{ textfield('systemXmlFilename', 'The filename for the output XML file.') }}
+                    </div>
+                    <div class="form-group">
+                    <label for="integratorXmlFilename">Integrator XML Output Filename</label>
+                    {{ textfield('integratorXmlFilename', 'The filename for the output XML file.') }}
+                    </div>
+                </div>
+                <div class="form-group">
+                <label><input type="checkbox" name="writeFinalState" id="writeFinalState" oninput="optionChanged()" {{ 'checked' if session['writeFinalState'] else '' }}> Save final simulation state</label>
+                </div>
+                <div id="writeFinalStateOptions">
+                    <div class="form-group">
+                    <label for="finalStateFileType">Output File Type</label>
+                    {{ choice('finalStateFileType', 'Select the file type for the final state output.', [
+                        ('stateXML', 'OpenMM State XML', 'Write an OpenMM state XML file. This includes most details about the simulation, but not internal information like state of the pseudorandom number generator.' ),
+                        ('checkpoint', 'OpenMM Checkpoint', 'Write an OpenMM checkpoint file. This allows an exact continuation of the simulation, but is specific to the particular hardware and OpenMM version used to run the simulation.'),
+                        ('pdbx', 'PDBx/mmCIF (no velocities)', 'Write a PDBx/mmCIF file, which can be loaded by many programs. Only positions and topology information will be stored.') ], 'outputFiletypeChanged') }}
+                    </div>
+                    <div class="form-group">
+                    <label for="finalStateFilename">Output Filename</label>
+                    {{ textfield('finalStateFilename', 'Filename for simulation final state output.') }}
+                    </div>
+                </div>
+                <div class="form-group">
+                <label for="restart_checkpoint">restart_checkpoint</label>
+                {{ choice('restart_checkpoint', 'Restart MD Simulation from checkpoint', [
+                    ('yes', 'yes', 'Restart from checkpoint'),
+                    ('no', 'no', 'Dont restart')]) }}
+                </div>
+                <div class="form-group" id="restart_step">
+                <label for="restart_step">Restart_step</label>
+                {{ textfield('restart_step', 'Enter Restart step.') }}
+                </div>
+                </div>
             
             <div id="mdanalysis" class="tab-pane fade">
             <p/>
@@ -278,6 +203,82 @@
             <div class="form-group" id="ligand_atom_name">
             <label for="ligand_atom_name">Ligand Atom name</label>
             {{ textfield('ligand_atom_name', 'Ligand Atom name') }}
+            </div>
+            </div>
+
+            <div id="system" class="tab-pane fade">
+            <p/>
+            <div class="form-group">
+            <label for="nonbondedMethod">Nonbonded Method</label>
+            {% if 'forcefield' in session and session['forcefield'].startswith('amoeba') %}
+                {{ choice('nonbondedMethod', 'Select how to compute long range nonbonded interactions.', [
+                    ('NoCutoff', 'No cutoff', 'The system is not periodic, and no cutoff is applied to nonbonded interactions.'),
+                    ('PME', 'PME', 'Periodic boundary conditions are used.  Long range interactions are computed with Particle Mesh Ewald.')]) }}
+            {% else %}
+                {{ choice('nonbondedMethod', 'Select how to compute long range nonbonded interactions.', [
+                    ('NoCutoff', 'No cutoff', 'The system is not periodic, and no cutoff is applied to nonbonded interactions.'),
+                    ('CutoffNonPeriodic', 'Cutoff, non-periodic', 'The system is not periodic.  Long range interactions are cut off with the reaction field method.'),
+                    ('CutoffPeriodic', 'Cutoff, periodic', 'Periodic boundary conditions are used.  Long range interactions are cut off with the reaction field method.'),
+                    ('PME', 'PME', 'Periodic boundary conditions are used.  Long range interactions are computed with Particle Mesh Ewald.')]) }}
+            {% endif %}
+            </div>
+            <div class="form-group" id="cutoffRow">
+            <label for="cutoff">Cutoff Distance (nm)</label>
+            {{ textfield('cutoff', 'Nonbonded interactions beyond this distance will be ignored.') }}
+            </div>
+            <div class="form-group" id="ewaldTolRow">
+            <label for="ewaldTol">Ewald Error Tolerance</label>
+            {{ textfield('ewaldTol', 'This determines the accuracy of interactions computed with PME.') }}
+            </div>
+            <div class="form-group">
+            <label for="constraints">Constraints</label>
+            {{ choice('constraints', 'Select which bonds to replace with rigid constraints.', [
+                ('none', 'None', 'No degrees of freedom are constrained.'),
+                ('water', 'Water only', 'Water molecules are kept rigid, but no other degrees of freedom are constrained.'),
+                ('hbonds', 'Bonds involving hydrogen', 'The lengths of bonds involving a hydrogen atom are kept fixed.  Water molecules are kept rigid.'),
+                ('allbonds', 'All bonds', 'All bond lengths are kept fixed.  Water molecules are kept rigid.')]) }}
+            </div>
+            <div class="form-group" id="constraintTolRow">
+            <label for="constraintTol">Constraint Error Tolerance</label>
+            {{ textfield('constraintTol', 'The maximum allowed relative error in constrained distance.') }}
+            </div>
+            <div class="form-group">
+            <label><input type="checkbox" name="hmr" id="hmr" oninput="optionChanged()" {{ 'checked' if session['hmr'] else '' }}> Hydrogen Mass Repartitioning</label>
+            </div>
+            <div class="form-group" id="hmrOptions">
+                <label for="hmrMass">Hydrogen Mass (amu)</label>
+                {{ textfield('hmrMass', 'The mass of hydrogen atoms.') }}
+            </div>
+            </div>
+
+
+            <div id="integrator" class="tab-pane fade">
+            <p/>
+            <div class="form-group">
+            <label for="dt">Step Size (ps)</label>
+            {{ textfield('dt', 'The size of the time steps used by the integrator.') }}
+            </div>
+            <div class="form-group">
+            <label for="ensemble">Statistical Ensemble</label>
+            {{ choice('ensemble', 'Select the statistical ensemble to simulate.  This describes how the system interacts with the surrounding environment.', [
+                ('npt', 'Constant pressure, temperature', 'The simulation includes a thermostat and barostat to sample a constant pressure, constant temperature (NPT) ensemble.'),
+                ('nvt', 'Constant volume, temperature', 'The simulation includes a thermostat so it samples a constant volume, constant temperature (NVT) ensemble.')]) }}
+            </div>
+            <div class="form-group" id="temperatureRow">
+            <label for="temperature">Temperature (K)</label>
+            {{ textfield('temperature', 'The temperature at which the system is simulated.') }}
+            </div>
+            <div class="form-group" id="frictionRow">
+            <label for="friction">Friction Coefficient (ps<sup>-1</sup>)</label>
+            {{ textfield('friction', 'The friction coefficient coupling the system to the thermostat.') }}
+            </div>
+            <div class="form-group" id="pressureRow">
+            <label for="pressure">Pressure (atm)</label>
+            {{ textfield('pressure', 'The pressure at which the system is simulated.') }}
+            </div>
+            <div class="form-group" id="barostatIntervalRow">
+            <label for="barostatInterval">Barostat Interval (steps)</label>
+            {{ textfield('barostatInterval', 'The interval at which the barostat attempts to change the box volume, measured in time steps.') }}
             </div>
             </div>
         </div>

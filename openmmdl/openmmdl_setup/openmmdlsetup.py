@@ -828,15 +828,15 @@ def configureDefaultOptions():
         implicitWater = True
     session['ensemble'] = 'nvt' if implicitWater else 'npt'
     session['platform'] = 'CUDA'
-    session['precision'] = 'single'
+    session['precision'] = 'mixed'
     session['cutoff'] = '2.0' if implicitWater else '1.0'
     session['ewaldTol'] = '0.0005'
     session['constraintTol'] = '0.000001'
     session['hmr'] = True
     session['hmrMass'] = '1.5'
-    session['dt'] = '0.004'
-    session['steps'] = '1000000'
-    session['equilibrationSteps'] = '1000'
+    session['dt'] = '0.002'
+    session['sim_length'] = '50'
+    session['equilibration_length'] = '0.5'
     session['temperature'] = '300'
     session['friction'] = '1.0'
     session['pressure'] = '1.0'
@@ -844,8 +844,8 @@ def configureDefaultOptions():
     session['nonbondedMethod'] = 'CutoffNonPeriodic' if implicitWater else 'PME'
     session['writeDCD'] = True
     session['dcdFilename'] = 'trajectory.dcd'
-    session['dcdInterval'] = '10000'
-    session['pdbinterval'] = '10000'
+    session['dcdFrames'] = '1000'
+    session['pdbInterval_ns'] = '10'
     session['writeData'] = True
     session['dataFilename'] = 'log.txt'
     session['dataInterval'] = '1000'
@@ -1032,6 +1032,7 @@ os.chdir(outputDir)""")
     # Integration options
 
     script.append('\n# Integration Options\n')
+    script.append('step_time = %s' % session['dt'])
     script.append('dt = %s*unit.picoseconds' % session['dt'])
     script.append('temperature = %s*unit.kelvin' % session['temperature'])
     script.append('friction = %s/unit.picosecond' % session['friction'])
@@ -1043,18 +1044,22 @@ os.chdir(outputDir)""")
     # Simulation options
 
     script.append('\n# Simulation Options\n')
-    script.append('steps = %s' % session['steps'])
+    script.append('sim_length = %s' % session['sim_length'])
+    script.append('steps = int(sim_length / step_time * 1000)')
+    script.extend(['dcdFrames = %s' % session['dcdFrames'], 'dcdInterval = int(steps / dcdFrames)'])
+    script.extend(['pdbInterval_ns = %s' % session['pdbInterval_ns'], 'pdbInterval = int(steps / step_time * 1000)'])
     if session['restart_checkpoint'] == 'yes':
         script.append('restart_step = %s' % session['restart_step'])
-    script.append('equilibrationSteps = %s' % session['equilibrationSteps'])
+    script.append('equilibration_length = %s' % session['equilibration_length'])
+    script.append('equilibrationSteps = int(equilibration_length / step_time * 1000)')
     script.append("platform = Platform.getPlatformByName('%s')" % session['platform'])
     if session['platform'] in ('CUDA', 'OpenCL'):
         script.append("platformProperties = {'Precision': '%s'}" % session['precision'])
     if session['writeDCD']:
         if session['restart_checkpoint'] == 'yes':
-            script.append("dcdReporter = DCDReporter('%s_%s', %s)" % (session['restart_step'], session['dcdFilename'], session['dcdInterval']))
+            script.append("dcdReporter = DCDReporter('%s_%s', dcdInterval)" % (session['restart_step'], session['dcdFilename']))
         else:
-            script.append("dcdReporter = DCDReporter('%s', %s)" % (session['dcdFilename'], session['dcdInterval']))
+            script.append("dcdReporter = DCDReporter('%s', dcdInterval)" % (session['dcdFilename']))
     if session['writeData']:
         args = ', '.join('%s=True' % field for field in session['dataFields'])
         if session['restart_checkpoint'] == 'yes':
@@ -1202,9 +1207,9 @@ with open(f'Equilibration_{protein}', 'w') as outfile:
     script.append('\n# Simulate\n')
     script.append("print('Simulating...')")
     if session['restart_checkpoint'] == 'yes':
-        script.append("simulation.reporters.append(PDBReporter(f'restart_output_{protein}', %s))" % session['pdbinterval'])
+        script.append("simulation.reporters.append(PDBReporter(f'restart_output_{protein}', pdbInterval))")
     else:
-        script.append("simulation.reporters.append(PDBReporter(f'output_{protein}', %s))" % session['pdbinterval'])
+        script.append("simulation.reporters.append(PDBReporter(f'output_{protein}', pdbInterval))")
     if session['writeDCD']:
         script.append('simulation.reporters.append(dcdReporter)')
     if session['writeData']:
