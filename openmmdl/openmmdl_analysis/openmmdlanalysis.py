@@ -21,6 +21,7 @@ from rdkit.Chem import AllChem, Draw
 from rdkit.Chem.Draw import rdMolDraw2D
 
 from openmmdl.openmmdl_analysis.preprocessing import process_pdb_file, convert_pdb_to_sdf
+from openmmdl.openmmdl_analysis.rmsd_calculation import rmsd_for_atomgroups, RMSD_dist_frames
 from openmmdl.openmmdl_analysis.ligand_processing import increase_ring_indices, convert_ligand_to_smiles
 from openmmdl.openmmdl_analysis.interaction_gathering import characterize_complex, retrieve_plip_interactions, create_df_from_binding_site, process_frame, process_trajectory, fill_missing_frames
 from openmmdl.openmmdl_analysis.binding_mode_processing import gather_interactions, remove_duplicate_values, combine_subdict_values, filtering_values, unique_data_generation, df_iteration_numbering, update_values
@@ -53,6 +54,7 @@ def main():
     parser.add_argument('-df', dest='dataframe', help='Dataframe (use if the interactions were already calculated, default name would be "df_all.csv")', default=None)
     parser.add_argument('-m', dest='min_transition', help='Minimal Transition % for Markov State Model', default=1)
     parser.add_argument('-c', dest='cpu_count', help='CPU Count, specify how many CPUs should be used, default is half of the CPU count', default=os.cpu_count()/2 )
+    parser.add_argument('-r', dest='frame_rmsd', help='RMSD Difference between frames calculation type "True" to use it default is False,', default=False )
 
     input_formats = ['.pdb', '.dcd', '.sdf', '.csv'] 
     args = parser.parse_args()
@@ -70,6 +72,7 @@ def main():
     trajectory = args.trajectory
     ligand_sdf = args.ligand_sdf
     ligand = args.ligand_name
+    frame_rmsd = args.frame_rmsd
     if ligand == "*":
        ligand = "UNK"
     treshold = int(args.binding)
@@ -109,6 +112,10 @@ def main():
     print("\033[1mLigand ring data gathered\033[0m")
     
     convert_ligand_to_smiles(ligand_sdf,output_smi="lig.smi")
+
+    rmsd_for_atomgroups(f'{topology}', f'{trajectory}', selection1='backbone', selection2=['protein', f'resname {ligand}'])
+    if frame_rmsd == True:
+        RMSD_dist_frames(f'{topology}', f'{trajectory}', lig=f'{ligand}')
     
     interaction_list = pd.DataFrame(columns=["RESNR", "RESTYPE", "RESCHAIN", "RESNR_LIG", "RESTYPE_LIG", "RESCHAIN_LIG", "DIST", "LIGCARBONIDX", "PROTCARBONIDX", "LIGCOO", "PROTCOO"])
 
