@@ -54,7 +54,7 @@ def main():
     parser.add_argument('-df', dest='dataframe', help='Dataframe (use if the interactions were already calculated, default name would be "df_all.csv")', default=None)
     parser.add_argument('-m', dest='min_transition', help='Minimal Transition % for Markov State Model', default=1)
     parser.add_argument('-c', dest='cpu_count', help='CPU Count, specify how many CPUs should be used, default is half of the CPU count', default=os.cpu_count()/2 )
-    parser.add_argument('-r', dest='frame_rmsd', help='RMSD Difference between frames calculation type "True" to use it default is False,', default=False )
+    parser.add_argument('-r', dest='frame_rmsd', help='RMSD Difference between frames calculation type "True" to use it default is False,', default="No" )
 
     input_formats = ['.pdb', '.dcd', '.sdf', '.csv'] 
     args = parser.parse_args()
@@ -114,7 +114,7 @@ def main():
     convert_ligand_to_smiles(ligand_sdf,output_smi="lig.smi")
 
     rmsd_for_atomgroups(f'{topology}', f'{trajectory}', selection1='backbone', selection2=['protein', f'resname {ligand}'])
-    if frame_rmsd == True:
+    if frame_rmsd != "No":
         RMSD_dist_frames(f'{topology}', f'{trajectory}', lig=f'{ligand}')
     
     interaction_list = pd.DataFrame(columns=["RESNR", "RESTYPE", "RESCHAIN", "RESNR_LIG", "RESTYPE_LIG", "RESCHAIN_LIG", "DIST", "LIGCARBONIDX", "PROTCARBONIDX", "LIGCOO", "PROTCOO"])
