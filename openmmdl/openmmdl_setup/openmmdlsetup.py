@@ -901,7 +901,7 @@ os.chdir(outputDir)""")
 ''')
     script.append('from scripts.forcefield_water import ff_selection, water_forcefield_selection, water_model_selection, generate_forcefield, generate_transitional_forcefield')
     script.append('from scripts.protein_ligand_prep import protein_choice, prepare_ligand, rdkit_to_openmm, merge_protein_and_ligand, water_padding_solvent_builder, water_absolute_solvent_builder, membrane_builder, water_conversion')
-    script.append('from scripts.post_md_conversions import mdtraj_conversion, MDanalysis_conversion, rmsd_for_atomgroups, RMSD_dist_frames, atomic_distance')
+    script.append('from scripts.post_md_conversions import mdtraj_conversion, MDanalysis_conversion')
     script.append('from scripts.cleaning_procedures import cleanup, post_md_file_movement \n')
     
     script.append('import simtk.openmm.app as app')
@@ -1247,10 +1247,6 @@ with open(f'Equilibration_{protein}', 'w') as outfile:
         elif fileType == "amber":
             script.append("mdtraj_conversion(protein)")
             script.append("MDanalysis_conversion(f'centered_old_coordinates_top.pdb', f'centered_old_coordinates.dcd', ligand_name='UNK')")
-    
-    if session['rmsd'] == 'True':
-            script.append("rmsd_for_atomgroups(f'prot_lig_top.pdb', f'prot_lig_traj.dcd', selection1='backbone', selection2=['protein', 'resname UNK'])")
-            script.append("RMSD_dist_frames(f'prot_lig_top.pdb', f'prot_lig_traj.dcd', lig='UNK')")
     if fileType == "pdb":
         script.append('post_md_file_movement(protein,ligand)')
     elif fileType == "amber":
