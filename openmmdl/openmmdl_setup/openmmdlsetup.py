@@ -902,7 +902,7 @@ os.chdir(outputDir)""")
     script.append('from scripts.forcefield_water import ff_selection, water_forcefield_selection, water_model_selection, generate_forcefield, generate_transitional_forcefield')
     script.append('from scripts.protein_ligand_prep import protein_choice, prepare_ligand, rdkit_to_openmm, merge_protein_and_ligand, water_padding_solvent_builder, water_absolute_solvent_builder, membrane_builder, water_conversion')
     script.append('from scripts.post_md_conversions import mdtraj_conversion, MDanalysis_conversion')
-    script.append('from scripts.cleaning_procedures import cleanup, post_md_file_movement \n')
+    script.append('from scripts.cleaning_procedures import cleanup, create_directory_if_not_exists, copy_file, organize_files, post_md_file_movement \n')
     
     script.append('import simtk.openmm.app as app')
     script.append('from simtk.openmm.app import PDBFile, Modeller, PDBReporter, StateDataReporter, DCDReporter, CheckpointReporter')
