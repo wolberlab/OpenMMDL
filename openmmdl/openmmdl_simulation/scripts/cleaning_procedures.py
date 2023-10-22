@@ -131,6 +131,3 @@ def post_md_file_movement(protein_name, prmtop=None, inpcrd=None, ligand=None):
 
     # Organize checkpoint files
     organize_files(["checkpoint.chk", "10x_checkpoint.chk", "100x_checkpoint.chk"], "Checkpoints")
-
-    # Organize analysis files
-    organize_files(["RMSD_over_time.csv", "RMSD_between_the_frames.png", "RMSD_over_time.png"], "Analysis")
