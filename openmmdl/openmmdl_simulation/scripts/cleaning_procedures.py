@@ -39,7 +39,7 @@ def create_directory_if_not_exists(directory_path):
         shutil.rmtree(directory_path)
         os.mkdir(directory_path)
 
-def move_file(src, dest):
+def copy_file(src, dest):
     """
     Copy a file to the destination path.
 
@@ -107,10 +107,10 @@ def post_md_file_movement(protein_name, prmtop=None, inpcrd=None, ligand=None):
     create_directory_if_not_exists("Analysis")
 
     # Move input files
-    move_file(ligand, "Input_Files") if ligand else None
-    move_file(protein_name, "Input_Files")
-    move_file(prmtop, "Input_Files") if prmtop else None
-    move_file(inpcrd, "Input_Files") if inpcrd else None
+    copy_file(ligand, "Input_Files") if ligand else None
+    copy_file(protein_name, "Input_Files")
+    copy_file(prmtop, "Input_Files") if prmtop else None
+    copy_file(inpcrd, "Input_Files") if inpcrd else None
 
     # Organize pre-MD files
     source_pre_md_files = ["prepared_no_solvent_", "solvent_padding_", "solvent_absolute_", "membrane_"]
@@ -131,3 +131,6 @@ def post_md_file_movement(protein_name, prmtop=None, inpcrd=None, ligand=None):
 
     # Organize checkpoint files
     organize_files(["checkpoint.chk", "10x_checkpoint.chk", "100x_checkpoint.chk"], "Checkpoints")
+
+    # Copy ligand to MDAnalysis files
+    copy_file(ligand, "MD_Postprocessing/2_MDAnalysis") if ligand else None
