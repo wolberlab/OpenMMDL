@@ -70,6 +70,7 @@ Binding_Modes_Markov_States:
     .. figure:: /_static/images/Analysis/all_binding_modes_arranged.png
         :figwidth: 725px
         :align: center
+
     This figure shows all binding modes found in the markov state analysis. The binding modes are arranged by their occurence procentage in the trajectory. The 2D image of the ligand is coloured according to the interactions formed in this binding mode.
 
     Markov Chain Plots:
