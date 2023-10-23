@@ -852,7 +852,7 @@ def configureDefaultOptions():
     session['dataFields'] = ['step', 'speed' ,'progress', 'potentialEnergy', 'temperature']
     session['writeCheckpoint'] = True
     session['checkpointFilename'] = 'checkpoint.chk'
-    session['checkpointInterval'] = '10000'
+    session['checkpointInterval_ns'] = '0.02'
     session['writeSimulationXml'] = False
     session['systemXmlFilename'] = 'system.xml'
     session['integratorXmlFilename'] = 'integrator.xml'
@@ -1071,14 +1071,15 @@ os.chdir(outputDir)""")
             # Create a second reporting sending to stdout so we can display it in the browser.
             script.append("consoleReporter = StateDataReporter(sys.stdout, %s, totalSteps=steps, %s, separator='\\t')" % (session['dataInterval'], args))
     if session['writeCheckpoint']:
+        script.append("checkpointInterval = int(1000 * %s / %s)" % (session['checkpointInterval_ns'], session['dt']))
         if session['restart_checkpoint'] == 'yes':
-            script.append("checkpointReporter = CheckpointReporter('%s_%s', %s)" % (session['restart_step'], session['checkpointFilename'], session['checkpointInterval']))
-            script.append("checkpointReporter10 = CheckpointReporter('10x_%s__%s', %s0)" % (session['restart_step'], session['checkpointFilename'], session['checkpointInterval']))
-            script.append("checkpointReporter100 = CheckpointReporter('100x_%s_%s', %s00)" % (session['restart_step'], session['checkpointFilename'], session['checkpointInterval']))
+            script.append("checkpointReporter = CheckpointReporter('%s_%s', checkpointInterval)" % (session['restart_step'], session['checkpointFilename']))
+            script.append("checkpointReporter10 = CheckpointReporter('10x_%s__%s', checkpointInterval *10)" % (session['restart_step'], session['checkpointFilename']))
+            script.append("checkpointReporter100 = CheckpointReporter('100x_%s_%s', checkpointInterval *100)" % (session['restart_step'], session['checkpointFilename']))
         else:
-            script.append("checkpointReporter = CheckpointReporter('%s', %s)" % (session['checkpointFilename'], session['checkpointInterval']))
-            script.append("checkpointReporter10 = CheckpointReporter('10x_%s', %s0)" % (session['checkpointFilename'], session['checkpointInterval']))
-            script.append("checkpointReporter100 = CheckpointReporter('100x_%s', %s00)" % (session['checkpointFilename'], session['checkpointInterval']))
+            script.append("checkpointReporter = CheckpointReporter('%s', checkpointInterval)" % (session['checkpointFilename']))
+            script.append("checkpointReporter10 = CheckpointReporter('10x_%s', checkpointInterval* 10)" % (session['checkpointFilename']))
+            script.append("checkpointReporter100 = CheckpointReporter('100x_%s', checkpointInterval* 100)" % (session['checkpointFilename']))
     
     # Prepare the simulation
     
