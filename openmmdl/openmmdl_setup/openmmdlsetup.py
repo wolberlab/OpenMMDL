@@ -824,7 +824,7 @@ def configureDefaultOptions():
     session['restart_checkpoint'] = 'no'
     session['md_postprocessing'] = 'True'
     session['mdtraj_output'] = 'mdtraj_pdb_dcd'
-    session['mdtraj_remove'] = 'False'
+    session['mdtraj_removal'] = 'False'
     session['mda_output'] = 'mda_pdb_dcd'
     session['mda_selection'] = 'mda_prot_lig_all'
     if session['fileType'] == 'pdb' and session['waterModel'] == 'implicit':
@@ -1257,6 +1257,8 @@ with open(f'Equilibration_{protein}', 'w') as outfile:
                 script.append("MDanalysis_conversion(f'centered_old_coordinates_top.pdb', f'centered_old_coordinates.dcd', ligand_name='UNK', mda_output='%s', output_selection='%s')" % (session['mda_output'], session['mda_selection']))
             elif session['mdtraj_output'] == 'mdtraj_gro_xtc':
                 script.append("MDanalysis_conversion(f'centered_old_coordinates_top.gro', f'centered_old_coordinates.xtc', ligand_name='UNK', mda_output='%s', output_selection='%s')" % (session['mda_output'], session['mda_selection']))
+        if session['mdtraj_removal'] == "True":
+            script.append("cleanup(f'{protein}')")
     if fileType == "pdb":
         script.append('post_md_file_movement(protein,ligand)')
     elif fileType == "amber":
