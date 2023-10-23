@@ -29,21 +29,15 @@ def mdtraj_conversion(pdb_file, mdtraj_output):
     """    
     mdtraj_frames = md.load_dcd("trajectory.dcd", top=pdb_file)
     mdtraj_frames.image_molecules()
-    if mdtraj_output == "mdtraj_pdb_dcd":
+    if "dcd" in mdtraj_output:
         mdtraj_frames.save_dcd(f'centered_old_coordinates.dcd')
-    elif mdtraj_output == "mdtraj_gro_xtc":
-        mdtraj_frames.save_xtc(f'centered_old_coordinates.xtc')
-    elif mdtraj_output == "mdtraj_all":
-        mdtraj_frames.save_dcd(f'centered_old_coordinates.dcd')
+    if "xtc" in mdtraj_output:
         mdtraj_frames.save_xtc(f'centered_old_coordinates.xtc')
     mdtraj_first_frame = mdtraj_frames[0:1]
-    if mdtraj_output == "mdtraj_pdb_dcd":
+    if "pdb" in mdtraj_output:
         mdtraj_first_frame.save_pdb(f'centered_old_coordinates_top.pdb')
-    elif mdtraj_output == "mdtraj_gro_xtc":
+    if "gro" in mdtraj_output:
         mdtraj_first_frame.save_gro(f'centered_old_coordinates_top.gro')
-    elif mdtraj_output == "mdtraj_all":
-        mdtraj_first_frame.save_pdb(f'centered_old_coordinates_top.pdb')
-        mdtraj_first_frame.save_gro(f'centered_old_coordinates_top.gro')  
     
 def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, ligand_name):
     """
