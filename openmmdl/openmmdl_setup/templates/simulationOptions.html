@@ -293,8 +293,6 @@
             {% endif %}
             <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('downloadPackage') }}')"
                 title="Save an archive containing both the script and the input files.  To run the simulation, expand the archive and execute the script.">Save All Files</button>
-            <button type="button" class="btn btn-default"
-                title="Run the simulation now, displaying results in your browser." onclick="runSimulation()">Run Simulation</button>
         </div>
         <pre id="scriptContainer"><code id="script" class="python" style="overflow:scroll; white-space:pre"></code></pre>
     </div>
