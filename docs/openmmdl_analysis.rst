@@ -66,14 +66,12 @@ Barcodes:
 Binding_Modes_Markov_States:
     This folder contains a .png image of all binding modes found in the markov state analysis aswell as .png images of the markov chain plots.
     
-    Binding Modes:
     .. figure:: /_static/images/Analysis/all_binding_modes_arranged.png
         :figwidth: 725px
         :align: center
 
     This figure shows all binding modes found in the markov state analysis. The binding modes are arranged by their occurence procentage in the trajectory. The 2D image of the ligand is coloured according to the interactions formed in this binding mode.
 
-    Markov Chain Plots:
     .. figure:: /_static/images/Analysis/markov_chain_plot_1.png
         :figwidth: 725px
         :align: center
@@ -107,10 +105,10 @@ You will need to edit the following variables in the notebook (please note that 
     interacting_waters = path to the interacting_waters.pkl file
     ligname = name of the ligand in the topology file (same as for analysis unless the ligname in the original was '*' then pls use ligname = 'UNK')
 
-After editing the variables, you can run the whole notebook and view the interactions in an NGL-widget.
+After editing the variables, you can run the whole notebook and view the interactions in an NGL-widget. Here is an example of the visualization
 
-Example:
 .. figure:: /_static/images/Analysis/visualization.png
     :figwidth: 725px
     :align: center
-    (CDK2 receptor with ligand LS3 (PDB: 1KE7))
+    
+(CDK2 receptor with ligand LS3 (PDB: 1KE7))
