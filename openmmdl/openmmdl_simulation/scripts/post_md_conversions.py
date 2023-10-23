@@ -20,6 +20,8 @@ def mdtraj_conversion(pdb_file, mdtraj_output):
     ----------
     pdb_file: str
         name of the pdb file. This pdb file stores the extracted frames from the MD trajectory.
+    mdtraj_output : str
+        The selected format that will be used as an output of the topology and trajectory
 
     Returns
     -------
@@ -27,15 +29,21 @@ def mdtraj_conversion(pdb_file, mdtraj_output):
     """    
     mdtraj_frames = md.load_dcd("trajectory.dcd", top=pdb_file)
     mdtraj_frames.image_molecules()
-    if mdtraj_output != "mdtraj_gro_xtc":
+    if mdtraj_output == "mdtraj_pdb_dcd":
         mdtraj_frames.save_dcd(f'centered_old_coordinates.dcd')
-    else:
+    elif mdtraj_output == "mdtraj_gro_xtc":
+        mdtraj_frames.save_xtc(f'centered_old_coordinates.xtc')
+    elif mdtraj_output == "mdtraj_all":
+        mdtraj_frames.save_dcd(f'centered_old_coordinates.dcd')
         mdtraj_frames.save_xtc(f'centered_old_coordinates.xtc')
     mdtraj_first_frame = mdtraj_frames[0:1]
-    if mdtraj_output != "mdtraj_gro_xtc":
+    if mdtraj_output == "mdtraj_pdb_dcd":
         mdtraj_first_frame.save_pdb(f'centered_old_coordinates_top.pdb')
-    else:
+    elif mdtraj_output == "mdtraj_gro_xtc":
         mdtraj_first_frame.save_gro(f'centered_old_coordinates_top.gro')
+    elif mdtraj_output == "mdtraj_all":
+        mdtraj_first_frame.save_pdb(f'centered_old_coordinates_top.pdb')
+        mdtraj_first_frame.save_gro(f'centered_old_coordinates_top.gro')  
     
 def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, ligand_name):
     """
