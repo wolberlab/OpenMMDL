@@ -53,27 +53,27 @@ Barcodes:
     This folder will contain figures of the barcodes for each interaction in form of .png image files. Each interaction type will be stored in a sperate file.
     
     .. figure:: /_static/images/Analysis/donor_barcodes.png
-        :figwidth: 725px
+        :figwidth: 700px
         :align: center
     
     Furthermore the "Barcodes" folder will contain a subfolder called "Waterbridge_Piecharts".
     This folder contains piecharts of the different waters interacting (with waterid) for each waterbridge interaction in form of .png image files.
     
     .. figure:: /_static/images/Analysis/59ARGA_4192_Acceptor_waterbridge.png
-        :figwidth: 725px
+        :figwidth: 700px
         :align: center
 
 Binding_Modes_Markov_States:
     This folder contains a .png image of all binding modes found in the markov state analysis aswell as .png images of the markov chain plots.
     
     .. figure:: /_static/images/Analysis/all_binding_modes_arranged.png
-        :figwidth: 725px
+        :figwidth: 700px
         :align: center
 
     This figure shows all binding modes found in the markov state analysis. The binding modes are arranged by their occurence procentage in the trajectory. The 2D image of the ligand is coloured according to the interactions formed in this binding mode.
 
     .. figure:: /_static/images/Analysis/markov_chain_plot_1.png
-        :figwidth: 725px
+        :figwidth: 700px
         :align: center
     The markov chain plot figures show the transition probabilities between the different binding modes. You will obtain four figures, each containing only transitions above a given cutoff. The cutoffs are 1%, 5%, and 10%.
 
@@ -108,7 +108,7 @@ You will need to edit the following variables in the notebook (please note that 
 After editing the variables, you can run the whole notebook and view the interactions in an NGL-widget. Here is an example of the visualization
 
 .. figure:: /_static/images/Analysis/visualization.png
-    :figwidth: 725px
+    :figwidth: 700px
     :align: center
     
 (CDK2 receptor with ligand LS3 (PDB: 1KE7))
