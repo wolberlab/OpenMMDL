@@ -823,7 +823,9 @@ def configureDefaultOptions():
     implicitWater = False
     session['restart_checkpoint'] = 'no'
     session['md_postprocessing'] = 'True'
+    session['mdtraj_output'] = 'mdtraj_pdb_dcd'
     session['mdtraj_remove'] = 'False'
+    session['mda_output'] = 'mda_pdb_dcd'
     if session['fileType'] == 'pdb' and session['waterModel'] == 'implicit':
         implicitWater = True
     session['ensemble'] = 'nvt' if implicitWater else 'npt'

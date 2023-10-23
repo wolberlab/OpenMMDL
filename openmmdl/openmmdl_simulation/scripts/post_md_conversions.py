@@ -12,7 +12,7 @@ from MDAnalysis.analysis.hydrogenbonds.hbond_analysis import HydrogenBondAnalysi
 
 ######################################################################
 # prepare the topology and trajectory file for further analysis
-def mdtraj_conversion(pdb_file):
+def mdtraj_conversion(pdb_file, add_pdb_dcd = True, add_gro_xtc = False):
     """
     Recenter and apply periodic boundary conditions to the molecules in each frame of the trajectory, and save the centered trajectory and its first frame.
 
@@ -27,11 +27,15 @@ def mdtraj_conversion(pdb_file):
     """    
     mdtraj_frames = md.load_dcd("trajectory.dcd", top=pdb_file)
     mdtraj_frames.image_molecules()
-    mdtraj_frames.save_dcd(f'centered_old_coordinates.dcd')
-    mdtraj_frames.save_xtc(f'centered_old_coordinates.xtc')
+    if add_pdb_dcd == True:
+        mdtraj_frames.save_dcd(f'centered_old_coordinates.dcd')
+    if add_gro_xtc == True:
+        mdtraj_frames.save_xtc(f'centered_old_coordinates.xtc')
     mdtraj_first_frame = mdtraj_frames[0:1]
-    mdtraj_first_frame.save_pdb(f'centered_old_coordinates_top.pdb')
-    mdtraj_first_frame.save_gro(f'centered_old_coordinates_top.gro')
+    if add_pdb_dcd == True:
+        mdtraj_first_frame.save_pdb(f'centered_old_coordinates_top.pdb')
+    if add_gro_xtc == True:
+        mdtraj_first_frame.save_gro(f'centered_old_coordinates_top.gro')
     
 def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, ligand_name):
     """
