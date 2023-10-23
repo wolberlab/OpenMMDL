@@ -7,8 +7,8 @@ OpenMMDL  @ Molecular Design Lab
 =========================================================
 
 .. figure:: /_static/images/OpenMMDL_logo.png
-      :figwidth: 700px
-      :align: center
+   :figwidth: 700px
+   :align: center
 
 .. image::
    https://img.shields.io/badge/License-MIT-blue.svg
