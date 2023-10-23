@@ -104,7 +104,6 @@ def post_md_file_movement(protein_name, prmtop=None, inpcrd=None, ligand=None):
     create_directory_if_not_exists("MD_Postprocessing/1_MDTraj")
     create_directory_if_not_exists("MD_Postprocessing/2_MDAnalysis")
     create_directory_if_not_exists("Checkpoints")
-    create_directory_if_not_exists("Analysis")
 
     # Move input files
     copy_file(ligand, "Input_Files") if ligand else None
