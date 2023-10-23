@@ -1245,10 +1245,10 @@ with open(f'Equilibration_{protein}', 'w') as outfile:
     
     if session ['md_postprocessing'] == 'True':
         if fileType == "pdb":
-            script.append("mdtraj_conversion(f'Equilibration_{protein}', %s)" % session['mdtraj_output'])
+            script.append("mdtraj_conversion(f'Equilibration_{protein}', '%s')" % session['mdtraj_output'])
             script.append("MDanalysis_conversion(f'centered_old_coordinates_top.pdb', f'centered_old_coordinates.dcd', ligand_name='UNK')")
         elif fileType == "amber":
-            script.append("mdtraj_conversion(protein, %s)" % session['mdtraj_output'])
+            script.append("mdtraj_conversion(protein, '%s')" % session['mdtraj_output'])
             script.append("MDanalysis_conversion(f'centered_old_coordinates_top.pdb', f'centered_old_coordinates.dcd', ligand_name='UNK')")
     if fileType == "pdb":
         script.append('post_md_file_movement(protein,ligand)')
