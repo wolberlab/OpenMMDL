@@ -24,7 +24,8 @@
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#simulation">System</a></li>
             <li><a data-toggle="tab" href="#output">Output</a></li>
-            <li><a data-toggle="tab" href="#mdanalysis">MDAnalysis</a></li>
+            <li><a data-toggle="tab" href="#postprocessing">Postprocessing</a></li>
+            <li><a data-toggle="tab" href="#analysis">Analysis</a></li>
             <li><a data-toggle="tab" href="#system">Simulation</a></li>
             <li><a data-toggle="tab" href="#integrator">Integrator</a></li>
         </ul>
@@ -161,50 +162,54 @@
                 </div>
                 </div>
             
-            <div id="mdanalysis" class="tab-pane fade">
-            <p/>
-            <div class="form-group" id="md_postprocessing">
-            <label for="md_postprocessing">MD Simulation Postprocessing</label>
-            {{ choice('md_postprocessing', 'Centering of Protein and separate saving of pdb and dcd with only ligand and protein.', [
-                ('True', 'True', 'The Centering will be performed'),
-                ('False', 'False', 'No post MD Simulation Analysis')]) }}
-            </div>
-            <div class="form-group" id="mdtraj_remove">
-            <label for="mdtraj_remove">MDTraj Removal</label>
-            {{ choice('mdtraj_remove', 'Removing of MDTraj Files.', [
-                ('True', 'True', 'The Files will be removed'),
-                ('False', 'False', 'No the files will stay')]) }}
-            </div>
-            <div class="form-group" id="rmsd">
-            <label for="rmsd">RMSD Calculation</label>
-            {{ choice('rmsd', 'RMSD Calculation', [
-                ('True', 'True', 'The RMSD will be calculated'),
-                ('False', 'False', 'The RMSD will not be calculated')]) }}
-            </div>
-            <div class="form-group">
-            <label for="interaction_analysis">Interaction Analysis</label>
-            {{ choice('interaction_analysis', 'Interaction Analysis', [
-                ('True', 'True', 'The interactions will be analyzed'),
-                ('False', 'False', 'The interactions will not be analyzed')]) }}
-            </div>
-            Apply Nglview/VMD/MOE to look up name and id
-            <div class="form-group" id="protein_res_id">
-            <label for="protein_res_id">Protein Residue id </label>
-            {{ textfield('protein_res_id', 'Protein Residue id') }}
-            </div>
-            <div class="form-group" id="protein_atom_name">
-            <label for="protein_atom_name">Protein Atom name</label>
-            {{ textfield('protein_atom_name', 'Protein Atom name') }}
-            </div>
-            <div class="form-group" id="ligand_id">
-            <label for="ligand_id">Ligand id</label>
-            {{ textfield('ligand_id', 'Ligand id') }}
-            </div>
-            <div class="form-group" id="ligand_atom_name">
-            <label for="ligand_atom_name">Ligand Atom name</label>
-            {{ textfield('ligand_atom_name', 'Ligand Atom name') }}
-            </div>
-            </div>
+            <div id="postprocessing" class="tab-pane fade">
+                <p/>
+                <div class="form-group" id="md_postprocessing">
+                <label for="md_postprocessing">MD Simulation Postprocessing</label>
+                {{ choice('md_postprocessing', 'Centering of Protein and separate saving of pdb and dcd with only ligand and protein.', [
+                    ('True', 'True', 'The Centering will be performed'),
+                    ('False', 'False', 'No post MD Simulation Analysis')]) }}
+                </div>
+                <div class="form-group" id="mdtraj_remove">
+                <label for="mdtraj_remove">MDTraj Removal</label>
+                {{ choice('mdtraj_remove', 'Removing of MDTraj Files.', [
+                    ('True', 'True', 'The Files will be removed'),
+                    ('False', 'False', 'No the files will stay')]) }}
+                </div>
+                </div>
+
+            <div id="analysis" class="tab-pane fade">
+                <p/>
+                <div class="form-group" id="rmsd">
+                <label for="rmsd">RMSD Calculation</label>
+                {{ choice('rmsd', 'RMSD Calculation', [
+                    ('True', 'True', 'The RMSD will be calculated'),
+                    ('False', 'False', 'The RMSD will not be calculated')]) }}
+                </div>
+                <div class="form-group">
+                <label for="interaction_analysis">Interaction Analysis</label>
+                {{ choice('interaction_analysis', 'Interaction Analysis', [
+                    ('True', 'True', 'The interactions will be analyzed'),
+                    ('False', 'False', 'The interactions will not be analyzed')]) }}
+                </div>
+                Apply Nglview/VMD/MOE to look up name and id
+                <div class="form-group" id="protein_res_id">
+                <label for="protein_res_id">Protein Residue id </label>
+                {{ textfield('protein_res_id', 'Protein Residue id') }}
+                </div>
+                <div class="form-group" id="protein_atom_name">
+                <label for="protein_atom_name">Protein Atom name</label>
+                {{ textfield('protein_atom_name', 'Protein Atom name') }}
+                </div>
+                <div class="form-group" id="ligand_id">
+                <label for="ligand_id">Ligand id</label>
+                {{ textfield('ligand_id', 'Ligand id') }}
+                </div>
+                <div class="form-group" id="ligand_atom_name">
+                <label for="ligand_atom_name">Ligand Atom name</label>
+                {{ textfield('ligand_atom_name', 'Ligand Atom name') }}
+                </div>
+                </div>
 
             <div id="system" class="tab-pane fade">
             <p/>
@@ -250,7 +255,6 @@
                 {{ textfield('hmrMass', 'The mass of hydrogen atoms.') }}
             </div>
             </div>
-
 
             <div id="integrator" class="tab-pane fade">
             <p/>
