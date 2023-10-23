@@ -39,7 +39,7 @@ def mdtraj_conversion(pdb_file, mdtraj_output):
     if "gro" in mdtraj_output:
         mdtraj_first_frame.save_gro(f'centered_old_coordinates_top.gro')
     
-def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, ligand_name):
+def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, ligand_name, mda_output, output_selection):
     """
     translate the trajectory so that all frames coincide with its center of geometry.
 
@@ -51,6 +51,10 @@ def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, ligand_nam
         Name of the post-MDtraj DCD File.
     ligand_name: str
         ligand name saved in PDB file.
+    mda_output: str
+        Selection of Output formats.
+    output_selection: str
+        Selection of Topologies with specific atom selections that will be created
 
     Returns
     -------
@@ -62,22 +66,28 @@ def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, ligand_nam
     topology_trajectory_all_atoms.atoms.translate(topology_trajectory_all_atoms.center_of_mass())
     topology_trajectory_protein_ligand = topology_trajectory.select_atoms(f'protein or resname {ligand_name}')
 
-    with mda.Writer(f'centered_traj.dcd', topology_trajectory_all_atoms.n_atoms) as w:
-        for ts in topology_trajectory.trajectory[1:]:
-            w.write(topology_trajectory_all_atoms)
-    topology_trajectory_all_atoms.write(f'centered_top.pdb')
+    if "pdb" in mda_output:
+        if output_selection != "mda_prot_lig":
+            with mda.Writer(f'centered_traj.dcd', topology_trajectory_all_atoms.n_atoms) as w:
+                for ts in topology_trajectory.trajectory[1:]:
+                    w.write(topology_trajectory_all_atoms)
+            topology_trajectory_all_atoms.write(f'centered_top.pdb')
 
-    with mda.Writer(f'centered_traj.xtc', topology_trajectory_all_atoms.n_atoms) as w:
-        for ts in topology_trajectory.trajectory[1:]:
-            w.write(topology_trajectory_all_atoms)
-    topology_trajectory_all_atoms.write(f'centered_top.gro')
-    
-    with mda.Writer(f'prot_lig_traj.dcd', topology_trajectory_protein_ligand.n_atoms) as w:
-        for ts in topology_trajectory.trajectory[1:]:
-            w.write(topology_trajectory_protein_ligand)
-    topology_trajectory_protein_ligand.write(f'prot_lig_top.pdb')
+        if output_selection != "mda_all":
+            with mda.Writer(f'prot_lig_traj.dcd', topology_trajectory_protein_ligand.n_atoms) as w:
+                for ts in topology_trajectory.trajectory[1:]:
+                    w.write(topology_trajectory_protein_ligand)
+            topology_trajectory_protein_ligand.write(f'prot_lig_top.pdb')
 
-    with mda.Writer(f'prot_lig_traj.xtc', topology_trajectory_protein_ligand.n_atoms) as w:
-        for ts in topology_trajectory.trajectory[1:]:
-            w.write(topology_trajectory_protein_ligand)
-    topology_trajectory_protein_ligand.write(f'prot_lig_top.gro')
+    if "gro" in mda_output:
+        if output_selection != "mda_prot_lig":
+            with mda.Writer(f'centered_traj.xtc', topology_trajectory_all_atoms.n_atoms) as w:
+                for ts in topology_trajectory.trajectory[1:]:
+                    w.write(topology_trajectory_all_atoms)
+            topology_trajectory_all_atoms.write(f'centered_top.gro')
+
+        if output_selection != "mda_all":
+            with mda.Writer(f'prot_lig_traj.xtc', topology_trajectory_protein_ligand.n_atoms) as w:
+                for ts in topology_trajectory.trajectory[1:]:
+                    w.write(topology_trajectory_protein_ligand)
+            topology_trajectory_protein_ligand.write(f'prot_lig_top.gro')
