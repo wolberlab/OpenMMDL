@@ -1248,15 +1248,15 @@ with open(f'Equilibration_{protein}', 'w') as outfile:
         if fileType == "pdb":
             script.append("mdtraj_conversion(f'Equilibration_{protein}', '%s')" % session['mdtraj_output'])
             if session['mdtraj_output'] != 'mdtraj_gro_xtc':
-                script.append("MDanalysis_conversion(f'centered_old_coordinates_top.pdb', f'centered_old_coordinates.dcd', ligand_name='UNK', mda_output='%s', output_files='%s')" % (session['mda_output'], session['mda_selection']))
+                script.append("MDanalysis_conversion(f'centered_old_coordinates_top.pdb', f'centered_old_coordinates.dcd', ligand_name='UNK', mda_output='%s', output_selection='%s')" % (session['mda_output'], session['mda_selection']))
             elif session['mdtraj_output'] == 'mdtraj_gro_xtc':
-                script.append("MDanalysis_conversion(f'centered_old_coordinates_top.gro', f'centered_old_coordinates.xtc', ligand_name='UNK', mda_output='%s', output_files='%s')" % (session['mda_output'], session['mda_selection']))
+                script.append("MDanalysis_conversion(f'centered_old_coordinates_top.gro', f'centered_old_coordinates.xtc', ligand_name='UNK', mda_output='%s', output_selection='%s')" % (session['mda_output'], session['mda_selection']))
         elif fileType == "amber":
             script.append("mdtraj_conversion(protein, '%s')" % session['mdtraj_output'])
             if session['mdtraj_output'] != 'mdtraj_gro_xtc':
-                script.append("MDanalysis_conversion(f'centered_old_coordinates_top.pdb', f'centered_old_coordinates.dcd', ligand_name='UNK', mda_output='%s', output_files='%s')" % (session['mda_output'], session['mda_selection']))
+                script.append("MDanalysis_conversion(f'centered_old_coordinates_top.pdb', f'centered_old_coordinates.dcd', ligand_name='UNK', mda_output='%s', output_selection='%s')" % (session['mda_output'], session['mda_selection']))
             elif session['mdtraj_output'] == 'mdtraj_gro_xtc':
-                script.append("MDanalysis_conversion(f'centered_old_coordinates_top.gro', f'centered_old_coordinates.xtc', ligand_name='UNK', mda_output='%s', output_files='%s')" % (session['mda_output'], session['mda_selection']))
+                script.append("MDanalysis_conversion(f'centered_old_coordinates_top.gro', f'centered_old_coordinates.xtc', ligand_name='UNK', mda_output='%s', output_selection='%s')" % (session['mda_output'], session['mda_selection']))
     if fileType == "pdb":
         script.append('post_md_file_movement(protein,ligand)')
     elif fileType == "amber":
