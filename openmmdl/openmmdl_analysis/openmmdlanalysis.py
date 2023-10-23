@@ -54,6 +54,7 @@ def main():
     parser.add_argument('-df', dest='dataframe', help='Dataframe (use if the interactions were already calculated, default name would be "df_all.csv")', default=None)
     parser.add_argument('-m', dest='min_transition', help='Minimal Transition % for Markov State Model', default=1)
     parser.add_argument('-c', dest='cpu_count', help='CPU Count, specify how many CPUs should be used, default is half of the CPU count', default=os.cpu_count()/2 )
+    parser.add_argument('-p', dest='generate_pml', help='Generate .pml files for pharmacophore visualization', default=False)
     parser.add_argument('-r', dest='frame_rmsd', help='RMSD Difference between frames calculation type "True" to use it default is False,', default="No" )
 
     input_formats = ['.pdb', '.dcd', '.sdf', '.csv'] 
@@ -79,6 +80,8 @@ def main():
     dataframe = args.dataframe
     min_transition = args.min_transition
     cpu_count = int(args.cpu_count)
+    generate_pml = bool(args.generate_pml)
+
     process_pdb_file(topology)
     print("\033[1mFiles are preprocessed\033[0m")
     
@@ -324,37 +327,38 @@ def main():
     top_10_binding_modes_df = pd.DataFrame(result_dict)
     
     id_num = 0
-    for index, row in top_10_binding_modes_df.iterrows():
-        b_mode = row['Binding Mode']
-        first_occurance = row['First Frame']
-        filtered_df_all = df_all[df_all['FRAME'] == first_occurance]
-        filtered_df_bindingmodes = grouped_frames_treshold[grouped_frames_treshold['FRAME'] == first_occurance]
-        bindingmode_dict = {}
-        for index, row in filtered_df_bindingmodes.iterrows():
-            for column in filtered_df_bindingmodes.columns:
-                if column not in ['FRAME', 'FRAME.1', 'fingerprint', 'Binding_fingerprint_treshold']:
-                    if row[column] == 1:
-                        if column not in bindingmode_dict:
-                            bindingmode_dict[column] = {"LIGCOO": [], "PROTCOO": []}  # Initialize a nested dictionary for each key if not already present
-                        for index2, row2 in filtered_df_all.iterrows():
-                            if row2[column] == 1:
-                                # Extract the string representation of the tuple
-                                tuple_string = row2['LIGCOO']
-                                # Split the string into individual values using a comma as the delimiter
-                                ligcoo_values = tuple_string.strip('()').split(',')
-                                # Convert the string values to float
-                                ligcoo_values = [float(value.strip()) for value in ligcoo_values]
+    if generate_pml:
+        for index, row in top_10_binding_modes_df.iterrows():
+            b_mode = row['Binding Mode']
+            first_occurance = row['First Frame']
+            filtered_df_all = df_all[df_all['FRAME'] == first_occurance]
+            filtered_df_bindingmodes = grouped_frames_treshold[grouped_frames_treshold['FRAME'] == first_occurance]
+            bindingmode_dict = {}
+            for index, row in filtered_df_bindingmodes.iterrows():
+                for column in filtered_df_bindingmodes.columns:
+                    if column not in ['FRAME', 'FRAME.1', 'fingerprint', 'Binding_fingerprint_treshold']:
+                        if row[column] == 1:
+                            if column not in bindingmode_dict:
+                                bindingmode_dict[column] = {"LIGCOO": [], "PROTCOO": []}  # Initialize a nested dictionary for each key if not already present
+                            for index2, row2 in filtered_df_all.iterrows():
+                                if row2[column] == 1:
+                                    # Extract the string representation of the tuple
+                                    tuple_string = row2['LIGCOO']
+                                    # Split the string into individual values using a comma as the delimiter
+                                    ligcoo_values = tuple_string.strip('()').split(',')
+                                    # Convert the string values to float
+                                    ligcoo_values = [float(value.strip()) for value in ligcoo_values]
 
-                                # Extract the string representation of the tuple for PROTCOO
-                                tuple_string = row2['PROTCOO']
-                                # Split the string into individual values using a comma as the delimiter
-                                protcoo_values = tuple_string.strip('()').split(',')
-                                # Convert the string values to float
-                                protcoo_values = [float(value.strip()) for value in protcoo_values]
+                                    # Extract the string representation of the tuple for PROTCOO
+                                    tuple_string = row2['PROTCOO']
+                                    # Split the string into individual values using a comma as the delimiter
+                                    protcoo_values = tuple_string.strip('()').split(',')
+                                    # Convert the string values to float
+                                    protcoo_values = [float(value.strip()) for value in protcoo_values]
 
-                                bindingmode_dict[column]["LIGCOO"].append(ligcoo_values)
-                                bindingmode_dict[column]["PROTCOO"].append(protcoo_values)
-        generate_bindingmode_pharmacophore(bindingmode_dict, ligand, f"{ligand}_complex", b_mode, id_num)
+                                    bindingmode_dict[column]["LIGCOO"].append(ligcoo_values)
+                                    bindingmode_dict[column]["PROTCOO"].append(protcoo_values)
+            generate_bindingmode_pharmacophore(bindingmode_dict, ligand, f"{ligand}_complex", b_mode, id_num)
         
     
     hydrophobic_interactions = df_all.filter(regex='hydrophobic').columns
@@ -444,10 +448,11 @@ def main():
     cloud_dict["PI"] = generate_pharmacophore_centers_all_points(df_all, df_all.filter(regex='PI_saltbridge').columns)
     cloud_dict["NI"] = generate_pharmacophore_centers_all_points(df_all, df_all.filter(regex='NI_saltbridge').columns)
     
-    generate_point_cloud_pml(cloud_dict, f"{ligand}_complex", "point_cloud")
-        
-    # generate combo pharmacophore of the md with each interaction as a single pharmacophore feature
-    generate_md_pharmacophore_cloudcenters(df_all, ligand, "combopharm.pml", f"{ligand}_complex")
+    if generate_pml:
+        generate_point_cloud_pml(cloud_dict, f"{ligand}_complex", "point_cloud")
+            
+        # generate combo pharmacophore of the md with each interaction as a single pharmacophore feature
+        generate_md_pharmacophore_cloudcenters(df_all, ligand, "combopharm.pml", f"{ligand}_complex")
 
     print("\033[1mPharmacophores generated\033[0m")
     print("\033[1mAnalysis is Finished.\033[0m")

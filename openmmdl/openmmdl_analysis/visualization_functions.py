@@ -127,7 +127,7 @@ def cloud_json_generation(df_all):
     return clouds
 
 
-def visualization(json_file_path, pdb_file_path, dcd_file_path, interacting_waters_file_path, ligname, receptor_type='protein', height='1200px', width='1200px'):
+def visualization(json_file_path, pdb_file_path, dcd_file_path, interacting_waters_file_path, ligname, receptor_type='protein', height='1000px', width='1000px'):
     """Generates visualization of the trajectory with the interacting waters and interaction clouds.
     
     Args:

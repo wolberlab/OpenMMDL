@@ -108,7 +108,7 @@ def create_df_from_binding_site(selected_site_interactions, interaction_type="hb
     ]
 
     if interaction_type not in valid_types:
-        print("!!! Wrong interaction type specified. Hbond is chosen by default!!!\n")
+        print("\033[1m!!! Wrong interaction type specified. Hbond is chosen by default!!!\033[0m\n")
         interaction_type = "hbond"
 
     df = pd.DataFrame.from_records(
