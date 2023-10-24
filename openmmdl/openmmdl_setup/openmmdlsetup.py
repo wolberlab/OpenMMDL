@@ -738,13 +738,13 @@ def downloadPDB():
 def downloadPackage():
     temp = tempfile.NamedTemporaryFile()
     with zipfile.ZipFile(temp, 'w', zipfile.ZIP_DEFLATED) as zip:
-        zip.writestr('openmm_simulation/OpenMMDL_Simulation.py', createScript())
+        zip.writestr('openmmdl_simulation/OpenMMDL_Simulation.py', createScript())
         for key in uploadedFiles:
             for file, name in uploadedFiles[key]:
                 file.seek(0, 0)
-                zip.writestr('openmm_simulation/%s' % name, file.read())
+                zip.writestr('openmmdl_simulation/%s' % name, file.read())
     temp.seek(0, 0)
-    return send_file(temp, 'application/zip', True, 'openmm_simulation.zip', max_age=0)
+    return send_file(temp, 'application/zip', True, 'openmmdl_simulation.zip', max_age=0)
 
 @app.route('/showRunSimulation')
 def showRunSimulation():
