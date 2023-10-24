@@ -7,13 +7,6 @@ Introduction
 Amber files is hard to get for those don't familar with Amber language and Bash script. OpenMMDL-Setup provides a user-friendly interface to help users to generate Amber files for later MD simulation.
 This tutorial provides a step-by-step guide on setting up an MD simulation using the Amber files using OpenMMDL-Setup.
 
-1. [Starting OpenMMDL-Setup](#starting-openmmdl-setup)
-2. [Selecting the Amber Path](#selecting-the-amber-path)
-3. [Selecting the input files](#selecting-the-input-files)
-4. [Amber Configuration](#amber-configuration)
-5. [Simulation Setup](#simulation-setup)
-6. [Run Simulation](#run-simulation)
-
 Starting OpenMMDL-Setup
 ------------------------------
 We start the tutorial by creating an folder where we will copy all the input files and later run the MD Simulation.
