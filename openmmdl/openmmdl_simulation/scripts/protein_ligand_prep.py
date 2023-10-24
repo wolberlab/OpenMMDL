@@ -47,12 +47,16 @@ def prepare_ligand(ligand_file, minimize_molecule=True):
     	The prepared and converted ligand.
     """
     # Reading of SDF File, converting to rdkit.
-    if ".sdf" in ligand_file:
+    file_name = ligand_file.lower()
+    if file_name.endswith(".sdf"):
         rdkit_mol = Chem.SDMolSupplier(ligand_file, sanitize = False)
         for mol in rdkit_mol:
             rdkit_mol = mol
-    elif ".mol" in ligand_file:
+    elif file_name.endswith(".mol") and not file_name.endswith(".mol2"):
+        print(ligand_file)
         rdkit_mol = Chem.rdmolfiles.MolFromMolFile(ligand_file, sanitize = False)
+    elif file_name.endswith(".mol2"):
+        rdkit_mol = Chem.rdmolfiles.MolFromMol2File(ligand_file, sanitize = False)
     # Adding of hydrogens and assigning chrial tags from the structure.
     print('Adding hydrogens')
     rdkitmolh = Chem.AddHs(rdkit_mol, addCoords=True)
