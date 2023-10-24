@@ -201,34 +201,17 @@
 
             <div id="analysis" class="tab-pane fade">
                 <p/>
+                <div class="form-group">
+                    <label for="openmmdl_analysis">Interaction Analysis</label>
+                    {{ choice('openmmdl_analysis', 'Perform OpenMMDL Analysis', [
+                        ('True', 'Yes', 'The simulation will be analyzed'),
+                        ('False', 'No', 'The simulation will not be analyzed')]) }}
+                    </div>
                 <div class="form-group" id="rmsd">
                 <label for="rmsd">RMSD Calculation</label>
                 {{ choice('rmsd', 'RMSD Calculation', [
                     ('True', 'True', 'The RMSD will be calculated'),
                     ('False', 'False', 'The RMSD will not be calculated')]) }}
-                </div>
-                <div class="form-group">
-                <label for="interaction_analysis">Interaction Analysis</label>
-                {{ choice('interaction_analysis', 'Interaction Analysis', [
-                    ('True', 'True', 'The interactions will be analyzed'),
-                    ('False', 'False', 'The interactions will not be analyzed')]) }}
-                </div>
-                Apply Nglview/VMD/MOE to look up name and id
-                <div class="form-group" id="protein_res_id">
-                <label for="protein_res_id">Protein Residue id </label>
-                {{ textfield('protein_res_id', 'Protein Residue id') }}
-                </div>
-                <div class="form-group" id="protein_atom_name">
-                <label for="protein_atom_name">Protein Atom name</label>
-                {{ textfield('protein_atom_name', 'Protein Atom name') }}
-                </div>
-                <div class="form-group" id="ligand_id">
-                <label for="ligand_id">Ligand id</label>
-                {{ textfield('ligand_id', 'Ligand id') }}
-                </div>
-                <div class="form-group" id="ligand_atom_name">
-                <label for="ligand_atom_name">Ligand Atom name</label>
-                {{ textfield('ligand_atom_name', 'Ligand Atom name') }}
                 </div>
                 </div>
 
@@ -310,14 +293,22 @@
     </div>
     <div class="col-md-8">
         <div class="form-group">
-            <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('downloadScript') }}')"
+            {% if display_save_script %}
+            <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('downloadScript')}}')"
                 title="Save the script.  To run the simulation, put the script in the directory containing the input files and execute it.">Save Script</button>
-            {% if 'cleanup' in session and session['cleanup'] == 'yes' %}
-            <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('downloadPDB') }}')"
-                title="Save the processed PDB file.  This is the file the script loads as its input.">Save Processed PDB File</button>
             {% endif %}
-            <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('downloadPackage') }}')"
+
+            {% if 'cleanup' in session and session['cleanup'] == 'yes' %}
+            {% if display_processed_pdb %}
+            <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('downloadStructuralfiles') }}')"
+                title="Only applicable for the PDB path. Save the processed PDB files.">Save Processed PDB Files</button>
+            {% endif %}
+            {% endif %}
+
+            {% if display_save_all_files %}
+            <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('downloadPackage')}}')"
                 title="Save an archive containing both the script and the input files.  To run the simulation, expand the archive and execute the script.">Save All Files</button>
+            {% endif %}
         </div>
         <pre id="scriptContainer"><code id="script" class="python" style="overflow:scroll; white-space:pre"></code></pre>
     </div>
@@ -364,11 +355,7 @@ function outputFiletypeChanged() {
 
 function optionChanged() {
     // Update UI elements.
-    interaction_analysis = document.getElementById("interaction_analysis").value;
-    document.getElementById("protein_res_id").hidden = (interaction_analysis != 'True');
-    document.getElementById("protein_atom_name").hidden = (interaction_analysis != 'True');
-    document.getElementById("ligand_id").hidden = (interaction_analysis != 'True');
-    document.getElementById("ligand_atom_name").hidden = (interaction_analysis != 'True');
+    openmmdl_analysis = document.getElementById("openmmdl_analysis").value;
     restart_checkpoint = document.getElementById("restart_checkpoint").value;
     document.getElementById("restart_step").hidden = (restart_checkpoint != 'yes');
     nonbondedMethod = document.getElementById("nonbondedMethod").value;
@@ -417,22 +404,6 @@ function updateScriptSize() {
         container.style.height = "100%";
 }
 
-function runSimulation() {
-    platforms = [
-        {% for i in range(mm.Platform.getNumPlatforms()) %}
-            '{{ mm.Platform.getPlatform(i).getName() }}',
-        {% endfor %}
-    ];
-    platform = document.getElementById("platform").value;
-    if (platforms.indexOf(platform) == -1) {
-        document.getElementById("selectedPlatformName").textContent = platform;
-        document.getElementById("availablePlatforms").textContent = platforms.join(', ');
-        $('a[href="#simulation"]').tab('show');
-        $('#illegalPlatformModal').modal('show');
-    }
-    else
-        window.open('{{ url_for('showRunSimulation') }}');
-}
 
 // Configure the page based on initial values
 
