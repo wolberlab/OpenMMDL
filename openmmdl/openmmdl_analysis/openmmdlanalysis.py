@@ -78,7 +78,7 @@ def main():
        ligand = "UNK"
     treshold = int(args.binding)
     dataframe = args.dataframe
-    min_transition = args.min_transition
+    min_transition = int(args.min_transition)
     cpu_count = int(args.cpu_count)
     generate_pml = bool(args.generate_pml)
 
