@@ -35,21 +35,13 @@
   <div class="row">
     <div class="col-md-5">
       <ul class="nav nav-tabs">
-        <li class="active"><a data-toggle="tab" href="#input">Input</a></li>
-        <li><a data-toggle="tab" href="#rcpParam">Receptor</a></li>
+        <li class="active"><a data-toggle="tab" href="#rcpParam">Receptor</a></li>
         <li><a data-toggle="tab" href="#ligParam">Ligand</a></li>
         <li><a data-toggle="tab" href="#addWatMem">Add Water/Membrane</a></li>
       </ul>
       <div class="tab-content">
-        <div id="input" class="tab-pane fade in active">
-          <p>Select the PDB file that contains all the components to be modelled.</p>
-        <div class="form-group">
-            <label for="pdbFile" class="control-label col-md-2">PDB File</label>
-        <div class="col-md-10">{{ fileinput('pdbFile') }}</div>            
-        </div>
-        </div>
 
-        <div id="rcpParam" class="tab-pane fade">
+        <div id="rcpParam" class="tab-pane in active">
           <p>Select receptor type:</p>
 
           <!-- Proteins-->
@@ -62,7 +54,7 @@
             <div class="form-group">
               <div class="row">
                 <div class="col-lg-4" style="padding-left: 30px">
-                  <label for="protLabel"> Receptor File Name </label>
+                  <label for="protLabel"> Receptor File (.pdb) </label>
                   {{ fileinput('protFile') }}
                 </div>
 
@@ -102,7 +94,7 @@
             <div class="form-group">
               <div class="row">
                 <div class="col-lg-4" style="padding-left: 30px">
-                  <label for="dnaFile"> Receptor File Name </label>
+                  <label for="dnaFile"> Receptor File (.pdb) </label>
                   {{ fileinput('dnaFile') }}
                 </div>
           
@@ -135,7 +127,7 @@
             <div class="form-group">
               <div class="row">
                 <div class="col-lg-4" style="padding-left: 30px">
-                  <label for="rnaFile"> Receptor File Name </label>
+                  <label for="rnaFile"> Receptor File (.pdb) </label>
                   {{ fileinput('rnaFile') }}
                 </div>
           
@@ -171,7 +163,7 @@
             <div class="form-group">
               <div class="row">
                 <div class="col-lg-4" style="padding-left: 30px">
-                  <label for="carboFile"> Receptor File Name </label>
+                  <label for="carboFile"> Receptor File (.pdb) </label>
                   {{ fileinput('carboFile') }}
                 </div>
           
@@ -209,11 +201,8 @@
             <div id="nmLigContainer">
               <!-- Ligand 1-->
               <div id="nmLig1">
-                <div class="col-lg-2">
-                  <label> Ligand 1 </label>
-                </div>
 
-                <div class="col-lg-5">
+                <div class="col-lg-6">
                   <div class="form-group">
                     <label for="nmLigFile1">PDB File</label>
                     {{ fileinput('nmLigFile') }}
@@ -228,7 +217,7 @@
                   </div>
                 </div>
                 
-                <div class="col-lg-5">
+                <div class="col-lg-6">
                   <div class="form-group">
                     <label for="charge_value1">Charge Value</label>
                     {{ textfield('charge_value', 'Enter the net molecular charge of the ligand as integer (e.g. 1 or -2). The charge value can be checked via text editor, MOE, Pymol, etc.') }}
@@ -252,22 +241,21 @@
               </div>              
             </div>
             
-            <div class="form-group">
-              <button type="button" class="btn btn-default float-right" id="addNmLig1" onclick="addNmLig()">+ Add Normal Ligand</button>
-            </div>
           </div>
                                 
           <!-- for special ligand -->
           <div class="form-group">
-            <label><input type="checkbox" name="spLig" id="spLig" oninput="optionChanged()" {{ 'checked' if
-                  session['spLig'] else '' }}> Special Ligand </label>
+            <label><input type="checkbox" name="spLig" id="spLig" oninput="optionChanged()" {{ 'checked' if session['spLig'] else '' }}> Special Ligand
+              <span style="color:grey; font-weight: normal;">(e.g. cofactor heme in CYP450 enzymes)</span>
+            </label>
+
           </div>
 
           <div id="spLigOptions">
             <p>To get AMBER parameters for special ligands:</p>
             <ol>
               <li>Go to the <a href="http://amber.manchester.ac.uk/" target="_blank">AMBER parameter database</a></li>
-              <li>Find the components you need in the database</li>
+              <li>Find the components you need in this database</li>
               <li>Download the corresponding parameter set (i.e. both the <code>.prepc</code> and <code>.frcmod</code> files)</li>
               <li>Save the files locally</li>
               <li>Select the files below</li>
@@ -276,11 +264,8 @@
 
             <div id="spLigContainer">
               <div id="spLig1">
-                <div class="col-lg-2">
-                  <label> Ligand 1 </label>
-                </div>
 
-                <div class="col-lg-10">
+                <div class="col-lg-12">
                   <div class="form-group">
                     <label for="spLigFile1" class=" control-label col-md-3">PDB File</label>
                     <div class="col-md-9" style="margin-bottom: 15px">{{ fileinput('spLigFile') }}</div>
@@ -300,10 +285,6 @@
               </div>
             </div>
 
-            <div class="form-group">
-              <button type="button" class="btn btn-default" id="addSpLig1" onclick="addSpLig()">+ Add Special Ligand</button>
-            </div>
-
           </div>
         </div>
 
@@ -317,9 +298,8 @@
               href="https://pubs.acs.org/doi/10.1021/acs.jcim.9b00269" class="alert-link" target="_blank">the literature</a>.
           </p>
           <div class="alert alert-warning" role="alert">
-            <p> Warning: The input structure must first be aligned to its corresponding PDB structure in the <a
-                href="https://opm.phar.umich.edu/" class="alert-link" target="_blank">OPM database</a> in order for
-              the membrane to be added properly using this application. </p>
+            <p> Warning: The input structure, encompassing both the receptor and ligand, must be aligned with its respective PDB structure available in the <a
+                href="https://opm.phar.umich.edu/" class="alert-link" target="_blank">OPM database</a>. This alignment is essential for adding the membrane properly using this application. </p>
           </div>
           <hr>
 
@@ -526,8 +506,9 @@
       <div class="form-group">
         <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('downloadAmberBashScript')}}')"
           title="Save the script.  To run the simulation, put the script in the directory containing the input files and execute it.">Save Script</button>
-          <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('getAmberOutput')}}')"
-          title="Continue to the simulations configuration.">Continue</button>
+        
+        <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('showSimulationOptions')}}')"
+          title="Run the script and save the output in the current working directory, and continue to the simulations configuration.">Continue</button>
         {% if 'cleanup' in session and session['cleanup'] == 'yes' %}
         {% endif %}
       </div>
@@ -559,9 +540,6 @@
 <script>
 function optionChanged() {
   // Update UI elements:
-  // select the input file from the user's device;
-  pdbFile = document.getElementById("pdbFile").files;
-  document.getElementById("pdbFile_label").textContent = (pdbFile.length == 0 ? "" : pdbFile[0].name);
   
   // for tab 'Ligand';
   nmLig = document.getElementById("nmLig").checked;
@@ -665,107 +643,6 @@ function optionChanged() {
   }
 }
 optionChanged();
-
-// normal ligand options
-let nmLigCounter = 1;
-
-function addNmLig() {
-  nmLigCounter++;
-  const container = document.getElementById('nmLigContainer');
-  const newLigand = document.createElement('div');
-  newLigand.id = `ligand${nmLigCounter}`;
-  newLigand.innerHTML = `
-    <div class="col-lg-2">
-      <label> Ligand ${nmLigCounter} </label>
-      <button type="button" class="btn btn-default" id="delNmLig${nmLigCounter}" onclick="delNmLig(${nmLigCounter})">-</button>
-    </div>
-
-    <div class="col-lg-5">
-      <div class="form-group">
-        <label for="nmLigFile${nmLigCounter}">PDB File</label>
-        {{ fileinput('nmLigFile') }}
-      </div>
-
-      <div class="form-group">
-        <label for="lig_ff${nmLigCounter}">Ligand Force Field</label>
-        {{choice('lig_ff', 'Select the force filed for ligand.', [
-        ('gaff', 'GAFF'),
-        ('gaff2', 'GAFF2')
-        ])}}
-      </div>
-    </div>
-     
-    <div class="col-lg-5">
-      <div class="form-group">
-        <label for="charge_value${nmLigCounter}">Charge Value</label>
-        {{ textfield('charge_value', 'Enter the net molecular charge of the ligand as integer (e.g. 1 or -2). The charge value can be checked via text editor, MOE, Pymol, etc.') }}
-      </div>
-
-      <div class="form-group">
-        <label for="charge_method${nmLigCounter}">Charge Method</label>
-        {{choice('charge_method', 'Select the charge method that antechamber will adopt.', [
-        ('bcc', 'AM1-BCC'),
-        ('resp', 'RESP'),
-        ('cm1', 'CM1'),
-        ('cm2', 'CM2'),
-        ('esp', 'ESP(Kollman)'),
-        ('mul', 'Mulliken'),
-        ('gas', 'Gasteriger'),
-        ('rc', 'Read in charge'),
-        ('wc', 'Write out charge'),
-        ('dc', 'Delete charge')
-        ])}}
-      </div>  
-    </div>
-  `;
-  container.appendChild(newLigand);
-}
-
-function delNmLig(nmLigCounter) {
-  const container = document.getElementById('nmLigContainer');
-  const ligandToDelete = document.getElementById(`ligand${nmLigCounter}`);
-  container.removeChild(ligandToDelete);
-}
-
-//special ligand options
-let spLigCounter = 1;
-
-function addSpLig(){
-  spLigCounter++;
-  const container = document.getElementById('spLigContainer');
-  const newLigand = document.createElement('div');
-  newLigand.id = `ligand${spLigCounter}`;
-  newLigand.innerHTML = `
-    <div class="col-lg-2">
-      <label> Ligand ${spLigCounter} </label>
-      <button type="button" class="btn btn-default" id="delSpLig${spLigCounter}" onclick="delSpLig(${spLigCounter})">-</button>
-    </div>
-
-    <div class="col-lg-10">
-      <div class="form-group">
-        <label for="spLigFile${spLigCounter} class="control-label col-md-3"> PDB File</label> 
-        <div class="col-md-9" style="margin-bottom: 15px">{{ fileinput('spLigFile') }}</div>        
-      </div>
-      
-      <div class="form-group">
-        <label for="prepcFile${spLigCounter}" class="control-label col-md-3">Prepc File</label>
-        <div class="col-md-9" style="margin-bottom: 15px">{{ fileinput('prepcFile') }}</div>
-      </div>
-
-      <div class="form-group">
-        <label for="frcmodFile${spLigCounter}" class="control-label col-md-3">Frcmod File</label>
-        <div class="col-md-9" style="margin-bottom: 15px">{{ fileinput('frcmodFile') }}</div>
-      </div>
-    </div>
-  `;
-  container.appendChild(newLigand);
-}
-
-function delSpLig(spLigCounter){
-  const container = document.getElementById('spLigContainer');
-  const ligandToDelete = document.getElementById(`ligand${spLigCounter}`);
-  container.removeChild(ligandToDelete);
-}
 
 </script>
 {% endblock %}
