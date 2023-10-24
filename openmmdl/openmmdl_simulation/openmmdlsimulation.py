@@ -32,7 +32,7 @@ def main():
     parser.add_argument('-t', dest='topology', help='Protein Topology PDB/Amber File', required=True)
     parser.add_argument('-l', dest='ligand', help='SDF File of Ligand', default=None)
     parser.add_argument('-c', dest='coordinate', help='Amber coordinates file', default=None)
-    input_formats = ['.py', '.pdb', '.sdf', '.prmtop', '.inpcrd'] 
+    input_formats = ['.py', '.pdb', '.sdf', '.mol', '.prmtop', '.inpcrd'] 
     args = parser.parse_args()
     if not os.path.exists(args.folder):
         os.mkdir(args.folder)
@@ -51,7 +51,7 @@ def main():
                 shutil.copy(args.topology, args.folder)
             else:
                 print("Wrong topology file path, try the absolute path")
-        elif input_formats[3] in args.topology:
+        elif input_formats[4] in args.topology:
             if os.path.exists(args.topology):
                 shutil.copy(args.topology, args.folder)
             else:
@@ -59,7 +59,7 @@ def main():
         else:
             print("Wrong Format, don't forget the .pdb/.prmtop of the file")
         if args.ligand != None:
-            if input_formats[2] in args.ligand:
+            if input_formats[2] in args.ligand or input_formats[3] in args.ligand:
                 if os.path.exists(args.ligand):
                     shutil.copy(args.ligand, args.folder)
                 else:
@@ -67,7 +67,7 @@ def main():
             else:
                 print("Wrong Format, don't forget the .sdf of the ligand file")
         if args.coordinate != None:
-            if input_formats[4] in args.coordinate:
+            if input_formats[5] in args.coordinate:
                 if os.path.exists(args.coordinate):
                     shutil.copy(args.coordinate, args.folder)
                 else:
