@@ -198,10 +198,6 @@ def downloadAmberBashScript():
     response.headers['Content-Disposition'] = 'attachment; filename="run_ambertools.sh"'
     return response
 
-@app.route('/getAmberOutput')
-def getAmberOutput():
-    return render_template("simulationOptions.html")
-
 def configureDefaultAmberOptions():
     """Select default options based on the file format and force field."""
     # Ligand
@@ -252,11 +248,6 @@ def createAmberBashScript():
     ''')
 
     a_script.append('#!/bin/sh\n')
-    
-    # Input 
-    a_script.append('# Input')
-    a_script.append('#comp_file=%s # the file name of complex that contains all components to be modelled ' % uploadedFiles['pdbFile'][0][1])
-    a_script.append('\n')
 
     # Receptor
     a_script.append('################################## Receptor ######################################')
@@ -703,9 +694,16 @@ def addHydrogens():
     uploadedFiles['file'] = [(temp, prefix+'-processed_openMMDL'+suffix)]
     return showSimulationOptions()
 
+@app.route('/showSimulationOptions')
 def showSimulationOptions():
-    return render_template('simulationOptions.html')
+    file_type = session.get('fileType', '')
 
+    # render buttons based on the fileType
+    if file_type == 'pdb':
+        return render_template('simulationOptions.html', display_save_script=True, display_processed_pdb=True, display_save_all_files=True)
+    elif file_type == 'amber':
+        return render_template('simulationOptions.html', display_save_script=True, display_processed_pdb=False, display_save_all_files=False)
+    
 @app.route('/setSimulationOptions', methods=['POST'])
 def setSimulationOptions():
     for key in request.form:
@@ -726,8 +724,8 @@ def downloadScript():
     response.headers['Content-Disposition'] = 'attachment; filename="OpenMMDL_Simulation.py"'
     return response
 
-@app.route('/downloadPDB')
-def downloadPDB():
+@app.route('/downloadStructuralfiles')
+def downloadStructuralfiles():
     file, name = uploadedFiles['file'][0]
     file.seek(0, 0)
     response = make_response(file.read())
@@ -746,77 +744,6 @@ def downloadPackage():
     temp.seek(0, 0)
     return send_file(temp, 'application/zip', True, 'openmmdl_simulation.zip', max_age=0)
 
-@app.route('/showRunSimulation')
-def showRunSimulation():
-    homeDir = os.path.expanduser('~')
-    defaultDir = os.path.join(homeDir, 'openmm_simulation')
-    return render_template('runSimulation.html', defaultDir=defaultDir)
-
-@app.route('/startSimulation', methods=['POST'])
-def startSimulation():
-    global scriptOutput, simulationProcess
-    conn1, conn2 = Pipe()
-    scriptOutput = conn1
-    # Create the simulation directory and copy files.
-    try:
-        outputDir = request.form['directory']
-        if not os.path.isdir(outputDir):
-            os.makedirs(outputDir)
-    except:
-        conn2.send('An error occurred while creating the simulation directory: %s' % sys.exc_info()[1])
-        conn2.send(None)
-        return ""
-    try:
-        for key in uploadedFiles:
-            for file, name in uploadedFiles[key]:
-                file.seek(0, 0)
-                with open(os.path.join(outputDir, name), 'wb') as outputFile:
-                    shutil.copyfileobj(file, outputFile)
-        with open(os.path.join(outputDir, 'OpenMMDL_Simulation.py'), 'w') as outputFile:
-            outputFile.write(createScript())
-    except:
-        conn2.send('An error occurred while copying the input files: %s' % sys.exc_info()[1])
-        conn2.send(None)
-        return ""
-    # Run the simulation in a subprocess.
-    simulationProcess = Process(target=simulate, args=(conn2, outputDir, createScript(True)))
-    simulationProcess.start()
-    return ""
-
-@app.route('/stopSimulation', methods=['POST'])
-def stopSimulation():
-    global scriptOutput, simulationProcess
-    os.kill(simulationProcess.pid, signal.SIGKILL)
-    scriptOutput = None
-    return ""
-
-@app.route('/getSimulationOutput')
-def getSimulationOutput():
-    global scriptOutput
-    if scriptOutput is None:
-        return "", 404
-    output = []
-    try:
-        while scriptOutput.poll():
-            data = scriptOutput.recv()
-            if data is None:
-                scriptOutput = None
-                break
-            else:
-                output.append(data)
-    except EOFError:
-        scriptOutput = None
-    return "".join(output)
-
-def simulate(output, outputDir, script):
-    try:
-        exec(script, {"output":output, "outputDir":outputDir})
-    except Exception as e:
-        output.send('\nThe simulation failed with the following error:\n\n')
-        output.send(str(e))
-        output.send('\n\nDetails:\n\n')
-        output.send(traceback.format_exc())
-    output.send(None)
 
 def configureDefaultOptions():
     """Select default options based on the file format and force field."""
