@@ -207,6 +207,13 @@
                         ('Yes', 'Yes', 'The simulation will be analyzed'),
                         ('No', 'No', 'The simulation will not be analyzed')]) }}
                     </div>
+                <div class="form-group" id="analysis_selection">
+                    <label for="analysis_selection">Analysis Topology Selection</label>
+                    {{ choice('analysis_selection', 'Choose the Topology file that the analysis will be performed on', [
+                        ('analysis_all', 'Only all Atoms Topology/Trajectory', 'Analysis will be only performed on all Atoms Topology/Trajectory'),
+                        ('analysis_prot_lig', 'Only protein and ligand Topology/Trajectory', 'Analysis will be only performed on protein and ligand Topology/Trajectory'),
+                        ('analysis_all_prot_lig', 'Both Topologies/Trajectories', 'Analysis will be performed for both topoloies/trajectoreis')]) }}
+                    </div>
                 <div class="form-group" id="binding_mode">
                     <label for="binding_mode">Binding Mode Treshold</label>
                     {{ textfield('binding_mode', 'Enter the interaction treshold for binding mode generation without %.') }}
@@ -224,8 +231,8 @@
                 <div class="form-group" id="pml_generation">
                     <label for="pml_generation">PML Generation</label>
                     {{ choice('pml_generation', 'Generate Binding mode PML files', [
-                        ('Yes', 'Yes', 'PML files will be generated'),
-                        ('No', 'No', 'PML files will not be generated')]) }}
+                        ('True', 'Yes', 'PML files will be generated'),
+                        ('False', 'No', 'PML files will not be generated')]) }}
                     </div>
                 </div>
 
@@ -370,6 +377,7 @@ function outputFiletypeChanged() {
 function optionChanged() {
     // Update UI elements.
     openmmdl_analysis = document.getElementById("openmmdl_analysis").value;
+    document.getElementById("analysis_selection").hidden = (openmmdl_analysis != 'Yes');
     document.getElementById("rmsd_diff").hidden = (openmmdl_analysis != 'Yes');
     document.getElementById("pml_generation").hidden = (openmmdl_analysis != 'Yes');
     document.getElementById("binding_mode").hidden = (openmmdl_analysis != 'Yes');

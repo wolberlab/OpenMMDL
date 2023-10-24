@@ -53,7 +53,7 @@ def main():
     parser.add_argument('-b', dest='binding', help='Binding Mode Treshold for Binding Mode in %', default=40)   
     parser.add_argument('-df', dest='dataframe', help='Dataframe (use if the interactions were already calculated, default name would be "df_all.csv")', default=None)
     parser.add_argument('-m', dest='min_transition', help='Minimal Transition % for Markov State Model', default=1)
-    parser.add_argument('-c', dest='cpu_count', help='CPU Count, specify how many CPUs should be used, default is half of the CPU count', default=os.cpu_count()/2 )
+    parser.add_argument('-c', dest='cpu_count', help='CPU Count, specify how many CPUs should be used, default is half of the CPU count', default=os.cpu_count()//2 )
     parser.add_argument('-p', dest='generate_pml', help='Generate .pml files for pharmacophore visualization', default=False)
     parser.add_argument('-r', dest='frame_rmsd', help='RMSD Difference between frames calculation type "True" to use it default is False,', default="No" )
 

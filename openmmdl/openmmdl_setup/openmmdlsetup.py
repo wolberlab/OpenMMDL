@@ -755,10 +755,11 @@ def configureDefaultOptions():
     session['mda_output'] = 'mda_pdb_dcd'
     session['mda_selection'] = 'mda_prot_lig_all'
     session['openmmdl_analysis'] = 'No'
+    session['analysis_selection'] = 'analysis_all'
     session['binding_mode'] = '40'
     session['min_transition'] = '1'
     session['rmsd_diff'] = 'No'
-    session['pml_generation'] = 'No'    
+    session['pml_generation'] = 'True'    
     if session['fileType'] == 'pdb' and session['waterModel'] == 'implicit':
         implicitWater = True
     session['ensemble'] = 'nvt' if implicitWater else 'npt'
@@ -847,6 +848,8 @@ os.chdir(outputDir)""")
     script.append('import sys')
     script.append('import os')
     script.append('import shutil')
+    if session['openmmdl_analysis'] == 'Yes':
+        script.append('import subprocess')
     
     if session['fileType'] == 'amber':
         script.append('from openmm import *')
@@ -1195,6 +1198,12 @@ with open(f'Equilibration_{protein}', 'w') as outfile:
         script.append('post_md_file_movement(protein,ligand)')
     elif fileType == "amber":
         script.append('post_md_file_movement(protein, inpcrd_file, ligand=None)')
+    if session['openmmdl_analysis'] == "Yes":
+        script.append("os.chdir('MD_Postprocessing/2_MDAnalysis')")
+        if session['mdtraj_output'] != 'mdtraj_gro_xtc':
+            script.append("analysis_run_command = 'openmmdl_analysis -t centered_top.pdb -d centered_traj.dcd -l %s -n UNK -b %s -m %s -r %s -p %s' " % (session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+        elif session['mdtraj_output'] == 'mdtraj_gro_xtc':
+            script.append("analysis_run_command = 'openmmdl_analysis -t centered_top.gro -d centered_traj.xtc -l %s -n UNK -b %s -m %s -r %s -p %s' " % (session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
     return "\n".join(script)
 
 

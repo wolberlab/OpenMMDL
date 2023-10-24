@@ -110,6 +110,7 @@ def post_md_file_movement(protein_name, prmtop=None, inpcrd=None, ligand=None):
     copy_file(protein_name, "Input_Files")
     copy_file(prmtop, "Input_Files") if prmtop else None
     copy_file(inpcrd, "Input_Files") if inpcrd else None
+    copy_file(ligand, "MD_Postprocessing/2_MDAnalysis") if ligand else None
 
     # Organize pre-MD files
     source_pre_md_files = ["prepared_no_solvent_", "solvent_padding_", "solvent_absolute_", "membrane_"]
