@@ -3,7 +3,7 @@
 {% macro fileinput(id) %}
 <div class="input-group">
     <label class="btn btn-default btn-file input-group-addon">
-        Browse... <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" onchange="optionChanged()" />
+        Browse... <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" {{'disabled' if disabled else ''}} onchange="optionChanged()" />
     </label>
     <span id="{{ id }}_label" class="form-control" />
 </div>
@@ -14,7 +14,7 @@
 <p>Do you have available Amber files? </p>
 <form method="post" enctype="multipart/form-data" action="{{ url_for('configureFiles') }}" class="form-horizontal">
     <div style="margin-left:50px"><label class="control-label"><input type="radio" name="has_files" value="yes" checked
-                onchange="optionChanged()" />Yes.</label> My files are all ready to simulate.</div>
+                onchange="optionChanged()" />Yes, </label> my files are already to simulate.</div>
     <div class="form-group">
         <label for="prmtopFile" class="control-label col-md-2">Prmtop File</label>
         <div class="col-md-10">{{ fileinput('prmtopFile') }}</div>
@@ -25,17 +25,24 @@
     </div>
 
     <div style="margin-left:50px"><label class="control-label"><input type="radio" name="has_files" value="no"
-                onchange="optionChanged()" />No.</label> I want to prepare them here.</div>
+                onchange="optionChanged()" />No, </label> I want to prepare them here.</div>
     <input type="submit" value="Continue" id="continue" class="btn" disabled="true" />
 </form>
 
 
 <script>
+ 
     function optionChanged() {
-        // Update UI elements.
-        if (document.querySelector('input[name="has_files"]:checked').value === "no") {
+    var hasFilesRadio = document.querySelector('input[name="has_files"]:checked');
+    if (hasFilesRadio.value === "no") {
             // If the user does not have available Amber files, enable the sumit button.
             document.getElementById("continue").disabled = false;
+        document.getElementById("prmtopFile").value = null;
+        document.getElementById("inpcrdFile").value = null;
+        document.getElementById("prmtopFile_label").textContent = ""; 
+        document.getElementById("inpcrdFile_label").textContent = ""; 
+        document.getElementById("prmtopFile").disabled = true;
+        document.getElementById("inpcrdFile").disabled = true;
         } else {
             // Otherwise, update the UI elements based on the selected files.
             prmtopFiles = document.getElementById("prmtopFile").files;
@@ -43,9 +50,13 @@
             document.getElementById("prmtopFile_label").textContent = (prmtopFiles.length == 0 ? "" : prmtopFiles[0].name);
             document.getElementById("inpcrdFile_label").textContent = (inpcrdFiles.length == 0 ? "" : inpcrdFiles[0].name);
             document.getElementById('continue').disabled = !document.getElementById("prmtopFile").value || !document.getElementById("inpcrdFile").value;
+        document.getElementById("prmtopFile").disabled = false;
+        document.getElementById("inpcrdFile").disabled = false;
         }
     }
     optionChanged();
+
+    
 
 </script>
 {% endblock %}
