@@ -215,9 +215,9 @@
                     <label for="min_transition">Minimal Markov State Transition</label>
                     {{ textfield('min_transition', 'Enter the minimal markov state transition for the figure generation without %.') }}
                     </div>
-                <div class="form-group" id="rmsd">
-                <label for="rmsd">Frame RMSD Difference Calculation</label>
-                {{ choice('rmsd', 'RMSD Calculation', [
+                <div class="form-group" id="rmsd_diff">
+                <label for="rmsd_diff">Frame RMSD Difference Calculation</label>
+                {{ choice('rmsd_diff', 'RMSD Calculation', [
                     ('Yes', 'Yes', 'The RMSD will be calculated'),
                     ('No', 'No', 'The RMSD will not be calculated')]) }}
                 </div>
@@ -370,7 +370,7 @@ function outputFiletypeChanged() {
 function optionChanged() {
     // Update UI elements.
     openmmdl_analysis = document.getElementById("openmmdl_analysis").value;
-    document.getElementById("rmsd").hidden = (openmmdl_analysis != 'Yes');
+    document.getElementById("rmsd_diff").hidden = (openmmdl_analysis != 'Yes');
     document.getElementById("pml_generation").hidden = (openmmdl_analysis != 'Yes');
     document.getElementById("binding_mode").hidden = (openmmdl_analysis != 'Yes');
     document.getElementById("min_transition").hidden = (openmmdl_analysis != 'Yes');

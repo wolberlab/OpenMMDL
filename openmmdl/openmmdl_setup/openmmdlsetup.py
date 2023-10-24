@@ -754,6 +754,11 @@ def configureDefaultOptions():
     session['mdtraj_removal'] = 'False'
     session['mda_output'] = 'mda_pdb_dcd'
     session['mda_selection'] = 'mda_prot_lig_all'
+    session['openmmdl_analysis'] = 'No'
+    session['binding_mode'] = '40'
+    session['min_transition'] = '1'
+    session['rmsd_diff'] = 'No'
+    session['pml_generation'] = 'No'    
     if session['fileType'] == 'pdb' and session['waterModel'] == 'implicit':
         implicitWater = True
     session['ensemble'] = 'nvt' if implicitWater else 'npt'
