@@ -30,14 +30,14 @@ def protein_choice(protein_is_prepared, protein):
     
     return prepared_protein
     
-def prepare_ligand(sdf_file, minimize_molecule=True):
+def prepare_ligand(ligand_file, minimize_molecule=True):
     """
     Reads an SDF File into RDKit, adds hydrogens to the structure, minimizes it if selected and creates an openforcefield Molecule object.
 
     Parameters
     ----------
-    sdf_file: str
-        User input of SDF File
+    ligand_file: str
+        User input of SDF or MOL File
     minimize_molecule: bool
         Minimization of ligand.
         
@@ -47,9 +47,12 @@ def prepare_ligand(sdf_file, minimize_molecule=True):
     	The prepared and converted ligand.
     """
     # Reading of SDF File, converting to rdkit.
-    rdkitmol = Chem.SDMolSupplier(sdf_file, sanitize = False)
-    for mol in rdkitmol:
-        rdkit_mol = mol
+    if ".sdf" in ligand_file:
+        rdkit_mol = Chem.SDMolSupplier(ligand_file, sanitize = False)
+        for mol in rdkit_mol:
+            rdkit_mol = mol
+    elif ".mol" in ligand_file:
+        rdkit_mol = Chem.rdmolfiles.MolFromMolFile(ligand_file, sanitize = False)
     # Adding of hydrogens and assigning chrial tags from the structure.
     print('Adding hydrogens')
     rdkitmolh = Chem.AddHs(rdkit_mol, addCoords=True)
