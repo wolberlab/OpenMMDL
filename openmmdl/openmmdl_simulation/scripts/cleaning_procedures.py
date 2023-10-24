@@ -101,16 +101,18 @@ def post_md_file_movement(protein_name, prmtop=None, inpcrd=None, ligand=None):
     create_directory_if_not_exists("MD_Files/Minimization_Equilibration")
     create_directory_if_not_exists("MD_Files/MD_Output")
     create_directory_if_not_exists("MD_Postprocessing")
-    create_directory_if_not_exists("MD_Postprocessing/1_MDTraj")
-    create_directory_if_not_exists("MD_Postprocessing/2_MDAnalysis")
+    create_directory_if_not_exists("Final_Output")
+    create_directory_if_not_exists("Final_Output/All_Atoms")
+    create_directory_if_not_exists("Final_Output/Prot_Lig")
     create_directory_if_not_exists("Checkpoints")
 
     # Move input files
-    copy_file(ligand, "Input_Files") if ligand else None
+    copy_file(ligand, "Final_Output/All_Atoms") if ligand else None
+    copy_file(ligand, "Final_Output/Prot_Lig") if ligand else None
     copy_file(protein_name, "Input_Files")
     copy_file(prmtop, "Input_Files") if prmtop else None
     copy_file(inpcrd, "Input_Files") if inpcrd else None
-    copy_file(ligand, "MD_Postprocessing/2_MDAnalysis") if ligand else None
+    copy_file(ligand, "Input_Files") if ligand else None
 
     # Organize pre-MD files
     source_pre_md_files = ["prepared_no_solvent_", "solvent_padding_", "solvent_absolute_", "membrane_"]
@@ -126,11 +128,9 @@ def post_md_file_movement(protein_name, prmtop=None, inpcrd=None, ligand=None):
     organize_files([f"output_{protein_name}", "trajectory.dcd"], "MD_Files/MD_Output")
 
     # Organize MDtraj and MDAnalysis files
-    organize_files(["centered_old_coordinates_top.pdb", "centered_old_coordinates.dcd", "centered_old_coordinates_top.gro", "centered_old_coordinates.xtc"], "MD_Postprocessing/1_MDTraj")
-    organize_files(["centered_top.pdb", "centered_traj.dcd", "centered_top.gro", "centered_traj.xtc", "prot_lig_top.pdb", "prot_lig_traj.dcd", "prot_lig_top.gro", "prot_lig_traj.xtc"], "MD_Postprocessing/2_MDAnalysis")
+    organize_files(["centered_old_coordinates_top.pdb", "centered_old_coordinates.dcd", "centered_old_coordinates_top.gro", "centered_old_coordinates.xtc"], "MD_Postprocessing")
+    organize_files(["centered_top.pdb", "centered_traj.dcd", "centered_top.gro", "centered_traj.xtc"], "Final_Output/All_Atoms")
+    organize_files(["prot_lig_top.pdb", "prot_lig_traj.dcd", "prot_lig_top.gro", "prot_lig_traj.xtc"], "Final_Output/Prot_Lig")
 
     # Organize checkpoint files
     organize_files(["checkpoint.chk", "10x_checkpoint.chk", "100x_checkpoint.chk"], "Checkpoints")
-
-    # Copy ligand to MDAnalysis files
-    copy_file(ligand, "MD_Postprocessing/2_MDAnalysis") if ligand else None
