@@ -45,7 +45,7 @@ def main():
                   "              Prepare and Perform OpenMM Protein-Ligand MD Simulations                                 ",
                   "                                     Alpha Version                                                     "])
     
-    parser = argparse.ArgumentParser(prog='openmmdl', description=logo, formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(prog='openmmdl_analysis', description=logo, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-t', dest='topology', help='Topology File after MD Simulation', required=True)
     parser.add_argument('-d', dest='trajectory', help='Trajectory File in DCD Format', required=True)
     parser.add_argument('-l', dest='ligand_sdf', help='Ligand in SDF Format', required=True)       
