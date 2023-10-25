@@ -139,9 +139,9 @@ def highlight_numbers(split_data, starting_idx):
                     atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
                     highlighted_ni.append(atom_index)
             if saltbridge_type == "PI":
-                highlighted_pi.append(atom_index)
                 for code in numeric_codes:
                     atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
+                    highlighted_pi.append(atom_index)
 
         elif interaction_type == 'pication':
             parts = item.split()
