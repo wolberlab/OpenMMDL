@@ -26,7 +26,7 @@ logo = '\n'.join(["     ,-----.    .-------.     .-''-.  ,---.   .--.,---.    ,-
 
 
 def main():
-    parser = argparse.ArgumentParser(prog='openmmdl', description=logo, formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(prog='openmmdl_simulation', description=logo, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-f', dest='folder', type=str, help='Folder Name for MD Simulation', required=True,)
     parser.add_argument('-s', dest='script', type=str, help='MD Simulation script', required=True,)
     parser.add_argument('-t', dest='topology', help='Protein Topology PDB/Amber File', required=True)
