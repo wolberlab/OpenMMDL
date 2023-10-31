@@ -13,7 +13,7 @@ This can be accoplished by using the following command lines:
     git clone https://github.com/wolberlab/OpenMMDL
 
 
-The next step consists in installing all required dependencies in a new separate environment, which will be used to run the openmmdl-setup and openmmdl-simulation.
+The next step consists in installing all required dependencies in a new separate environment, which will be used to run the OpenMMDL package.
 OpenMMDL is written in python 3.10 and uses several packages, which can be easily installed on a separate environment using conda (we recommend using miniconda):
 
 .. code-block:: text
@@ -21,20 +21,12 @@ OpenMMDL is written in python 3.10 and uses several packages, which can be easil
     cd OpenMMDL
     conda create -n openmmdl --file requirements.txt
     
-After installation, activate the conda environment:
-
+After installation, activate the conda environment and install the OpenMMDL package:
+(Be sure, you are still within the OpenMMDL folder)
 
 .. code-block:: text
 
     conda activate openmmdl
+    pip install .
     
-The final step of the installation of OpenMMDL consists in the creation of alias for openmmdl-simulation and openmmdl-setup:
-
-
-.. code-block:: text
-
-    echo 'alias openmmdl-setup="python3 ~/OpenMMDL/openmmdl_setup/openmmdlsetup.py"' >> ~/.bashrc
-    echo 'alias openmmdl-simulation="python3 ~/OpenMMDL/openmmdl_simulation/openmmdlsimulation.py"' >> ~/.bashrc
-    
-    
-Now with OpenMMDL being installed on the local device and the alias being assigned everything is setup to work with OpenMMDL.
+Now with OpenMMDL being installed on the local device everything is setup to work with OpenMMDL.
