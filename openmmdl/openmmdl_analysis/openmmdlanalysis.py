@@ -431,12 +431,13 @@ def main():
     interacting_water_id_list = interacting_water_ids(df_all, waterbridge_interactions)
 
     # dump interacting waters for visualization
-    with open('interacting_waters.pkl', 'wb') as f:
+    os.makedirs("Visualization", exist_ok=True)  # Create the folder if it doesn't exist
+    with open('Visualization/interacting_waters.pkl', 'wb') as f:
         pickle.dump(interacting_water_id_list, f)
     save_interacting_waters_trajectory(topology, trajectory, interacting_water_id_list, ligand)
 
     # save clouds for visualization with NGL
-    with open('clouds.json', 'w') as f:
+    with open('Visualization/clouds.json', 'w') as f:
         json.dump(cloud_json_generation(df_all), f)
         
     # generate poincloud pml for visualization    
@@ -453,8 +454,8 @@ def main():
             
         # generate combo pharmacophore of the md with each interaction as a single pharmacophore feature
         generate_md_pharmacophore_cloudcenters(df_all, ligand, "combopharm.pml", f"{ligand}_complex")
-
-    print("\033[1mPharmacophores generated\033[0m")
+        print("\033[1mPharmacophores generated\033[0m")
+    
     print("\033[1mAnalysis is Finished.\033[0m")
     
     
