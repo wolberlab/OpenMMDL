@@ -113,21 +113,21 @@ def cloud_json_generation(df_all):
 
 
     clouds = {}
-    clouds['hydrophobic'] = {"coordinates": hydrophobe_coords, "color": [1.0, 1.0, 0.0], "radius": 0.05}
-    clouds['acceptor'] = {"coordinates": acceptor_ccords, "color": [1.0, 0.0, 0.0], "radius": 0.05}
-    clouds['donor'] = {"coordinates": donor_coords, "color": [0.0, 1.0, 0.0], "radius": 0.05}
-    clouds['waterbridge'] = {"coordinates": waterbridge_coords, "color": [0.0, 1.0, 0.9], "radius": 0.05}
-    clouds['negative_ionizable'] = {"coordinates": negative_ionizable_coords, "color": [0.0, 0.0, 1.0], "radius": 0.05}
-    clouds['positive_ionizable'] = {"coordinates": positive_ionizable_coords, "color": [1.0, 0.0, 0.0], "radius": 0.05}
-    clouds['pistacking'] = {"coordinates": pistacking_coords, "color": [0.0, 0.0, 1.0], "radius": 0.05}
-    clouds['pication'] = {"coordinates": pication_coords, "color": [0.0, 0.0, 1.0], "radius": 0.05}
-    clouds['halogen'] = {"coordinates": halogen_coords, "color": [1.0, 0.0, 0.9], "radius": 0.05}
-    clouds['metal'] = {"coordinates": metal_coords, "color": [1.0, 0.6, 0.0], "radius": 0.05}
+    clouds['hydrophobic'] = {"coordinates": hydrophobe_coords, "color": [1.0, 1.0, 0.0], "radius": 0.1}
+    clouds['acceptor'] = {"coordinates": acceptor_ccords, "color": [1.0, 0.0, 0.0], "radius": 0.1}
+    clouds['donor'] = {"coordinates": donor_coords, "color": [0.0, 1.0, 0.0], "radius": 0.1}
+    clouds['waterbridge'] = {"coordinates": waterbridge_coords, "color": [0.0, 1.0, 0.9], "radius": 0.1}
+    clouds['negative_ionizable'] = {"coordinates": negative_ionizable_coords, "color": [0.0, 0.0, 1.0], "radius": 0.1}
+    clouds['positive_ionizable'] = {"coordinates": positive_ionizable_coords, "color": [1.0, 0.0, 0.0], "radius": 0.1}
+    clouds['pistacking'] = {"coordinates": pistacking_coords, "color": [0.0, 0.0, 1.0], "radius": 0.1}
+    clouds['pication'] = {"coordinates": pication_coords, "color": [0.0, 0.0, 1.0], "radius": 0.1}
+    clouds['halogen'] = {"coordinates": halogen_coords, "color": [1.0, 0.0, 0.9], "radius": 0.1}
+    clouds['metal'] = {"coordinates": metal_coords, "color": [1.0, 0.6, 0.0], "radius": 0.1}
 
     return clouds
 
 
-def visualization(json_file_path, pdb_file_path, dcd_file_path, interacting_waters_file_path, ligname, receptor_type='protein', height='1000px', width='1000px'):
+def visualization(filepath, ligname, receptor_type='protein', height='1000px', width='1000px'):
     """Generates visualization of the trajectory with the interacting waters and interaction clouds.
     
     Args:
@@ -142,7 +142,7 @@ def visualization(json_file_path, pdb_file_path, dcd_file_path, interacting_wate
     Returns:
         nglview widget: returns the nglview widget containing the visualization
     """
-    with open(json_file_path) as f:
+    with open(f'{filepath}clouds.json') as f:
         data = json.load(f)
 
     sphere_buffers = []
@@ -154,9 +154,9 @@ def visualization(json_file_path, pdb_file_path, dcd_file_path, interacting_wate
             sphere_buffer["radius"] += [cloud["radius"]]
         sphere_buffers.append(sphere_buffer)
     
-    pdb_structure = md.load(pdb_file_path)
-    dcd_trajectory = md.load(dcd_file_path, top=pdb_structure)
-    with open(interacting_waters_file_path, 'rb') as f:
+    pdb_structure = md.load(f'{filepath}interacting_waters.pdb')
+    dcd_trajectory = md.load(f'{filepath}interacting_waters.dcd', top=pdb_structure)
+    with open(f'{filepath}interacting_waters.pkl', 'rb') as f:
         interacting_watersids = pickle.load(f)
 
     view = nv.show_mdtraj(dcd_trajectory)
