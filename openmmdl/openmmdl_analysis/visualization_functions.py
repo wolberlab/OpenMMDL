@@ -29,7 +29,7 @@ def interacting_water_ids(df_all, waterbridge_interactions):
     return list(set(interacting_waters))
 
 
-def save_interacting_waters_trajectory(pdb_file_path, dcd_file_path, interacting_waters, ligname, outputpath='./'):
+def save_interacting_waters_trajectory(pdb_file_path, dcd_file_path, interacting_waters, ligname, outputpath='./Visualization/'):
     """Saves .pdb and .dcd files of the trajectory containing ligand, receptor and all interacting waters.
 
     Args:
@@ -37,7 +37,7 @@ def save_interacting_waters_trajectory(pdb_file_path, dcd_file_path, interacting
         dcd_file_path (str): path to original dcd file
         interacting_waters (list): list of all interacting water ids
         ligname (str): name of the ligand in the pdb file
-        outputpath (str, optional): filepath to output new pdb and dcd files. Defaults to './'.
+        outputpath (str, optional): filepath to output new pdb and dcd files. Defaults to './Visualization/'.
     """
     u = mda.Universe(pdb_file_path, dcd_file_path)
     water_atoms = u.select_atoms(f"protein or nucleic or resname {ligname}")
