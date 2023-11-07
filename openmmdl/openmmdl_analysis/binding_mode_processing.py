@@ -107,7 +107,7 @@ def gather_interactions(df, ligand_rings):
                 col_name = f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
         elif row['INTERACTION'] == 'metal':
             prot_partner = row['Prot_partner']
-            ligcarbonidx = row['METAL_IDX']
+            ligcarbonidx = int(row['METAL_IDX'])
             metal_type = row['METAL_TYPE']
             location = row['LOCATION']
             interaction = row['INTERACTION']
