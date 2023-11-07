@@ -236,7 +236,7 @@ def create_and_merge_images(binding_mode, occurrence_percent, split_data, merged
     ----------
     binding_mode : str
         The name of the binding mode.
-    occurrence_percent: dict
+    occurrence_percent: float
         The percentage occurrence of the binding mode.
     split_data: list of str
         Data of the interaction used to generate the legend.
