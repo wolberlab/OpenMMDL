@@ -32,6 +32,10 @@ def test_waterids_barcode_generator(sample_dataframe_barcode_generation):
     
     # Test if the output is a list
     assert isinstance(waterid_barcode, list)
+    
+    # Test the expected waterid barcode for the sample dataframe and interaction
+    expected_waterid_barcode = [0, 104, 105]
+    assert waterid_barcode == expected_waterid_barcode
 
 def test_plot_barcodes():
     # create barcode data
@@ -62,6 +66,3 @@ def test_plot_barcodes():
     save_path = "multiple_barcodes.png"
     
     assert save_path is not None
-    # Test the expected waterid barcode for the sample dataframe and interaction
-    expected_waterid_barcode = [0, 104, 105]
-    assert waterid_barcode == expected_waterid_barcode
