@@ -15,10 +15,13 @@ def cleanup(protein_name):
     None
     """ 
     print("Cleaning Up :)")
-    os.remove(f'output_{protein_name}')
-    os.remove(f'centered_old_coordinates.pdb')
-    os.remove(f'centered_old_coordinates.dcd')
-    print("It's done")
+    try:
+        os.remove(f'output_{protein_name}')
+        os.remove(f'centered_old_coordinates.pdb')
+        os.remove(f'centered_old_coordinates.dcd')
+    except FileNotFoundError:
+        print("One or more files not found. Cleanup skipped.")
+    print("Cleanup is done.")
     
 def create_directory_if_not_exists(directory_path):
     """
