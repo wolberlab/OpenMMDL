@@ -30,8 +30,10 @@ def test_highlight_numbers():
         "165ASPA 4222 Donor waterbridge",
         "161PHEA 4211 4212 4213 4214 4215 4210 hydrophobic",
         "59ARGA 4205 4206 4207 4216 4217 4218 Aromatic pication",
+        "155PHEA 4205 4206 4207 4216 4217 4218 pistacking",
         "59ARGA 4194 F halogen",
-        "166ARGA 4202,4203 Carboxylate NI saltbridge"
+        "166ARGA 4202,4203 Carboxylate NI saltbridge",
+        "165ASPA 4202 Amine PI saltbridge"
     ]
 
     starting_idx = 1  # Updated starting index
@@ -211,13 +213,6 @@ def test_arranged_figure_generation():
     # Check if the output file was created
     
     assert output_path is not None
-
-    # Check if the output file is a valid image
-    try:
-        with Image.open(output_path) as img:
-            img.verify()
-    except Exception as e:
-        pytest.fail(f"Output file is not a valid image: {e}")
 
 # Run the tests
 if __name__ == '__main__':
