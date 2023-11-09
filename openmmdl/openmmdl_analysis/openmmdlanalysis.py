@@ -92,6 +92,8 @@ def main():
     complex.write("complex.pdb")
     # Writing out the ligand in a separate pdb file for ring calculation
     ligand_complex = pdb_md.select_atoms(f"resname {ligand}")
+    ligand_complex_no_h = pdb_md.select_atoms(f"resname {ligand} and not (name H*)")
+    ligand_complex_no_h.write("lig_no_h.pdb")
     ligand_complex.write("lig.pdb")
     #convert_pdb_to_sdf("lig.pdb", "lig.sdf")
     #ligand_sdf = "ligand_unk_2.sdf"
