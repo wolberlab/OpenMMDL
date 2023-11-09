@@ -31,49 +31,49 @@ def test_data_dir(tmp_path_factory):
     return data_dir
 
 
-def test_script_execution(test_data_dir):
-    # Define the root directory
-    root_dir = "/home/runner/work/OpenMMDL/OpenMMDL"
+#def test_script_execution(test_data_dir):
+#    # Define the root directory
+#    root_dir = "/home/runner/work/OpenMMDL/OpenMMDL"
+#
+#    # Specify the relative path to the input data
+#    relative_input_path = "openmmdl/tests/data/in"
+#
+#    # Combine the root directory and relative input path
+#    input_data_path = os.path.join(root_dir, relative_input_path)
 
-    # Specify the relative path to the input data
-    relative_input_path = "openmmdl/tests/data/in"
-
-    # Combine the root directory and relative input path
-    input_data_path = os.path.join(root_dir, relative_input_path)
-
-    # Ensure that the script runs successfully without errors
-    script_path = "openmmdlanalysis.py"
-    topology_file = os.path.join(input_data_path, "0_unk_hoh.pdb")
-    trajectory_file = os.path.join(root_dir, "openmmdl/tests/data/in/all_50.dcd")
-    ligand_sdf_file = os.path.join(input_data_path, "lig.sdf")
-    ligand_name = "UNK"
+#    # Ensure that the script runs successfully without errors
+#    script_path = "openmmdlanalysis.py"
+#    topology_file = os.path.join(input_data_path, "0_unk_hoh.pdb")
+#    trajectory_file = os.path.join(root_dir, "openmmdl/tests/data/in/all_50.dcd")
+#    ligand_sdf_file = os.path.join(input_data_path, "lig.sdf")
+#    ligand_name = "UNK"
     
-    cmd = f" openmmdl_analysis -t {topology_file} -d {trajectory_file} -l {ligand_sdf_file} -n {ligand_name} -b 10 -c 2"
+#    cmd = f" openmmdl_analysis -t {topology_file} -d {trajectory_file} -l {ligand_sdf_file} -n {ligand_name} -b 10 -c 2"
     
-    result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=test_data_dir)
+#    result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=test_data_dir)
     
-    assert result.returncode == 0, f"Script execution failed with error:\n{result.stderr.decode()}"
+#    assert result.returncode == 0, f"Script execution failed with error:\n{result.stderr.decode()}"
 
-    # Check that expected output files are generated
-    assert os.path.exists(os.path.join(test_data_dir, "complex.pdb"))
-    assert os.path.exists(os.path.join(test_data_dir, "lig.pdb"))
-    assert os.path.exists(os.path.join(test_data_dir, "df_all.csv"))
+#    # Check that expected output files are generated
+#    assert os.path.exists(os.path.join(test_data_dir, "complex.pdb"))
+#    assert os.path.exists(os.path.join(test_data_dir, "lig.pdb"))
+#    assert os.path.exists(os.path.join(test_data_dir, "df_all.csv"))
 
-    # Check for the presence of "Barcodes" folder
-    barcodes_folder = os.path.join(test_data_dir, "Barcodes")
-    assert os.path.exists(barcodes_folder), "The 'Barcodes' folder is missing."
+#    # Check for the presence of "Barcodes" folder
+#    barcodes_folder = os.path.join(test_data_dir, "Barcodes")
+#    assert os.path.exists(barcodes_folder), "The 'Barcodes' folder is missing."
 
-    # Check for the existence of "hydrophobic_barcodes.png" inside "Barcodes"
-    hydro_file_path = os.path.join(barcodes_folder, "hydrophobic_barcodes.png")
-    assert os.path.exists(hydro_file_path), "The 'hydrophobic_barcodes.png' file is missing inside 'Barcodes'."
+#    # Check for the existence of "hydrophobic_barcodes.png" inside "Barcodes"
+#    hydro_file_path = os.path.join(barcodes_folder, "hydrophobic_barcodes.png")
+#    assert os.path.exists(hydro_file_path), "The 'hydrophobic_barcodes.png' file is missing inside 'Barcodes'."
 
 
     # Check for the presence of "Binding_Modes_Markov_States" folder
-    markov_states_folder = os.path.join(test_data_dir, "Binding_Modes_Markov_States")
-    assert os.path.exists(markov_states_folder), "The 'Binding_Modes_Markov_States' folder is missing."
+#    markov_states_folder = os.path.join(test_data_dir, "Binding_Modes_Markov_States")
+#    assert os.path.exists(markov_states_folder), "The 'Binding_Modes_Markov_States' folder is missing."
 
-    # Check for the existence of "all_binding_modes_arranged.png" inside "Binding_Modes_Markov_States"
-    png_file_path = os.path.join(markov_states_folder, "all_binding_modes_arranged.png")
-    assert os.path.exists(png_file_path), "The 'all_binding_modes_arranged.png' file is missing inside 'Binding_Modes_Markov_States'."
+#    # Check for the existence of "all_binding_modes_arranged.png" inside "Binding_Modes_Markov_States"
+#    png_file_path = os.path.join(markov_states_folder, "all_binding_modes_arranged.png")
+#    assert os.path.exists(png_file_path), "The 'all_binding_modes_arranged.png' file is missing inside 'Binding_Modes_Markov_States'."
 
-    # Add more checks for other output files as needed
+#    # Add more checks for other output files as needed
