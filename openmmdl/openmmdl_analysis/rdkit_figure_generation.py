@@ -4,6 +4,7 @@ from PIL import Image
 import cairosvg
 import pylab
 import os
+import MDAnalysis as mda
 
 def split_interaction_data(data):
     """
@@ -68,6 +69,9 @@ def highlight_numbers(split_data, starting_idx):
     highlighted_pi = []
     highlighted_pication = []
     highlighted_metal = []
+    complex = mda.Universe("complex.pdb")
+    ligand_no_h = mda.Universe("lig_no_h.pdb")
+    lig_noh = ligand_no_h.select_atoms("all")
     
     
     for item in split_data:
@@ -83,11 +87,17 @@ def highlight_numbers(split_data, starting_idx):
             type = parts[-2]
             interaction_type = parts[-1]
             for code in numeric_codes:
-                atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
+                atom_index = int(code)  # Subtract starting_idx from the numeric code
+                complex_id = complex.select_atoms(f"id {atom_index}")
+                for atom in complex_id:
+                    atom_name = atom.name
+                for lig_atom in lig_noh:
+                    if lig_atom.name == atom_name:
+                        lig_real_index = lig_atom.id
                 if type == "Donor":
-                    highlighted_hbond_donor.append(atom_index)
+                    highlighted_hbond_donor.append(lig_real_index-1)
                 elif type == "Acceptor":
-                    highlighted_hbond_acceptor.append(atom_index)                    
+                    highlighted_hbond_acceptor.append(lig_real_index-1)                  
 
         elif interaction_type == 'hydrophobic':
             parts = item.split()
@@ -96,7 +106,13 @@ def highlight_numbers(split_data, starting_idx):
             interaction_type = parts[-1]
             for code in numeric_codes:
                 atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
-                highlighted_hydrophobic.append(atom_index)
+                complex_id = complex.select_atoms(f"id {atom_index}")
+                for atom in complex_id:
+                    atom_name = atom.name
+                for lig_atom in lig_noh:
+                    if lig_atom.name == atom_name:
+                        lig_real_index = lig_atom.id
+                highlighted_hydrophobic.append(lig_real_index-1)
 
         elif interaction_type == 'waterbridge':
             parts = item.split()
@@ -105,7 +121,13 @@ def highlight_numbers(split_data, starting_idx):
             interaction_type = parts[-1]
             for code in numeric_codes:
                 atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
-                highlighted_waterbridge.append(atom_index)
+                complex_id = complex.select_atoms(f"id {atom_index}")
+                for atom in complex_id:
+                    atom_name = atom.name
+                for lig_atom in lig_noh:
+                    if lig_atom.name == atom_name:
+                        lig_real_index = lig_atom.id
+                highlighted_waterbridge.append(lig_real_index-1)
 
         elif interaction_type == 'pistacking':
             parts = item.split()
@@ -114,7 +136,13 @@ def highlight_numbers(split_data, starting_idx):
             interaction_type = parts[-1]
             for code in numeric_codes:
                 atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
-                highlighted_pistacking.append(atom_index)
+                complex_id = complex.select_atoms(f"id {atom_index}")
+                for atom in complex_id:
+                    atom_name = atom.name
+                for lig_atom in lig_noh:
+                    if lig_atom.name == atom_name:
+                        lig_real_index = lig_atom.id
+                highlighted_pistacking.append(lig_real_index-1)
 
         elif interaction_type == 'halogen':
             parts = item.split()
@@ -124,7 +152,13 @@ def highlight_numbers(split_data, starting_idx):
             halogen_type = parts[-2]
             for code in numeric_codes:
                 atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
-                highlighted_halogen.append(atom_index)
+                complex_id = complex.select_atoms(f"id {atom_index}")
+                for atom in complex_id:
+                    atom_name = atom.name
+                for lig_atom in lig_noh:
+                    if lig_atom.name == atom_name:
+                        lig_real_index = lig_atom.id
+                highlighted_halogen.append(lig_real_index-1)
 
         elif interaction_type == 'saltbridge':
             parts = item.split()
@@ -137,11 +171,23 @@ def highlight_numbers(split_data, starting_idx):
                 numeric_values = [int(code) for code in split_codes]
                 for code in numeric_values:
                     atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
-                    highlighted_ni.append(atom_index)
+                    complex_id = complex.select_atoms(f"id {atom_index}")
+                    for atom in complex_id:
+                        atom_name = atom.name
+                    for lig_atom in lig_noh:
+                        if lig_atom.name == atom_name:
+                            lig_real_index = lig_atom.id
+                    highlighted_ni.append(lig_real_index-1)
             if saltbridge_type == "PI":
                 for code in numeric_codes:
                     atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
-                    highlighted_pi.append(atom_index)
+                    complex_id = complex.select_atoms(f"id {atom_index}")
+                    for atom in complex_id:
+                        atom_name = atom.name
+                    for lig_atom in lig_noh:
+                        if lig_atom.name == atom_name:
+                            lig_real_index = lig_atom.id
+                    highlighted_pi.append(lig_real_index-1)
 
         elif interaction_type == 'pication':
             parts = item.split()
@@ -151,7 +197,13 @@ def highlight_numbers(split_data, starting_idx):
             halogen_type = parts[-2]
             for code in numeric_codes:
                 atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
-                highlighted_pication.append(atom_index)
+                complex_id = complex.select_atoms(f"id {atom_index}")
+                for atom in complex_id:
+                    atom_name = atom.name
+                for lig_atom in lig_noh:
+                    if lig_atom.name == atom_name:
+                        lig_real_index = lig_atom.id
+                highlighted_pication.append(lig_real_index-1)
 
         elif interaction_type == 'metal':
             parts = item.split()
@@ -161,7 +213,13 @@ def highlight_numbers(split_data, starting_idx):
             halogen_type = parts[-2]
             for code in numeric_codes:
                 atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
-                highlighted_metal.append(atom_index)
+                complex_id = complex.select_atoms(f"id {atom_index}")
+                for atom in complex_id:
+                    atom_name = atom.name
+                for lig_atom in lig_noh:
+                    if lig_atom.name == atom_name:
+                        lig_real_index = lig_atom.id
+                highlighted_metal.append(lig_real_index-1)
     
     for value in highlighted_hbond_donor[:]:  # Using a copy of the list to avoid modifying while iterating
         if value in highlighted_hbond_acceptor:
