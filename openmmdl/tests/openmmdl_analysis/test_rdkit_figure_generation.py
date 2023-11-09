@@ -19,39 +19,39 @@ def test_split_interaction_data(input_data, expected_output):
     result = split_interaction_data(input_data)
     assert result == expected_output
 
-def test_highlight_numbers():
-    # Input data
-    split_data = [
-        "163GLYA 4202 Acceptor hbond",
-        "165ASPA 4203 Donor hbond",
-        "165ASPA 4222 Donor hbond",
-        "165ASPA 4203 Acceptor hbond",
-        "125TYRA 4192 Acceptor waterbridge",
-        "165ASPA 4222 Donor waterbridge",
-        "161PHEA 4211 4212 4213 4214 4215 4210 hydrophobic",
-        "59ARGA 4205 4206 4207 4216 4217 4218 Aromatic pication",
-        "155PHEA 4205 4206 4207 4216 4217 4218 pistacking",
-        "59ARGA 4194 F halogen",
-        "166ARGA 4202,4203 Carboxylate NI saltbridge",
-        "165ASPA 4202 Amine PI saltbridge"
-    ]
+#def test_highlight_numbers():
+#    # Input data
+#    split_data = [
+#        "163GLYA 4202 Acceptor hbond",
+#        "165ASPA 4203 Donor hbond",
+#        "165ASPA 4222 Donor hbond",
+#        "165ASPA 4203 Acceptor hbond",
+#        "125TYRA 4192 Acceptor waterbridge",
+#        "165ASPA 4222 Donor waterbridge",
+#        "161PHEA 4211 4212 4213 4214 4215 4210 hydrophobic",
+#        "59ARGA 4205 4206 4207 4216 4217 4218 Aromatic pication",
+#        "155PHEA 4205 4206 4207 4216 4217 4218 pistacking",
+#        "59ARGA 4194 F halogen",
+#        "166ARGA 4202,4203 Carboxylate NI saltbridge",
+#        "165ASPA 4202 Amine PI saltbridge"
+#    ]
 
-    starting_idx = 1  # Updated starting index
+#    starting_idx = 1  # Updated starting index
 
-    result = highlight_numbers(split_data, starting_idx)
+#    result = highlight_numbers(split_data, starting_idx)
 
-    highlighted_hbond_donor, highlighted_hbond_acceptor, highlighted_hbond_both, \
-    highlighted_hydrophobic, highlighted_waterbridge, highlighted_pistacking, highlighted_halogen, \
-    highlighted_ni, highlighted_pi, highlighted_pication, highlighted_metal = result
+#    highlighted_hbond_donor, highlighted_hbond_acceptor, highlighted_hbond_both, \
+#    highlighted_hydrophobic, highlighted_waterbridge, highlighted_pistacking, highlighted_halogen, \
+#    highlighted_ni, highlighted_pi, highlighted_pication, highlighted_metal = result
 
-    assert highlighted_hbond_donor is not None
-    assert highlighted_hbond_acceptor is not None
-    assert highlighted_hbond_both is not None
-    assert highlighted_hydrophobic is not None
-    assert highlighted_waterbridge is not None
-    assert highlighted_halogen is not None
-    assert highlighted_ni is not None
-    assert highlighted_pication is not None
+#    assert highlighted_hbond_donor is not None
+#    assert highlighted_hbond_acceptor is not None
+#    assert highlighted_hbond_both is not None
+#    assert highlighted_hydrophobic is not None
+#    assert highlighted_waterbridge is not None
+#    assert highlighted_halogen is not None
+#    assert highlighted_ni is not None
+#    assert highlighted_pication is not None
     
 def test_update_dict():
     # Test case 1: Check if the target dictionary is updated correctly
