@@ -37,15 +37,15 @@ def rmsd_for_atomgroups(prot_lig_top_file, prot_lig_traj_file, selection1, selec
     rmsd_df = pd.DataFrame(np.round(rmsd_analysis.rmsd[:, 2:], 2), columns=columns)
     rmsd_df.index.name = "frame"
 
-    rmsd_df.to_csv('RMSD_over_time.csv', sep=' ')
+    rmsd_df.to_csv('./RMSD/RMSD_over_time.csv', sep=' ')
 
     rmsd_df.plot(title="RMSD of protein and ligand")
     plt.ylabel("RMSD (Å)")
-    plt.savefig('RMSD_over_time.png')
+    plt.savefig('./RMSD/RMSD_over_time.png')
 
     return rmsd_df
 
-def RMSD_dist_frames(prot_lig_top_file, prot_lig_traj_file, lig):
+def RMSD_dist_frames(prot_lig_top_file, prot_lig_traj_file, lig, nucleic=False):
     """Calculate the RMSD between all frames in a matrix.
 
     Parameters
@@ -66,7 +66,10 @@ def RMSD_dist_frames(prot_lig_top_file, prot_lig_traj_file, lig):
 
     """
     universe=mda.Universe(prot_lig_top_file, prot_lig_traj_file)
-    pairwise_rmsd_prot = diffusionmap.DistanceMatrix(universe, select="protein").run().dist_matrix
+    if nucleic:
+        pairwise_rmsd_prot = diffusionmap.DistanceMatrix(universe, select="nucleic").run().dist_matrix
+    else:
+        pairwise_rmsd_prot = diffusionmap.DistanceMatrix(universe, select="protein").run().dist_matrix
     pairwise_rmsd_lig = diffusionmap.DistanceMatrix(universe, f"resname {lig}").run().dist_matrix
 
     max_dist = max(np.amax(pairwise_rmsd_lig), np.amax(pairwise_rmsd_prot))
@@ -76,7 +79,10 @@ def RMSD_dist_frames(prot_lig_top_file, prot_lig_traj_file, lig):
 
     # protein image
     img1 = ax[0].imshow(pairwise_rmsd_prot, cmap="viridis", vmin=0, vmax=max_dist)
-    ax[0].title.set_text("protein")
+    if nucleic:
+        ax[0].title.set_text("nucleic")
+    else:
+        ax[0].title.set_text("protein")
     ax[0].set_xlabel("frames")
     ax[0].set_ylabel("frames")
     
@@ -87,5 +93,5 @@ def RMSD_dist_frames(prot_lig_top_file, prot_lig_traj_file, lig):
 
     fig.colorbar(img1, ax=ax, orientation="horizontal", fraction=0.1, label="RMSD (Å)")
 
-    plt.savefig('RMSD_between_the_frames.png')
+    plt.savefig('./RMSD/RMSD_between_the_frames.png')
     return pairwise_rmsd_prot, pairwise_rmsd_lig
