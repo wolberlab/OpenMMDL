@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import MDAnalysis as mda
 from tqdm import tqdm
+from plip.basic import config
 from plip.structure.preparation import PDBComplex, LigandFinder, Mol, PLInteraction
 from plip.exchange.report import BindingSiteReport
 from multiprocessing import Pool
@@ -33,7 +34,7 @@ def characterize_complex(pdb_file: str, binding_site_id: str) -> PLInteraction:
     return pdb_complex.interaction_sets[binding_site_id]
 
 
-def retrieve_plip_interactions(pdb_file, lig_name):
+def retrieve_plip_interactions(pdb_file, lig_name, ):
     """
     Retrieves the interactions from PLIP.
 
@@ -138,7 +139,7 @@ def process_frame(frame, pdb_md, lig_name):
     pd.DataFrame :
         A dataframe conatining the interaction data for the processed frame.
     """
-    atoms_selected = pdb_md.select_atoms(f"protein or resname {lig_name} or (resname HOH and around 10 resname {lig_name})")
+    atoms_selected = pdb_md.select_atoms(f"protein or nucleic or resname {lig_name} or (resname HOH and around 10 resname {lig_name})")
     for num in pdb_md.trajectory[(frame):(frame+1)]:
         atoms_selected.write(f'processing_frame_{frame}.pdb')
     interactions_by_site = retrieve_plip_interactions(f"processing_frame_{frame}.pdb", lig_name)
