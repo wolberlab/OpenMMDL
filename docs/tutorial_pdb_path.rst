@@ -28,7 +28,7 @@ Now that we have activated the openmmdl environment we can start OpenMMDL-Setup.
 
 .. code-block:: text
 
-    openmmdl-setup
+    openmmdl_setup
 
 
 Selecting Input Files

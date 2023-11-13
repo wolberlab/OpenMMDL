@@ -1,8 +1,0 @@
-
-rcp = loadpdb protein_amber_f.pdb
-nmLig = loadpdb rename_ligand.pdb 
-comp = combine{rcp nmLig}
-savepdb comp comp.pdb
-
-quit
-

@@ -61,8 +61,8 @@
                 <div class="col-lg-4" >
                   <label for="prot_ff"> Force Field </label>
                   <select name="prot_ff" id="prot_ff" class="form-control" onchange="optionChanged()">
-                    <option value="leaprc.protein.ff14SB" selected>ff14SB</option>
-                    <option value="leaprc.protein.ff19SB">ff19SB</option>
+                    <option value="leaprc.protein.ff19SB" selected>ff19SB</option>
+                    <option value="leaprc.protein.ff14SB">ff14SB</option>
                     <option value="leaprc.ff99SB">ff99SB</option>
                     <option value="leaprc.protein.ff14SBonlysc">ff14SBonlysc</option>
                     <option value="leaprc.protein.ff19ipq">ff19ipq</option>
@@ -76,7 +76,7 @@
             
                 <!-- Add a container for the text field and hide it by default-->
                 <div class="col-lg-4" id="other_prot_ff_container" style="display: none;">
-                  <label for="other_prot_ff_input" style="color:grey;">Other Force Fields</label>
+                  <label for="other_prot_ff_input" style="color:grey;">Other Force Field</label>
                   {{ textfield('other_prot_ff_input', 'See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`')}}
                 </div>
 
@@ -109,7 +109,7 @@
           
                 <!-- Add a container for the text field and hide it by default-->
                 <div class="col-lg-4" id="other_dna_ff_container" style="display: none;">
-                  <label for="other_dna_ff_input" style="color:grey;">Other Force Fields</label>
+                  <label for="other_dna_ff_input" style="color:grey;">Other Force Field</label>
                   {{ textfield('other_dna_ff_input', 'See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`')}}
                 </div>
           
@@ -145,7 +145,7 @@
           
                 <!-- Add a container for the text field and hide it by default-->
                 <div class="col-lg-4" id="other_rna_ff_container" style="display: none;">
-                  <label for="other_rna_ff_input" style="color:grey;">Other Force Fields</label>
+                  <label for="other_rna_ff_input" style="color:grey;">Other Force Field</label>
                   {{ textfield('other_rna_ff_input', 'See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`')}}
                 </div>
           
@@ -178,7 +178,7 @@
           
                 <!-- Add a container for the text field and hide it by default-->
                 <div class="col-lg-4" id="other_carbo_ff_container" style="display: none;">
-                  <label for="other_carbo_ff_input" style="color:grey;">Other Force Fields</label>
+                  <label for="other_carbo_ff_input" style="color:grey;">Other Force Field</label>
                   {{ textfield('other_carbo_ff_input', 'See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`')}}
                 </div>
           
@@ -211,8 +211,8 @@
                   <div class="form-group">
                     <label for="lig_ff1">Ligand Force Field</label>
                     {{choice('lig_ff', 'Select the force filed for ligand.', [
-                    ('gaff', 'GAFF'),
-                    ('gaff2', 'GAFF2')
+                    ('gaff2', 'GAFF2'),
+                    ('gaff', 'GAFF')
                     ])}}
                   </div>
                 </div>
@@ -426,12 +426,12 @@
               <div class="col-lg-6" style="padding-left: 30px">
                   <label for="water_ff">Water Force Field</label>
                   <select name="water_ff" id="water_ff" class="form-control" onchange="optionChanged()">
-                    <option value="tip3p" selected>TIP3P</option>
+                    <option value="opc" selected>OPC</option>
+                    <option value="tip3p">TIP3P</option>
                     <option value="fb3">TIP3P-FB</option>
                     <option value="spce">SPC/E</option>
                     <option value="tip4pew">TIP4P-Ew</option>
                     <option value="fb4">TIP4P-FB</option>
-                    <option value="opc">OPC</option>
                     <option value="opc3">OPC3</option>
                     <option value="other_water_ff">other</option>
                   </select>

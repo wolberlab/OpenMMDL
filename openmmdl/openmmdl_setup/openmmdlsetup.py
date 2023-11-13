@@ -202,13 +202,13 @@ def configureDefaultAmberOptions():
     """Select default options based on the file format and force field."""
     # Ligand
     session['nmLig'] = False
-    session['lig_ff'] = 'gaff'
+    session['lig_ff'] = 'gaff2'
     session['charge_value'] = '0'
     session['charge_method'] = 'bcc'
     session['spLig'] = False
 
     # Receptor
-    session['prot_ff'] = 'ff14SB'
+    session['prot_ff'] = 'ff19SB'
     session['dna_ff'] = 'OL15'
     session['rna_ff'] = 'OL3'
     session['carbo_ff'] = 'GLYCAM_06j'
@@ -225,7 +225,7 @@ def configureDefaultAmberOptions():
     session['dist2Border'] = '15'
     session['padDist'] = '17'
         
-    session['water_ff'] = 'tip3p'
+    session['water_ff'] = 'opc'
     session['pos_ion'] = 'Na+'
     session['neg_ion'] = 'Cl-'
     session['ionConc'] = '0.15'
@@ -247,7 +247,7 @@ def createAmberBashScript():
                                                                                                       
     ''')
 
-    a_script.append('#!/bin/sh\n')
+    a_script.append('#!/bin/bash\n')
 
     # Receptor
     a_script.append('################################## Receptor ######################################')
@@ -306,7 +306,8 @@ def createAmberBashScript():
 ## `tleap` requires that all residues and atoms have appropriate types to ensure compatibility with the specified force field.
 ## To avoid `tleap` failing, we delete non-essential atoms, such as hydrogens, but preserve important atoms like carbon and nitrogen within the caps residues.
 ## Don' worry about the missing atoms as tleap has the capability to reconstruct them automatically. ''')
-    a_script.append('''awk '! ($2 ~ "(CH3|HH31|HH32|HH33)" || $3 ~ "(CH3|HH31|HH32|HH33)" )' ${rcp_nm}_amber.pdb > ${rcp_nm}_amber_f.pdb\n ''')
+    a_script.append('''awk '! ($2 ~ "(CH3|HH31|HH32|HH33)" || $3 ~ "(CH3|HH31|HH32|HH33)" )' ${rcp_nm}_amber.pdb > ${rcp_nm}_amber_f.pdb ''')
+    a_script.append("grep -v '^CONECT' ${rcp_nm}_amber_f.pdb > ${rcp_nm}_cnt_rmv.pdb\n")
 
     # Ligand
     if session['nmLig'] or session['spLig']:
@@ -349,7 +350,17 @@ def createAmberBashScript():
     if session['nmLig'] or session['spLig']:
         a_script.append('######################  Combine All Components to Be Modelled ####################')
         a_script.append('cat > tleap.combine.in <<EOF\n')
-        a_script.append('rcp = loadpdb ${rcp_nm}_amber_f.pdb')
+        a_script.append('source ${rcp_ff}')
+        a_script.append('source leaprc.${lig_ff}')
+        ## load the prepc and frcmod file for either normal or special ligand
+        if session ['nmLig']:
+            a_script.append('\nloadamberprep ${nmLigFile}.prepc')
+            a_script.append('loadamberparams ${nmLigFile}.frcmod\n')
+        if session['spLig']:
+            a_script.append('loadamberprep ${prepc}.prepc')
+            a_script.append('loadamberparams ${frcmod}.frcmod\n')
+        ## load both receptor and ligand pdb file
+        a_script.append('rcp = loadpdb ${rcp_nm}_cnt_rmv.pdb')
         if session['nmLig'] and session['spLig']:
             a_script.append('nmLig = loadpdb rename_${nmLigFile}.pdb ')
             a_script.append('spLig = loadpdb ${spLigFile}_amber.pdb ')
@@ -359,12 +370,14 @@ def createAmberBashScript():
             a_script.append('comp = combine{rcp nmLig}')
         elif session['spLig']:
             a_script.append('spLig = loadpdb ${spLigFile}_amber.pdb')
-            a_script.append('comp = combine{rcp spLig}')
+            a_script.append('comp = combine {rcp spLig}')
             
         a_script.append('savepdb comp comp.pdb')
         a_script.append('\nquit')
         a_script.append('\nEOF\n')
-        a_script.append('tleap -s -f tleap.combine.in > tleap.combine.out\n')
+        a_script.append('tleap -s -f tleap.combine.in > tleap.combine.out')
+        ## remove 'CONECT' line in the pdb file
+        a_script.append("grep -v '^CONECT' comp.pdb > comp_cnt_rmv.pdb\n")
 
     # Add Water/Membrane
     a_script.append('################################ Add Water/Membrane ##############################')
@@ -453,14 +466,18 @@ def createAmberBashScript():
     if addType == 'addMembrane':
         a_script.append('## Build the membrane')
         if session['nmLig'] == False and session['spLig'] == False:
-            a_script.append('packmol-memgen --pdb ${rcp_nm}_amber_f.pdb --lipids ${lipid_tp} --ratio ${lipid_ratio} --preoriented --dist ${dist2Border} --dist_wat ${padDist} --salt --salt_c ${pos_ion} --saltcon ${ionConc} --nottrim --overwrite --notprotonate\n')
+            a_script.append('packmol-memgen --pdb ${rcp_nm}_cnt_rmv.pdb --lipids ${lipid_tp} --ratio ${lipid_ratio} --preoriented --dist ${dist2Border} --dist_wat ${padDist} --salt --salt_c ${pos_ion} --saltcon ${ionConc} --nottrim --overwrite --notprotonate\n')
             a_script.append('## Clean the complex pdb by `pdb4amber` for further `tleap` process')
-            a_script.append('pdb4amber -i bilayer_${rcp_nm}_amber_f.pdb -o clean_bilayer_${rcp_nm}.pdb')
+            a_script.append('pdb4amber -i bilayer_${rcp_nm}_cnt_rmv.pdb -o clean_bilayer_${rcp_nm}.pdb')
+            ## remove 'CONECT' line in the pdb file
+            a_script.append("grep -v '^CONECT' clean_bilayer_${rcp_nm}.pdb > clean_bilayer_${rcp_nm}_cnt_rmv.pdb")
             a_script.append('\n')
         if session['nmLig'] or session['spLig']:
             a_script.append('packmol-memgen --pdb comp.pdb --lipids ${lipid_tp} --ratio ${lipid_ratio} --preoriented --dist ${dist2Border} --dist_wat ${padDist} --salt --salt_c ${pos_ion} --saltcon ${ionConc} --nottrim --overwrite --notprotonate\n')
             a_script.append('## Clean the complex pdb by `pdb4amber` for further `tleap` process')
             a_script.append('pdb4amber -i bilayer_comp.pdb -o clean_bilayer_comp.pdb')
+            ## remove 'CONECT' line in the pdb file
+            a_script.append("grep -v '^CONECT' clean_bilayer_comp.pdb > clean_bilayer_comp_cnt_rmv.pdb")
             a_script.append('\n')
 
     # Generate the prmtop and frcmod file for the complex.
@@ -483,14 +500,14 @@ def createAmberBashScript():
     ## load the complex pdb which comtains all the components to be modelled.
     if addType == 'addWater':
         if session['nmLig'] == False and session['spLig'] == False:
-            a_script.append('\nsystem = loadpdb ${rcp_nm}_amber_f.pdb\n ')
+            a_script.append('\nsystem = loadpdb ${rcp_nm}_cnt_rmv.pdb\n ')
         else:
-            a_script.append('system = loadpdb comp.pdb\n')
+            a_script.append('system = loadpdb comp_cnt_rmv.pdb\n')
     elif addType == 'addMembrane':
         if session['nmLig'] == False and session['spLig'] == False:
-            a_script.append('\nsystem = loadpdb clean_bilayer_${rcp_nm}.pdb\n')
+            a_script.append('\nsystem = loadpdb clean_bilayer_${rcp_nm}_cnt_rmv.pdb\n')
         if session['nmLig'] or session['spLig']:
-            a_script.append('system = loadpdb clean_bilayer_comp.pdb\n')
+            a_script.append('system = loadpdb clean_bilayer_comp_cnt_rmv.pdb\n')
     ## add box
     if addType == 'addWater':
         if boxType == 'cube':

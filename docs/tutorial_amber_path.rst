@@ -4,158 +4,192 @@
 Introduction
 ------------------
 
-Amber files is hard to get for those don't familar with Amber language and Bash script. OpenMMDL-Setup provides a user-friendly interface to help users to generate Amber files for later MD simulation.
-This tutorial provides a step-by-step guide on setting up an MD simulation using the Amber files using OpenMMDL-Setup.
+OpenMM enables users to perform molecular dynamics (MD) simulations using AMBER topology (`.prmtop`) and coordinate (`.inpcrd`) files as input. However, obtaining these essential Amber files can be a daunting task for users unfamiliar with Amber commands and Bash scripting. To address this challenge, OpenMMDL-Setup provides a user-friendly interface, streamlining the process of generating the required Amber files for subsequent MD simulations. 
+
+In this tutorial, we will use the mu opioid receptor (PDB ID: 8EFO) as an illustrative example to provide a comprehensive, step-by-step guide on configuring and initiating an MD simulation using Amber files prepared by OpenMMDL-Setup.
 
 Starting OpenMMDL-Setup
 ------------------------------
-We start the tutorial by creating an folder where we will copy all the input files and later run the MD Simulation.
+We start the tutorial by creating an folder to store input files and facilitate the MD simulation.
 
-To create a new folder we enter the following command lines:
+Create a new folder we enter the following command lines in the terminal:
 
 .. code-block:: text
     
     mkdir openmmdl_amber_tutorial
 
-To copy or move the pdb files for receptor and ligand to the folder we just created:
+Copy the receptor and ligand PDB files from `/openmmdl/openmmdl-simulation/tuturial_systems/amber_path/8efo_membrane` into the newly created folder:
 
 .. code-block:: text
     
-    copy receptor.pdb openmmdl_amber_tutorial
-    copy ligand.pdb openmmdl_amber_tutorial
-Replace the receptor.pdb and ligand.pdb with the pdb files you want to simulate.
+    copy 8EFO_protein.pdb openmmdl_amber_tutorial
+    copy 8QY.pdb openmmdl_amber_tutorial
+    
+In practice, replace the PDB files with the specific files you intend to simulate.
 
-To start the OpenMMDL-Setup we need to activate the openmmdl environment. To do this we have to enter the following command lines:
+Activate the OpenMMDL environment by entering the following command:
+
 .. code-block:: text
 
     conda activate openmmdl
 
-Now that we have activated the openmmdl environment we can launch OpenMMDL-Setup. To do this you need to type the following:
+Launch OpenMMDL-Setup:
 
 .. code-block:: text
 
-    openmmdl-setup
+    openmmdl_setup
 
 Selecting the Amber Path
 ------------------------------
-The first step is to select the Amber path. To do this we have to click on the "Amber" button.
+The first step is to choose the Amber path by clicking the "Amber" button.
+
+.. figure:: /_static/images/tutorials/Amber_Path/amberPath.png
+   :figwidth: 700px
+   :align: center
 
 Selecting the input files
 ------------------------------
-The second step is to select the input files. There are two options available:
+The second step involves choosing input files. Two options are available:
 
 .. figure:: /_static/images/tutorials/Amber_Path/selectAmberFiles.png
    :figwidth: 700px
    :align: center
 
 1. **Yes**, my files are already to simulate.
-When this button is selected, the user can select the Prmtop and Inpcrd files from the file browser. Once the files are selected, the user can click on the "Continue" button, which will take the user to the 'Simulation  Setup' page.
+When selected, users can choose the Prmtop and Inpcrd files via the file browser. Clicking "Continue" transitions to the 'Simulation Setup' page.
+
 2. **No**, I want to prepare them here.
-When this button is selected, and the user clicks on the "Continue" button, the user will be taken to the 'Amber Configuration' page. 
+When selected, clicking "Continue", users are directed to the 'Amber Configuration' page.
+
+For this tutorial, we will select the second option.
 
 Amber Configuration
 ------------------------------
-The user can configure the Amber setup and generate the bash script to generate the Amber files for later-on simulation.
+This page allows users to configure Amber settings and generate the Bash script for Amber files generation.
 
 .. figure:: /_static/images/tutorials/Amber_Path/AmberOption.png
    :figwidth: 700px
    :align: center
 
-There are three tabs in this page: 
+The page consists of three tabs: Receptor, Ligand, and Add Water/Membrane.
+
 1. **Receptor**
-Depends on the type of macromolecule the user wants to simulate, there are four types are available:
+
+Depending on the macromolecule type (Protein, DNA, RNA, or Carbohydrate), users can select the receptor PDB file using the file browser and choose the appropriate force fields.
 
 .. figure:: /_static/images/tutorials/Amber_Path/receptor.png
    :figwidth: 700px
    :align: center
 
-- Protein. Click on the "Browse..." button to select the PDB file, and then select the force field from the drop-down menu of "Force Field". If the force filed the user wants is not listed in the menu, the user can click on the 'other', and the 'Other Force Field' textbox will appear. 
+ If needed, users can specify an 'Other Force Field' in the provided textbox. To do this, select 'other' from the drop-down menu of "Force Field," and the 'Other Force Field' textbox will appear. Users can input the force field name in the textbox.
+
 
 .. figure:: /_static/images/tutorials/Amber_Path/receptor_otherFF.png
    :figwidth: 700px
    :align: center
 
-The user can type in the force field name in the textbox. Note: only the force field provided by the AmberTools can be used.``
-- DNA;
-- RNA;
-- Carbohydrate.
+Note: Only force fields provided by AmberTools are supported. To check available force fields, navigate to `/home/user/miniconda3/envs/openmmdl/dat/leap/cmd`. Replace the path with the location of your OpenMMDL installation. 
 
-The user can select one of the above type of macromolecule at one time.
+Users can select one type of macromolecule from the options listed above at a time. 
+
+In this tutorial, we will select the protein option, navigate to the folder 'openmmdl_amber_tutorial', and select'8EFO_protein.pdb',and select 'ff19SB' as the receptor force field. 
 
 2. **Ligand**
-Depends on the type of ligand the user wants to simulate, there are two types are available:
+   
+Depends on the type of ligand the user intends to simulate, two options are available:
 
-.. figure:: /_static/images/tutorials/Amber_Path/ligand.png
-   :figwidth: 700px
-   :align: center
+2.1 **Normal Ligand**. 
 
-- Normal Ligand. It refers to the small molecule that is made up of C, N, O, S, P, H, F, Cl, Br and I. Here `Antechamber` and `Parmchk2`` will be used to generate the Amber files for the ligand.
+It refers to the small molecule that is made up of C, N, O, S, P, H, F, Cl, Br and I. The Amber files for the ligand will be generated using `Antechamber` and `Parmchk2`.
 
 .. figure:: /_static/images/tutorials/Amber_Path/normalLigand.png
    :figwidth: 700px
    :align: center
 
-After check the 'Normal Ligand' option, the parameter setting for the ligand will be unfold. 
-Firstly, click on the "Browse..." button to select the ligand pdb file. 
-And then fill up the charge value of the ligand in the textbox of 'Charge Value'. This value should be a integer, e.g., -1 or 2. and can be calculating easily by openning the ligand pdb file in one text editor, and then suming up the value of the last column of the pdb file.
-For 'Ligand Force Field', two force fields are available: General Amber Force Field (GAFF) and GAFF2. The user can select either one of them.
-Lastly, pick up 'Charge Method' in the drop-down menu.
+Upon selecting the 'Normal Ligand' option, the parameter settings for the ligand will be revealed. 
 
-- Special Ligand. When it comes to the ligand that `Antechamber` is not able to processed, e.g. cofactor heme in CYP450 enzymes, the user can check the 'Special Ligand' option. 
-AMBER parameter database is a good source to find the Amber files for these special ligands. Follow the guidance listed in this application and finally setup for generating the Amber files for the special ligand.
+- Begin by clicking the "Browse..." button to select the ligand PDB file. 
+  
+- Fill in the charge value for the ligand in the 'Charge Value' textbox; this value should be an integer (e.g., -1 or 2) and can be calculated by opening the ligand PDB file in a text editor and summing up the values in the last column of the file. 
+  
+- Choose the 'Ligand Force Field' from the available options: General Amber Force Field (GAFF) or GAFF2. 
+  
+- Finally, select the 'Charge Method' from the drop-down menu.
+
+In this tutorial, we will select the ligand '8QY.pdb', set the charge value to 1, select the 'GAFF2' force field, and choose the 'bcc' charge method.
+
+2.2 **Special Ligand**. 
+
+For ligands that `Antechamber` cannot process, such as cofactors like heme in CYP450 enzymes, users can check the 'Special Ligand' option. The AMBER parameter database serves as a valuable source for finding Amber files for these special ligands. Follow the guidance provided in the application to set up the generation of Amber files for the special ligand.
 
 .. figure:: /_static/images/tutorials/Amber_Path/specialLigand.png
    :figwidth: 700px
    :align: center
 
-The user can select either one of or both of the above type of ligand at one time.
+Users can select either one or both of the above types of ligands at one time.
 
-3. **Add Water/Membrane**
-Depends on the environment the biosystem is in, the user should consider to add water or membrane to the system. 
-The user can select either 'Add water Box' or 'Add Membrane and Water' in this tab.
-- When 'Add water Box' is selected, the user can further select the 'Box Type' in the drop-down list, and then type the 'Distance(Å)' value in the textbox.
+1. **Add Water/Membrane**
+   
+Depending on the environment of the biosystem, users should consider adding water or a membrane. Choose between 'Add Water Box' or 'Add Membrane and Water' in this tab. 
+
+3.1 **Add water Box**.
+
+When this option is selected, users can further select the 'Box Type' from the drop-down list and then specify the 'Distance (Å)' value in the textbox.
+
 
 .. figure:: /_static/images/tutorials/Amber_Path/addWater.png
    :figwidth: 700px
    :align: center
 
-- When 'Add Membrane and Water' is selected, the user can further select the 'Lipid Type' and 'Lipid Force Field' in the drop-down list. 
-If the listed lipid type is not the one the user wants, the user can click on the 'Other Type or Mixture' option, and then type in the lipid type in the pop-up textbox of 'Other Types or Mixture' and 'Lipid Ratio'. 
-For example, 'POPC:TOPC' in 'Other Types or Mixture' and '1:1' in the 'Lipid Ratio' means the membrane is made up of 1 POPC and 1 TOPC. When only one type of lipid is selected, set the 'Lipid Ratio' to 1.
+3.2 **Add Membrane and Water** 
 
-.. figure:: /_static/images/tutorials/Amber_Path/adMembrane.png
+When this option is selected, users can further select the 'Lipid Type' and 'Lipid Force Field' from the drop-down list. 
+
+.. figure:: /_static/images/tutorials/Amber_Path/addMembrane.png
    :figwidth: 700px
    :align: center
 
-Warning: The input structure, encompassing both the receptor and ligand, must be aligned with its respective PDB structure available in the OPM database. This alignment is essential for adding the membrane properly using this application.
+If the listed lipid type does not match the desired one, click on the 'Other Type or Mixture' option. Then, input the lipid type in the pop-up textbox of 'Other Types or Mixture' and set the 'Lipid Ratio'. For instance, 'POPC:TOPC' in 'Other Types or Mixture' and '1:1' in the 'Lipid Ratio' means the membrane consists of 1 POPC and 1 TOPC. 
 
-- 'Water and Ions Setting' is a must for both 'Add water Box' and 'Add Membrane and Water' options. The Ions will be added to neutralize the model. The user can select the 'Water Force Field', 'Positive Ion' and 'Negative Ion' in the drop-down list, and then type the 'Ion Concentration (molar)' value in the textbox.
+.. figure:: /_static/images/tutorials/Amber_Path/addMembrane_other.png
+   :figwidth: 700px
+   :align: center
+
+When selecting only one type of lipid, set the 'Lipid Ratio' to 1. 
+
+Warning: Ensure that the input structure, including both the receptor and ligand, aligns with their respective PDB structures available in the OPM database. Proper alignment is crucial for adding the membrane accurately using this application.
+
+In this tutorial, we will select the 'add Membrane and Water' option, and keep the default values for all parameters.
+
+3.3 **Water and Ions Setting**.
+
+It is a must for both 'Add water Box' and 'Add Membrane and Water' options. The Ions will be added to neutralize the model. The user can select the 'Water Force Field', 'Positive Ion' and 'Negative Ion' in the drop-down list, and then type the 'Ion Concentration (molar)' value in the textbox.
 
 .. figure:: /_static/images/tutorials/Amber_Path/water_ion_setting.png
    :figwidth: 700px
    :align: center
 
-`tleap` in AmberTools is used to create water boxes around solute. For more information, see AmberTools22 .
-`PACKMOL-Memgen` is used to build the membrane in this application. For more information, see the literature.
-
 4. **Save Script**
-Last, click on 'Save Script' to download the generated bash script based on the configuration the user set up in this page and save it in the folder the user created at the beginning of this tutorial.
-Click 'Continue' to go to the 'Simulation  Setup' page.
+   
+Click 'Save Script' on the top of the right code block to download the generated Bash script based on the configuration. Save it in the previously created tutorial folder. Click 'Continue' to proceed to the 'Simulation Setup' page.
 
 Simulation Setup
 ------------------------------
-Firstly, configure the simulation options including the five tabs available in this page: System, Integrator, Simulation, Output, MDAnalysis.
-And then click on 'Save Script' to download the generated python script based on the configuration the user set up in this page and save it in the folder the user created at the beginning of this tutorial.
+Configure simulation options across five tabs: System, Integrator, Simulation, Output, and MDAnalysis. Click 'Save Script' to download the generated Python script based on the configuration, saving it in the tutorial folder.
 
-Run Simulation
+Run Bash Script
 ------------------------------
-In the terminal, go to the folder 'openmmdl_amber_tutorial', type the following command lines to run the bash script to generate the Amber files:
+In the terminal, navigate to the 'openmmdl_amber_tutorial' folder and run the Bash script to generate Amber files:
 
 .. code-block:: text
 
     bash run_ambertools.sh
 
-Once the 'Prmtop' and 'Inpcrd' files are generated, the user can run the MD simulation by typing the following command lines:
+If the script runs not successfully, please check the error message in the output 'leap.log' file and modify the input PDB files accordingly.Then go back to the 'Amber Configuration' page to regenerate the Bash script and run it again.
+
+Run MD simulation
+------------------------------
+Once the `Prmtop` and `Inpcrd` files are generated, the user can run the MD simulation by typing the following command lines:
 
 .. code-block:: text
 
