@@ -87,7 +87,7 @@ def highlight_numbers(split_data, starting_idx):
             type = parts[-2]
             interaction_type = parts[-1]
             for code in numeric_codes:
-                atom_index = int(code)  # Subtract starting_idx from the numeric code
+                atom_index = int(code)  
                 complex_id = complex.select_atoms(f"id {atom_index}")
                 for atom in complex_id:
                     atom_name = atom.name
@@ -105,7 +105,7 @@ def highlight_numbers(split_data, starting_idx):
             numeric_codes = parts[1:-1]
             interaction_type = parts[-1]
             for code in numeric_codes:
-                atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
+                atom_index = int(code)
                 complex_id = complex.select_atoms(f"id {atom_index}")
                 for atom in complex_id:
                     atom_name = atom.name
@@ -120,7 +120,7 @@ def highlight_numbers(split_data, starting_idx):
             numeric_codes = parts[1:-2]
             interaction_type = parts[-1]
             for code in numeric_codes:
-                atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
+                atom_index = int(code)
                 complex_id = complex.select_atoms(f"id {atom_index}")
                 for atom in complex_id:
                     atom_name = atom.name
@@ -135,7 +135,7 @@ def highlight_numbers(split_data, starting_idx):
             numeric_codes = parts[1:-1]
             interaction_type = parts[-1]
             for code in numeric_codes:
-                atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
+                atom_index = int(code)
                 complex_id = complex.select_atoms(f"id {atom_index}")
                 for atom in complex_id:
                     atom_name = atom.name
@@ -151,7 +151,7 @@ def highlight_numbers(split_data, starting_idx):
             interaction_type = parts[-1]
             halogen_type = parts[-2]
             for code in numeric_codes:
-                atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
+                atom_index = int(code)
                 complex_id = complex.select_atoms(f"id {atom_index}")
                 for atom in complex_id:
                     atom_name = atom.name
@@ -170,7 +170,7 @@ def highlight_numbers(split_data, starting_idx):
                 split_codes = numeric_codes[0].split(',')
                 numeric_values = [int(code) for code in split_codes]
                 for code in numeric_values:
-                    atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
+                    atom_index = int(code)
                     complex_id = complex.select_atoms(f"id {atom_index}")
                     for atom in complex_id:
                         atom_name = atom.name
@@ -180,7 +180,7 @@ def highlight_numbers(split_data, starting_idx):
                     highlighted_ni.append(lig_real_index-1)
             if saltbridge_type == "PI":
                 for code in numeric_codes:
-                    atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
+                    atom_index = int(code)
                     complex_id = complex.select_atoms(f"id {atom_index}")
                     for atom in complex_id:
                         atom_name = atom.name
@@ -196,7 +196,7 @@ def highlight_numbers(split_data, starting_idx):
             interaction_type = parts[-1]
             halogen_type = parts[-2]
             for code in numeric_codes:
-                atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
+                atom_index = int(code)
                 complex_id = complex.select_atoms(f"id {atom_index}")
                 for atom in complex_id:
                     atom_name = atom.name
@@ -212,7 +212,7 @@ def highlight_numbers(split_data, starting_idx):
             interaction_type = parts[-1]
             halogen_type = parts[-2]
             for code in numeric_codes:
-                atom_index = int(code) - starting_idx  # Subtract starting_idx from the numeric code
+                atom_index = int(code)
                 complex_id = complex.select_atoms(f"id {atom_index}")
                 for atom in complex_id:
                     atom_name = atom.name
