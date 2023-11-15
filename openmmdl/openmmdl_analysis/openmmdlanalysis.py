@@ -19,6 +19,7 @@ from collections import Counter
 from rdkit import Chem
 from rdkit.Chem import AllChem, Draw
 from rdkit.Chem.Draw import rdMolDraw2D
+from plip.basic import config
 
 from openmmdl.openmmdl_analysis.preprocessing import process_pdb_file, convert_pdb_to_sdf
 from openmmdl.openmmdl_analysis.rmsd_calculation import rmsd_for_atomgroups, RMSD_dist_frames
@@ -56,6 +57,7 @@ def main():
     parser.add_argument('-c', dest='cpu_count', help='CPU Count, specify how many CPUs should be used, default is half of the CPU count', default=os.cpu_count()//2 )
     parser.add_argument('-p', dest='generate_pml', help='Generate .pml files for pharmacophore visualization', default=False)
     parser.add_argument('-r', dest='frame_rmsd', help='RMSD Difference between frames calculation type "True" to use it default is False,', default="No" )
+    parser.add_argument('-nuc', dest='receptor_nucleic', help='Treat nucleic acids as receptor', default=False)
 
     input_formats = ['.pdb', '.dcd', '.sdf', '.csv'] 
     args = parser.parse_args()
@@ -81,6 +83,7 @@ def main():
     min_transition = int(args.min_transition)
     cpu_count = int(args.cpu_count)
     generate_pml = bool(args.generate_pml)
+    receptor_nucleic = bool(args.receptor_nucleic)
 
     process_pdb_file(topology)
     print("\033[1mFiles are preprocessed\033[0m")
@@ -88,10 +91,12 @@ def main():
     pdb_md = mda.Universe(topology, trajectory)
 
     # Writing out the complex of the protein and ligand with water around 10A of the ligand 
-    complex = pdb_md.select_atoms(f"protein or resname {ligand} or (resname HOH and around 10 resname {ligand})")
+    complex = pdb_md.select_atoms(f"protein or nucleic or resname {ligand} or (resname HOH and around 10 resname {ligand})")
     complex.write("complex.pdb")
     # Writing out the ligand in a separate pdb file for ring calculation
     ligand_complex = pdb_md.select_atoms(f"resname {ligand}")
+    ligand_complex_no_h = pdb_md.select_atoms(f"resname {ligand} and not (name H*)")
+    ligand_complex_no_h.write("lig_no_h.pdb")
     ligand_complex.write("lig.pdb")
     #convert_pdb_to_sdf("lig.pdb", "lig.sdf")
     #ligand_sdf = "ligand_unk_2.sdf"
@@ -115,10 +120,21 @@ def main():
     print("\033[1mLigand ring data gathered\033[0m")
     
     convert_ligand_to_smiles(ligand_sdf,output_smi="lig.smi")
-
-    rmsd_for_atomgroups(f'{topology}', f'{trajectory}', selection1='backbone', selection2=['protein', f'resname {ligand}'])
-    if frame_rmsd != "No":
-        RMSD_dist_frames(f'{topology}', f'{trajectory}', lig=f'{ligand}')
+    
+    os.makedirs("RMSD", exist_ok=True)
+    if receptor_nucleic:
+        rmsd_for_atomgroups(f'{topology}', f'{trajectory}', selection1='nucleicbackbone', selection2=['nucleic', f'resname {ligand}'])
+        if frame_rmsd != "No":
+            RMSD_dist_frames(f'{topology}', f'{trajectory}', lig=f'{ligand}', nucleic=True)
+            print("\033[1mRMSD calculated\033[0m")            
+    else:
+        rmsd_for_atomgroups(f'{topology}', f'{trajectory}', selection1='backbone', selection2=['protein', f'resname {ligand}'])
+        if frame_rmsd != "No":
+            RMSD_dist_frames(f'{topology}', f'{trajectory}', lig=f'{ligand}')
+            print("\033[1mRMSD calculated\033[0m")  
+            
+    if receptor_nucleic:
+        config.DNARECEPTOR = True
     
     interaction_list = pd.DataFrame(columns=["RESNR", "RESTYPE", "RESCHAIN", "RESNR_LIG", "RESTYPE_LIG", "RESCHAIN_LIG", "DIST", "LIGCARBONIDX", "PROTCARBONIDX", "LIGCOO", "PROTCOO"])
 

@@ -1,9 +1,12 @@
 OpenMMDL @ Molecular Design Lab
 ==============================
 [//]: # (Badges)
+[![CI-CD](https://github.com/wolberlab/OpenMMDL/actions/workflows/CI-CD.yml/badge.svg)](https://github.com/wolberlab/OpenMMDL/actions/workflows/CI-CD.yml)
+[![codecov](https://codecov.io/gh/talagayev/OpenMMDL/graph/badge.svg?token=950HZ93CKS)](https://codecov.io/gh/talagayev/OpenMMDL)
 [![Documentation Status](https://readthedocs.org/projects/openmmdl/badge/?version=latest)](https://openmmdl.readthedocs.io)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![CodeQL](https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml/badge.svg)](https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml)
+
 
 <img src="https://github.com/wolberlab/OpenMMDL/blob/main/openmmdl/openmmdl_setup/static/OpenMMDL_logo.svg" height="250">
 

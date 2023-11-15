@@ -1,0 +1,32 @@
+name: openmmdl  # Name of the Conda environment
+
+channels:
+  - conda-forge  # Add the conda-forge channel here
+
+dependencies:
+  - python=3.8
+  - pip
+  - setuptools>=61.0
+  - versioningit~=2.0
+  - pytest>=6.1.2
+  - pytest-runner
+  - numpy=1.23.4
+  - plip=2.3.0
+  - requests>=2.28.1
+  - rdkit>=2022.03.5
+  - mdtraj=1.9.7
+  - pdbfixer=1.8.1
+  - openff-toolkit=0.11.1
+  - openmmforcefields=0.11.2
+  - cudatoolkit>=11.7.0
+  - cuda-python>=11.7.1
+  - MDAnalysis>=2.3.0
+  - pytest-shutil>=1.7.0
+  - flask>=2.2.2
+  - cairosvg=2.7.1
+  - nglview=3.0.6
+  - jupyter
+  # Add any additional runtime dependencies from pyproject.toml here
+  # - package_name=version
+
+  # Include the dependencies from requirements.txt
