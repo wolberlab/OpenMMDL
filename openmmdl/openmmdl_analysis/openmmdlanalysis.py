@@ -56,8 +56,9 @@ def main():
     parser.add_argument('-m', dest='min_transition', help='Minimal Transition percentage for Markov State Model', default=1)
     parser.add_argument('-c', dest='cpu_count', help='CPU Count, specify how many CPUs should be used, default is half of the CPU count', default=os.cpu_count()//2 )
     parser.add_argument('-p', dest='generate_pml', help='Generate .pml files for pharmacophore visualization', default=False)
-    parser.add_argument('-r', dest='frame_rmsd', help='RMSD Difference between frames calculation type "True" to use it default is False,', default="No" )
+    parser.add_argument('-r', dest='frame_rmsd', help='RMSD Difference between frames calculation type "True" to use it default is False,', default="No")
     parser.add_argument('-nuc', dest='receptor_nucleic', help='Treat nucleic acids as receptor', default=False)
+    parser.add_argument('-s', dest='special_ligand', help='Calculate interactions with special ligands', default=None)
 
     input_formats = ['.pdb', '.dcd', '.sdf', '.csv'] 
     args = parser.parse_args()
@@ -84,6 +85,7 @@ def main():
     cpu_count = int(args.cpu_count)
     generate_pml = bool(args.generate_pml)
     receptor_nucleic = bool(args.receptor_nucleic)
+    special_ligand = args.special_ligand
 
     process_pdb_file(topology)
     print("\033[1mFiles are preprocessed\033[0m")
@@ -91,11 +93,14 @@ def main():
     pdb_md = mda.Universe(topology, trajectory)
 
     # Writing out the complex of the protein and ligand with water around 10A of the ligand 
-    complex = pdb_md.select_atoms(f"protein or nucleic or resname {ligand} or (resname HOH and around 10 resname {ligand})")
+    complex = pdb_md.select_atoms(f"protein or nucleic or resname {ligand} or (resname HOH and around 10 resname {ligand}) or resname {special_ligand}")
     complex.write("complex.pdb")
     # Writing out the ligand in a separate pdb file for ring calculation
     ligand_complex = pdb_md.select_atoms(f"resname {ligand}")
     ligand_complex_no_h = pdb_md.select_atoms(f"resname {ligand} and not (name H*)")
+    if special_ligand != None:
+        ligand_special = pdb_md.select_atoms(f"resname {ligand} or resname {special_ligand}")
+        ligand_special.write("ligand_special.pdb")
     ligand_complex_no_h.write("lig_no_h.pdb")
     ligand_complex.write("lig.pdb")
     #convert_pdb_to_sdf("lig.pdb", "lig.sdf")
@@ -117,6 +122,7 @@ def main():
     for atom_ring in lig_rd_ring.AtomRings():
         updated_ring = increase_ring_indices(atom_ring, lig_index)
         ligand_rings.append(updated_ring)
+    print(ligand_rings)
     print("\033[1mLigand ring data gathered\033[0m")
     
     convert_ligand_to_smiles(ligand_sdf,output_smi="lig.smi")
@@ -138,7 +144,7 @@ def main():
     
     interaction_list = pd.DataFrame(columns=["RESNR", "RESTYPE", "RESCHAIN", "RESNR_LIG", "RESTYPE_LIG", "RESCHAIN_LIG", "DIST", "LIGCARBONIDX", "PROTCARBONIDX", "LIGCOO", "PROTCOO"])
 
-    interaction_list = process_trajectory(pdb_md, dataframe=dataframe, num_processes=cpu_count, lig_name=ligand)
+    interaction_list = process_trajectory(pdb_md, dataframe=dataframe, num_processes=cpu_count, lig_name=ligand, special_ligand=special_ligand)
 
     interaction_list["Prot_partner"] = interaction_list["RESNR"].astype(str) + interaction_list["RESTYPE"] + interaction_list["RESCHAIN"]
 
