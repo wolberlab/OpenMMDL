@@ -39,7 +39,7 @@ def mdtraj_conversion(pdb_file, mdtraj_output):
     if "gro" in mdtraj_output:
         mdtraj_first_frame.save_gro(f'centered_old_coordinates_top.gro')
     
-def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, ligand_name, mda_output, output_selection):
+def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, mda_output, output_selection, ligand_name=None):
     """
     translate the trajectory so that all frames coincide with its center of geometry.
 
