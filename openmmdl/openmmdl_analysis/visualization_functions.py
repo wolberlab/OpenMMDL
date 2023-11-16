@@ -29,7 +29,7 @@ def interacting_water_ids(df_all, waterbridge_interactions):
     return list(set(interacting_waters))
 
 
-def save_interacting_waters_trajectory(pdb_file_path, dcd_file_path, interacting_waters, ligname, outputpath='./Visualization/'):
+def save_interacting_waters_trajectory(pdb_file_path, dcd_file_path, interacting_waters, ligname, special, outputpath='./Visualization/'):
     """Saves .pdb and .dcd files of the trajectory containing ligand, receptor and all interacting waters.
 
     Args:
@@ -40,7 +40,7 @@ def save_interacting_waters_trajectory(pdb_file_path, dcd_file_path, interacting
         outputpath (str, optional): filepath to output new pdb and dcd files. Defaults to './Visualization/'.
     """
     u = mda.Universe(pdb_file_path, dcd_file_path)
-    water_atoms = u.select_atoms(f"protein or nucleic or resname {ligname}")
+    water_atoms = u.select_atoms(f"protein or nucleic or resname {ligname} or resname {special}")
 
     for water in interacting_waters:
         add_water_atoms = u.select_atoms(f'resname HOH and resid {water}')
@@ -136,8 +136,8 @@ def visualization(filepath, ligname, receptor_type='protein', height='1000px', w
         dcd_file_path (str): path to dcd file (use interacting_waters.dcd for better visualization)
         interacting_waters_file_path (str): path to .pkl file containing the interacting water ids
         receptor_type (str, optional): type of receptor. Defaults to 'protein'.
-        height (str, optional): height of the visualization. Defaults to '1200px'.
-        width (str, optional): width of the visualization. Defaults to '1200px'.
+        height (str, optional): height of the visualization. Defaults to '1000px'.
+        width (str, optional): width of the visualization. Defaults to '1000px'.
     
     Returns:
         nglview widget: returns the nglview widget containing the visualization
