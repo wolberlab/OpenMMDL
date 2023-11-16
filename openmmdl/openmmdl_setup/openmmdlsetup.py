@@ -318,9 +318,9 @@ def createAmberBashScript():
         a_script.append('nmLigFile=%s # the file name of ligand without suffix `.pdb` or `.sdf`' % nmLigFile[:-4] )
         # depending on the uploaded file format,convert it to pdb or sdf file.
         if nmLigFile[-4:] == '.sdf':
-            a_script.append('obabel -isdf ${nmLigFile}.sdf -opdb ${nmLigFile}.pdb # convert to pdb file for tleap')
+            a_script.append('obabel ${nmLigFile}.sdf -O ${nmLigFile}.pdb -p # convert to pdb file for tleap, -p: add hydrogens appropriate for pH7.4')
         elif nmLigFile[-4:] == '.pdb':
-            a_script.append('obabel -ipdb ${nmLigFile}.pdb -osdf ${nmLigFile}.sdf # convert to sdf file for openmmdl_analysis')
+            a_script.append('obabel ${nmLigFile}.pdb -O ${nmLigFile}.sdf -p # convert to sdf file for openmmdl_analysis, -p: add hydrogens appropriate for pH7.4')
 
         a_script.append('charge_method=%s # refers to the charge method that antechamber will adopt' % session['charge_method'] )
         a_script.append('charge_value=%s # Enter the net molecular charge of the ligand as integer (e.g. 1 or -2)' % session['charge_value'])
@@ -341,9 +341,9 @@ def createAmberBashScript():
         a_script.append('spLigFile=%s # the file name of ligand without suffix `.pdb` or `.sdf' % spLigFile[:-4] )
         # depending on the uploaded file format,convert it to pdb or sdf file.
         if spLigFile[-4:] == '.sdf':
-            a_script.append('obabel -isdf ${spLigFile}.sdf -opdb ${spLigFile}.pdb # convert to pdb file for tleap')
+            a_script.append('obabel ${spLigFile}.sdf -O ${spLigFile}.pdb -p # convert to pdb file for tleap. -p: add hydrogens appropriate for pH7.4')
         elif spLigFile[-4:] == '.pdb':
-            a_script.append('obabel -ipdb ${spLigFile}.pdb -osdf ${spLigFile}.sdf # convert to sdf file for openmmdl_analysis')
+            a_script.append('obabel ${spLigFile}.pdb -O ${spLigFile}.sdf -p  # convert to sdf file for openmmdl_analysis, -p: add hydrogens appropriate for pH7.4')
         prepcFile = uploadedFiles['prepcFile'][0][1]
         prepcFile = prepcFile [:-6]
         a_script.append('prepc=%s # the file name without suffix `prepc`' % prepcFile )

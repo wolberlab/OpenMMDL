@@ -81,7 +81,7 @@ Depending on the macromolecule type (Protein, DNA, RNA, or Carbohydrate), users 
    :figwidth: 700px
    :align: center
 
- If needed, users can specify an 'Other Force Field' in the provided textbox. To do this, select 'other' from the drop-down menu of "Force Field," and the 'Other Force Field' textbox will appear. Users can input the force field name in the textbox.
+If needed, users can specify an 'Other Force Field' in the provided textbox. To do this, select 'other' from the drop-down menu of "Force Field," and the 'Other Force Field' textbox will appear. Users can input the force field name in the textbox.
 
 
 .. figure:: /_static/images/tutorials/Amber_Path/receptor_otherFF.png
@@ -143,13 +143,15 @@ When this option is selected, users can further select the 'Box Type' from the d
    :figwidth: 700px
    :align: center
 
-3.2 **Add Membrane and Water** 
+
+3.2 **Add Membrane and Water**.
 
 When this option is selected, users can further select the 'Lipid Type' and 'Lipid Force Field' from the drop-down list. 
 
 .. figure:: /_static/images/tutorials/Amber_Path/addMembrane.png
    :figwidth: 700px
    :align: center
+
 
 If the listed lipid type does not match the desired one, click on the 'Other Type or Mixture' option. Then, input the lipid type in the pop-up textbox of 'Other Types or Mixture' and set the 'Lipid Ratio'. For instance, 'POPC:TOPC' in 'Other Types or Mixture' and '1:1' in the 'Lipid Ratio' means the membrane consists of 1 POPC and 1 TOPC. 
 
@@ -170,6 +172,7 @@ It is a must for both 'Add water Box' and 'Add Membrane and Water' options. The 
 .. figure:: /_static/images/tutorials/Amber_Path/water_ion_setting.png
    :figwidth: 700px
    :align: center
+
 
 4. **Save Script**
    
@@ -196,3 +199,15 @@ Once the `Prmtop` and `Inpcrd` files are generated, the user can run the MD simu
 .. code-block:: text
 
     python3 OpenMMDL_Simulation.py
+
+Or run the several MD recplicas via slurm.The `run_slurm.sh` is in tutorial folder `/openmmdl/openmmdl-simulation/tuturial_systems/amber_path/8efo_membrane`. Firstly copy it to the tutorial folder
+
+.. code-block:: text
+
+    copy run_slurm.sh openmmdl_amber_tutorial
+
+Remember to replace the slurm configuration and environment `openmmdl` path with your own via a text editor. Finally run the following command lines:
+
+.. code-block:: text
+
+    bash run_slurm.sh
