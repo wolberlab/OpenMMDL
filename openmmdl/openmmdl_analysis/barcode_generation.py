@@ -80,7 +80,7 @@ def plot_barcodes(barcodes, save_path):
     for i, (title, barcode) in enumerate(barcodes.items()):
         ax = axs[i]
         ax.set_axis_off()
-        im = ax.imshow(barcode.reshape(1, -1), cmap='binary', aspect='auto', interpolation='nearest')
+        im = ax.imshow(barcode.reshape(1, -1), cmap='binary', aspect='auto', interpolation='nearest', vmin=0, vmax=1)
 
         percent_occurrence = (barcode.sum() / len(barcode)) * 100
         ax.text(1.05, 0.5, f"{percent_occurrence:.2f}%", transform=ax.transAxes, va='center', fontsize=8)

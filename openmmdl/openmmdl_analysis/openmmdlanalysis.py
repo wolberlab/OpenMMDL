@@ -392,6 +392,7 @@ def main():
     pication_interactions = df_all.filter(regex='pication').columns
     saltbridge_ni_interactions = df_all.filter(regex='NI_saltbridge').columns
     saltbridge_pi_interactions = df_all.filter(regex='PI_saltbridge').columns
+    metal_interactions = df_all.filter(regex='metal').columns
 
     hydrophobicinteraction_barcodes = {}
     for hydrophobic_interaction in hydrophobic_interactions:
@@ -438,6 +439,11 @@ def main():
         barcode = barcodegeneration(df_all, saltbridge_pi_interactions)
         saltbridge_pi_barcodes[saltbridge_pi_interaction] = barcode
     
+    metal_barcodes = {}
+    for metal_interaction in metal_interactions:
+        barcode = barcodegeneration(df_all, metal_interaction)
+        metal_barcodes[metal_interaction] = barcode
+    
     plot_barcodes(hydrophobicinteraction_barcodes, "hydrophobic_barcodes.png")
     plot_barcodes(acceptor_barcodes, "acceptor_barcodes.png")
     plot_barcodes(donor_barcodes, "donor_barcodes.png")
@@ -447,6 +453,7 @@ def main():
     plot_barcodes(waterbridge_barcodes, "waterbridge_barcodes.png")
     plot_barcodes(saltbridge_ni_barcodes, "saltbridge_ni_barcodes.png")
     plot_barcodes(saltbridge_pi_barcodes, "saltbridge_pi_barcodes.png")
+    plot_barcodes(metal_barcodes, "metal_barcodes.png")
     plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions)
     print("\033[1mBarcodes generated\033[0m")
 
@@ -456,7 +463,7 @@ def main():
     os.makedirs("Visualization", exist_ok=True)  # Create the folder if it doesn't exist
     with open('Visualization/interacting_waters.pkl', 'wb') as f:
         pickle.dump(interacting_water_id_list, f)
-    save_interacting_waters_trajectory(topology, trajectory, interacting_water_id_list, ligand)
+    save_interacting_waters_trajectory(topology, trajectory, interacting_water_id_list, ligand, special_ligand)
 
     # save clouds for visualization with NGL
     with open('Visualization/clouds.json', 'w') as f:
@@ -470,6 +477,7 @@ def main():
     cloud_dict["AR"] = generate_pharmacophore_centers_all_points(df_all, df_all.filter(regex='pistacking').columns)
     cloud_dict["PI"] = generate_pharmacophore_centers_all_points(df_all, df_all.filter(regex='PI_saltbridge').columns)
     cloud_dict["NI"] = generate_pharmacophore_centers_all_points(df_all, df_all.filter(regex='NI_saltbridge').columns)
+    cloud_dict["M"] = generate_pharmacophore_centers_all_points(df_all, df_all.filter(regex='metal').columns)
     
     if generate_pml:
         generate_point_cloud_pml(cloud_dict, f"{ligand}_complex", "point_cloud")
