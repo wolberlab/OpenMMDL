@@ -196,3 +196,5 @@ Once the `Prmtop` and `Inpcrd` files are generated, the user can run the MD simu
 .. code-block:: text
 
     python3 OpenMMDL_Simulation.py
+
+Or run several replicas of the MD simulation by slurm: 
