@@ -945,7 +945,7 @@ os.chdir(outputDir)""")
             script.append("prmtop_file = 'system.%s.prmtop'" % session['water_ff'])
             script.append("inpcrd_file = 'system.%s.inpcrd' " % session['water_ff'])
 
-        script.append("prmtop = AmberPrmtopFile(promtop_file)")
+        script.append("prmtop = AmberPrmtopFile(prmtop_file)")
         script.append("inpcrd = AmberInpcrdFile(inpcrd_file)")
 
         if session['nmLig']:
@@ -1310,7 +1310,7 @@ with open(f'Equilibration_{protein}', 'w') as outfile:
             script.append("post_md_file_movement(protein)")
     elif fileType == "amber":
         if session['nmLig'] or session['spLig']:
-            script.append('post_md_file_movement(prmtop_file, inpcrd=inpcrd_file, ligand= %s.sdf)' % nmLigFileName[:-4])
+            script.append("post_md_file_movement(prmtop_file, inpcrd=inpcrd_file, ligand='%s.sdf')" % nmLigFileName[:-4])
         else:
             script.append('post_md_file_movement(prmtop_file, inpcrd=inpcrd_file)')
     
