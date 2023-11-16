@@ -210,4 +210,4 @@ Remember to replace the slurm configuration and environment `openmmdl` path with
 
 .. code-block:: text
 
-    bash run_slurm.sh
+    sbatch run_slurm.sh
