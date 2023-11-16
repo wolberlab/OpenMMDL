@@ -106,13 +106,13 @@ def gather_interactions(df, ligand_rings):
                 type = "PI"
                 col_name = f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
         elif row['INTERACTION'] == 'metal':
-            prot_partner = row['Prot_partner']
-            ligcarbonidx = int(row['METAL_IDX'])
+            special_ligand = row['RESTYPE_LIG']
+            ligcarbonidx = int(row['TARGET_IDX'])
             metal_type = row['METAL_TYPE']
-            location = row['LOCATION']
+            coordination = row['COORDINATION']
             interaction = row['INTERACTION']
             # Concatenate the values to form a unique column name
-            col_name = f"{prot_partner}_{ligcarbonidx}_{metal_type}_{location}_{interaction}"
+            col_name = f"{special_ligand}_{ligcarbonidx}_{metal_type}_{coordination}_{interaction}"
         frame_value = row['FRAME']
         if frame_value not in unique_columns_rings_grouped:
             unique_columns_rings_grouped[frame_value] = {}
@@ -344,6 +344,18 @@ def df_iteration_numbering(df,unique_data):
                     interaction = parts[-1]
                     condition = (row['Prot_partner'] == prot_partner) & (row['LIG_IDX_LIST'] == ligidx) & (row['LIG_GROUP'] == lig_group) & (row['INTERACTION'] == interaction)
                     df.at[index, col] = 1 if condition else 0
+
+        elif row['INTERACTION'] == "metal":
+            for col in unique_data.values():
+                if "metal" in col:
+                    parts = col.split('_')
+                    special_ligand = parts[0]
+                    ligidx = int(parts[1])
+                    metal_type = parts[2]
+                    interaction = parts[-1]
+                    condition = (row['RESTYPE_LIG'] == special_ligand) & (int(row['TARGET_IDX']) == ligidx) & (row['METAL_TYPE'] == metal_type) & (row['INTERACTION'] == interaction)
+                    df.at[index, col] = 1 if condition else 0
+
 
 
 def update_values(df, new, unique_data):

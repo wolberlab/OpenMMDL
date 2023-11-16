@@ -7,6 +7,7 @@ from plip.structure.preparation import PDBComplex, LigandFinder, Mol, PLInteract
 from plip.exchange.report import BindingSiteReport
 from multiprocessing import Pool
 from functools import partial
+config.KEEPMOD = True
 
 
 def characterize_complex(pdb_file: str, binding_site_id: str) -> PLInteraction:
@@ -120,8 +121,30 @@ def create_df_from_binding_site(selected_site_interactions, interaction_type="hb
     )
     return df
 
+def change_lig_to_residue(file_path, old_residue_name, new_residue_name):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
 
-def process_frame(frame, pdb_md, lig_name):
+    with open(file_path, 'w') as file:
+        for line in lines:
+            if line.startswith('HETATM'):
+                # Assuming the standard PDB format for simplicity
+                # You may need to adapt this part based on your specific PDB file
+                atom_name = line[12:16].strip()
+                residue_name = line[17:20].strip()
+
+                # Check if the residue name matches the one to be changed
+                if residue_name == old_residue_name:
+                    # Change the residue name to the new one
+                    modified_line = line[:17] + new_residue_name + line[20:]
+                    file.write(modified_line)
+                else:
+                    file.write(line)
+            else:
+                file.write(line)
+
+
+def process_frame(frame, pdb_md, lig_name, special=None):
     """
     Process a single frame of MD simulation.
 
@@ -139,7 +162,7 @@ def process_frame(frame, pdb_md, lig_name):
     pd.DataFrame :
         A dataframe conatining the interaction data for the processed frame.
     """
-    atoms_selected = pdb_md.select_atoms(f"protein or nucleic or resname {lig_name} or (resname HOH and around 10 resname {lig_name})")
+    atoms_selected = pdb_md.select_atoms(f"protein or nucleic or resname {lig_name} or (resname HOH and around 10 resname {lig_name}) or resname {special}")
     for num in pdb_md.trajectory[(frame):(frame+1)]:
         atoms_selected.write(f'processing_frame_{frame}.pdb')
     interactions_by_site = retrieve_plip_interactions(f"processing_frame_{frame}.pdb", lig_name)
@@ -155,10 +178,61 @@ def process_frame(frame, pdb_md, lig_name):
         tmp_interaction['INTERACTION'] = interaction_type
         interaction_list = pd.concat([interaction_list, tmp_interaction])
 
-    os.remove(f"processing_frame_{frame}.pdb")
+    if special is not None:
+        combi_lig_special = mda.Universe("ligand_special.pdb")
+        complex = mda.Universe("complex.pdb")
+        complex_all = complex.select_atoms("all")
+        result = process_frame_special(frame, pdb_md, lig_name, special)
+        results_df = pd.concat(result, ignore_index=True)
+        results_df = results_df[results_df['LOCATION'] == 'protein.sidechain']
+        results_df['RESTYPE'] = results_df['RESTYPE'].replace(['HIS', 'SER', 'CYS'], lig_name)
+        results_df['LOCATION'] = results_df['LOCATION'].replace('protein.sidechain', 'ligand')
+        updated_target_idx = []
+    
+        for index, row in results_df.iterrows():
+            ligand_special_int_nr = int(row['TARGET_IDX'])
+            ligand_special_int_nr_atom = combi_lig_special.select_atoms(f"id {ligand_special_int_nr}")
+            for atom in ligand_special_int_nr_atom:
+                atom_name = atom.name
+                for complex_atom in complex_all:
+                    complex_atom_name = complex_atom.name
+                    if atom_name == complex_atom_name:
+                        true_number = complex_atom.id
+                        break  # Exit the loop once a match is found
+                updated_target_idx.append(true_number)
+    
+        # Update 'TARGET_IDX' in interaction_list
+        results_df['TARGET_IDX'] = updated_target_idx
+        interaction_list['TARGET_IDX'] = interaction_list['TARGET_IDX']
+    
+    # Concatenate the updated results_df to interaction_list
+        interaction_list = pd.concat([interaction_list, results_df])
+
+    if os.path.exists(f"processing_frame_{frame}.pdb"):
+        os.remove(f"processing_frame_{frame}.pdb")
 
     return interaction_list
 
+def process_frame_special(frame, pdb_md, lig_name, special=None):
+    res_renaming = ['HIS', 'SER', 'CYS']
+    interaction_dfs = []
+    for res in res_renaming:
+        atoms_selected = pdb_md.select_atoms(f"resname {lig_name} or resname {special}")
+        atoms_selected.write(f'processing_frame_{frame}.pdb')
+        change_lig_to_residue(f'processing_frame_{frame}.pdb', lig_name, res)
+        interactions_by_site = retrieve_plip_interactions(f"processing_frame_{frame}.pdb", special)
+        index_of_selected_site = -1
+        selected_site = list(interactions_by_site.keys())[index_of_selected_site]
+        interaction_types = ["metal"]
+        interaction_list = pd.DataFrame()
+        for interaction_type in interaction_types:
+            tmp_interaction = create_df_from_binding_site(interactions_by_site[selected_site], interaction_type=interaction_type)
+            tmp_interaction['FRAME'] = int(frame)
+            tmp_interaction['INTERACTION'] = interaction_type
+            interaction_list = pd.concat([interaction_list, tmp_interaction])
+        interaction_dfs.append(interaction_list)   
+        os.remove(f'processing_frame_{frame}.pdb')
+    return interaction_dfs
 
 def process_frame_wrapper(args):
     """
@@ -179,12 +253,12 @@ def process_frame_wrapper(args):
     tuple :
         tuple containing the frame index and the result of from `process_frame(frame_idx, pdb_md)`.
     """
-    frame_idx, pdb_md, lig_name = args
+    frame_idx, pdb_md, lig_name, special_ligand = args
 
-    return frame_idx, process_frame(frame_idx, pdb_md, lig_name)
+    return frame_idx, process_frame(frame_idx, pdb_md, lig_name, special_ligand)
 
 
-def process_trajectory(pdb_md, dataframe, num_processes, lig_name):
+def process_trajectory(pdb_md, dataframe, num_processes, lig_name, special_ligand):
     """
     Process protein-ligand trajectory with multiple CPUs in parallel.
 
@@ -210,7 +284,7 @@ def process_trajectory(pdb_md, dataframe, num_processes, lig_name):
         total_frames = len(pdb_md.trajectory) - 1
 
         with Pool(processes=num_processes) as pool:
-            frame_args = [(i, pdb_md, lig_name) for i in range(1, total_frames + 1)]
+            frame_args = [(i, pdb_md, lig_name, special_ligand) for i in range(1, total_frames + 1)]
             
             # Initialize the progress bar with the total number of frames
             pbar = tqdm(total=total_frames, ascii=True, desc="Analyzing frames")
@@ -230,6 +304,7 @@ def process_trajectory(pdb_md, dataframe, num_processes, lig_name):
         interaction_list = pd.concat(interaction_lists)
 
         interaction_list.to_csv("interactions_gathered.csv")
+
     elif dataframe is not None:
         print(f"\033[1mGathering data from {dataframe}\033[0m")
         interaction_tmp = pd.read_csv(dataframe)

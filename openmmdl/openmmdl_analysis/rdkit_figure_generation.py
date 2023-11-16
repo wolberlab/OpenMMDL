@@ -207,19 +207,17 @@ def highlight_numbers(split_data, starting_idx):
 
         elif interaction_type == 'metal':
             parts = item.split()
-            protein_partner_name = parts[0]
-            numeric_codes = parts[1:-2]
-            interaction_type = parts[-1]
-            halogen_type = parts[-2]
-            for code in numeric_codes:
-                atom_index = int(code)
-                complex_id = complex.select_atoms(f"id {atom_index}")
-                for atom in complex_id:
-                    atom_name = atom.name
-                for lig_atom in lig_noh:
-                    if lig_atom.name == atom_name:
-                        lig_real_index = lig_atom.id
-                highlighted_metal.append(lig_real_index-1)
+            special_ligand = parts[0]
+            ligidx = parts[1]
+            metal_type = parts[2]
+            atom_index = int(ligidx)
+            complex_id = complex.select_atoms(f"id {atom_index}")
+            for atom in complex_id:
+                atom_name = atom.name
+            for lig_atom in lig_noh:
+                if lig_atom.name == atom_name:
+                    lig_real_index = lig_atom.id
+            highlighted_metal.append(lig_real_index-1)
     
     for value in highlighted_hbond_donor[:]:  # Using a copy of the list to avoid modifying while iterating
         if value in highlighted_hbond_acceptor:
