@@ -108,13 +108,15 @@ It refers to the small molecule that is made up of C, N, O, S, P, H, F, Cl, Br a
 
 Upon selecting the 'Normal Ligand' option, the parameter settings for the ligand will be revealed. 
 
-- Begin by clicking the "Browse..." button to select the ligand PDB file. 
+- Begin by clicking the "Browse..." button to select the ligand PDB or SDF file. 
   
 - Fill in the charge value for the ligand in the 'Charge Value' textbox; this value should be an integer (e.g., -1 or 2) and can be calculated by opening the ligand PDB file in a text editor and summing up the values in the last column of the file. 
   
 - Choose the 'Ligand Force Field' from the available options: General Amber Force Field (GAFF) or GAFF2. 
   
 - Finally, select the 'Charge Method' from the drop-down menu.
+
+Warning: When the file format is pdb, the prefix of the filename should be the same as the ligand name in the PDB file. For instance, the ligand name in the PDB file is '8QY', and the filename should be '8QY.pdb'.
 
 In this tutorial, we will select the ligand '8QY.pdb', set the charge value to 1, select the 'GAFF2' force field, and choose the 'bcc' charge method.
 
@@ -128,7 +130,7 @@ For ligands that `Antechamber` cannot process, such as cofactors like heme in CY
 
 Users can select either one or both of the above types of ligands at one time.
 
-1. **Add Water/Membrane**
+3. **Add Water/Membrane**
    
 Depending on the environment of the biosystem, users should consider adding water or a membrane. Choose between 'Add Water Box' or 'Add Membrane and Water' in this tab. 
 
