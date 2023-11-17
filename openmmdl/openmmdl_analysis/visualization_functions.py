@@ -75,7 +75,7 @@ def cloud_json_generation(df_all):
     metal_coords = []
 
     for index, row in df_all.iterrows():
-        if row['LIGCOO''] != 0:
+        if row['LIGCOO'] != 0:
             coord_match = coord_pattern.match(row['LIGCOO'])
             if coord_match:
                 x, y, z = map(float, coord_match.groups())
