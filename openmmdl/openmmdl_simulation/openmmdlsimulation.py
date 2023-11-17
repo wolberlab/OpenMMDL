@@ -74,7 +74,6 @@ def main():
                     print("Wrong coordinates file path, try the absolute path")
             else:
                 print("Wrong Format, don't forget the .inpcrd of the coordinate file")
-        shutil.copytree(f"{script_dir}/scripts", f"{args.folder}/scripts")
         os.chdir(args.folder)
         os.system(f"python3 *.py")
         
