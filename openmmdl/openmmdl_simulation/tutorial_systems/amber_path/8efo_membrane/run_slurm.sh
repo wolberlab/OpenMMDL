@@ -10,7 +10,7 @@
 
 
 # simulation variables
-workdir=/home/yuchen/or/OpenMMDL/8efo/env_openmm/.....
+workdir=/home/yuchen/or/OpenMMDL/8efo
 
 # environment variables
 eval "$(/home/yuchen/miniconda3/bin/conda shell.bash hook)" 		# set this to where your conda is
@@ -20,9 +20,9 @@ conda activate openmmdl   						# change if openmmdl is installed in different e
 cd ${workdir}
 mkdir ./${SLURM_ARRAY_TASK_ID} 
 cp ./OpenMMDL_Simulation.py ./${SLURM_ARRAY_TASK_ID}/
-cp ./system.tip3p.inpcrd ./${SLURM_ARRAY_TASK_ID}/
-cp ./system.tip3p.prmtop ./${SLURM_ARRAY_TASK_ID}/
-cp -r ./scripts ./${SLURM_ARRAY_TASK_ID}/
-cd ./${SLURM_ARRAY_TASK_ID}
+cp ./system.opc.inpcrd ./${SLURM_ARRAY_TASK_ID}/
+cp ./system.opc.prmtop ./${SLURM_ARRAY_TASK_ID}/
+cp ./8QY.sdf ./${SLURM_ARRAY_TASK_ID}/
+cd ./${SLURM_ARRAY_TASK_ID}/
 
 python3 OpenMMDL_Simulation.py
