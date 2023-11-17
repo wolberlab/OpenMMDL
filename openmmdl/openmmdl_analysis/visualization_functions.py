@@ -75,48 +75,50 @@ def cloud_json_generation(df_all):
     metal_coords = []
 
     for index, row in df_all.iterrows():
-        coord_match = coord_pattern.match(row['LIGCOO'])
-        if coord_match:
-            x, y, z = map(float, coord_match.groups())
-            x, y, z = round(x, 3), round(y, 3), round(z, 3)
-            interaction = row['INTERACTION']
-            if interaction == 'hbond':
-                if row['PROTISDON'] == 'True':
-                    interaction = 'donor'
-                else:
-                    interaction = 'acceptor'
-            if interaction == 'saltbridge':
-                if row['PROTISPOS'] == 'True':
-                    interaction = 'negative_ionizable'
-                else:
-                    interaction = 'positive_ionizable'
-            if interaction == 'hydrophobic':
-                hydrophobe_coords.append([x, y, z])
-            if interaction == 'acceptor':
-                acceptor_ccords.append([x, y, z])
-            if interaction == 'donor': 
-                donor_coords.append([x, y, z])
-            if interaction == 'waterbridge':
-                waterbridge_coords.append([x, y, z])
-            if interaction == 'negative_ionizable':
-                negative_ionizable_coords.append([x, y, z])
-            if interaction == 'positive_ionizable':
-                positive_ionizable_coords.append([x, y, z])
-            if interaction == 'pistacking':
-                pistacking_coords.append([x, y, z])
-            if interaction == 'pication':
-                pication_coords.append([x, y, z])
-            if interaction == 'halogen':
-                halogen_coords.append([x, y, z])
+        if row['LIGCOO''] != 0:
+            coord_match = coord_pattern.match(row['LIGCOO'])
+            if coord_match:
+                x, y, z = map(float, coord_match.groups())
+                x, y, z = round(x, 3), round(y, 3), round(z, 3)
+                interaction = row['INTERACTION']
+                if interaction == 'hbond':
+                    if row['PROTISDON'] == 'True':
+                        interaction = 'donor'
+                    else:
+                        interaction = 'acceptor'
+                if interaction == 'saltbridge':
+                    if row['PROTISPOS'] == 'True':
+                        interaction = 'negative_ionizable'
+                    else:
+                        interaction = 'positive_ionizable'
+                if interaction == 'hydrophobic':
+                    hydrophobe_coords.append([x, y, z])
+                if interaction == 'acceptor':
+                    acceptor_ccords.append([x, y, z])
+                if interaction == 'donor': 
+                    donor_coords.append([x, y, z])
+                if interaction == 'waterbridge':
+                    waterbridge_coords.append([x, y, z])
+                if interaction == 'negative_ionizable':
+                    negative_ionizable_coords.append([x, y, z])
+                if interaction == 'positive_ionizable':
+                    positive_ionizable_coords.append([x, y, z])
+                if interaction == 'pistacking':
+                    pistacking_coords.append([x, y, z])
+                if interaction == 'pication':
+                    pication_coords.append([x, y, z])
+                if interaction == 'halogen':
+                    halogen_coords.append([x, y, z])
                 
     for index, row in df_all.iterrows():
-        coord_match = coord_pattern.match(row['TARGETCOO'])
-        if coord_match:
-            x, y, z = map(float, coord_match.groups())
-            x, y, z = round(x, 3), round(y, 3), round(z, 3)
-            interaction = row['INTERACTION']
-            if interaction == 'metal':
-                metal_coords.append([x, y, z])
+        if row['TARGETCOO'] != 0:
+            coord_match = coord_pattern.match(row['TARGETCOO'])
+            if coord_match:
+                x, y, z = map(float, coord_match.groups())
+                x, y, z = round(x, 3), round(y, 3), round(z, 3)
+                interaction = row['INTERACTION']
+                if interaction == 'metal':
+                    metal_coords.append([x, y, z])
 
 
     clouds = {}
