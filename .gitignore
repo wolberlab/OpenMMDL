@@ -1,0 +1,5 @@
+.vscode
+
+# ignore entire folder with all its contents
+openmmdl.egg-info/
+build/
