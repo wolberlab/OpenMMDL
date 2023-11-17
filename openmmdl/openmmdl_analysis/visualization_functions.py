@@ -108,6 +108,13 @@ def cloud_json_generation(df_all):
                 pication_coords.append([x, y, z])
             if interaction == 'halogen':
                 halogen_coords.append([x, y, z])
+                
+    for index, row in df_all.iterrows():
+        coord_match = coord_pattern.match(row['TARGETCOO'])
+        if coord_match:
+            x, y, z = map(float, coord_match.groups())
+            x, y, z = round(x, 3), round(y, 3), round(z, 3)
+            interaction = row['INTERACTION']
             if interaction == 'metal':
                 metal_coords.append([x, y, z])
 
