@@ -127,7 +127,7 @@ def change_lig_to_residue(file_path, old_residue_name, new_residue_name):
 
     with open(file_path, 'w') as file:
         for line in lines:
-            if line.startswith('HETATM'):
+            if line.startswith('HETATM') or line.startswith('ATOM'):
                 # Assuming the standard PDB format for simplicity
                 # You may need to adapt this part based on your specific PDB file
                 atom_name = line[12:16].strip()
