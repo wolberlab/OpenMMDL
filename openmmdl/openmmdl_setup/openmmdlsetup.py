@@ -1218,6 +1218,11 @@ positions = modeller.positions  ''')
 with open(f'Energyminimization_{protein}', 'w') as outfile:
     PDBFile.writeFile(modeller.topology, modeller.positions, outfile)
     """)
+    elif fileType == 'amber':
+        script.append("""
+with open(f'Energyminimization_{prmtop_file[:-7]}.pdb', 'w') as outfile:
+    PDBFile.writeFile(prmtop.topology, inpcrd.positions, outfile)
+    """)
     script.append("print('Equilibrating...')")
     script.append('simulation.context.setVelocitiesToTemperature(temperature)')
     script.append('simulation.step(equilibrationSteps)')
@@ -1225,6 +1230,11 @@ with open(f'Energyminimization_{protein}', 'w') as outfile:
         script.append("""
 with open(f'Equilibration_{protein}', 'w') as outfile:
     PDBFile.writeFile(modeller.topology, modeller.positions, outfile)
+    """)
+    elif fileType == 'amber':
+        script.append("""
+with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
+    PDBFile.writeFile(inpcrd.positions, inpcrd.positions, outfile)
     """)    
     if session['restart_checkpoint'] == 'yes':
         script.append("simulation.loadCheckpoint('%s')" % session['checkpointFilename'])
