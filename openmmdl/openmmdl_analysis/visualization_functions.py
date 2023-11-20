@@ -174,7 +174,7 @@ def visualization(filepath, ligname, receptor_type='protein', height='1000px', w
 
     for water in interacting_watersids:
         view.add_licorice(selection=f"water and {water}")
-    view.add_licorice(selection=ligname)
+    view.add_licorice(selection='ligand')
 
     for sphere_buffer, name in zip(sphere_buffers, ['hydrophobic', 'acceptor', 'donor', 'waterbridge', 'negative_ionizable', 'positive_ionizable', 'pistacking', 'pication', 'halogen', 'metal']):
         js = (
