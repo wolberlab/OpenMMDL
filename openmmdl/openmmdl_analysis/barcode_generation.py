@@ -145,3 +145,46 @@ def plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interact
         # Adjust the position of the subplots within the figure
         plt.subplots_adjust(top=0.99, bottom=0.01)  # You can change the value as needed
         plt.savefig(f'Barcodes/Waterbridge_Piecharts/{waterbridge_interaction}.png', bbox_inches='tight', dpi=300)
+        
+        
+def plot_bacodes_grouped(interactions, df_all, interaction_type):
+    """generates barcode figures and groups them by ligandatom, aswell as total interaction barcode for a giveen lingenatom.
+
+    Args:
+        interactions (pandas.core.indexes): list of indexes that contain the interactions to generate barcodes for
+        df_all (pandas dataframe): dataframe containing all information from plip analysis (typicaly df_all)
+        interaction_type (str): name of the interaction type to generate barcodes for
+    """
+    # get ligand atom information
+    ligatoms_dict = {}
+    for interaction in interactions:
+        ligatom = interaction.split('_')
+        ligatom.pop(0)
+        ligatom.pop(-1)
+        if interaction_type in ['acceptor', "donor", "waterbridge", "saltbridge_ni", "saltbridge_pi"]:
+            ligatom.pop(-1)
+            if interaction_type in ["saltbridge_ni", "saltbridge_pi"]:
+                ligatom.pop(-1)
+        ligatom = '_'.join(ligatom)
+        if ligatom not in ligatoms_dict:
+            ligatoms_dict[ligatom] = [interaction]
+        else:
+            ligatoms_dict[ligatom].append(interaction)
+    
+    # plot barcodes 
+    total_interactions ={}
+    for ligatom in ligatoms_dict:
+        ligatom_interaction_barcodes = {}
+        for interaction in ligatoms_dict[ligatom]:
+            barcode = barcodegeneration(df_all, interaction)
+            ligatom_interaction_barcodes[interaction] = barcode
+        os.makedirs(f'./Barcodes/{ligatom}', exist_ok=True)
+        plot_barcodes(ligatom_interaction_barcodes, f'{ligatom}/{ligatom}_{interaction_type}_barcodes.png')
+        
+        barcodes_list = list(ligatom_interaction_barcodes.values())
+        grouped_array = np.logical_or.reduce(barcodes_list)
+        grouped_array[np.all(np.vstack(barcodes_list) == 0, axis=0)] = 0
+        grouped_array = grouped_array.astype(int)
+        total_interactions[ligatom] = grouped_array
+        
+    plot_barcodes(total_interactions, f'{interaction_type}_interactions.png')

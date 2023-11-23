@@ -28,7 +28,7 @@ from openmmdl.openmmdl_analysis.interaction_gathering import characterize_comple
 from openmmdl.openmmdl_analysis.binding_mode_processing import gather_interactions, remove_duplicate_values, combine_subdict_values, filtering_values, unique_data_generation, df_iteration_numbering, update_values
 from openmmdl.openmmdl_analysis.markov_state_figure_generation import min_transition_calculation, binding_site_markov_network
 from openmmdl.openmmdl_analysis.rdkit_figure_generation import split_interaction_data, highlight_numbers, generate_interaction_dict, update_dict, create_and_merge_images, arranged_figure_generation
-from openmmdl.openmmdl_analysis.barcode_generation import barcodegeneration,plot_barcodes,plot_waterbridge_piechart
+from openmmdl.openmmdl_analysis.barcode_generation import barcodegeneration,plot_barcodes,plot_waterbridge_piechart, plot_bacodes_grouped
 from openmmdl.openmmdl_analysis.visualization_functions import interacting_water_ids, save_interacting_waters_trajectory, cloud_json_generation
 from openmmdl.openmmdl_analysis.pml_writer import generate_md_pharmacophore_cloudcenters, generate_bindingmode_pharmacophore, generate_pharmacophore_centers_all_points, generate_point_cloud_pml
 
@@ -348,6 +348,14 @@ def main():
         result_dict['Percentage Occurrence'].append(percent_occurrence)
     top_10_binding_modes_df = pd.DataFrame(result_dict)
     
+    # save bindingmode pdb
+    for index, row in top_10_binding_modes_df.iterrows():
+        b_mode = row['Binding Mode']
+        first_occurance = int(row['First Frame'])
+        pdb_md.trajectory[first_occurance]
+        frame_atomgroup = pdb_md.atoms
+        frame_atomgroup.write(f"./Binding_Modes_Markov_States/{b_mode}.pdb")
+    
     id_num = 0
     if generate_pml:
         for index, row in top_10_binding_modes_df.iterrows():
@@ -394,66 +402,23 @@ def main():
     saltbridge_pi_interactions = df_all.filter(regex='PI_saltbridge').columns
     metal_interactions = df_all.filter(regex='metal').columns
 
-    hydrophobicinteraction_barcodes = {}
-    for hydrophobic_interaction in hydrophobic_interactions:
-        barcode = barcodegeneration(df_all, hydrophobic_interaction)
-        hydrophobicinteraction_barcodes[hydrophobic_interaction] = barcode
-
-    acceptor_barcodes = {}
-    for acceptor_interaction in acceptor_interactions:
-        barcode = barcodegeneration(df_all, acceptor_interaction)
-        acceptor_barcodes[acceptor_interaction] = barcode
-
-    donor_barcodes = {}
-    for donor_interaction in donor_interactions:
-        barcode = barcodegeneration(df_all, donor_interaction)
-        donor_barcodes[donor_interaction] = barcode
-
-    pistacking_barcodes = {}
-    for pistacking_interaction in pistacking_interactions:
-        barcode = barcodegeneration(df_all, pistacking_interaction)
-        pistacking_barcodes[pistacking_interaction] = barcode
-
-    halogen_barcodes = {}
-    for halogen_interaction in halogen_interactions:
-        barcode = barcodegeneration(df_all, halogen_interaction)
-        halogen_barcodes[halogen_interaction] = barcode
 
     waterbridge_barcodes = {}
     for waterbridge_interaction in waterbridge_interactions:
         barcode = barcodegeneration(df_all, waterbridge_interaction)
         waterbridge_barcodes[waterbridge_interaction] = barcode
 
-    pication_barcodes = {}
-    for pication_interaction in pication_interactions:
-        barcode = barcodegeneration(df_all, pication_interaction)
-        pication_barcodes[pication_interaction] = barcode
-
-    saltbridge_ni_barcodes = {}
-    for saltbridge_ni_interaction in saltbridge_ni_interactions:
-        barcode = barcodegeneration(df_all, saltbridge_ni_interactions)
-        saltbridge_ni_barcodes[saltbridge_ni_interaction] = barcode
-
-    saltbridge_pi_barcodes = {}
-    for saltbridge_pi_interaction in saltbridge_pi_interactions:
-        barcode = barcodegeneration(df_all, saltbridge_pi_interactions)
-        saltbridge_pi_barcodes[saltbridge_pi_interaction] = barcode
     
-    metal_barcodes = {}
-    for metal_interaction in metal_interactions:
-        barcode = barcodegeneration(df_all, metal_interaction)
-        metal_barcodes[metal_interaction] = barcode
-    
-    plot_barcodes(hydrophobicinteraction_barcodes, "hydrophobic_barcodes.png")
-    plot_barcodes(acceptor_barcodes, "acceptor_barcodes.png")
-    plot_barcodes(donor_barcodes, "donor_barcodes.png")
-    plot_barcodes(pistacking_barcodes, "pistacking_barcodes.png")
-    plot_barcodes(halogen_barcodes, "halogen_barcodes.png")
-    plot_barcodes(pication_barcodes, "pication_barcodes.png")
-    plot_barcodes(waterbridge_barcodes, "waterbridge_barcodes.png")
-    plot_barcodes(saltbridge_ni_barcodes, "saltbridge_ni_barcodes.png")
-    plot_barcodes(saltbridge_pi_barcodes, "saltbridge_pi_barcodes.png")
-    plot_barcodes(metal_barcodes, "metal_barcodes.png")
+    plot_bacodes_grouped(hydrophobic_interactions, df_all, "hydrophobic")
+    plot_bacodes_grouped(acceptor_interactions, df_all, "acceptor")
+    plot_bacodes_grouped(donor_interactions, df_all, "donor")
+    plot_bacodes_grouped(pistacking_interactions, df_all, "pistacking")
+    plot_bacodes_grouped(halogen_interactions, df_all, "halogen")
+    plot_bacodes_grouped(waterbridge_interactions, df_all, "waterbridge")
+    plot_bacodes_grouped(pication_interactions, df_all, "pication")
+    plot_bacodes_grouped(saltbridge_ni_interactions, df_all, "saltbridge_ni")
+    plot_bacodes_grouped(saltbridge_pi_interactions, df_all, "saltbridge_pi")
+    plot_bacodes_grouped(metal_interactions, df_all, "metal")
     plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions)
     print("\033[1mBarcodes generated\033[0m")
 
