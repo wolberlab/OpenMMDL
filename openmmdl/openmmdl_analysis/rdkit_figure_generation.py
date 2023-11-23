@@ -1,10 +1,55 @@
 import matplotlib.pyplot as plt
 import rdkit
+from rdkit import Chem
+from rdkit.Chem import AllChem, Draw
 from PIL import Image
 import cairosvg
 import pylab
 import os
 import MDAnalysis as mda
+
+
+def generate_ligand_image(ligand_name, complex_pdb_file, ligand_no_h_pdb_file, smiles_file, output_png_filename):
+    # Load complex and ligand structures
+    complex = mda.Universe(complex_pdb_file)
+    ligand_no_h = mda.Universe(ligand_no_h_pdb_file)
+    lig_noh = ligand_no_h.select_atoms("all")
+    complex_lig = complex.select_atoms(f"resname {ligand_name}")
+
+    # Load ligand from PDB file
+    mol = Chem.MolFromPDBFile(ligand_no_h_pdb_file)
+    lig_rd = mol
+
+    # Load reference SMILES
+    with open(smiles_file, "r") as file:
+        reference_smiles = file.read().strip()
+    reference_mol = Chem.MolFromSmiles(reference_smiles)
+
+    # Prepare ligand
+    prepared_ligand = AllChem.AssignBondOrdersFromTemplate(reference_mol, lig_rd)
+    AllChem.Compute2DCoords(prepared_ligand)
+
+    # Map atom indices between ligand_no_h and complex
+    for atom in prepared_ligand.GetAtoms():
+        atom_index = atom.GetIdx()
+        for lig_atom in lig_noh:
+            lig_index = lig_atom.index
+            if atom_index == lig_index:
+                lig_atom_name = lig_atom.name
+                for comp_lig in complex_lig:
+                    comp_lig_name = comp_lig.name
+                    if lig_atom_name == comp_lig_name:
+                        num = int(comp_lig.id)
+                        atom.SetAtomMapNum(atom.GetIdx() + num)
+
+    # Generate a PNG image of the ligand
+    img = Draw.MolToImage(prepared_ligand, size=(2500, 2500))
+
+    # Save the image to a file
+    img.save(output_png_filename)
+
+
+
 
 def split_interaction_data(data):
     """
@@ -97,7 +142,7 @@ def highlight_numbers(split_data, starting_idx):
                 if type == "Donor":
                     highlighted_hbond_donor.append(lig_real_index-1)
                 elif type == "Acceptor":
-                    highlighted_hbond_acceptor.append(lig_real_index-1)                  
+                    highlighted_hbond_acceptor.append(lig_real_index-1)                 
 
         elif interaction_type == 'hydrophobic':
             parts = item.split()

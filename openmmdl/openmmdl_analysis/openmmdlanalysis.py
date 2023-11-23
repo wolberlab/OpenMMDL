@@ -27,7 +27,7 @@ from openmmdl.openmmdl_analysis.ligand_processing import increase_ring_indices, 
 from openmmdl.openmmdl_analysis.interaction_gathering import characterize_complex, retrieve_plip_interactions, create_df_from_binding_site, process_frame, process_trajectory, fill_missing_frames
 from openmmdl.openmmdl_analysis.binding_mode_processing import gather_interactions, remove_duplicate_values, combine_subdict_values, filtering_values, unique_data_generation, df_iteration_numbering, update_values
 from openmmdl.openmmdl_analysis.markov_state_figure_generation import min_transition_calculation, binding_site_markov_network
-from openmmdl.openmmdl_analysis.rdkit_figure_generation import split_interaction_data, highlight_numbers, generate_interaction_dict, update_dict, create_and_merge_images, arranged_figure_generation
+from openmmdl.openmmdl_analysis.rdkit_figure_generation import split_interaction_data, highlight_numbers, generate_interaction_dict, update_dict, create_and_merge_images, arranged_figure_generation, generate_ligand_image
 from openmmdl.openmmdl_analysis.barcode_generation import barcodegeneration,plot_barcodes,plot_waterbridge_piechart, plot_bacodes_grouped
 from openmmdl.openmmdl_analysis.visualization_functions import interacting_water_ids, save_interacting_waters_trajectory, cloud_json_generation
 from openmmdl.openmmdl_analysis.pml_writer import generate_md_pharmacophore_cloudcenters, generate_bindingmode_pharmacophore, generate_pharmacophore_centers_all_points, generate_point_cloud_pml
@@ -263,6 +263,7 @@ def main():
                 columns_with_value_1[treshold] = set()
             columns_with_value_1[treshold].update(columns_set)
 
+    
     # Generate an Figure for each of the binding modes with rdkit Drawer with the atoms interacting highlighted by colors
     matplotlib.use("Agg") 
     binding_site = {}
@@ -329,6 +330,7 @@ def main():
 
     # Create Figure with all Binding modes
     arranged_figure_generation(merged_image_paths, "all_binding_modes_arranged.png")
+    generate_ligand_image(ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", "ligand_numbering.png")
     print("\033[1mBinding mode figure generated\033[0m")
 
     df_all = pd.read_csv('df_all.csv')
