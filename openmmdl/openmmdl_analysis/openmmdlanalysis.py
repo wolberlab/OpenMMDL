@@ -14,6 +14,8 @@ import rdkit
 import matplotlib
 import pickle
 import json
+import Bio
+from Bio import PDB
 import cairosvg
 from collections import Counter
 from rdkit import Chem
@@ -21,7 +23,7 @@ from rdkit.Chem import AllChem, Draw
 from rdkit.Chem.Draw import rdMolDraw2D
 from plip.basic import config
 
-from openmmdl.openmmdl_analysis.preprocessing import process_pdb_file, convert_pdb_to_sdf
+from openmmdl.openmmdl_analysis.preprocessing import process_pdb_file, convert_pdb_to_sdf, renumber_atoms_in_residues, replace_atom_type, process_pdb, move_hydrogens_to_end
 from openmmdl.openmmdl_analysis.rmsd_calculation import rmsd_for_atomgroups, RMSD_dist_frames
 from openmmdl.openmmdl_analysis.ligand_processing import increase_ring_indices, convert_ligand_to_smiles
 from openmmdl.openmmdl_analysis.interaction_gathering import characterize_complex, retrieve_plip_interactions, create_df_from_binding_site, process_frame, process_trajectory, fill_missing_frames
@@ -95,6 +97,15 @@ def main():
     # Writing out the complex of the protein and ligand with water around 10A of the ligand 
     complex = pdb_md.select_atoms(f"protein or nucleic or resname {ligand} or (resname HOH and around 10 resname {ligand}) or resname {special_ligand}")
     complex.write("complex.pdb")
+    renumber_atoms_in_residues("complex.pdb", "complex.pdb", ligand)
+    process_pdb("complex.pdb", topology)
+    parser = PDB.PDBParser(QUIET=True)
+    structure = parser.get_structure('my_structure', "complex.pdb")
+    move_hydrogens_to_end(structure, ligand)
+    complex = "complex.pdb"
+    io = PDB.PDBIO()
+    io.set_structure(structure)
+    io.save(complex)
     # Writing out the ligand in a separate pdb file for ring calculation
     ligand_complex = pdb_md.select_atoms(f"resname {ligand}")
     ligand_complex_no_h = pdb_md.select_atoms(f"resname {ligand} and not (name H*)")
