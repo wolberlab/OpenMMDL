@@ -40,7 +40,7 @@ def generate_ligand_image(ligand_name, complex_pdb_file, ligand_no_h_pdb_file, s
                     comp_lig_name = comp_lig.name
                     if lig_atom_name == comp_lig_name:
                         num = int(comp_lig.id)
-                        atom.SetAtomMapNum(atom.GetIdx() + num)
+                        atom.SetAtomMapNum(num)
 
     # Generate a PNG image of the ligand
     img = Draw.MolToImage(prepared_ligand, size=(2500, 2500))
