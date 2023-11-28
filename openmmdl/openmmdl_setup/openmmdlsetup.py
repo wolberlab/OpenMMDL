@@ -1234,7 +1234,7 @@ with open(f'Equilibration_{protein}', 'w') as outfile:
     elif fileType == 'amber':
         script.append("""
 with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
-    PDBFile.writeFile(inpcrd.positions, inpcrd.positions, outfile)
+    PDBFile.writeFile(prmtop.topology, inpcrd.positions, outfile)
     """)    
     if session['restart_checkpoint'] == 'yes':
         script.append("simulation.loadCheckpoint('%s')" % session['checkpointFilename'])
