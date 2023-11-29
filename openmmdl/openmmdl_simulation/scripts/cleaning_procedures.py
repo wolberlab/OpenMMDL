@@ -131,7 +131,7 @@ def post_md_file_movement(protein_name, prmtop=None, inpcrd=None, ligand=None):
     organize_files([f"output_{protein_name}", "trajectory.dcd"], "MD_Files/MD_Output")
 
     # Organize MDtraj and MDAnalysis files
-    organize_files(["centered_old_coordinates_top.pdb", "centered_old_coordinates.dcd", "centered_old_coordinates_top.gro", "centered_old_coordinates.xtc"], "MD_Postprocessing")
+    organize_files(["centered_old_coordinates_top.pdb", "centered_old_coordinates.dcd", "centered_old_coordinates_top.gro", "centered_old_coordinates.xtc", "centered_traj_unaligned.dcd", "centered_traj_unaligned.xtc", "prot_lig_traj_unaligned.dcd", "prot_lig_traj_unaligned.xtc"], "MD_Postprocessing")
     organize_files(["centered_top.pdb", "centered_traj.dcd", "centered_top.gro", "centered_traj.xtc"], "Final_Output/All_Atoms")
     organize_files(["prot_lig_top.pdb", "prot_lig_traj.dcd", "prot_lig_top.gro", "prot_lig_traj.xtc"], "Final_Output/Prot_Lig")
 
