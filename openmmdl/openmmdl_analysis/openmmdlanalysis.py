@@ -98,7 +98,7 @@ def main():
     complex = pdb_md.select_atoms(f"protein or nucleic or resname {ligand} or (resname HOH and around 10 resname {ligand}) or resname {special_ligand}")
     complex.write("complex.pdb")
     renumber_atoms_in_residues("complex.pdb", "complex.pdb", ligand)
-    process_pdb("complex.pdb", topology)
+    process_pdb("complex.pdb", "complex.pdb")
     parser = PDB.PDBParser(QUIET=True)
     structure = parser.get_structure('my_structure', "complex.pdb")
     move_hydrogens_to_end(structure, ligand)
