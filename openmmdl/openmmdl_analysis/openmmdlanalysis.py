@@ -113,6 +113,7 @@ def main():
         ligand_special = pdb_md.select_atoms(f"resname {ligand} or resname {special_ligand}")
         ligand_special.write("ligand_special.pdb")
     ligand_complex_no_h.write("lig_no_h.pdb")
+    renumber_atoms_in_residues("lig_no_h.pdb", "lig_no_h.pdb", ligand)
     ligand_complex.write("lig.pdb")
     #convert_pdb_to_sdf("lig.pdb", "lig.sdf")
     #ligand_sdf = "ligand_unk_2.sdf"
