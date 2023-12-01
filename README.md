@@ -94,6 +94,11 @@ It analyzes the protein-ligand complex interactions throughout the MD trajectory
 all possible interactions. In addition, it generates interaction fingerprints, provides the most occurring binding modes
 , and displays the transitions between the separate binding modes.
 
+If there is no ligand given, OpenMMDL-Analysis will instead analyze the trajectory on stable watermolecules
+and cluster those at positions where in at least 75% of the MD a watermolecule is present. Outputs include a PDB with representative waters
+and a CSV of nearby protein Residuenumbers and chains as well as PDBs of each water cluster.
+
+
 ### Usage
 
 Start the analysis with the following Inputs:
@@ -132,7 +137,7 @@ openmmdl_visualization
 ```
 Then edit the notebook to include the output of your analyis.
 ## Copyright
-Copyright (c) 2022, Valerij Talagayev, Yu Chen & Niklas Piet Doering (Wolber lab)
+Copyright (c) 2022, Valerij Talagayev, Yu Chen,  Niklas Piet Doering & Leon Obendorf (Wolber lab)
 
 #### Acknowledgements
 

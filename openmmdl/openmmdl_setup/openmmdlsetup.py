@@ -1291,7 +1291,7 @@ with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
                     script.append("MDanalysis_conversion(f'centered_old_coordinates_top.pdb', f'centered_old_coordinates.dcd', mda_output='%s', output_selection='%s', ligand_name='UNK')" % (session['mda_output'], session['mda_selection']))
                 elif session['mdtraj_output'] == 'mdtraj_gro_xtc':
                     script.append("MDanalysis_conversion(f'centered_old_coordinates_top.gro', f'centered_old_coordinates.xtc', mda_output='%s', output_selection='%s', ligand_name='UNK')" % (session['mda_output'], session['mda_selection']))
-            elif session['sdfFile'] == False:
+            elif session['sdfFile'] == '':
                 if session['mdtraj_output'] != 'mdtraj_gro_xtc':
                     script.append("MDanalysis_conversion(f'centered_old_coordinates_top.pdb', f'centered_old_coordinates.dcd', mda_output='%s', output_selection='%s')" % (session['mda_output'], session['mda_selection']))
                 elif session['mdtraj_output'] == 'mdtraj_gro_xtc':
@@ -1316,7 +1316,7 @@ with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
     if fileType == "pdb":
         if session['sdfFile']:
             script.append("post_md_file_movement(protein,ligand=ligand)")
-        elif session['sdfFile'] == False:
+        elif session['sdfFile'] == '':
             script.append("post_md_file_movement(protein)")
     elif fileType == "amber":
         if session['nmLig'] or session['spLig']:
@@ -1327,53 +1327,56 @@ with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
     
     if session['openmmdl_analysis'] == "Yes":
         if session['mdtraj_output'] != 'mdtraj_gro_xtc':
-            if session['analysis_selection'] == 'analysis_all':
+            top_ext = ".pdb"
+            traj_ext = ".dcd"
+        elif session['mdtraj_output'] == 'mdtraj_gro_xtc':
+            top_ext = ".gro"
+            traj_ext = ".xtc"
+        if session['analysis_selection'] == 'analysis_all':
+            script.append("os.chdir('Final_Output/All_Atoms')")
+            if fileType == "pdb":
+                if session['sdfFile']:
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                elif session['sdfFile'] == '':  
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+            elif fileType == "amber":
+                if session['nmLig'] or session['spLig']:
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                else:
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+        elif session['analysis_selection'] == 'analysis_prot_lig':
+            script.append("os.chdir('Final_Output/Prot_Lig')")
+            if fileType == "pdb":
+                if session['sdfFile']:
+                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                elif session['sdfFile'] == '': 
+                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+            elif fileType == 'amber':
+                if session['nmLig'] or session['spLig']:
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                else:
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+        elif session['analysis_selection'] == 'analysis_all_prot_lig':
+            if fileType == "pdb":
                 script.append("os.chdir('Final_Output/All_Atoms')")
-                if fileType == "pdb":
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top.pdb -d centered_traj.dcd -l %s -n UNK -b %s -m %s -r %s -p %s' " % (session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
-                elif fileType == "amber":
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top.pdb -d centered_traj.dcd -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
-            elif session['analysis_selection'] == 'analysis_prot_lig':
-                script.append("os.chdir('Final_Output/Prot_Lig')")
-                if fileType == "pdb":
-                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top.pdb -d prot_lig_traj.dcd -l %s -n UNK -b %s -m %s -r %s -p %s' " % (session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
-                elif fileType == 'amber':
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top.pdb -d centered_traj.dcd -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
-            elif session['analysis_selection'] == 'analysis_all_prot_lig':
-                if fileType == "pdb":
-                    script.append("os.chdir('Final_Output/All_Atoms')")
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top.pdb -d centered_traj.dcd -l %s -n UNK -b %s -m %s -r %s -p %s' " % (session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                if session['sdfFile']:
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
                     script.append("os.chdir('../Prot_Lig')")
-                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top.pdb -d prot_lig_traj.dcd -l %s -n UNK -b %s -m %s -r %s -p %s' " % (session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
-                elif fileType == 'amber':
-                    script.append("os.chdir('Final_Output/All_Atoms')")
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top.pdb -d centered_traj.dcd -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                elif session['sdfFile'] == '':
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
                     script.append("os.chdir('../Prot_Lig')")
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top.pdb -d centered_traj.dcd -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
-    elif session['mdtraj_output'] == 'mdtraj_gro_xtc':
-            if session['analysis_selection'] == 'analysis_all':
+                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+            elif fileType == 'amber':
                 script.append("os.chdir('Final_Output/All_Atoms')")
-                if fileType == "pdb":
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top.gro -d centered_traj.xtc -l %s -n UNK -b %s -m %s -r %s -p %s' " % (session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
-                elif fileType == "amber":
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top.gro -d centered_traj.xtc -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
-            elif session['analysis_selection'] == 'analysis_prot_lig':
-                script.append("os.chdir('Final_Output/Prot_Lig')")
-                if fileType == "pdb":
-                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top.gro -d prot_lig_traj.xtc -l %s -n UNK -b %s -m %s -r %s -p %s' " % (session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
-                elif fileType == 'amber':
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top.gro -d centered_traj.xtc -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
-            elif session['analysis_selection'] == 'analysis_all_prot_lig':
-                if fileType == "pdb":
-                    script.append("os.chdir('Final_Output/All_Atoms')")
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top.gro -d centered_traj.xtc -l %s -n UNK -b %s -m %s -r %s -p %s' " % (session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                if session['nmLig'] or session['spLig']:
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
                     script.append("os.chdir('../Prot_Lig')")
-                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top.gro -d prot_lig_traj.xtc -l %s -n UNK -b %s -m %s -r %s -p %s' " % (session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
-                elif fileType == 'amber':
-                    script.append("os.chdir('Final_Output/All_Atoms')")
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top.gro -d centered_traj.xtc -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                else:
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
                     script.append("os.chdir('../Prot_Lig')")
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top.gro -d centered_traj.xtc -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
     script.append("subprocess.run(analysis_run_command, shell=True, check=True)")
             
     return "\n".join(script)

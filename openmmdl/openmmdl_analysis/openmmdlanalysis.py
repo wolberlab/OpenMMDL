@@ -33,7 +33,7 @@ from openmmdl.openmmdl_analysis.rdkit_figure_generation import split_interaction
 from openmmdl.openmmdl_analysis.barcode_generation import barcodegeneration,plot_barcodes,plot_waterbridge_piechart, plot_bacodes_grouped
 from openmmdl.openmmdl_analysis.visualization_functions import interacting_water_ids, save_interacting_waters_trajectory, cloud_json_generation
 from openmmdl.openmmdl_analysis.pml_writer import generate_md_pharmacophore_cloudcenters, generate_bindingmode_pharmacophore, generate_pharmacophore_centers_all_points, generate_point_cloud_pml
-
+from openmmdl.openmmdl_analysis.find_stable_waters import process_trajectory_and_cluster, analyze_protein_and_water_interaction
 
 def main():
     logo = '\n'.join(["     ,-----.    .-------.     .-''-.  ,---.   .--.,---.    ,---.,---.    ,---. ______       .---.      ",
@@ -51,8 +51,8 @@ def main():
     parser = argparse.ArgumentParser(prog='openmmdl_analysis', description=logo, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-t', dest='topology', help='Topology File after MD Simulation', required=True)
     parser.add_argument('-d', dest='trajectory', help='Trajectory File in DCD Format', required=True)
-    parser.add_argument('-l', dest='ligand_sdf', help='Ligand in SDF Format', required=True)       
-    parser.add_argument('-n', dest='ligand_name', help='Ligand Name (3 Letter Code in PDB)', required=True)
+    parser.add_argument('-l', dest='ligand_sdf', help='Ligand in SDF Format')       
+    parser.add_argument('-n', dest='ligand_name', help='Ligand Name (3 Letter Code in PDB)')
     parser.add_argument('-b', dest='binding', help='Binding Mode Treshold for Binding Mode in %%', default=40)   
     parser.add_argument('-df', dest='dataframe', help='Dataframe (use if the interactions were already calculated, default name would be "df_all.csv")', default=None)
     parser.add_argument('-m', dest='min_transition', help='Minimal Transition percentage for Markov State Model', default=1)
@@ -61,21 +61,32 @@ def main():
     parser.add_argument('-r', dest='frame_rmsd', help='RMSD Difference between frames calculation type "True" to use it default is False,', default="No")
     parser.add_argument('-nuc', dest='receptor_nucleic', help='Treat nucleic acids as receptor', default=False)
     parser.add_argument('-s', dest='special_ligand', help='Calculate interactions with special ligands', default=None)
-
+    
     input_formats = ['.pdb', '.dcd', '.sdf', '.csv'] 
     args = parser.parse_args()
     if input_formats[0] not in args.topology:
         print("PDB is missing, try the absolute path")
     if input_formats[1] not in args.trajectory:
         print("DCD is missing, try the absolute path")
-    if input_formats[2] not in args.ligand_sdf:
-        print("SDF is missing, try the absolute path")
-    if args.ligand_name == None:
-        print("Ligand Name is Missing, Add Ligand Name")
 
     # set variables for analysis and preprocess input files
     topology = args.topology
     trajectory = args.trajectory
+
+    if not args.ligand_sdf:
+        print("All analyses will be run which can be done without a ligand present")
+        #...
+        process_trajectory_and_cluster(topology, trajectory)
+        analyze_protein_and_water_interaction(topology,"representative_waters.pdb")
+        sys.exit()   
+
+    
+    if input_formats[2] not in args.ligand_sdf:
+        print("SDF is missing, try the absolute path. Maybe you don't own a ligand (sad), in this case we'll only analyze the stable waters!")
+    if args.ligand_name == None:
+        print("Ligand Name is Missing, Add Ligand Name")
+
+    # set variables for analysis and preprocess input files
     ligand_sdf = args.ligand_sdf
     ligand = args.ligand_name
     frame_rmsd = args.frame_rmsd
