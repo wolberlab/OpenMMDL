@@ -82,7 +82,7 @@ def cloud_json_generation(df_all):
                 x, y, z = round(x, 3), round(y, 3), round(z, 3)
                 interaction = row['INTERACTION']
                 if interaction == 'hbond':
-                    if row['PROTISDON'] == 'True':
+                    if row['PROTISDON'] == 'False':
                         interaction = 'donor'
                     else:
                         interaction = 'acceptor'
