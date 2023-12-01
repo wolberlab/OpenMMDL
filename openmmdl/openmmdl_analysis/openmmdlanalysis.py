@@ -120,25 +120,36 @@ def main():
     renumber_atoms_in_residues("lig_no_h.pdb", "lig_no_h.pdb", ligand)
     process_pdb("lig_no_h.pdb", "lig_no_h.pdb")
     ligand_complex.write("lig.pdb")
-    #convert_pdb_to_sdf("lig.pdb", "lig.sdf")
-    #ligand_sdf = "ligand_unk_2.sdf"
 
     # getting Ring Information from the ligand pdb file
     lig_rd = rdkit.Chem.rdmolfiles.MolFromPDBFile("lig.pdb")
     lig_rd_ring = lig_rd.GetRingInfo()
 
     # getting the index of the first atom of the ligand from the complex pdb
-    novel = mda.Universe("complex.pdb")
-    novel_lig = novel.select_atoms(f"resname {ligand}")
-    for atom in novel_lig:
+    novel_complex = mda.Universe("complex.pdb")
+    novel_complex_ligand = novel_complex.select_atoms(f"resname {ligand}")
+    for atom in novel_complex_ligand:
         lig_index = atom.id
         break
     ligand_rings = []
+    ligand_no_hydrogens = mda.Universe("lig_no_h.pdb")
+    lig_no_hydrogens = ligand_no_hydrogens.select_atoms("all")
+    complex_universe = mda.Universe("complex.pdb")
+    complex_lig = novel_complex.select_atoms(f"resname {ligand}")
 
     # Iterate through each ring, increase indices by 1, and print the updated rings
     for atom_ring in lig_rd_ring.AtomRings():
-        updated_ring = increase_ring_indices(atom_ring, lig_index)
-        ligand_rings.append(updated_ring)
+        current_ring = []
+        for atom_ring_single in atom_ring:
+            for ligand_ring_atom in lig_no_hydrogens:
+                if atom_ring_single + 1 == ligand_ring_atom.id:
+                    #print(ligand_ring_atom.name)
+                    for complex_lig_atom in novel_complex_ligand:
+                        if ligand_ring_atom.name == complex_lig_atom.name:
+                            true_number = complex_lig_atom.id
+                            updated_ring_2 = true_number
+                            current_ring.append(updated_ring_2)
+        ligand_rings.append(current_ring)
     print(ligand_rings)
     print("\033[1mLigand ring data gathered\033[0m")
     
