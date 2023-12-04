@@ -120,7 +120,6 @@ def highlight_numbers(split_data, starting_idx):
     
     
     for item in split_data:
-        print(item)
         parts = item.split()
         protein_partner_name = parts[0]
         numeric_codes = parts[1:-1]
