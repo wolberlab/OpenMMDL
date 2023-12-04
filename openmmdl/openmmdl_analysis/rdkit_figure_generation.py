@@ -120,6 +120,7 @@ def highlight_numbers(split_data, starting_idx):
     
     
     for item in split_data:
+        print(item)
         parts = item.split()
         protein_partner_name = parts[0]
         numeric_codes = parts[1:-1]
@@ -178,8 +179,11 @@ def highlight_numbers(split_data, starting_idx):
             parts = item.split()
             protein_partner_name = parts[0]
             numeric_codes = parts[1:-1]
+            print(numeric_codes)
             interaction_type = parts[-1]
-            for code in numeric_codes:
+            split_codes = numeric_codes[0].split(',')
+            print(split_codes)
+            for code in split_codes:
                 atom_index = int(code)
                 complex_id = complex.select_atoms(f"id {atom_index}")
                 for atom in complex_id:
