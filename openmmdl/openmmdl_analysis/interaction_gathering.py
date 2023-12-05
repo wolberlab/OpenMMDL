@@ -217,6 +217,7 @@ def process_frame_special(frame, pdb_md, lig_name, special=None):
     res_renaming = ['HIS', 'SER', 'CYS']
     interaction_dfs = []
     for res in res_renaming:
+        pdb_md.trajectory[frame]
         atoms_selected = pdb_md.select_atoms(f"resname {lig_name} or resname {special}")
         atoms_selected.write(f'processing_frame_{frame}.pdb')
         change_lig_to_residue(f'processing_frame_{frame}.pdb', lig_name, res)
