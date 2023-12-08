@@ -4,7 +4,7 @@ import pandas as pd
 import itertools
 import os
 
-def gather_interactions(df, ligand_rings):
+def gather_interactions(df, ligand_rings, peptide=None):
     """
     Process a DataFrame with the protein-ligand interaction and generate column names for each unique interaction.
 
@@ -24,102 +24,189 @@ def gather_interactions(df, ligand_rings):
     unique_columns_rings_grouped = {}
 
     # Iterate through the rows of the DataFrame
-    for index, row in df.iterrows():
-        # Check if the 'INTERACTION' is 'hydrophobic'
-        if row['INTERACTION'] == 'hydrophobic':
-            # Get the values from the current row
-            prot_partner = row['Prot_partner']
-            ligcarbonidx = row['LIGCARBONIDX']
-            interaction = row['INTERACTION']
-            ring_found = False
-            # Concatenate the values to form a unique column name
-            for ligand_ring in ligand_rings:
-                if ligcarbonidx in ligand_ring:
-                    numbers_as_strings = [str(ligcarbonidx) for ligcarbonidx in ligand_ring]
-                    # Create the name with numbers separated by underscores
-                    name_with_numbers = '_'.join(numbers_as_strings)
-                    col_name = f"{prot_partner}_{name_with_numbers}_{interaction}"
-                    ring_found = True
-                    break
-            if not ring_found:
-                ligcarbonidx = int(row['LIGCARBONIDX'])
+    if peptide is None:
+        for index, row in df.iterrows():
+            # Check if the 'INTERACTION' is 'hydrophobic'
+            if row['INTERACTION'] == 'hydrophobic':
+                # Get the values from the current row
+                prot_partner = row['Prot_partner']
+                ligcarbonidx = row['LIGCARBONIDX']
+                interaction = row['INTERACTION']
+                ring_found = False
+                # Concatenate the values to form a unique column name
+                for ligand_ring in ligand_rings:
+                    if ligcarbonidx in ligand_ring:
+                        numbers_as_strings = [str(ligcarbonidx) for ligcarbonidx in ligand_ring]
+                        # Create the name with numbers separated by underscores
+                        name_with_numbers = '_'.join(numbers_as_strings)
+                        col_name = f"{prot_partner}_{name_with_numbers}_{interaction}"
+                        ring_found = True
+                        break
+                if not ring_found:
+                    ligcarbonidx = int(row['LIGCARBONIDX'])
+                    col_name = f"{prot_partner}_{ligcarbonidx}_{interaction}"
+            elif row['INTERACTION'] == 'hbond':
+                if row['PROTISDON'] == True:
+                    prot_partner = row['Prot_partner']
+                    ligcarbonidx = int(row['ACCEPTORIDX'])
+                    interaction = row['INTERACTION']
+                    type = "Acceptor"
+                elif row['PROTISDON'] == False:
+                    prot_partner = row['Prot_partner']
+                    ligcarbonidx = int(row['DONORIDX'])
+                    interaction = row['INTERACTION']
+                    type = "Donor"
+                # Concatenate the values to form a unique column name
+                col_name = f"{prot_partner}_{ligcarbonidx}_{type}_{interaction}"
+            elif row['INTERACTION'] == 'halogen':
+                prot_partner = row['Prot_partner']
+                ligcarbonidx = int(row['DON_IDX'])
+                halogen = row['DONORTYPE']
+                interaction = row['INTERACTION']
+                # Concatenate the values to form a unique column name
+                col_name = f"{prot_partner}_{ligcarbonidx}_{halogen}_{interaction}"
+            elif row['INTERACTION'] == 'waterbridge':
+                if row['PROTISDON'] == True:
+                    prot_partner = row['Prot_partner']
+                    ligcarbonidx = int(row['ACCEPTOR_IDX'])
+                    interaction = row['INTERACTION']
+                    type = "Acceptor"
+                    # Concatenate the values to form a unique column name
+                    col_name = f"{prot_partner}_{ligcarbonidx}_{type}_{interaction}"
+                elif row['PROTISDON'] == False:
+                    prot_partner = row['Prot_partner']
+                    ligcarbonidx = int(row['DONOR_IDX'])
+                    interaction = row['INTERACTION']
+                    type = "Donor"
+                    # Concatenate the values to form a unique column name
+                    col_name = f"{prot_partner}_{ligcarbonidx}_{type}_{interaction}"
+            elif row['INTERACTION'] == 'pistacking':
+                prot_partner = row['Prot_partner']
+                ligcarbonidx = row['LIG_IDX_LIST']
+                interaction = row['INTERACTION']
+                # Concatenate the values to form a unique column name
                 col_name = f"{prot_partner}_{ligcarbonidx}_{interaction}"
-        elif row['INTERACTION'] == 'hbond':
-            if row['PROTISDON'] == True:
+            elif row['INTERACTION'] == 'pication':
                 prot_partner = row['Prot_partner']
-                ligcarbonidx = int(row['ACCEPTORIDX'])
+                ligidx = row['LIG_IDX_LIST']
+                ligtype = row['LIG_GROUP']
                 interaction = row['INTERACTION']
-                type = "Acceptor"
-            elif row['PROTISDON'] == False:
-                prot_partner = row['Prot_partner']
-                ligcarbonidx = int(row['DONORIDX'])
-                interaction = row['INTERACTION']
-                type = "Donor"
-            # Concatenate the values to form a unique column name
-            col_name = f"{prot_partner}_{ligcarbonidx}_{type}_{interaction}"
-        elif row['INTERACTION'] == 'halogen':
-            prot_partner = row['Prot_partner']
-            ligcarbonidx = int(row['DON_IDX'])
-            halogen = row['DONORTYPE']
-            interaction = row['INTERACTION']
-            # Concatenate the values to form a unique column name
-            col_name = f"{prot_partner}_{ligcarbonidx}_{halogen}_{interaction}"
-        elif row['INTERACTION'] == 'waterbridge':
-            if row['PROTISDON'] == True:
-                prot_partner = row['Prot_partner']
-                ligcarbonidx = int(row['ACCEPTOR_IDX'])
-                interaction = row['INTERACTION']
-                type = "Acceptor"
                 # Concatenate the values to form a unique column name
-                col_name = f"{prot_partner}_{ligcarbonidx}_{type}_{interaction}"
-            elif row['PROTISDON'] == False:
+                col_name = f"{prot_partner}_{ligidx}_{ligtype}_{interaction}"
+                col_name = col_name.replace(',', '_')
+            elif row['INTERACTION'] == 'saltbridge':
                 prot_partner = row['Prot_partner']
-                ligcarbonidx = int(row['DONOR_IDX'])
+                ligidx = row['LIG_IDX_LIST']
+                lig_group = row['LIG_GROUP']
                 interaction = row['INTERACTION']
-                type = "Donor"
+                if row['PROTISPOS'] == True:
+                    type = "NI"
+                    # Concatenate the values to form a unique column name
+                    col_name = f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
+                elif row['PROTISPOS'] == False:
+                    type = "PI"
+                    col_name = f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
+            elif row['INTERACTION'] == 'metal':
+                special_ligand = row['RESTYPE_LIG']
+                ligcarbonidx = int(row['TARGET_IDX'])
+                metal_type = row['METAL_TYPE']
+                coordination = row['COORDINATION']
+                interaction = row['INTERACTION']
                 # Concatenate the values to form a unique column name
-                col_name = f"{prot_partner}_{ligcarbonidx}_{type}_{interaction}"
-        elif row['INTERACTION'] == 'pistacking':
-            prot_partner = row['Prot_partner']
-            ligcarbonidx = row['LIG_IDX_LIST']
-            interaction = row['INTERACTION']
-            # Concatenate the values to form a unique column name
-            col_name = f"{prot_partner}_{ligcarbonidx}_{interaction}"
-        elif row['INTERACTION'] == 'pication':
-            prot_partner = row['Prot_partner']
-            ligidx = row['LIG_IDX_LIST']
-            ligtype = row['LIG_GROUP']
-            interaction = row['INTERACTION']
-            # Concatenate the values to form a unique column name
-            col_name = f"{prot_partner}_{ligidx}_{ligtype}_{interaction}"
-            col_name = col_name.replace(',', '_')
-        elif row['INTERACTION'] == 'saltbridge':
-            prot_partner = row['Prot_partner']
-            ligidx = row['LIG_IDX_LIST']
-            lig_group = row['LIG_GROUP']
-            interaction = row['INTERACTION']
-            if row['PROTISPOS'] == True:
-                type = "NI"
+                col_name = f"{special_ligand}_{ligcarbonidx}_{metal_type}_{coordination}_{interaction}"
+            frame_value = row['FRAME']
+            if frame_value not in unique_columns_rings_grouped:
+                unique_columns_rings_grouped[frame_value] = {}
+            if row['INTERACTION'] != 'skip':
+                unique_columns_rings_grouped[frame_value][index] = col_name
+                # Add the column name and its value to the dictionary
+                unique_columns_rings[index] = col_name
+    if peptide is not None:
+        for index, row in df.iterrows():
+            # Check if the 'INTERACTION' is 'hydrophobic'
+            if row['INTERACTION'] == 'hydrophobic':
+                # Get the values from the current row
+                prot_partner = row['Prot_partner']
+                peptide_partner = str(row['RESNR_LIG']) + row['RESTYPE_LIG']
+                interaction = row['INTERACTION']
+                ring_found = False
+                col_name = f"{prot_partner}_{peptide_partner}_{interaction}"
+            elif row['INTERACTION'] == 'hbond':
+                if row['PROTISDON'] == True:
+                    prot_partner = row['Prot_partner']
+                    peptide_partner = str(row['RESNR_LIG']) + row['RESTYPE_LIG']
+                    interaction = row['INTERACTION']
+                    type = "Acceptor"
+                elif row['PROTISDON'] == False:
+                    prot_partner = row['Prot_partner']
+                    peptide_partner = str(row['RESNR_LIG']) + row['RESTYPE_LIG']
+                    interaction = row['INTERACTION']
+                    type = "Donor"
                 # Concatenate the values to form a unique column name
-                col_name = f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
-            elif row['PROTISPOS'] == False:
-                type = "PI"
-                col_name = f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
-        elif row['INTERACTION'] == 'metal':
-            special_ligand = row['RESTYPE_LIG']
-            ligcarbonidx = int(row['TARGET_IDX'])
-            metal_type = row['METAL_TYPE']
-            coordination = row['COORDINATION']
-            interaction = row['INTERACTION']
-            # Concatenate the values to form a unique column name
-            col_name = f"{special_ligand}_{ligcarbonidx}_{metal_type}_{coordination}_{interaction}"
-        frame_value = row['FRAME']
-        if frame_value not in unique_columns_rings_grouped:
-            unique_columns_rings_grouped[frame_value] = {}
-        if row['INTERACTION'] != 'skip':
-            unique_columns_rings_grouped[frame_value][index] = col_name
-            # Add the column name and its value to the dictionary
-            unique_columns_rings[index] = col_name
+                col_name = f"{prot_partner}_{peptide_partner}_{type}_{interaction}"
+            elif row['INTERACTION'] == 'halogen':
+                prot_partner = row['Prot_partner']
+                peptide_partner = str(row['RESNR_LIG']) + row['RESTYPE_LIG']
+                halogen = row['DONORTYPE']
+                interaction = row['INTERACTION']
+                # Concatenate the values to form a unique column name
+                col_name = f"{prot_partner}_{peptide_partner}_{halogen}_{interaction}"
+            elif row['INTERACTION'] == 'waterbridge':
+                if row['PROTISDON'] == True:
+                    prot_partner = row['Prot_partner']
+                    peptide_partner = str(row['RESNR_LIG']) + row['RESTYPE_LIG']
+                    interaction = row['INTERACTION']
+                    type = "Acceptor"
+                    # Concatenate the values to form a unique column name
+                    col_name = f"{prot_partner}_{peptide_partner}_{type}_{interaction}"
+                elif row['PROTISDON'] == False:
+                    prot_partner = row['Prot_partner']
+                    peptide_partner = str(row['RESNR_LIG']) + row['RESTYPE_LIG']
+                    interaction = row['INTERACTION']
+                    type = "Donor"
+                    # Concatenate the values to form a unique column name
+                    col_name = f"{prot_partner}_{peptide_partner}_{type}_{interaction}"
+            elif row['INTERACTION'] == 'pistacking':
+                prot_partner = row['Prot_partner']
+                peptide_partner = str(row['RESNR_LIG']) + row['RESTYPE_LIG']
+                interaction = row['INTERACTION']
+                # Concatenate the values to form a unique column name
+                col_name = f"{prot_partner}_{peptide_partner}_{interaction}"
+            elif row['INTERACTION'] == 'pication':
+                prot_partner = row['Prot_partner']
+                ligidx = (str(row['RESNR_LIG']) + row['RESTYPE_LIG'])
+                ligtype = row['RESTYPE_LIG']
+                interaction = row['INTERACTION']
+                # Concatenate the values to form a unique column name
+                col_name = f"{prot_partner}_{ligidx}_{ligtype}_{interaction}"
+                col_name = col_name.replace(',', '_')
+            elif row['INTERACTION'] == 'saltbridge':
+                prot_partner = row['Prot_partner']
+                ligidx = (str(row['RESNR_LIG']) + row['RESTYPE_LIG'])
+                lig_group = row['RESTYPE_LIG']
+                interaction = row['INTERACTION']
+                if row['PROTISPOS'] == True:
+                    type = "NI"
+                    # Concatenate the values to form a unique column name
+                    col_name = f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
+                elif row['PROTISPOS'] == False:
+                    type = "PI"
+                    col_name = f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
+            elif row['INTERACTION'] == 'metal':
+                special_ligand = row['RESTYPE_LIG']
+                ligcarbonidx = (str(row['RESNR_LIG']) + row['RESTYPE_LIG'])
+                metal_type = row['METAL_TYPE']
+                coordination = row['COORDINATION']
+                interaction = row['INTERACTION']
+                # Concatenate the values to form a unique column name
+                col_name = f"{special_ligand}_{ligcarbonidx}_{metal_type}_{coordination}_{interaction}"
+            frame_value = row['FRAME']
+            if frame_value not in unique_columns_rings_grouped:
+                unique_columns_rings_grouped[frame_value] = {}
+            if row['INTERACTION'] != 'skip':
+                unique_columns_rings_grouped[frame_value][index] = col_name
+                # Add the column name and its value to the dictionary
+                unique_columns_rings[index] = col_name
     print("\033[1minteraction partners generated\033[0m")
 
     return unique_columns_rings_grouped
@@ -253,7 +340,7 @@ def unique_data_generation(filtered_values):
     return unique_data
 
 
-def df_iteration_numbering(df,unique_data):
+def df_iteration_numbering(df,unique_data, peptide=None):
     """
     Loop through the DataFrame and assign the values 1 and 0 to the rows, depending if the corresponding interaction from unique data is present.
 
@@ -268,94 +355,181 @@ def df_iteration_numbering(df,unique_data):
     -------
     None
     """
-    for index, row in df.iterrows():
-        if row['INTERACTION'] == "hydrophobic":
-            for col in unique_data.values():
-                if "hydrophobic" in col:
-                    ligcarbonidx_check = str(int(row['LIGCARBONIDX']))
-                    if ligcarbonidx_check in col:
+    if peptide is None:
+        for index, row in df.iterrows():
+            if row['INTERACTION'] == "hydrophobic":
+                for col in unique_data.values():
+                    if "hydrophobic" in col:
+                        ligcarbonidx_check = str(int(row['LIGCARBONIDX']))
+                        if ligcarbonidx_check in col:
+                            parts = col.split('_')
+                            prot_partner = parts[0]
+                            interaction = parts[-1]
+                            condition = (row['Prot_partner'] == prot_partner) & (row['INTERACTION'] == interaction)
+                            df.at[index, col] = 1 if condition else 0
+                        else:
+                            continue
+            elif row['INTERACTION'] == "hbond":
+                if row['PROTISDON'] == True:
+                    for col in unique_data.values():
+                        if "hbond" in col:
+                            prot_partner, ligcarbonidx, type, interaction = col.split('_')
+                            ligcarbonidx = int(ligcarbonidx)
+                            condition = (row['Prot_partner'] == prot_partner) & (int(row['ACCEPTORIDX']) == ligcarbonidx) & (row['INTERACTION'] == interaction)
+                            df.at[index, col] = 1 if condition else 0
+                elif row['PROTISDON'] == False:
+                    for col in unique_data.values():
+                        if "hbond" in col:
+                            prot_partner, ligcarbonidx, type, interaction = col.split('_')
+                            ligcarbonidx = int(ligcarbonidx)
+                            condition = (row['Prot_partner'] == prot_partner) & (int(row['DONORIDX']) == ligcarbonidx) & (row['INTERACTION'] == interaction)
+                            df.at[index, col] = 1 if condition else 0
+            elif row['INTERACTION'] == "halogen":
+                for col in unique_data.values():
+                    if "halogen" in col:
+                        prot_partner, ligcarbonidx, halogen, interaction = col.split('_')
+                        ligcarbonidx = int(ligcarbonidx)
+                        condition = (row['Prot_partner'] == prot_partner) & (int(row['DON_IDX']) == ligcarbonidx) & (row['DONORTYPE'] == halogen) & (row['INTERACTION'] == interaction)
+                        df.at[index, col] = 1 if condition else 0
+            elif row['INTERACTION'] == "pistacking":
+                for col in unique_data.values():
+                    if "pistacking" in col:
+                        prot_partner, ligcarbonidx, interaction = col.split('_')
+                        condition = (row['Prot_partner'] == prot_partner) & (row['LIG_IDX_LIST'] == ligcarbonidx) & (row['INTERACTION'] == interaction)
+                        df.at[index, col] = 1 if condition else 0
+            elif row['INTERACTION'] == "waterbridge":
+                for col in unique_data.values():
+                    if "waterbridge" in col:
+                        if row['PROTISDON'] == True:
+                            prot_partner, ligcarbonidx, type, interaction = col.split('_')
+                            condition = (row['Prot_partner'] == prot_partner) & (int(row['ACCEPTOR_IDX']) == int(ligcarbonidx)) & (row['INTERACTION'] == interaction)
+                            df.at[index, col] = 1 if condition else 0
+                        elif row['PROTISDON'] == False:
+                            prot_partner, ligcarbonidx, type, interaction = col.split('_')
+                            condition = (row['Prot_partner'] == prot_partner) & (int(row['DONOR_IDX']) == int(ligcarbonidx)) & (row['INTERACTION'] == interaction)
+                            df.at[index, col] = 1 if condition else 0
+            elif row['INTERACTION'] == "pication":
+                for col in unique_data.values():
+                    if "pication" in col:
                         parts = col.split('_')
                         prot_partner = parts[0]
+                        ligidx = parts[1:-2]
+                        ligidx = ','.join(ligidx)
+                        ligtype = parts[-2]
                         interaction = parts[-1]
-                        condition = (row['Prot_partner'] == prot_partner) & (row['INTERACTION'] == interaction)
+                        condition = (row['Prot_partner'] == prot_partner) & (row['LIG_IDX_LIST'] == ligidx) & (row['LIG_GROUP'] == ligtype) & (row['INTERACTION'] == interaction)
                         df.at[index, col] = 1 if condition else 0
-                    else:
-                        continue
-        elif row['INTERACTION'] == "hbond":
-            if row['PROTISDON'] == True:
+
+            elif row['INTERACTION'] == "saltbridge":
                 for col in unique_data.values():
-                    if "hbond" in col:
-                        prot_partner, ligcarbonidx, type, interaction = col.split('_')
-                        ligcarbonidx = int(ligcarbonidx)
-                        condition = (row['Prot_partner'] == prot_partner) & (int(row['ACCEPTORIDX']) == ligcarbonidx) & (row['INTERACTION'] == interaction)
+                    if "saltbridge" in col:
+                        parts = col.split('_')
+                        prot_partner = parts[0]
+                        ligidx = parts[1:-3]
+                        ligidx = ','.join(ligidx)
+                        lig_group = parts[-3]
+                        type = parts[-2]
+                        interaction = parts[-1]
+                        condition = (row['Prot_partner'] == prot_partner) & (row['LIG_IDX_LIST'] == ligidx) & (row['LIG_GROUP'] == lig_group) & (row['INTERACTION'] == interaction)
                         df.at[index, col] = 1 if condition else 0
-            elif row['PROTISDON'] == False:
+
+            elif row['INTERACTION'] == "metal":
                 for col in unique_data.values():
-                    if "hbond" in col:
-                        prot_partner, ligcarbonidx, type, interaction = col.split('_')
-                        ligcarbonidx = int(ligcarbonidx)
-                        condition = (row['Prot_partner'] == prot_partner) & (int(row['DONORIDX']) == ligcarbonidx) & (row['INTERACTION'] == interaction)
+                    if "metal" in col:
+                        parts = col.split('_')
+                        special_ligand = parts[0]
+                        ligidx = int(parts[1])
+                        metal_type = parts[2]
+                        interaction = parts[-1]
+                        condition = (row['RESTYPE_LIG'] == special_ligand) & (int(row['TARGET_IDX']) == ligidx) & (row['METAL_TYPE'] == metal_type) & (row['INTERACTION'] == interaction)
                         df.at[index, col] = 1 if condition else 0
-        elif row['INTERACTION'] == "halogen":
-            for col in unique_data.values():
-                if "halogen" in col:
-                    prot_partner, ligcarbonidx, halogen, interaction = col.split('_')
-                    ligcarbonidx = int(ligcarbonidx)
-                    condition = (row['Prot_partner'] == prot_partner) & (int(row['DON_IDX']) == ligcarbonidx) & (row['DONORTYPE'] == halogen) & (row['INTERACTION'] == interaction)
-                    df.at[index, col] = 1 if condition else 0
-        elif row['INTERACTION'] == "pistacking":
-            for col in unique_data.values():
-                if "pistacking" in col:
-                    prot_partner, ligcarbonidx, interaction = col.split('_')
-                    condition = (row['Prot_partner'] == prot_partner) & (row['LIG_IDX_LIST'] == ligcarbonidx) & (row['INTERACTION'] == interaction)
-                    df.at[index, col] = 1 if condition else 0
-        elif row['INTERACTION'] == "waterbridge":
-            for col in unique_data.values():
-                if "waterbridge" in col:
-                    if row['PROTISDON'] == True:
-                        prot_partner, ligcarbonidx, type, interaction = col.split('_')
-                        condition = (row['Prot_partner'] == prot_partner) & (int(row['ACCEPTOR_IDX']) == int(ligcarbonidx)) & (row['INTERACTION'] == interaction)
+                        
+    if peptide is not None:
+        for index, row in df.iterrows():
+            if row['INTERACTION'] == "hydrophobic":
+                for col in unique_data.values():
+                    if "hydrophobic" in col:
+                        ligcarbonidx_check = str(int(row['RESNR_LIG']))
+                        if ligcarbonidx_check in col:
+                            parts = col.split('_')
+                            prot_partner = parts[0]
+                            interaction = parts[-1]
+                            condition = (row['Prot_partner'] == prot_partner) & (row['INTERACTION'] == interaction)
+                            df.at[index, col] = 1 if condition else 0
+                        else:
+                            continue
+            elif row['INTERACTION'] == "hbond":
+                if row['PROTISDON'] == True:
+                    for col in unique_data.values():
+                        if "hbond" in col:
+                            prot_partner, ligcarbonidx, type, interaction = col.split('_')
+
+                            condition = (row['Prot_partner'] == prot_partner) & ((str(row['RESNR_LIG']) + row['RESTYPE_LIG']) == ligcarbonidx) & (row['INTERACTION'] == interaction)
+                            df.at[index, col] = 1 if condition else 0
+                elif row['PROTISDON'] == False:
+                    for col in unique_data.values():
+                        if "hbond" in col:
+                            prot_partner, ligcarbonidx, type, interaction = col.split('_')
+
+                            condition = (row['Prot_partner'] == prot_partner) & (((str(row['RESNR_LIG']) + row['RESTYPE_LIG'])) == ligcarbonidx) & (row['INTERACTION'] == interaction)
+                            df.at[index, col] = 1 if condition else 0
+            elif row['INTERACTION'] == "halogen":
+                for col in unique_data.values():
+                    if "halogen" in col:
+                        prot_partner, ligcarbonidx, halogen, interaction = col.split('_')
+
+                        condition = (row['Prot_partner'] == prot_partner) & ((str(row['RESNR_LIG']) + row['RESTYPE_LIG']) == ligcarbonidx) & (row['DONORTYPE'] == halogen) & (row['INTERACTION'] == interaction)
                         df.at[index, col] = 1 if condition else 0
-                    elif row['PROTISDON'] == False:
-                        prot_partner, ligcarbonidx, type, interaction = col.split('_')
-                        condition = (row['Prot_partner'] == prot_partner) & (int(row['DONOR_IDX']) == int(ligcarbonidx)) & (row['INTERACTION'] == interaction)
+            elif row['INTERACTION'] == "pistacking":
+                for col in unique_data.values():
+                    if "pistacking" in col:
+                        prot_partner, ligcarbonidx, interaction = col.split('_')
+                        condition = (row['Prot_partner'] == prot_partner) & ((str(row['RESNR_LIG']) + row['RESTYPE_LIG']) == ligcarbonidx) & (row['INTERACTION'] == interaction)
                         df.at[index, col] = 1 if condition else 0
-        elif row['INTERACTION'] == "pication":
-            for col in unique_data.values():
-                if "pication" in col:
-                    parts = col.split('_')
-                    prot_partner = parts[0]
-                    ligidx = parts[1:-2]
-                    ligidx = ','.join(ligidx)
-                    ligtype = parts[-2]
-                    interaction = parts[-1]
-                    condition = (row['Prot_partner'] == prot_partner) & (row['LIG_IDX_LIST'] == ligidx) & (row['LIG_GROUP'] == ligtype) & (row['INTERACTION'] == interaction)
-                    df.at[index, col] = 1 if condition else 0
+            elif row['INTERACTION'] == "waterbridge":
+                for col in unique_data.values():
+                    if "waterbridge" in col:
+                        if row['PROTISDON'] == True:
+                            prot_partner, ligcarbonidx, type, interaction = col.split('_')
+                            condition = (row['Prot_partner'] == prot_partner) & ((str(row['RESNR_LIG']) + row['RESTYPE_LIG'])) == int(ligcarbonidx) & (row['INTERACTION'] == interaction)
+                            df.at[index, col] = 1 if condition else 0
+                        elif row['PROTISDON'] == False:
+                            prot_partner, ligcarbonidx, type, interaction = col.split('_')
+                            condition = (row['Prot_partner'] == prot_partner) & ((str(row['RESNR_LIG']) + row['RESTYPE_LIG']) == int(ligcarbonidx)) & (row['INTERACTION'] == interaction)
+                            df.at[index, col] = 1 if condition else 0
+            elif row['INTERACTION'] == "pication":
+                for col in unique_data.values():
+                    if "pication" in col:
+                        parts = col.split('_')
+                        prot_partner = parts[0]
+                        ligidx = parts[1]
+                        ligtype = parts[-2]
+                        interaction = parts[-1]
+                        condition = (row['Prot_partner'] == prot_partner) & ((str(row['RESNR_LIG']) + row['RESTYPE_LIG']) == ligidx) & (row['INTERACTION'] == interaction)
+                        df.at[index, col] = 1 if condition else 0
 
-        elif row['INTERACTION'] == "saltbridge":
-            for col in unique_data.values():
-                if "saltbridge" in col:
-                    parts = col.split('_')
-                    prot_partner = parts[0]
-                    ligidx = parts[1:-3]
-                    ligidx = ','.join(ligidx)
-                    lig_group = parts[-3]
-                    type = parts[-2]
-                    interaction = parts[-1]
-                    condition = (row['Prot_partner'] == prot_partner) & (row['LIG_IDX_LIST'] == ligidx) & (row['LIG_GROUP'] == lig_group) & (row['INTERACTION'] == interaction)
-                    df.at[index, col] = 1 if condition else 0
+            elif row['INTERACTION'] == "saltbridge":
+                for col in unique_data.values():
+                    if "saltbridge" in col:
+                        parts = col.split('_')
+                        prot_partner = parts[0]
+                        ligidx = parts[1]
+                        lig_group = parts[-3]
+                        type = parts[-2]
+                        interaction = parts[-1]
+                        condition = (row['Prot_partner'] == prot_partner) & ((str(row['RESNR_LIG']) + row['RESTYPE_LIG']) == ligidx) &  (row['INTERACTION'] == interaction)
+                        df.at[index, col] = 1 if condition else 0
 
-        elif row['INTERACTION'] == "metal":
-            for col in unique_data.values():
-                if "metal" in col:
-                    parts = col.split('_')
-                    special_ligand = parts[0]
-                    ligidx = int(parts[1])
-                    metal_type = parts[2]
-                    interaction = parts[-1]
-                    condition = (row['RESTYPE_LIG'] == special_ligand) & (int(row['TARGET_IDX']) == ligidx) & (row['METAL_TYPE'] == metal_type) & (row['INTERACTION'] == interaction)
-                    df.at[index, col] = 1 if condition else 0
-
+            elif row['INTERACTION'] == "metal":
+                for col in unique_data.values():
+                    if "metal" in col:
+                        parts = col.split('_')
+                        special_ligand = parts[0]
+                        ligidx = parts[1]
+                        metal_type = parts[2]
+                        interaction = parts[-1]
+                        condition = (row['RESTYPE_LIG'] == special_ligand) & ((str(row['RESNR_LIG']) + row['RESTYPE_LIG']) == ligidx) & (row['METAL_TYPE'] == metal_type) & (row['INTERACTION'] == interaction)
+                        df.at[index, col] = 1 if condition else 0
 
 
 def update_values(df, new, unique_data):

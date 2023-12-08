@@ -35,7 +35,7 @@ def characterize_complex(pdb_file: str, binding_site_id: str) -> PLInteraction:
     return pdb_complex.interaction_sets[binding_site_id]
 
 
-def retrieve_plip_interactions(pdb_file, lig_name, ):
+def retrieve_plip_interactions(pdb_file, lig_name):
     """
     Retrieves the interactions from PLIP.
 
@@ -54,6 +54,50 @@ def retrieve_plip_interactions(pdb_file, lig_name, ):
     for ligand in protlig.ligands:
         if str(ligand.longname) == lig_name:
             protlig.characterize_complex(ligand)  # find ligands and analyze interactions
+    sites = {}
+    # loop over binding sites
+    for key, site in sorted(protlig.interaction_sets.items()):
+        binding_site = BindingSiteReport(site)  # collect data about interactions
+        # tuples of *_features and *_info will be converted to pandas DataFrame
+        keys = (
+            "hydrophobic",
+            "hbond",
+            "waterbridge",
+            "saltbridge",
+            "pistacking",
+            "pication",
+            "halogen",
+            "metal",
+        )
+        # interactions is a dictionary which contains relevant information for each
+        # of the possible interactions: hydrophobic, hbond, etc. in the considered
+        # binding site.
+        interactions = {
+            k: [getattr(binding_site, k + "_features")] + getattr(binding_site, k + "_info")
+            for k in keys
+        }
+        sites[key] = interactions
+
+    return sites
+
+
+def retrieve_plip_interactions_peptide(pdb_file, peptide):
+    """
+    Retrieves the interactions from PLIP.
+
+    Parameters
+    ----------
+    pdb_file :
+        The PDB file of the complex.
+
+    Returns
+    -------
+    dict :
+        A dictionary of the binding sites and the interactions.
+    """
+    protlig = PDBComplex()
+    protlig.load_pdb(pdb_file)  # load the pdb file
+    protlig.characterize_complex(protlig.ligands[-1])  # find ligands and analyze interactions
     sites = {}
     # loop over binding sites
     for key, site in sorted(protlig.interaction_sets.items()):
@@ -144,7 +188,7 @@ def change_lig_to_residue(file_path, old_residue_name, new_residue_name):
                 file.write(line)
 
 
-def process_frame(frame, pdb_md, lig_name, special=None):
+def process_frame(frame, pdb_md, lig_name, special=None, peptide=None):
     """
     Process a single frame of MD simulation.
 
@@ -165,51 +209,64 @@ def process_frame(frame, pdb_md, lig_name, special=None):
     atoms_selected = pdb_md.select_atoms(f"protein or nucleic or resname {lig_name} or (resname HOH and around 10 resname {lig_name}) or resname {special}")
     for num in pdb_md.trajectory[(frame):(frame+1)]:
         atoms_selected.write(f'processing_frame_{frame}.pdb')
-    interactions_by_site = retrieve_plip_interactions(f"processing_frame_{frame}.pdb", lig_name)
-    index_of_selected_site = -1
-    selected_site = list(interactions_by_site.keys())[index_of_selected_site]
+    if peptide is None:
+        interactions_by_site = retrieve_plip_interactions(f"processing_frame_{frame}.pdb", lig_name)
+        index_of_selected_site = -1
+        selected_site = list(interactions_by_site.keys())[index_of_selected_site]
 
-    interaction_types = ["hydrophobic", "hbond", "waterbridge", "saltbridge", "pistacking", "pication", "halogen", "metal"]
+        interaction_types = ["hydrophobic", "hbond", "waterbridge", "saltbridge", "pistacking", "pication", "halogen", "metal"]
 
-    interaction_list = pd.DataFrame()
-    for interaction_type in interaction_types:
-        tmp_interaction = create_df_from_binding_site(interactions_by_site[selected_site], interaction_type=interaction_type)
-        tmp_interaction['FRAME'] = int(frame)
-        tmp_interaction['INTERACTION'] = interaction_type
-        interaction_list = pd.concat([interaction_list, tmp_interaction])
+        interaction_list = pd.DataFrame()
+        for interaction_type in interaction_types:
+            tmp_interaction = create_df_from_binding_site(interactions_by_site[selected_site], interaction_type=interaction_type)
+            tmp_interaction['FRAME'] = int(frame)
+            tmp_interaction['INTERACTION'] = interaction_type
+            interaction_list = pd.concat([interaction_list, tmp_interaction])
 
-    if special is not None:
-        combi_lig_special = mda.Universe("ligand_special.pdb")
-        complex = mda.Universe("complex.pdb")
-        complex_all = complex.select_atoms("all")
-        result = process_frame_special(frame, pdb_md, lig_name, special)
-        results_df = pd.concat(result, ignore_index=True)
-        results_df = results_df[results_df['LOCATION'] == 'protein.sidechain']
-        results_df['RESTYPE'] = results_df['RESTYPE'].replace(['HIS', 'SER', 'CYS'], lig_name)
-        results_df['LOCATION'] = results_df['LOCATION'].replace('protein.sidechain', 'ligand')
-        updated_target_idx = []
-    
-        for index, row in results_df.iterrows():
-            ligand_special_int_nr = int(row['TARGET_IDX'])
-            ligand_special_int_nr_atom = combi_lig_special.select_atoms(f"id {ligand_special_int_nr}")
-            for atom in ligand_special_int_nr_atom:
-                atom_name = atom.name
-                for complex_atom in complex_all:
-                    complex_atom_name = complex_atom.name
-                    if atom_name == complex_atom_name:
-                        true_number = complex_atom.id
-                        break  # Exit the loop once a match is found
-                updated_target_idx.append(true_number)
-    
-        # Update 'TARGET_IDX' in interaction_list
-        results_df['TARGET_IDX'] = updated_target_idx
-        interaction_list['TARGET_IDX'] = interaction_list['TARGET_IDX']
-    
-    # Concatenate the updated results_df to interaction_list
-        interaction_list = pd.concat([interaction_list, results_df])
+        if special is not None:
+            combi_lig_special = mda.Universe("ligand_special.pdb")
+            complex = mda.Universe("complex.pdb")
+            complex_all = complex.select_atoms("all")
+            result = process_frame_special(frame, pdb_md, lig_name, special)
+            results_df = pd.concat(result, ignore_index=True)
+            results_df = results_df[results_df['LOCATION'] == 'protein.sidechain']
+            results_df['RESTYPE'] = results_df['RESTYPE'].replace(['HIS', 'SER', 'CYS'], lig_name)
+            results_df['LOCATION'] = results_df['LOCATION'].replace('protein.sidechain', 'ligand')
+            updated_target_idx = []
+        
+            for index, row in results_df.iterrows():
+                ligand_special_int_nr = int(row['TARGET_IDX'])
+                ligand_special_int_nr_atom = combi_lig_special.select_atoms(f"id {ligand_special_int_nr}")
+                for atom in ligand_special_int_nr_atom:
+                    atom_name = atom.name
+                    for complex_atom in complex_all:
+                        complex_atom_name = complex_atom.name
+                        if atom_name == complex_atom_name:
+                            true_number = complex_atom.id
+                            break  # Exit the loop once a match is found
+                    updated_target_idx.append(true_number)
+        
+            # Update 'TARGET_IDX' in interaction_list
+            results_df['TARGET_IDX'] = updated_target_idx
+            interaction_list['TARGET_IDX'] = interaction_list['TARGET_IDX']
+        
+        # Concatenate the updated results_df to interaction_list
+            interaction_list = pd.concat([interaction_list, results_df])
+    if peptide is not None:
+        interactions_by_site = retrieve_plip_interactions_peptide(f"processing_frame_{frame}.pdb", peptide)
+        index_of_selected_site = -1
+        selected_site = list(interactions_by_site.keys())[index_of_selected_site]
 
-    if os.path.exists(f"processing_frame_{frame}.pdb"):
-        os.remove(f"processing_frame_{frame}.pdb")
+        interaction_types = ["hydrophobic", "hbond", "waterbridge", "saltbridge", "pistacking", "pication", "halogen", "metal"]
+
+        interaction_list = pd.DataFrame()
+        for interaction_type in interaction_types:
+            tmp_interaction = create_df_from_binding_site(interactions_by_site[selected_site], interaction_type=interaction_type)
+            tmp_interaction['FRAME'] = int(frame)
+            tmp_interaction['INTERACTION'] = interaction_type
+            interaction_list = pd.concat([interaction_list, tmp_interaction])
+        if os.path.exists(f"processing_frame_{frame}.pdb"):
+            os.remove(f"processing_frame_{frame}.pdb")
 
     return interaction_list
 
@@ -254,12 +311,12 @@ def process_frame_wrapper(args):
     tuple :
         tuple containing the frame index and the result of from `process_frame(frame_idx, pdb_md)`.
     """
-    frame_idx, pdb_md, lig_name, special_ligand = args
+    frame_idx, pdb_md, lig_name, special_ligand, peptide = args
 
-    return frame_idx, process_frame(frame_idx, pdb_md, lig_name, special_ligand)
+    return frame_idx, process_frame(frame_idx, pdb_md, lig_name, special_ligand, peptide)
 
 
-def process_trajectory(pdb_md, dataframe, num_processes, lig_name, special_ligand):
+def process_trajectory(pdb_md, dataframe, num_processes, lig_name, special_ligand, peptide):
     """
     Process protein-ligand trajectory with multiple CPUs in parallel.
 
@@ -285,7 +342,7 @@ def process_trajectory(pdb_md, dataframe, num_processes, lig_name, special_ligan
         total_frames = len(pdb_md.trajectory) - 1
 
         with Pool(processes=num_processes) as pool:
-            frame_args = [(i, pdb_md, lig_name, special_ligand) for i in range(1, total_frames + 1)]
+            frame_args = [(i, pdb_md, lig_name, special_ligand, peptide) for i in range(1, total_frames + 1)]
             
             # Initialize the progress bar with the total number of frames
             pbar = tqdm(total=total_frames, ascii=True, desc="Analyzing frames")
