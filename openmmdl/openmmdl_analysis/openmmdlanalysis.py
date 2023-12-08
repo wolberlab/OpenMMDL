@@ -52,7 +52,7 @@ def main():
     parser.add_argument('-t', dest='topology', help='Topology File after MD Simulation', required=True)
     parser.add_argument('-d', dest='trajectory', help='Trajectory File in DCD Format', required=True)
     parser.add_argument('-l', dest='ligand_sdf', help='Ligand in SDF Format')       
-    parser.add_argument('-n', dest='ligand_name', help='Ligand Name (3 Letter Code in PDB)')
+    parser.add_argument('-n', dest='ligand_name', help='Ligand Name (3 Letter Code in PDB)', default=None)
     parser.add_argument('-b', dest='binding', help='Binding Mode Treshold for Binding Mode in %%', default=40)   
     parser.add_argument('-df', dest='dataframe', help='Dataframe (use if the interactions were already calculated, default name would be "df_all.csv")', default=None)
     parser.add_argument('-m', dest='min_transition', help='Minimal Transition percentage for Markov State Model', default=1)
@@ -61,6 +61,7 @@ def main():
     parser.add_argument('-r', dest='frame_rmsd', help='RMSD Difference between frames calculation type "True" to use it default is False,', default="No")
     parser.add_argument('-nuc', dest='receptor_nucleic', help='Treat nucleic acids as receptor', default=False)
     parser.add_argument('-s', dest='special_ligand', help='Calculate interactions with special ligands', default=None)
+    parser.add_argument('-pep', dest='peptide', help='Calculate interactions with peptides. Give the peptides chain name as input. Defaults to None', default=None)
     
     input_formats = ['.pdb', '.dcd', '.sdf', '.csv'] 
     args = parser.parse_args()
@@ -73,7 +74,7 @@ def main():
     topology = args.topology
     trajectory = args.trajectory
 
-    if not args.ligand_sdf:
+    if not args.ligand_sdf and  args.peptide == None:
         print("All analyses will be run which can be done without a ligand present")
         #...
         process_trajectory_and_cluster(topology, trajectory)
@@ -81,10 +82,10 @@ def main():
         sys.exit()   
 
     
-    if input_formats[2] not in args.ligand_sdf:
-        print("SDF is missing, try the absolute path. Maybe you don't own a ligand (sad), in this case we'll only analyze the stable waters!")
-    if args.ligand_name == None:
-        print("Ligand Name is Missing, Add Ligand Name")
+    # if input_formats[2] not in args.ligand_sdf:
+    #     print("SDF is missing, try the absolute path. Maybe you don't own a ligand (sad), in this case we'll only analyze the stable waters!")
+    # if args.ligand_name == None:
+    #     print("Ligand Name is Missing, Add Ligand Name")
 
     # set variables for analysis and preprocess input files
     ligand_sdf = args.ligand_sdf
@@ -99,6 +100,7 @@ def main():
     generate_pml = bool(args.generate_pml)
     receptor_nucleic = bool(args.receptor_nucleic)
     special_ligand = args.special_ligand
+    peptide = args.peptide
 
     process_pdb_file(topology)
     print("\033[1mFiles are preprocessed\033[0m")
@@ -111,56 +113,64 @@ def main():
     renumber_atoms_in_residues("complex.pdb", "complex.pdb", ligand)
     process_pdb("complex.pdb", "complex.pdb")
     # Writing out the ligand in a separate pdb file for ring calculation
-    ligand_complex = pdb_md.select_atoms(f"resname {ligand}")
-    ligand_complex_no_h = pdb_md.select_atoms(f"resname {ligand} and not (name H*)")
-    if special_ligand != None:
-        ligand_special = pdb_md.select_atoms(f"resname {ligand} or resname {special_ligand}")
-        ligand_special.write("ligand_special.pdb")
-    ligand_complex_no_h.write("lig_no_h.pdb")
-    renumber_atoms_in_residues("lig_no_h.pdb", "lig_no_h.pdb", ligand)
-    process_pdb("lig_no_h.pdb", "lig_no_h.pdb")
-    ligand_complex.write("lig.pdb")
+    if peptide == None:
+        ligand_complex = pdb_md.select_atoms(f"resname {ligand}")
+        ligand_complex_no_h = pdb_md.select_atoms(f"resname {ligand} and not (name H*)")
+        if special_ligand != None:
+            ligand_special = pdb_md.select_atoms(f"resname {ligand} or resname {special_ligand}")
+            ligand_special.write("ligand_special.pdb")
+        ligand_complex_no_h.write("lig_no_h.pdb")
+        renumber_atoms_in_residues("lig_no_h.pdb", "lig_no_h.pdb", ligand)
+        process_pdb("lig_no_h.pdb", "lig_no_h.pdb")
+        ligand_complex.write("lig.pdb")
 
-    # getting Ring Information from the ligand pdb file
-    lig_rd = rdkit.Chem.rdmolfiles.MolFromPDBFile("lig.pdb")
-    lig_rd_ring = lig_rd.GetRingInfo()
+        # getting Ring Information from the ligand pdb file
+        lig_rd = rdkit.Chem.rdmolfiles.MolFromPDBFile("lig.pdb")
+        lig_rd_ring = lig_rd.GetRingInfo()
 
-    # getting the index of the first atom of the ligand from the complex pdb
-    novel_complex = mda.Universe("complex.pdb")
-    novel_complex_ligand = novel_complex.select_atoms(f"resname {ligand}")
-    for atom in novel_complex_ligand:
-        lig_index = atom.id
-        break
-    ligand_rings = []
-    ligand_no_hydrogens = mda.Universe("lig_no_h.pdb")
-    lig_no_hydrogens = ligand_no_hydrogens.select_atoms("all")
-    complex_universe = mda.Universe("complex.pdb")
-    complex_lig = novel_complex.select_atoms(f"resname {ligand}")
+        # getting the index of the first atom of the ligand from the complex pdb
+        novel_complex = mda.Universe("complex.pdb")
+        novel_complex_ligand = novel_complex.select_atoms(f"resname {ligand}")
+        for atom in novel_complex_ligand:
+            lig_index = atom.id
+            break
+        ligand_rings = []
+        ligand_no_hydrogens = mda.Universe("lig_no_h.pdb")
+        lig_no_hydrogens = ligand_no_hydrogens.select_atoms("all")
+        complex_universe = mda.Universe("complex.pdb")
+        complex_lig = novel_complex.select_atoms(f"resname {ligand}")
 
-    # Iterate through each ring, increase indices by 1, and print the updated rings
-    for atom_ring in lig_rd_ring.AtomRings():
-        current_ring = []
-        for atom_ring_single in atom_ring:
-            for ligand_ring_atom in lig_no_hydrogens:
-                if atom_ring_single + 1 == ligand_ring_atom.id:
-                    #print(ligand_ring_atom.name)
-                    for complex_lig_atom in novel_complex_ligand:
-                        if ligand_ring_atom.name == complex_lig_atom.name:
-                            true_number = complex_lig_atom.id
-                            updated_ring_2 = true_number
-                            current_ring.append(updated_ring_2)
-        ligand_rings.append(current_ring)
-    print(ligand_rings)
-    print("\033[1mLigand ring data gathered\033[0m")
-    
-    convert_ligand_to_smiles(ligand_sdf,output_smi="lig.smi")
+        # Iterate through each ring, increase indices by 1, and print the updated rings
+        for atom_ring in lig_rd_ring.AtomRings():
+            current_ring = []
+            for atom_ring_single in atom_ring:
+                for ligand_ring_atom in lig_no_hydrogens:
+                    if atom_ring_single + 1 == ligand_ring_atom.id:
+                        #print(ligand_ring_atom.name)
+                        for complex_lig_atom in novel_complex_ligand:
+                            if ligand_ring_atom.name == complex_lig_atom.name:
+                                true_number = complex_lig_atom.id
+                                updated_ring_2 = true_number
+                                current_ring.append(updated_ring_2)
+            ligand_rings.append(current_ring)
+        print(ligand_rings)
+        print("\033[1mLigand ring data gathered\033[0m")
+        
+        convert_ligand_to_smiles(ligand_sdf,output_smi="lig.smi")
+    if peptide != None:
+        ligand_rings = None
     
     os.makedirs("RMSD", exist_ok=True)
     if receptor_nucleic:
         rmsd_for_atomgroups(f'{topology}', f'{trajectory}', selection1='nucleicbackbone', selection2=['nucleic', f'resname {ligand}'])
         if frame_rmsd != "No":
             RMSD_dist_frames(f'{topology}', f'{trajectory}', lig=f'{ligand}', nucleic=True)
-            print("\033[1mRMSD calculated\033[0m")            
+            print("\033[1mRMSD calculated\033[0m")
+    if peptide != None:
+        rmsd_for_atomgroups(f'{topology}', f'{trajectory}', selection1='backbone', selection2=['protein', f'chainID {peptide}'])
+        if frame_rmsd != "No":
+            RMSD_dist_frames(f'{topology}', f'{trajectory}', lig=f'chainID {peptide}')
+            print("\033[1mRMSD calculated\033[0m")           
     else:
         rmsd_for_atomgroups(f'{topology}', f'{trajectory}', selection1='backbone', selection2=['protein', f'resname {ligand}'])
         if frame_rmsd != "No":
@@ -169,10 +179,12 @@ def main():
             
     if receptor_nucleic:
         config.DNARECEPTOR = True
+    if peptide != None:
+        config.PEPTIDES = [peptide]
     
     interaction_list = pd.DataFrame(columns=["RESNR", "RESTYPE", "RESCHAIN", "RESNR_LIG", "RESTYPE_LIG", "RESCHAIN_LIG", "DIST", "LIGCARBONIDX", "PROTCARBONIDX", "LIGCOO", "PROTCOO"])
 
-    interaction_list = process_trajectory(pdb_md, dataframe=dataframe, num_processes=cpu_count, lig_name=ligand, special_ligand=special_ligand)
+    interaction_list = process_trajectory(pdb_md, dataframe=dataframe, num_processes=cpu_count, lig_name=ligand, special_ligand=special_ligand, peptide=peptide)
 
     interaction_list["Prot_partner"] = interaction_list["RESNR"].astype(str) + interaction_list["RESTYPE"] + interaction_list["RESCHAIN"]
 
@@ -182,7 +194,7 @@ def main():
 
     interaction_list = interaction_list.reset_index(drop=True)
 
-    unique_columns_rings_grouped = gather_interactions(interaction_list, ligand_rings)
+    unique_columns_rings_grouped = gather_interactions(interaction_list, ligand_rings, peptide=peptide)
 
     interactions_all = interaction_list.copy()
 
@@ -199,8 +211,8 @@ def main():
     unique_data_all = unique_data_generation(filtering_all)
 
     # Iteration through the dataframe and numbering the interactions with 1 and 0, depending if the interaction exists or not
-    df_iteration_numbering(interaction_list,unique_data)
-    df_iteration_numbering(interactions_all,unique_data_all)
+    df_iteration_numbering(interaction_list,unique_data, peptide=peptide)
+    df_iteration_numbering(interactions_all,unique_data_all, peptide=peptide)
     print("\033[1mInteraction values assigned\033[0m")
 
     # Saving the dataframe
@@ -293,73 +305,74 @@ def main():
 
     
     # Generate an Figure for each of the binding modes with rdkit Drawer with the atoms interacting highlighted by colors
-    matplotlib.use("Agg") 
-    binding_site = {}
-    merged_image_paths = []
-    for binding_mode, values in columns_with_value_1.items():
-        binding_site[binding_mode] = values
-        occurrence_count = top_10_nodes_with_occurrences[binding_mode]
-        occurrence_percent = 100* occurrence_count / total_frames
-        with open("lig.smi", "r") as file:
-            reference_smiles = file.read().strip()  # Read the SMILES from the file and remove any leading/trailing whitespace
-        reference_mol = Chem.MolFromSmiles(reference_smiles)
-        prepared_ligand = AllChem.AssignBondOrdersFromTemplate(reference_mol, lig_rd)
-        # Generate 2D coordinates for the molecule
-        AllChem.Compute2DCoords(prepared_ligand)
-        split_data = split_interaction_data(values)
-        # Get the highlighted atom indices based on interaction type
-        highlighted_hbond_donor, highlighted_hbond_acceptor, highlighted_hbond_both, highlighted_hydrophobic, highlighted_waterbridge,highlighted_pistacking, highlighted_halogen, highlighted_ni, highlighted_pi, highlighted_pication, highlighted_metal = highlight_numbers(split_data, starting_idx=lig_index)
+    if peptide is None:
+        matplotlib.use("Agg") 
+        binding_site = {}
+        merged_image_paths = []
+        for binding_mode, values in columns_with_value_1.items():
+            binding_site[binding_mode] = values
+            occurrence_count = top_10_nodes_with_occurrences[binding_mode]
+            occurrence_percent = 100* occurrence_count / total_frames
+            with open("lig.smi", "r") as file:
+                reference_smiles = file.read().strip()  # Read the SMILES from the file and remove any leading/trailing whitespace
+            reference_mol = Chem.MolFromSmiles(reference_smiles)
+            prepared_ligand = AllChem.AssignBondOrdersFromTemplate(reference_mol, lig_rd)
+            # Generate 2D coordinates for the molecule
+            AllChem.Compute2DCoords(prepared_ligand)
+            split_data = split_interaction_data(values)
+            # Get the highlighted atom indices based on interaction type
+            highlighted_hbond_donor, highlighted_hbond_acceptor, highlighted_hbond_both, highlighted_hydrophobic, highlighted_waterbridge,highlighted_pistacking, highlighted_halogen, highlighted_ni, highlighted_pi, highlighted_pication, highlighted_metal = highlight_numbers(split_data, starting_idx=lig_index)
 
-        # Generate a dictionary for hydrogen bond acceptors
-        hbond_acceptor_dict = generate_interaction_dict('hbond_acceptor', highlighted_hbond_acceptor)
-        # Generate a dictionary for hydrogen bond acceptors and donors
-        hbond_both_dict = generate_interaction_dict('hbond_both', highlighted_hbond_both)
-        # Generate a dictionary for hydrogen bond donors
-        hbond_donor_dict = generate_interaction_dict('hbond_donor', highlighted_hbond_donor)
-        # Generate a dictionary for hydrophobic features
-        hydrophobic_dict = generate_interaction_dict('hydrophobic', highlighted_hydrophobic)
-        # Generate a dictionary for water bridge interactions
-        waterbridge_dict = generate_interaction_dict('waterbridge', highlighted_waterbridge)
-        # Generate a dictionary for pistacking
-        pistacking_dict = generate_interaction_dict('pistacking', highlighted_pistacking)
-        # Generate a dictionary for halogen interactions
-        halogen_dict = generate_interaction_dict('halogen', highlighted_halogen)
-        # Generate a dictionary for negative ionizables
-        ni_dict = generate_interaction_dict('ni', highlighted_ni)
-        # Generate a dictionary for negative ionizables
-        pi_dict = generate_interaction_dict('pi', highlighted_pi)
-        # Generate a dictionary for pication
-        pication_dict = generate_interaction_dict('pication', highlighted_pication)
-        # Generate a dictionary for metal interactions
-        metal_dict = generate_interaction_dict('metal', highlighted_metal)
+            # Generate a dictionary for hydrogen bond acceptors
+            hbond_acceptor_dict = generate_interaction_dict('hbond_acceptor', highlighted_hbond_acceptor)
+            # Generate a dictionary for hydrogen bond acceptors and donors
+            hbond_both_dict = generate_interaction_dict('hbond_both', highlighted_hbond_both)
+            # Generate a dictionary for hydrogen bond donors
+            hbond_donor_dict = generate_interaction_dict('hbond_donor', highlighted_hbond_donor)
+            # Generate a dictionary for hydrophobic features
+            hydrophobic_dict = generate_interaction_dict('hydrophobic', highlighted_hydrophobic)
+            # Generate a dictionary for water bridge interactions
+            waterbridge_dict = generate_interaction_dict('waterbridge', highlighted_waterbridge)
+            # Generate a dictionary for pistacking
+            pistacking_dict = generate_interaction_dict('pistacking', highlighted_pistacking)
+            # Generate a dictionary for halogen interactions
+            halogen_dict = generate_interaction_dict('halogen', highlighted_halogen)
+            # Generate a dictionary for negative ionizables
+            ni_dict = generate_interaction_dict('ni', highlighted_ni)
+            # Generate a dictionary for negative ionizables
+            pi_dict = generate_interaction_dict('pi', highlighted_pi)
+            # Generate a dictionary for pication
+            pication_dict = generate_interaction_dict('pication', highlighted_pication)
+            # Generate a dictionary for metal interactions
+            metal_dict = generate_interaction_dict('metal', highlighted_metal)
 
-        # Call the function to update hbond_donor_dict with values from other dictionaries
-        update_dict(hbond_donor_dict, hbond_acceptor_dict, hydrophobic_dict, hbond_both_dict, waterbridge_dict, pistacking_dict, halogen_dict, ni_dict, pi_dict, pication_dict, metal_dict)
+            # Call the function to update hbond_donor_dict with values from other dictionaries
+            update_dict(hbond_donor_dict, hbond_acceptor_dict, hydrophobic_dict, hbond_both_dict, waterbridge_dict, pistacking_dict, halogen_dict, ni_dict, pi_dict, pication_dict, metal_dict)
 
-        # Convert the highlight_atoms to int type for rdkit drawer
-        highlight_atoms = [int(x) for x in highlighted_hbond_donor + highlighted_hbond_acceptor + highlighted_hbond_both + highlighted_hydrophobic + highlighted_waterbridge + highlighted_pistacking + highlighted_halogen + highlighted_ni + highlighted_pi + highlighted_pication + highlighted_metal]
-        highlight_atoms = list(set(highlight_atoms))
-    
-        # Convert the RDKit molecule to SVG format with atom highlights
-        drawer = rdMolDraw2D.MolDraw2DSVG(600, 600)
-        drawer.DrawMolecule(prepared_ligand, highlightAtoms=highlight_atoms, highlightAtomColors=hbond_donor_dict)
-        drawer.FinishDrawing()
-        svg = drawer.GetDrawingText().replace('svg:', '')
+            # Convert the highlight_atoms to int type for rdkit drawer
+            highlight_atoms = [int(x) for x in highlighted_hbond_donor + highlighted_hbond_acceptor + highlighted_hbond_both + highlighted_hydrophobic + highlighted_waterbridge + highlighted_pistacking + highlighted_halogen + highlighted_ni + highlighted_pi + highlighted_pication + highlighted_metal]
+            highlight_atoms = list(set(highlight_atoms))
+        
+            # Convert the RDKit molecule to SVG format with atom highlights
+            drawer = rdMolDraw2D.MolDraw2DSVG(600, 600)
+            drawer.DrawMolecule(prepared_ligand, highlightAtoms=highlight_atoms, highlightAtomColors=hbond_donor_dict)
+            drawer.FinishDrawing()
+            svg = drawer.GetDrawingText().replace('svg:', '')
 
-        # Save the SVG to a file
-        with open(f'{binding_mode}.svg', 'w') as f:
-            f.write(svg)
+            # Save the SVG to a file
+            with open(f'{binding_mode}.svg', 'w') as f:
+                f.write(svg)
 
-        # Convert the svg to an png
-        cairosvg.svg2png(url=f'{binding_mode}.svg', write_to=f'{binding_mode}.png')
+            # Convert the svg to an png
+            cairosvg.svg2png(url=f'{binding_mode}.svg', write_to=f'{binding_mode}.png')
 
-        # Generate the interactions legend and combine it with the ligand png
-        merged_image_paths = create_and_merge_images(binding_mode, occurrence_percent, split_data, merged_image_paths)
+            # Generate the interactions legend and combine it with the ligand png
+            merged_image_paths = create_and_merge_images(binding_mode, occurrence_percent, split_data, merged_image_paths)
 
-    # Create Figure with all Binding modes
-    arranged_figure_generation(merged_image_paths, "all_binding_modes_arranged.png")
-    generate_ligand_image(ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", "ligand_numbering.png")
-    print("\033[1mBinding mode figure generated\033[0m")
+        # Create Figure with all Binding modes
+        arranged_figure_generation(merged_image_paths, "all_binding_modes_arranged.png")
+        generate_ligand_image(ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", "ligand_numbering.png")
+        print("\033[1mBinding mode figure generated\033[0m")
 
     df_all = pd.read_csv('df_all.csv')
     
