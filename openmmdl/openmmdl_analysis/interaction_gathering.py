@@ -222,6 +222,8 @@ def process_frame(frame, pdb_md, lig_name, special=None, peptide=None):
             tmp_interaction['FRAME'] = int(frame)
             tmp_interaction['INTERACTION'] = interaction_type
             interaction_list = pd.concat([interaction_list, tmp_interaction])
+        if os.path.exists(f"processing_frame_{frame}.pdb"):
+            os.remove(f"processing_frame_{frame}.pdb")
 
         if special is not None:
             combi_lig_special = mda.Universe("ligand_special.pdb")
