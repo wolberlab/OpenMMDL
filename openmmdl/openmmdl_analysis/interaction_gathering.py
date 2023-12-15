@@ -225,6 +225,7 @@ def process_frame(frame, pdb_md, lig_name, special=None, peptide=None):
         if os.path.exists(f"processing_frame_{frame}.pdb"):
             os.remove(f"processing_frame_{frame}.pdb")
 
+
         if special is not None:
             combi_lig_special = mda.Universe("ligand_special.pdb")
             complex = mda.Universe("complex.pdb")
