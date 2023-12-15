@@ -2,6 +2,8 @@
 from pathlib import Path
 import pandas as pd
 import itertools
+from MDAnalysis.analysis import rms
+from tqdm import tqdm
 import os
 
 def gather_interactions(df, ligand_rings, peptide=None):
@@ -555,3 +557,34 @@ def update_values(df, new, unique_data):
         df.loc[idx, list(unique_data.values())] = values_to_update
 
 
+def calculate_representative_frame(traj, bmode_frame_list, bmode, lig):
+    representative_frame = -1
+    min_mean_rmsd = 1000.0
+    for reference_frame in bmode_frame_list:
+        rmsd_values = []
+        traj.trajectory[reference_frame]
+        reference_frame_state = traj.select_atoms(f"protein or nucleic or resname {lig}").positions
+        for frame in bmode_frame_list:
+            if frame != reference_frame:
+                traj.trajectory[frame]
+                calculation_frame_state = traj.select_atoms(f"protein or nucleic or resname {lig}").positions
+                calc_rmsd = rms.rmsd(reference_frame_state, calculation_frame_state, center=True, superposition=True)
+                rmsd_values.append(calc_rmsd)
+        mean_rmsd = sum(rmsd_values) / len(rmsd_values)
+        if mean_rmsd < min_mean_rmsd:
+            min_mean_rmsd = mean_rmsd
+            representative_frame = reference_frame
+
+    return representative_frame
+
+
+def process_mode(mode, grouped_frames_treshold, top_10_binding_modes, total_binding_modes, pdb_md, ligand, result_dict):
+    first_frame = grouped_frames_treshold.loc[grouped_frames_treshold['Binding_fingerprint_treshold'].str.contains(mode), 'FRAME'].iloc[0]
+    all_frames = grouped_frames_treshold.loc[grouped_frames_treshold['Binding_fingerprint_treshold'].str.contains(mode), 'FRAME'].tolist()
+    percent_occurrence = (top_10_binding_modes[mode] / total_binding_modes) * 100
+    result_dict['Binding Mode'].append(mode)
+    result_dict['First Frame'].append(first_frame)
+    result_dict['All Frames'].append(all_frames)
+    result_dict['Percentage Occurrence'].append(percent_occurrence)
+    representative_frame = calculate_representative_frame(pdb_md, all_frames, mode, ligand)
+    result_dict['Representative Frame'].append(representative_frame)

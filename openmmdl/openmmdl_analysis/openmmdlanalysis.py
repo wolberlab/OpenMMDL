@@ -15,6 +15,8 @@ import matplotlib
 import pickle
 import json
 import Bio
+import multiprocessing
+import functools
 from Bio import PDB
 import cairosvg
 from collections import Counter
@@ -22,12 +24,14 @@ from rdkit import Chem
 from rdkit.Chem import AllChem, Draw
 from rdkit.Chem.Draw import rdMolDraw2D
 from plip.basic import config
+from MDAnalysis.analysis import rms
+from tqdm import tqdm
 
 from openmmdl.openmmdl_analysis.preprocessing import process_pdb_file, convert_pdb_to_sdf, renumber_atoms_in_residues, replace_atom_type, process_pdb, move_hydrogens_to_end
 from openmmdl.openmmdl_analysis.rmsd_calculation import rmsd_for_atomgroups, RMSD_dist_frames
 from openmmdl.openmmdl_analysis.ligand_processing import increase_ring_indices, convert_ligand_to_smiles
 from openmmdl.openmmdl_analysis.interaction_gathering import characterize_complex, retrieve_plip_interactions, create_df_from_binding_site, process_frame, process_trajectory, fill_missing_frames
-from openmmdl.openmmdl_analysis.binding_mode_processing import gather_interactions, remove_duplicate_values, combine_subdict_values, filtering_values, unique_data_generation, df_iteration_numbering, update_values
+from openmmdl.openmmdl_analysis.binding_mode_processing import gather_interactions, remove_duplicate_values, combine_subdict_values, filtering_values, unique_data_generation, df_iteration_numbering, update_values, calculate_representative_frame, process_mode
 from openmmdl.openmmdl_analysis.markov_state_figure_generation import min_transition_calculation, binding_site_markov_network
 from openmmdl.openmmdl_analysis.rdkit_figure_generation import split_interaction_data, highlight_numbers, generate_interaction_dict, update_dict, create_and_merge_images, arranged_figure_generation, generate_ligand_image
 from openmmdl.openmmdl_analysis.barcode_generation import barcodegeneration,plot_barcodes,plot_waterbridge_piechart, plot_bacodes_grouped
@@ -153,7 +157,6 @@ def main():
                                 updated_ring_2 = true_number
                                 current_ring.append(updated_ring_2)
             ligand_rings.append(current_ring)
-        print(ligand_rings)
         print("\033[1mLigand ring data gathered\033[0m")
         
         convert_ligand_to_smiles(ligand_sdf,output_smi="lig.smi")
@@ -376,28 +379,38 @@ def main():
 
     df_all = pd.read_csv('df_all.csv')
     
-    # get the top 10 bindingmodes with the most occurrences
+    # get the top 10 bindingmodes with the most occurrences  
     binding_modes = grouped_frames_treshold['Binding_fingerprint_treshold'].str.split('\n')
     all_binding_modes = [mode.strip() for sublist in binding_modes for mode in sublist]
     binding_mode_counts = pd.Series(all_binding_modes).value_counts()
     top_10_binding_modes = binding_mode_counts.head(10)
     total_binding_modes = len(all_binding_modes)
-    result_dict = {'Binding Mode': [], 'First Frame': [], 'Percentage Occurrence': []}
-    for mode in top_10_binding_modes.index:
-        first_frame = grouped_frames_treshold.loc[grouped_frames_treshold['Binding_fingerprint_treshold'].str.contains(mode), 'FRAME'].iloc[0]
-        percent_occurrence = (top_10_binding_modes[mode] / total_binding_modes) * 100
-        result_dict['Binding Mode'].append(mode)
-        result_dict['First Frame'].append(first_frame)
-        result_dict['Percentage Occurrence'].append(percent_occurrence)
+    result_dict = {'Binding Mode': [], 'First Frame': [], 'All Frames': [], 'Representative Frame': [], 'Percentage Occurrence': []}
+    modes_to_process = top_10_binding_modes.index
+    with multiprocessing.Pool(processes=cpu_count) as pool:
+        partial_process_mode = functools.partial(
+                process_mode,
+                grouped_frames_treshold=grouped_frames_treshold,
+                top_10_binding_modes=top_10_binding_modes,
+                total_binding_modes=total_binding_modes,
+                pdb_md=pdb_md,
+                ligand=ligand,
+                result_dict=result_dict
+            )
+        pool.map(partial_process_mode, modes_to_process)
     top_10_binding_modes_df = pd.DataFrame(result_dict)
-    
+    top_10_binding_modes_df.to_csv('top_10_binding_modes.csv')
+    print("\033[1mFound representative frame for each binding mode\033[0m")
     # save bindingmode pdb
     for index, row in top_10_binding_modes_df.iterrows():
         b_mode = row['Binding Mode']
-        first_occurance = int(row['First Frame'])
-        pdb_md.trajectory[first_occurance]
+        rep_frame = int(row['Representative Frame'])
+        pdb_md.trajectory[rep_frame]
         frame_atomgroup = pdb_md.atoms
         frame_atomgroup.write(f"./Binding_Modes_Markov_States/{b_mode}.pdb")
+    
+    print("\033[1mBinding mode pdb files saved\033[0m")
+        
     
     id_num = 0
     if generate_pml:
