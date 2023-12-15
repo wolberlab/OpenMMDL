@@ -62,6 +62,8 @@ def main():
     parser.add_argument('-nuc', dest='receptor_nucleic', help='Treat nucleic acids as receptor', default=False)
     parser.add_argument('-s', dest='special_ligand', help='Calculate interactions with special ligands', default=None)
     parser.add_argument('-pep', dest='peptide', help='Calculate interactions with peptides. Give the peptides chain name as input. Defaults to None', default=None)
+    parser.add_argument('-w', dest='stable_water_analysis', help='Should stable water analysis be performed? True or False', default=False)
+    parser.add_argument('--watereps', dest='water_eps', help='Set the Eps for clustering, this defines how big clusters can be spatially in Angstrom', default=1.0)
     
     input_formats = ['.pdb', '.dcd', '.sdf', '.csv'] 
     args = parser.parse_args()
@@ -74,11 +76,14 @@ def main():
     topology = args.topology
     trajectory = args.trajectory
 
-    if not args.ligand_sdf and  args.peptide == None:
+    water_eps = float(args.water_eps)
+    stable_water_analysis = bool(args.stable_water_analysis)
+    # The following is the current water analysis if no ligand is present. 
+    if not args.ligand_sdf and args.peptide == None and stable_water_analysis:
         print("All analyses will be run which can be done without a ligand present")
         #...
-        process_trajectory_and_cluster(topology, trajectory)
-        analyze_protein_and_water_interaction(topology,"representative_waters.pdb")
+        process_trajectory_and_cluster(topology, trajectory, water_eps)
+        analyze_protein_and_water_interaction(topology,"representative_waters.pdb", water_eps)
         sys.exit()   
 
     
@@ -495,6 +500,11 @@ def main():
         print("\033[1mPharmacophores generated\033[0m")
     
     print("\033[1mAnalysis is Finished.\033[0m")
+
+    if stable_water_analysis:
+        process_trajectory_and_cluster(topology, trajectory, water_eps)
+        analyze_protein_and_water_interaction(topology,"representative_waters.pdb")
+
     
     
 if __name__ == "__main__":

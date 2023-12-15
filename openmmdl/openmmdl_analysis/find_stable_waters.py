@@ -9,8 +9,8 @@ from Bio.PDB import PDBParser
 
 # the following function is called by the last function in this script. It is only to be run if the water was already calculated.
 # finding the water molecules is the campute intensive task, thus i splitted it in the two subtasks.
-def perform_clustering_and_writing(stable_waters, cluster_eps, min_samples, output_directory):
-    def write_pdb_clusters_and_representatives(clustered_waters):
+def perform_clustering_and_writing(stable_waters, cluster_eps, output_directory):
+    def write_pdb_clusters_and_representatives(clustered_waters, min_samples):
         atom_counter = 1
         pdb_file_counter = 1
         print("cluster_eps:")
@@ -29,6 +29,9 @@ def perform_clustering_and_writing(stable_waters, cluster_eps, min_samples, outp
                     atom_counter += 1
 
                 # Write the current cluster to a new PDB file
+                output_directory += "_"
+                output_directory += min_samples
+                os.makedirs(output_directory, exist_ok=True)
                 output_filename = os.path.join(output_directory, f"cluster_{label}.pdb")
                 with open(output_filename, "w") as pdb_file:
                     pdb_file.write("".join(pdb_lines))
@@ -39,7 +42,7 @@ def perform_clustering_and_writing(stable_waters, cluster_eps, min_samples, outp
         # Write representative water molecules to a PDB file
         representative_waters = clustered_waters.groupby("Cluster_Label").mean()
         representative_waters.reset_index(inplace=True)
-        representative_filename = "representative_waters.pdb"
+        representative_filename = os.path.join(output_directory, "representative_waters.pdb")
         with open(representative_filename, "w") as pdb_file:
             for index, row in representative_waters.iterrows():
                 x, y, z = row["Oxygen_X"], row["Oxygen_Y"], row["Oxygen_Z"]
@@ -48,27 +51,37 @@ def perform_clustering_and_writing(stable_waters, cluster_eps, min_samples, outp
 
     # Feature extraction: XYZ coordinates
     X = stable_waters[["Oxygen_X", "Oxygen_Y", "Oxygen_Z"]]
+   
+    # List of percentages to iterate over
+    percentage_values = [25, 50, 75, 90, 99]
 
-    # Apply DBSCAN clustering
-    dbscan = DBSCAN(eps=cluster_eps, min_samples=min_samples)
-    labels = dbscan.fit_predict(X)
+    # Assuming total_frames and X are defined outside of this snippet
+    for percent in percentage_values:
+       # Adjust min_percent based on the current iteration
+        min_percent = percent / 100
 
-    # Filter out noise (clusters with fewer than a threshold number of points)
-    clustered_waters = stable_waters.copy()
-    clustered_waters["Cluster_Label"] = labels
-    clustered_waters = clustered_waters[clustered_waters["Cluster_Label"] != -1]  # Remove noise
+        # Rest of your code remains the same
+        min_samples = int(min_percent * total_frames)
+       dbscan = DBSCAN(eps=cluster_eps, min_samples=min_samples)
+        labels = dbscan.fit_predict(X)
 
-    # Call the writing function
-    write_pdb_clusters_and_representatives(clustered_waters)
+       # Filter out noise and call the writing function
+       clustered_waters = stable_waters.copy()
+       clustered_waters["Cluster_Label"] = labels
+       clustered_waters = clustered_waters[clustered_waters["Cluster_Label"] != -1]  # Remove noise
 
-def process_trajectory_and_cluster(topology, trajectory, cluster_eps=1.0, min_percent=0.45, output_directory="./stableWaters"):
+       # Call the writing function
+        write_pdb_clusters_and_representatives(clustered_waters, min_samples)
+
+def process_trajectory_and_cluster(topology, trajectory, water_eps, output_directory="./stableWaters"):
     # Load the PDB and DCD files
     u = mda.Universe(topology, trajectory)
+    output_directory += "_clusterEps_"
+    strEps = str(water_eps).replace(".", "_")
+    output_directory += strEps
     os.makedirs(output_directory, exist_ok=True)
     # Get the total number of frames for the progress bar
     total_frames = len(u.trajectory)
-    min_samples = min_percent*total_frames
-    min_samples = int(min_samples)
     # Create an empty DataFrame to store stable water coordinates
     stable_waters = pd.DataFrame(columns=["Frame", "Residue", "Oxygen_X", "Oxygen_Y", "Oxygen_Z"])
 
@@ -110,10 +123,10 @@ def process_trajectory_and_cluster(topology, trajectory, cluster_eps=1.0, min_pe
     stable_waters.to_csv(os.path.join(output_directory, "stable_waters.csv"), index=False)
 
     # Call the clustering and writing function with the stable_waters DataFrame and output directory
-    perform_clustering_and_writing(stable_waters, cluster_eps, min_samples, output_directory)
+    perform_clustering_and_writing(stable_waters, water_eps, total_frames, output_directory)
 
 # Call the function with the desired water type and specify the output directory
-# process_trajectory_and_cluster("your_topology.pdb", "your_trajectory.dcd", cluster_eps=1.0, min_samples=1500, output_directory=".")
+# process_trajectory_and_cluster("your_topology.pdb", "your_trajectory.dcd", water_eps=1.0, min_samples=1500, output_directory=".")
 
 
 
@@ -179,7 +192,7 @@ def read_pdb_as_dataframe(pdb_file):
     return representative_waters
 
 # Encapsulate the code in a function
-def analyze_protein_and_water_interaction(protein_pdb_file, representative_waters_file, distance_threshold=5.0):
+def analyze_protein_and_water_interaction(protein_pdb_file, representative_waters_file, cluster_eps, output_directory="./stableWaters", distance_threshold=5.0):
     representative_waters = read_pdb_as_dataframe(representative_waters_file)
     filtered_structure = filter_and_parse_pdb(protein_pdb_file)
     interacting_residues = find_interacting_residues(filtered_structure, representative_waters, distance_threshold)
@@ -187,5 +200,9 @@ def analyze_protein_and_water_interaction(protein_pdb_file, representative_water
     result_df = pd.DataFrame(interacting_residues.items(), columns=['Cluster_Number', 'Interacting_Residues'])
     
     # Export to CSV
-    result_df.to_csv("interacting_residues.csv", index=False)
+    output_directory += "_clusterEps_"
+    strEps = str(cluster_eps).replace(".", "_")
+    output_directory += strEps
+    result_df.to_csv(os.path.join(output_directory, "interacting_residues.csv"), index=False)
     print("Exported interacting_residues.csv")
+

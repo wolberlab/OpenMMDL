@@ -223,10 +223,20 @@
                     {{ textfield('min_transition', 'Enter the minimal markov state transition for the figure generation without %.') }}
                     </div>
                 <div class="form-group" id="rmsd_diff">
-                <label for="rmsd_diff">Frame RMSD Difference Calculation</label>
-                {{ choice('rmsd_diff', 'RMSD Calculation', [
-                    ('Yes', 'Yes', 'The RMSD will be calculated'),
-                    ('No', 'No', 'The RMSD will not be calculated')]) }}
+                    <label for="rmsd_diff">Frame RMSD Difference Calculation</label>
+                    {{ choice('rmsd_diff', 'RMSD Calculation', [
+                        ('Yes', 'Yes', 'The RMSD will be calculated'),
+                        ('No', 'No', 'The RMSD will not be calculated')]) }}
+                    </div>
+                <div class="form-group" id="stable_water_container">
+                    <label for="stable_water">Stable water analysis</label>
+                    {{ choice('stable_water', 'Perform stable water clustering', [
+                        ('True', 'Yes', 'Stable waters will be searched within the MD'),
+                        ('False', 'No', 'No stable water analysis will be performed')]) }}
+                    </div>
+                <div class="form-group" id="wc_distance">
+                        <label for="wc_distance">Water cluster EPS</label>
+                        {{ textfield('wc_distance', 'Enter the max distance of waters that shall still be one cluster.') }}
                 </div>
                 <div class="form-group" id="pml_generation">
                     <label for="pml_generation">PML Generation</label>
@@ -377,9 +387,12 @@ function outputFiletypeChanged() {
 function optionChanged() {
     // Update UI elements.
     openmmdl_analysis = document.getElementById("openmmdl_analysis").value;
+    stable_water = document.getElementById("stable_water").value;
     document.getElementById("analysis_selection").hidden = (openmmdl_analysis != 'Yes');
     document.getElementById("rmsd_diff").hidden = (openmmdl_analysis != 'Yes');
     document.getElementById("pml_generation").hidden = (openmmdl_analysis != 'Yes');
+    document.getElementById("stable_water_container").hidden = (openmmdl_analysis != 'Yes');
+    document.getElementById("wc_distance").hidden = (openmmdl_analysis != 'Yes' || stable_water != 'True');
     document.getElementById("binding_mode").hidden = (openmmdl_analysis != 'Yes');
     document.getElementById("min_transition").hidden = (openmmdl_analysis != 'Yes');
     restart_checkpoint = document.getElementById("restart_checkpoint").value;
