@@ -821,7 +821,9 @@ def configureDefaultOptions():
     session['binding_mode'] = '40'
     session['min_transition'] = '1'
     session['rmsd_diff'] = 'No'
-    session['pml_generation'] = 'True'    
+    session['pml_generation'] = 'True'
+    session['stable_water'] = 'Yes'
+    session['wc_distance'] = '1.0'
     if session['fileType'] == 'pdb' and session['waterModel'] == 'implicit':
         implicitWater = True
     session['ensemble'] = 'nvt' if implicitWater else 'npt'
@@ -1283,6 +1285,7 @@ with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
         lines = [line.format(filename=session['finalStateFilename']) for line in state_script]
         script.extend(lines)
     
+
     if session ['md_postprocessing'] == 'True':
         if fileType == "pdb":
             script.append("mdtraj_conversion(f'Equilibration_{protein}', '%s')" % session['mdtraj_output'])
@@ -1336,47 +1339,47 @@ with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
             script.append("os.chdir('Final_Output/All_Atoms')")
             if fileType == "pdb":
                 if session['sdfFile']:
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                 elif session['sdfFile'] == '':  
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
             elif fileType == "amber":
                 if session['nmLig'] or session['spLig']:
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s --watereps %s' " % (top_ext, traj_ext, nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                 else:
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
         elif session['analysis_selection'] == 'analysis_prot_lig':
             script.append("os.chdir('Final_Output/Prot_Lig')")
             if fileType == "pdb":
                 if session['sdfFile']:
-                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                 elif session['sdfFile'] == '': 
-                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
             elif fileType == 'amber':
                 if session['nmLig'] or session['spLig']:
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                 else:
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
         elif session['analysis_selection'] == 'analysis_all_prot_lig':
             if fileType == "pdb":
                 script.append("os.chdir('Final_Output/All_Atoms')")
                 if session['sdfFile']:
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                     script.append("os.chdir('../Prot_Lig')")
-                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, session['sdfFile'], session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                 elif session['sdfFile'] == '':
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                     script.append("os.chdir('../Prot_Lig')")
-                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
             elif fileType == 'amber':
                 script.append("os.chdir('Final_Output/All_Atoms')")
                 if session['nmLig'] or session['spLig']:
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                     script.append("os.chdir('../Prot_Lig')")
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigFileName[:-4], nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                 else:
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                     script.append("os.chdir('../Prot_Lig')")
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
     script.append("subprocess.run(analysis_run_command, shell=True, check=True)")
             
     return "\n".join(script)
