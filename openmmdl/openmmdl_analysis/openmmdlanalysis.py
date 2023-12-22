@@ -174,7 +174,7 @@ def main():
         if frame_rmsd != "No":
             RMSD_dist_frames(f'{topology}', f'{trajectory}', lig=f'{ligand}', nucleic=True)
             print("\033[1mRMSD calculated\033[0m")
-    if peptide != None:
+    elif peptide != None:
         rmsd_for_atomgroups(f'{topology}', f'{trajectory}', selection1='backbone', selection2=['protein', f'chainID {peptide}'])
         if frame_rmsd != "No":
             RMSD_dist_frames(f'{topology}', f'{trajectory}', lig=f'chainID {peptide}')
