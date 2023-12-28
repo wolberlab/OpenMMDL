@@ -6,6 +6,7 @@ import pickle
 import nglview as nv
 import subprocess
 import os
+import shutil
 
 from openmmdl.openmmdl_analysis.barcode_generation import waterids_barcode_generator
 
@@ -136,22 +137,19 @@ def cloud_json_generation(df_all):
     return clouds
 
 
-def visualization(filepath, ligname, receptor_type='protein', height='1000px', width='1000px'):
+def visualization(ligname, receptor_type='protein or nucleic', height='1000px', width='1000px'):
     """Generates visualization of the trajectory with the interacting waters and interaction clouds.
     
     Args:
-        json_file_path (str): path to .json file containing the interaction clouds
-        pdb_file_path (str): path to pdb file (use interacting_waters.pdb for better visualization)
-        dcd_file_path (str): path to dcd file (use interacting_waters.dcd for better visualization)
-        interacting_waters_file_path (str): path to .pkl file containing the interacting water ids
-        receptor_type (str, optional): type of receptor. Defaults to 'protein'.
+        ligname (str): name of the ligand in the pdb file
+        receptor_type (str, optional): type of receptor. Defaults to 'protein or nucleic'.
         height (str, optional): height of the visualization. Defaults to '1000px'.
         width (str, optional): width of the visualization. Defaults to '1000px'.
     
     Returns:
         nglview widget: returns the nglview widget containing the visualization
     """
-    with open(f'{filepath}clouds.json') as f:
+    with open('clouds.json') as f:
         data = json.load(f)
 
     sphere_buffers = []
@@ -163,9 +161,9 @@ def visualization(filepath, ligname, receptor_type='protein', height='1000px', w
             sphere_buffer["radius"] += [cloud["radius"]]
         sphere_buffers.append(sphere_buffer)
     
-    pdb_structure = md.load(f'{filepath}interacting_waters.pdb')
-    dcd_trajectory = md.load(f'{filepath}interacting_waters.dcd', top=pdb_structure)
-    with open(f'{filepath}interacting_waters.pkl', 'rb') as f:
+    pdb_structure = md.load(f'interacting_waters.pdb')
+    dcd_trajectory = md.load(f'interacting_waters.dcd', top=pdb_structure)
+    with open(f'interacting_waters.pkl', 'rb') as f:
         interacting_watersids = pickle.load(f)
 
     view = nv.show_mdtraj(dcd_trajectory)
@@ -174,7 +172,7 @@ def visualization(filepath, ligname, receptor_type='protein', height='1000px', w
 
     for water in interacting_watersids:
         view.add_licorice(selection=f"water and {water}")
-    view.add_licorice(selection='ligand')
+    view.add_licorice(selection=ligname)
 
     for sphere_buffer, name in zip(sphere_buffers, ['hydrophobic', 'acceptor', 'donor', 'waterbridge', 'negative_ionizable', 'positive_ionizable', 'pistacking', 'pication', 'halogen', 'metal']):
         js = (
@@ -196,4 +194,6 @@ def visualization(filepath, ligname, receptor_type='protein', height='1000px', w
 def run_visualization():
     package_dir = os.path.dirname(__file__)
     notebook_path = os.path.join(package_dir, 'visualization.ipynb')
-    subprocess.run(['jupyter', 'notebook', notebook_path])
+    current_dir = os.getcwd()
+    shutil.copyfile(notebook_path, f'{current_dir}/visualization.ipynb')
+    subprocess.run(['jupyter', 'notebook', 'visualization.ipynb'])
