@@ -242,6 +242,14 @@ def process_frame(frame, pdb_md, lig_name, special=None, peptide=None):
                 ligand_special_int_nr_atom = combi_lig_special.select_atoms(f"id {ligand_special_int_nr}")
                 for atom in ligand_special_int_nr_atom:
                     atom_name = atom.name
+                    # Adjust atom_name based on the specified conditions
+                    if atom_name in ['N', 'C', 'O', 'S']:
+                        atom_name = f'{atom_name}1'
+                    else:
+                        # Assuming the format is a single letter followed by a number
+                        base_name, atom_number = atom_name[:-1], int(atom_name[-1])
+                        new_atom_number = atom_number + 1
+                        atom_name = f'{base_name}{new_atom_number}'
                     for complex_atom in complex_all:
                         complex_atom_name = complex_atom.name
                         if atom_name == complex_atom_name:
