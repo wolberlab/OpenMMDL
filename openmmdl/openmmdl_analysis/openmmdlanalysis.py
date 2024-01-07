@@ -516,7 +516,7 @@ def main():
 
     if stable_water_analysis:
         process_trajectory_and_cluster(topology, trajectory, water_eps)
-        analyze_protein_and_water_interaction(topology,"representative_waters.pdb")
+        analyze_protein_and_water_interaction(topology,"representative_waters.pdb", water_eps)
 
     
     
