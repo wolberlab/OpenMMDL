@@ -38,7 +38,7 @@
 
     <!--normal ligand-->
     <div class="form-group" style="margin-left: 120px">
-        <label><input type="checkbox" name="nmLig" id="nmLig" oninput="optionChanged()" {{ 'checked' if session['nmLig'] else '' }}> Normal Ligand 
+        <label><input type="checkbox" name="nmLig" id="nmLig" oninput="optionChanged()"> Normal Ligand 
             <span style="color:grey; font-weight: normal;">(refers to the chemical space is made up of C, N, O, S, P, H, F, Cl, Br and I)</span>
         </label>
     </div>
@@ -54,7 +54,7 @@
 
     <!--special ligand-->
     <div class="form-group" style="margin-left: 120px">
-        <label><input type="checkbox" name="spLig" id="spLig" oninput="optionChanged()" {{ 'checked' if session['spLig'] else '' }}> Special Ligand
+        <label><input type="checkbox" name="spLig" id="spLig" oninput="optionChanged()"> Special Ligand
             <span style="color:grey; font-weight: normal;">(e.g. cofactor heme in CYP450 enzymes)</span>
         </label>
     </div>
