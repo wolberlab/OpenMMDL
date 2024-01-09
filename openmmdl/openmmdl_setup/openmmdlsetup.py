@@ -913,11 +913,6 @@ os.chdir(outputDir)""")
     script.append('import shutil')
     if session['openmmdl_analysis'] == 'Yes':
         script.append('import subprocess')
-    
-    if session['fileType'] == 'amber':
-        script.append('from openmm import *')
-        script.append('from openmm.app import *')
-
    
     # Input files
     
