@@ -104,8 +104,7 @@ def configureFiles():
                 fixer = PDBFixer(pdbxfile=StringIO(file.read().decode()))
             return showSelectChains()
     elif fileType == 'amber':
-        session['amber_files'] = request.form.get('has_files', '')
-        session['has_files'] = request.args.get('has_files', '')
+        session['has_files'] = request.form.get('has_files', '')
         has_files = session['has_files']
         if 'prmtopFile' not in request.files or request.files['prmtopFile'].filename == '' or 'inpcrdFile' not in request.files or request.files['inpcrdFile'].filename == '':
             # They didn't select a file.  Send them back
@@ -125,8 +124,10 @@ def showAmberOptions():
 def setAmberOptions():
     for key in request.form:
         session[key] = request.form[key]
-    session['nmLig'] = 'nmLig' in request.form
-    session['spLig'] = 'spLig' in request.form
+    #session['nmLig'] = 'nmLig' in request.form
+    #session['spLig'] = 'spLig' in request.form
+    session['nmLig'] = request.form.get('nmLig', '')
+    session['spLig'] = request.form.get('spLig', '')
     session['rcpType'] = request.form.get('rcpType', '')
     session['prot_ff'] = request.form.get('prot_ff', '')
     session['other_prot_ff_input'] = request.form.get('other_prot_ff_input', '')
@@ -556,7 +557,6 @@ def extractLigName(LigFile):
     """
 
     LigFileName = LigFile[1]
-    print(f"LigFileName: {LigFileName}")
 
     if LigFileName[-4:] == '.sdf':
         LigName = 'UNL'
@@ -570,7 +570,6 @@ def extractLigName(LigFile):
         #    print(f"LigFile[0]: {LigFile[0]}")
         #    print(f"LigFile[0].name: {f}")
         #    print(f"line: {line}")
-#
         #    while line:
         #        #if line.startswith(b'ATOM') or line.startswith(b'HETATM'):
         #        if line.strip() and (line.startswith(b'ATOM') or line.startswith(b'HETATM')):
@@ -811,7 +810,6 @@ def configureDefaultOptions():
     """Select default options based on the file format and force field."""
     implicitWater = False
     session['restart_checkpoint'] = 'no'
-    session['md_postprocessing'] = 'True'
     session['mdtraj_output'] = 'mdtraj_pdb_dcd'
     session['mdtraj_removal'] = 'False'
     session['mda_output'] = 'mda_pdb_dcd'
@@ -862,6 +860,7 @@ def configureDefaultOptions():
     session['constraints'] = 'hbonds'
     session['rmsd'] = 'True'
     session['interaction_analysis'] = 'False'
+    session['md_postprocessing'] = 'True'
 
 def createScript(isInternal=False):
     script = []
@@ -923,10 +922,10 @@ os.chdir(outputDir)""")
     # Input files
     
     script.append('\n# Input Files')
-    script.append('''############# Ligand and Protein Data ###################''')
     fileType = session['fileType']
     if fileType == 'pdb':
-        script.append('''########   Add the Ligand SDf File and Protein PDB File in the Folder with the Script  ######### \n''')
+        script.append('''############# Ligand and Protein Data ###################''')
+        script.append('''########   Add the Ligand SDF File and Protein PDB File in the Folder with the Script  ######### \n''')
         pdbType = session['pdbType']
         if pdbType == 'pdb':
             script.append('protein = "%s"' % uploadedFiles['file'][0][1])
@@ -959,19 +958,20 @@ os.chdir(outputDir)""")
             #print(f"nmLigName: {nmLigName}")
 
             #request.files.getlist(key)
-            print(f"request.files: {request.files}")
-            print(f"request.files.getlist('nmLigFile'): {request.files.getlist('nmLigFile')}")
-            print(f"request.files.keys(): {request.files.keys()}")
+            #print(f"request.files: {request.files}")
+            #print(f"request.files.getlist('nmLigFile'): {request.files.getlist('nmLigFile')}")
+            #print(f"request.files.keys(): {request.files.keys()}")
 
-            print(f"uploadedFiles['nmLigFile']: {uploadedFiles['nmLigFile']}")
+            #print(f"uploadedFiles['nmLigFile']: {uploadedFiles['nmLigFile']}")
             nmLigFile = uploadedFiles['nmLigFile'][0] # extract the tuple
-            print(f"nmLigFile: {nmLigFile}")
-            nmLigFileName = nmLigFile[1] # extract the file name
-            nmLigName = extractLigName(nmLigFile)
-            print(f"nmLigName: {nmLigName}")
+            #print(f"nmLigFile: {nmLigFile}")
+            nmLigFileName = nmLigFile[1] # extract the file name with extension (e.g. 'ligand.sdf')
+            nmLigName = extractLigName(nmLigFile) # the ligand name is the fourth column of the first line in the pdb file
+            #print(f"nmLigName: {nmLigName}")
 
         if session['spLig']:
-            spLigFile = uploadedFiles['spLigFile'][0][1]
+            spLigFile = uploadedFiles['spLigFile'][0]
+            spLigFileName = spLigFile[1]
             spLigName = extractLigName(spLigFile)
 
     if fileType == 'pdb':
@@ -1030,10 +1030,6 @@ os.chdir(outputDir)""")
 ###########################################################################################################
 ########################################################################################################### 
     
-    script.append('''\n############# Post MD Processing ###################\n''')
-    script.append('MDAnalysis_Postprocessing = %s' % session['md_postprocessing'])
-    script.append('MDTraj_Cleanup = %s' % session['md_postprocessing'])
-
     # System configuration
     script.append('\n# System Configuration\n')
     nonbondedMethod = session['nonbondedMethod']
@@ -1318,14 +1314,19 @@ with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
                 script.append("cleanup(f'{prmtop_file}')")
     if fileType == "pdb":
         if session['sdfFile']:
-            script.append("post_md_file_movement(protein,ligand=ligand)")
+            script.append("post_md_file_movement(protein,ligands=[ligand])")
         elif session['sdfFile'] == '':
             script.append("post_md_file_movement(protein)")
     elif fileType == "amber":
-        if session['nmLig'] or session['spLig']:
-            script.append("post_md_file_movement(prmtop_file, inpcrd=inpcrd_file, ligand='%s.sdf')" % nmLigFileName[:-4])
-        else:
-            script.append('post_md_file_movement(prmtop_file, inpcrd=inpcrd_file)')
+        if session['nmLig'] == False and session['spLig'] == False:
+            script.append("post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file)")
+        elif session['nmLig']== True and session['spLig'] == False:
+            script.append("post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file, ligands=['%s.sdf'])" % nmLigFileName[:-4])
+        elif session['spLig']== True and session['nmLig'] == False:
+            script.append("post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file, ligands=['%s.sdf'])" % spLigFileName[:-4])
+        elif session['nmLig'] == True and session['spLig'] == True:
+            script.append("post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file, ligands=['%s.sdf', '%s.sdf'])" % nmLigFileName[:-4], spLigFileName[:-4])
+            
     
     
     if session['openmmdl_analysis'] == "Yes":
