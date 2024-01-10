@@ -39,7 +39,7 @@ def mdtraj_conversion(pdb_file, mdtraj_output):
     if "gro" in mdtraj_output:
         mdtraj_first_frame.save_gro(f'centered_old_coordinates_top.gro')
     
-def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, mda_output, output_selection, ligand_name=None):
+def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, mda_output, output_selection, ligand_name=None, special_ligname=None):
     """
     translate the trajectory so that all frames coincide with its center of geometry.
 
@@ -51,6 +51,8 @@ def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, mda_output
         Name of the post-MDtraj DCD File.
     ligand_name: str
         ligand name saved in PDB file.
+    special_ligname: str
+        special residue name saved in PDB file.
     mda_output: str
         Selection of Output formats.
     output_selection: str
@@ -64,7 +66,7 @@ def MDanalysis_conversion(post_mdtraj_pdb_file, post_mdtraj_dcd_file, mda_output
     topology_trajectory_all_atoms = topology_trajectory.select_atoms("all")
     # translate the trajectoy so that all frames coincide with its center of geometry
     topology_trajectory_all_atoms.atoms.translate(topology_trajectory_all_atoms.center_of_mass())
-    topology_trajectory_protein_ligand = topology_trajectory.select_atoms(f'protein or resname {ligand_name}')
+    topology_trajectory_protein_ligand = topology_trajectory.select_atoms(f'protein or resname {ligand_name} or resname {special_ligname}')
     
     
     if "pdb" in mda_output:
