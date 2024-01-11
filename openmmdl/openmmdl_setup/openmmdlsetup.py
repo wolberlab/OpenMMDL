@@ -867,7 +867,6 @@ def configureDefaultOptions():
     session['finalStateFilename'] = "final_state.xml"
     session['constraints'] = 'hbonds'
     session['rmsd'] = 'True'
-    session['interaction_analysis'] = 'False'
     session['md_postprocessing'] = 'True'
 
 def createScript(isInternal=False):
@@ -937,7 +936,6 @@ os.chdir(outputDir)""")
                 script.append("minimization = %s" % session['ligandMinimization'])
                 script.append("sanitization = %s" % session['ligandSanitization'])
             forcefield = session['forcefield']
-            water_model = session['waterModel']
             water = session['waterModel']
     elif fileType == 'amber':
         script.append('''####### Add the Amber Files in the Folder with this Script ####### \n''')
@@ -1299,31 +1297,31 @@ with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
             script.append("mdtraj_conversion(f'Equilibration_{protein}', '%s')" % session['mdtraj_output'])
             if session['sdfFile']:
                 if session['mdtraj_output'] != 'mdtraj_gro_xtc':
-                    script.append("MDanalysis_conversion(f'centered_old_coordinates_top.pdb', f'centered_old_coordinates.dcd', mda_output='%s', output_selection='%s', ligand_name='UNK')" % (session['mda_output'], session['mda_selection']))
+                    script.append("MDanalysis_conversion('centered_old_coordinates_top.pdb', 'centered_old_coordinates.dcd', mda_output='%s', output_selection='%s', ligand_name='UNK')" % (session['mda_output'], session['mda_selection']))
                 elif session['mdtraj_output'] == 'mdtraj_gro_xtc':
-                    script.append("MDanalysis_conversion(f'centered_old_coordinates_top.gro', f'centered_old_coordinates.xtc', mda_output='%s', output_selection='%s', ligand_name='UNK')" % (session['mda_output'], session['mda_selection']))
+                    script.append("MDanalysis_conversion('centered_old_coordinates_top.gro', 'centered_old_coordinates.xtc', mda_output='%s', output_selection='%s', ligand_name='UNK')" % (session['mda_output'], session['mda_selection']))
             elif session['sdfFile'] == '':
                 if session['mdtraj_output'] != 'mdtraj_gro_xtc':
-                    script.append("MDanalysis_conversion(f'centered_old_coordinates_top.pdb', f'centered_old_coordinates.dcd', mda_output='%s', output_selection='%s')" % (session['mda_output'], session['mda_selection']))
+                    script.append("MDanalysis_conversion('centered_old_coordinates_top.pdb', 'centered_old_coordinates.dcd', mda_output='%s', output_selection='%s')" % (session['mda_output'], session['mda_selection']))
                 elif session['mdtraj_output'] == 'mdtraj_gro_xtc':
-                    script.append("MDanalysis_conversion(f'centered_old_coordinates_top.gro', f'centered_old_coordinates.xtc', mda_output='%s', output_selection='%s')" % (session['mda_output'], session['mda_selection']))
+                    script.append("MDanalysis_conversion('centered_old_coordinates_top.gro', 'centered_old_coordinates.xtc', mda_output='%s', output_selection='%s')" % (session['mda_output'], session['mda_selection']))
         elif fileType == "amber":
             script.append("mdtraj_conversion(prmtop_file, '%s')" % session['mdtraj_output'])
             if session['nmLig'] == False and session['spLig'] == False:
                 if session['mdtraj_output'] != 'mdtraj_gro_xtc':
-                    script.append("MDanalysis_conversion(f'centered_old_coordinates_top.pdb', f'centered_old_coordinates.dcd', mda_output='%s', output_selection='%s')" % (session['mda_output'], session['mda_selection']))
+                    script.append("MDanalysis_conversion('centered_old_coordinates_top.pdb', 'centered_old_coordinates.dcd', mda_output='%s', output_selection='%s')" % (session['mda_output'], session['mda_selection']))
                 elif session['mdtraj_output'] == 'mdtraj_gro_xtc':
-                    script.append("MDanalysis_conversion(f'centered_old_coordinates_top.gro', f'centered_old_coordinates.xtc', mda_output='%s', output_selection='%s')" % (session['mda_output'], session['mda_selection']))
+                    script.append("MDanalysis_conversion('centered_old_coordinates_top.gro', 'centered_old_coordinates.xtc', mda_output='%s', output_selection='%s')" % (session['mda_output'], session['mda_selection']))
             elif session['nmLig'] and session['spLig'] == False:
                 if session['mdtraj_output'] != 'mdtraj_gro_xtc':
-                    script.append("MDanalysis_conversion(f'centered_old_coordinates_top.pdb', f'centered_old_coordinates.dcd', mda_output='%s', output_selection='%s', ligand_name=%s)" % (session['mda_output'], session['mda_selection'], f"'{nmLigName}'"))
+                    script.append("MDanalysis_conversion('centered_old_coordinates_top.pdb', 'centered_old_coordinates.dcd', mda_output='%s', output_selection='%s', ligand_name=%s)" % (session['mda_output'], session['mda_selection'], f"'{nmLigName}'"))
                 elif session['mdtraj_output'] == 'mdtraj_gro_xtc':
-                    script.append("MDanalysis_conversion(f'centered_old_coordinates_top.gro', f'centered_old_coordinates.xtc', mda_output='%s', output_selection='%s', ligand_name=%s)" % (session['mda_output'], session['mda_selection'], f"'{nmLigName}'"))
+                    script.append("MDanalysis_conversion('centered_old_coordinates_top.gro', 'centered_old_coordinates.xtc', mda_output='%s', output_selection='%s', ligand_name=%s)" % (session['mda_output'], session['mda_selection'], f"'{nmLigName}'"))
             elif session['nmLig'] and session['spLig']:
                 if session['mdtraj_output'] != 'mdtraj_gro_xtc':
-                    script.append("MDanalysis_conversion(f'centered_old_coordinates_top.pdb', f'centered_old_coordinates.dcd', mda_output='%s', output_selection='%s', ligand_name=%s, special_ligname=%s)" % (session['mda_output'], session['mda_selection'], f"'{nmLigName}'", f"'{spLigName}'"))
+                    script.append("MDanalysis_conversion('centered_old_coordinates_top.pdb', 'centered_old_coordinates.dcd', mda_output='%s', output_selection='%s', ligand_name=%s, special_ligname=%s)" % (session['mda_output'], session['mda_selection'], f"'{nmLigName}'", f"'{spLigName}'"))
                 elif session['mdtraj_output'] == 'mdtraj_gro_xtc':
-                    script.append("MDanalysis_conversion(f'centered_old_coordinates_top.gro', f'centered_old_coordinates.xtc', mda_output='%s', output_selection='%s', ligand_name=%s, special_ligname=%s)" % (session['mda_output'], session['mda_selection'], f"'{nmLigName}'", f"'{spLigName}'"))
+                    script.append("MDanalysis_conversion('centered_old_coordinates_top.gro', 'centered_old_coordinates.xtc', mda_output='%s', output_selection='%s', ligand_name=%s, special_ligname=%s)" % (session['mda_output'], session['mda_selection'], f"'{nmLigName}'", f"'{spLigName}'"))
         # cleanup()
         if session['mdtraj_removal'] == "True":
             if fileType == "pdb":
