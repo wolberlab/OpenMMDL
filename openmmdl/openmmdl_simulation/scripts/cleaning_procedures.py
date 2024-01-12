@@ -1,5 +1,6 @@
 import os
 import shutil
+from typing import List
 
 def cleanup(protein_name):
     """
@@ -79,7 +80,7 @@ def organize_files(source, destination):
         if os.path.exists(file):
             os.rename(file, os.path.join(destination, os.path.basename(file)))
 
-def post_md_file_movement(protein_name, prmtop=None, inpcrd=None, ligand=None):
+def post_md_file_movement(protein_name:str, prmtop:str=None, inpcrd:str=None, ligands:List[str]=None):
     """
     Organizes and moves the files after the MD simulation to their respective directories.
     Parameters
@@ -90,8 +91,8 @@ def post_md_file_movement(protein_name, prmtop=None, inpcrd=None, ligand=None):
         Path to the AMBER topology file.
     inpcrd : str (optional)
         Path to the AMBER coordinate file.
-    ligand : str (optional)
-        Path to the ligand file.
+    ligands : list of str (optional)
+        A list of strs that store the path to the ligand file.
 
     Returns
     ----------
@@ -110,12 +111,15 @@ def post_md_file_movement(protein_name, prmtop=None, inpcrd=None, ligand=None):
     create_directory_if_not_exists("Checkpoints")
 
     # Move input files
-    copy_file(ligand, "Final_Output/All_Atoms") if ligand else None
-    copy_file(ligand, "Final_Output/Prot_Lig") if ligand else None
+    if ligands:
+        for lig in ligands:
+            copy_file(lig, "Input_Files")
+            copy_file(lig, "Final_Output/All_Atoms")
+            copy_file(lig, "Final_Output/Prot_Lig")
     copy_file(protein_name, "Input_Files")
     copy_file(prmtop, "Input_Files") if prmtop else None
     copy_file(inpcrd, "Input_Files") if inpcrd else None
-    copy_file(ligand, "Input_Files") if ligand else None
+    
 
     # Organize pre-MD files
     source_pre_md_files = ["prepared_no_solvent_", "solvent_padding_", "solvent_absolute_", "membrane_"]

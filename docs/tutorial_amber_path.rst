@@ -58,6 +58,15 @@ The second step involves choosing input files. Two options are available:
 1. **Yes**, my files are already to simulate.
 When selected, users can choose the Prmtop and Inpcrd files via the file browser. Clicking "Continue" transitions to the 'Simulation Setup' page.
 
+If the above system contains ligands and conducting MD post-analysis using OpenMMDL is needed, checking the ligand box based on the ligand type, and then type the resname of the ligand in the `prmtop` file in the textfield.
+
+.. tip::
+   The way to find the resname of the ligand is to open the `prmtop` file in a text editor and search for '%FLAG RESIDUE_LABEL'. The resname of the ligand should be the last one after the common amimo acids and before the lipids and water.For example, as shown in below picture, the ligand rename in this `prmtop` file is 'UNL'.
+
+   .. figure:: /_static/images/tutorials/Amber_Path/lig_resname_prmtop.png
+      :figwidth: 500px
+      :align: center
+
 2. **No**, I want to prepare them here.
 When selected, clicking "Continue", users are directed to the 'Amber Configuration' page.
 
@@ -110,7 +119,12 @@ Upon selecting the 'Normal Ligand' option, the parameter settings for the ligand
 
 - Begin by clicking the "Browse..." button to select the ligand PDB or SDF file. 
   
-- Fill in the charge value for the ligand in the 'Charge Value' textbox; this value should be an integer (e.g., -1 or 2) and can be calculated by opening the ligand PDB file in a text editor and summing up the values in the last column of the file. 
+- Fill in the charge value for the ligand in the 'Charge Value' textbox; this value should be an integer (e.g., -1 or 2).
+
+.. tip::
+   For PDB file, the charge value can be calculated by opening the ligand PDB file in a text editor and summing up the values in the last column of the file. 
+
+   For SDF file, the charge value can be calculated by opening the ligand SDF file in a text editor and go to the line where starts with 'M  CHG'. For example, 'M  CHG  3  14  -1  38  -1  40   1' stands for that totally 3 atoms have charge, add -1 charge to atom 14 and 38, and add 1 charge to atom 40. The charge value is -1+(-1)+1=-1.
   
 - Choose the 'Ligand Force Field' from the available options: General Amber Force Field (GAFF) or GAFF2. 
   
