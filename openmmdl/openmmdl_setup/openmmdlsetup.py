@@ -1079,7 +1079,7 @@ os.chdir(outputDir)""")
     script.append('sim_length = %s' % session['sim_length'])
     script.append('steps = int(sim_length / step_time * 1000)')
     script.extend(['dcdFrames = %s' % session['dcdFrames'], 'dcdInterval = int(steps / dcdFrames)'])
-    script.extend(['pdbInterval_ns = %s' % session['pdbInterval_ns'], 'pdbInterval = int(steps / step_time * 1000)'])
+    script.extend(['pdbInterval_ns = %s' % session['pdbInterval_ns'], 'pdbInterval = int(steps * (pdbInterval_ns / sim_length))'])
     if session['restart_checkpoint'] == 'yes':
         script.append('restart_step = %s' % session['restart_step'])
     script.append('equilibration_length = %s' % session['equilibration_length'])
