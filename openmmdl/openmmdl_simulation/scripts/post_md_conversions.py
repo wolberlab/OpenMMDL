@@ -1,14 +1,8 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-
 import mdtraj as md
 import MDAnalysis as mda
-import MDAnalysis.transformations as trans
 
-from MDAnalysis.analysis import rms, diffusionmap, align
+from MDAnalysis.analysis import align
 from MDAnalysis.analysis.distances import dist
-from MDAnalysis.analysis.hydrogenbonds.hbond_analysis import HydrogenBondAnalysis as HBA
 
 ######################################################################
 # prepare the topology and trajectory file for further analysis
