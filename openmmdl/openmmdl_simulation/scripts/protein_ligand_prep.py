@@ -6,29 +6,7 @@ from simtk.openmm import unit
 from simtk.openmm import Vec3
 import mdtraj as md
 import numpy as np
-import pdbfixer
 
-
-def protein_choice(protein_is_prepared, protein):
-    """
-    Converts the protein string file to PDBFixer
-
-    Parameters
-    ----------
-    protein_is_prepared: str
-        User input of Protein preparation
-    protein: str
-        Protein file name.
-
-    Returns
-    -------
-    prepared_protein: pdbfixer.pdbfixer.PDBFixer
-    	Prepared protein system.
-    """
-    if protein_is_prepared == "Yes":
-        prepared_protein = pdbfixer.PDBFixer(str(protein))
-    
-    return prepared_protein
     
 def prepare_ligand(ligand_file, minimize_molecule=True):
     """
