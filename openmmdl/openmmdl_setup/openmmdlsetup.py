@@ -90,19 +90,15 @@ def configureFiles():
         session['waterModel'] = request.form.get('waterModel', '')
         session['ligandMinimization'] = request.form.get('ligandMinimization', '')
         session['ligandSanitization'] = request.form.get('ligandSanitization', '')
-        session['cleanup'] = request.form.get('cleanup', '')
         session['sdfFile'] = uploadedFiles['sdfFile'][0][1]
         configureDefaultOptions()
         file, name = uploadedFiles['file'][0]
         file.seek(0, 0)
         session['pdbType'] = _guessFileFormat(file, name)
-        if session['cleanup'] == 'yes':
+        if session['pdbType'] == 'pdb':
             global fixer
-            if session['pdbType'] == 'pdb':
-                fixer = PDBFixer(pdbfile=file)
-            else:
-                fixer = PDBFixer(pdbxfile=StringIO(file.read().decode()))
-            return showSelectChains()
+            fixer = PDBFixer(pdbfile=file)
+        return showSelectChains()
     elif fileType == 'amber':
         session['has_files'] = request.form.get('has_files', '')
         has_files = session['has_files']
@@ -1002,37 +998,34 @@ os.chdir(outputDir)""")
 ###########################################################################################################
 ###########################################################################################################
     if fileType == 'pdb':
-        if session['cleanup'] == 'yes':
-            if session['solvent'] == True:
-                if session['add_membrane'] == True:
-                    script.append('''\n############# Membrane Settings ###################\n''')
-                    script.append("add_membrane = %s" % session['add_membrane'])
-                    script.append("membrane_lipid_type = '%s'" % session['lipidType'])
-                    script.append("membrane_padding = %s" % session['membrane_padding'])
-                    script.append("membrane_ionicstrength = %s" % session['membrane_ionicstrength'])
-                    script.append("membrane_positive_ion = '%s'" % session['membrane_positive'])
-                    script.append("membrane_negative_ion = '%s'" % session['membrane_negative'])
-                elif session['add_membrane'] == False:
-                    script.append('''\n############# Water Box Settings ###################\n''')
-                    script.append("add_membrane = %s" % session['add_membrane'])
-                    if session['water_padding'] == True:
-                        script.append('Water_Box = "Buffer"')
-                        script.append("water_padding_distance = %s" % session['water_padding_distance'])
-                        script.append("water_boxShape = '%s'" % session['water_boxShape'])
-                    else:
-                        script.append('Water_Box = "Absolute"')
-                        script.append("water_box_x = %s" % session['box_x'])
-                        script.append("water_box_y = %s" % session['box_y']) 
-                        script.append("water_box_z = %s" % session['box_z'])   
-                    script.append("water_ionicstrength = %s" % session['water_ionicstrength'])
-                    script.append("water_positive_ion = '%s'" % session['water_positive'])
-                    script.append("water_negative_ion = '%s'" % session['water_negative'])
-            else:
-                if session['solvent'] == False:   
-                    script.append("Solvent = %s" % session['solvent'])
+        if session['solvent'] == True:
+            if session['add_membrane'] == True:
+                script.append('''\n############# Membrane Settings ###################\n''')
+                script.append("add_membrane = %s" % session['add_membrane'])
+                script.append("membrane_lipid_type = '%s'" % session['lipidType'])
+                script.append("membrane_padding = %s" % session['membrane_padding'])
+                script.append("membrane_ionicstrength = %s" % session['membrane_ionicstrength'])
+                script.append("membrane_positive_ion = '%s'" % session['membrane_positive'])
+                script.append("membrane_negative_ion = '%s'" % session['membrane_negative'])
+            elif session['add_membrane'] == False:
+                script.append('''\n############# Water Box Settings ###################\n''')
+                script.append("add_membrane = %s" % session['add_membrane'])
+                if session['water_padding'] == True:
+                    script.append('Water_Box = "Buffer"')
+                    script.append("water_padding_distance = %s" % session['water_padding_distance'])
+                    script.append("water_boxShape = '%s'" % session['water_boxShape'])
+                else:
+                    script.append('Water_Box = "Absolute"')
+                    script.append("water_box_x = %s" % session['box_x'])
+                    script.append("water_box_y = %s" % session['box_y']) 
+                    script.append("water_box_z = %s" % session['box_z'])   
+                script.append("water_ionicstrength = %s" % session['water_ionicstrength'])
+                script.append("water_positive_ion = '%s'" % session['water_positive'])
+                script.append("water_negative_ion = '%s'" % session['water_negative'])
+        else:
+            if session['solvent'] == False:   
+                script.append("Solvent = %s" % session['solvent'])
 
-
-    
 
 ################################## IF CLEANING WAS NOT PERFORMED ##########################################
 ###########################################################################################################
@@ -1144,7 +1137,7 @@ else:
     forcefield = app.ForceField(forcefield_selected)    
 if add_membrane == True:
         transitional_forcefield = generate_transitional_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, rdkit_mol=None)     ''')
-        if session['cleanup'] == 'yes' and session['sdfFile'] == '':
+        if session['sdfFile'] == '':
             script.append('''
 forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, rdkit_mol=None)        
 modeller = app.Modeller(protein_pdb.topology, protein_pdb.positions)
@@ -1160,7 +1153,7 @@ if add_membrane == True:
         water_conversion(model_water, modeller, protein)
 topology = modeller.topology
 positions = modeller.positions ''')
-        elif session['cleanup'] == 'yes' and session['sdfFile'] != '':
+        elif session['sdfFile'] != '':
             script.append('''
 modeller = app.Modeller(complex_topology, complex_positions)
 if add_membrane == True:
