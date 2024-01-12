@@ -1,7 +1,7 @@
 from rdkit import Chem
-from openff.toolkit.topology import Molecule, Topology
+from openff.toolkit.topology import Molecule
 import simtk.openmm.app as app
-from simtk.openmm.app import PDBFile, Modeller
+from simtk.openmm.app import PDBFile
 from simtk.openmm import unit
 from simtk.openmm import Vec3
 import mdtraj as md
@@ -85,7 +85,6 @@ def rdkit_to_openmm(rdkit_mol, name):
     # convert from OpenFF to OpenMM
     off_mol_topology = off_mol.to_topology()
     mol_topology = off_mol_topology.to_openmm()
-    mol_positions = off_mol.conformers[0];
     new_mol_positions = []
 
     # convert units from Ångström to Nanometers
