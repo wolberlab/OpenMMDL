@@ -902,7 +902,7 @@ os.chdir(outputDir)""")
                                                                                                       
 ''')
     script.append('from openmmdl.openmmdl_simulation.scripts.forcefield_water import ff_selection, water_forcefield_selection, water_model_selection, generate_forcefield, generate_transitional_forcefield')
-    script.append('from openmmdl.openmmdl_simulation.scripts.protein_ligand_prep import protein_choice, prepare_ligand, rdkit_to_openmm, merge_protein_and_ligand, water_padding_solvent_builder, water_absolute_solvent_builder, membrane_builder, water_conversion')
+    script.append('from openmmdl.openmmdl_simulation.scripts.protein_ligand_prep import prepare_ligand, rdkit_to_openmm, merge_protein_and_ligand, water_padding_solvent_builder, water_absolute_solvent_builder, membrane_builder, water_conversion')
     script.append('from openmmdl.openmmdl_simulation.scripts.post_md_conversions import mdtraj_conversion, MDanalysis_conversion')
     script.append('from openmmdl.openmmdl_simulation.scripts.cleaning_procedures import cleanup, create_directory_if_not_exists, copy_file, organize_files, post_md_file_movement \n')
     
@@ -911,6 +911,7 @@ os.chdir(outputDir)""")
     script.append('from simtk.openmm import unit, Platform, MonteCarloBarostat, LangevinMiddleIntegrator')
     script.append('from simtk.openmm import Vec3')
     script.append('import simtk.openmm as mm')
+    script.append('import pdbfixer')
     script.append('import sys')
     script.append('import os')
     script.append('import shutil')
@@ -983,9 +984,6 @@ os.chdir(outputDir)""")
         ######################################################################
 
     if fileType == 'pdb':
-        script.append('''\n############# Ligand and Protein Preparation ###################\n''')
-        script.append('protein_prepared = "Yes"')
-
         script.append('''\n############# Forcefield, Water and Membrane Model Selection ###################\n''')
         script.append("ff = '%s'" % session['forcefield'])
         if water != 'None':
@@ -1114,7 +1112,7 @@ os.chdir(outputDir)""")
 print("Preparing MD Simulation with ligand")
 ligand_prepared = prepare_ligand(ligand,minimize_molecule=minimization)
 omm_ligand = rdkit_to_openmm(ligand_prepared, ligand_name)
-protein_pdb = protein_choice(protein_is_prepared=protein_prepared,protein=protein)
+protein_pdb = pdbfixer.PDBFixer(str(protein))
 forcefield_selected = ff_selection(ff)
 water_selected = water_forcefield_selection(water=water,forcefield_selection=ff_selection(ff))
 model_water = water_model_selection(water=water,forcefield_selection=ff_selection(ff))
