@@ -61,9 +61,6 @@ Select the pdb input file and options for how to model it.
         <option value="True">Yes</option>
     </select></div>
     </div>
-    <p>PDB files often need to be cleaned up before they can be simulated.  For example, you may need to
-    add missing atoms, remove unwanted chains, or add a water box.  Do you want to do this now?</p>
-    <div style="margin-left:50px"><label class="control-label"><input type="radio" name="cleanup" value="yes" checked/> Yes.</label> Let's clean it up now.</div>
     <br/>
     <input type="submit" value="Continue" id="continue" class="btn" disabled="true"/>
 </form>
@@ -88,8 +85,8 @@ var charmm36WaterModels = [
 ]
 
 var oldAmberWaterModels = [
-        ["TIP3P", "TIP3P", false],
-        ["TIP3P-FB", "TIP3P-FB", true],
+        ["TIP3P", "TIP3P", true],
+        ["TIP3P-FB", "TIP3P-FB", false],
         ["SPC/E", "SPC/E", false],
         ["TIP4P-Ew", "TIP4P-Ew", false],
         ["TIP5P", "TIP5P", false],
