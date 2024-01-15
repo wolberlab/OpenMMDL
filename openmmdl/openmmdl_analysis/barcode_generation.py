@@ -44,7 +44,7 @@ def waterids_barcode_generator(df, interaction):
     waterid_barcode = []
     for index, row in df.iterrows():
         if row[interaction] == 1:
-            water_id_list.append(int(row['WATER_IDX']))
+            water_id_list.append(int(float(row['WATER_IDX'])))
     
     barcode = barcodegeneration(df, interaction)
     
