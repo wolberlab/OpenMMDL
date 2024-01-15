@@ -27,7 +27,7 @@ from plip.basic import config
 from MDAnalysis.analysis import rms
 from tqdm import tqdm
 
-from openmmdl.openmmdl_analysis.preprocessing import process_pdb_file, convert_pdb_to_sdf, renumber_atoms_in_residues, replace_atom_type, process_pdb, move_hydrogens_to_end
+from openmmdl.openmmdl_analysis.preprocessing import process_pdb_file, convert_pdb_to_sdf, renumber_atoms_in_residues, replace_atom_type, process_pdb, move_hydrogens_to_end, extract_and_save_ligand_as_sdf
 from openmmdl.openmmdl_analysis.rmsd_calculation import rmsd_for_atomgroups, RMSD_dist_frames
 from openmmdl.openmmdl_analysis.ligand_processing import increase_ring_indices, convert_ligand_to_smiles
 from openmmdl.openmmdl_analysis.interaction_gathering import characterize_complex, retrieve_plip_interactions, create_df_from_binding_site, process_frame, process_trajectory, fill_missing_frames
@@ -55,7 +55,7 @@ def main():
     parser = argparse.ArgumentParser(prog='openmmdl_analysis', description=logo, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-t', dest='topology', help='Topology File after MD Simulation', required=True)
     parser.add_argument('-d', dest='trajectory', help='Trajectory File in DCD Format', required=True)
-    parser.add_argument('-l', dest='ligand_sdf', help='Ligand in SDF Format')       
+    parser.add_argument('-l', dest='ligand_sdf', help='Ligand in SDF Format', default=None)       
     parser.add_argument('-n', dest='ligand_name', help='Ligand Name (3 Letter Code in PDB)', default=None)
     parser.add_argument('-b', dest='binding', help='Binding Mode Treshold for Binding Mode in %%', default=40)   
     parser.add_argument('-df', dest='dataframe', help='Dataframe (use if the interactions were already calculated, default name would be "df_all.csv")', default=None)
@@ -113,6 +113,10 @@ def main():
 
     process_pdb_file(topology)
     print("\033[1mFiles are preprocessed\033[0m")
+    
+    if ligand_sdf == None:
+        extract_and_save_ligand_as_sdf(topology, "./lig.sdf", ligand)
+        ligand_sdf = "./lig.sdf"
     
     pdb_md = mda.Universe(topology, trajectory)
 
