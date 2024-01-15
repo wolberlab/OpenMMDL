@@ -2,6 +2,7 @@ import MDAnalysis as mda
 import subprocess
 import os
 import re
+from openbabel import pybel
 
 def process_pdb_file(input_pdb_filename):
     """Process a PDB file to make it compatible with the openmmdl_analysis package.
@@ -25,29 +26,35 @@ def process_pdb_file(input_pdb_filename):
     # Save the modified topology to a new PDB file
     u.atoms.write(input_pdb_filename)
 
-# def extract_and_save_ligand_as_pdb(input_pdb_filename, output_pdb_filename, target_resname):
-#     """Extract and save the ligand from the receptor ligand complex PDB file into a new PDB file by itself .
+def extract_and_save_ligand_as_sdf(input_pdb_filename, output_filename, target_resname):
+    """Extract and save the ligand from the receptor ligand complex PDB file into a new PDB file by itself .
 
-#     Args:
-#         input_pdb_filename (str): name of the input PDB file
-#         output_pdb_filename (str): name of the output PDB file
-#         target_resname (str): resname of the ligand in the original PDB file
-#     """
-#     # Load the PDB file using MDAnalysis
-#     u = mda.Universe(input_pdb_filename)
+    Args:
+        input_pdb_filename (str): name of the input PDB file
+        output_pdb_filename (str): name of the output PDB file
+        target_resname (str): resname of the ligand in the original PDB file
+    """
+    # Load the PDB file using MDAnalysis
+    u = mda.Universe(input_pdb_filename)
 
-#     # Find the ligand by its residue name
-#     ligand_atoms = u.select_atoms(f"resname {target_resname}")
+    # Find the ligand by its residue name
+    ligand_atoms = u.select_atoms(f"resname {target_resname}")
 
-#     if len(ligand_atoms) == 0:
-#         print(f"No ligand with residue name '{target_resname}' found in the PDB file.")
-#         return
+    if len(ligand_atoms) == 0:
+        print(f"No ligand with residue name '{target_resname}' found in the PDB file.")
+        return
 
-#     # Create a new Universe with only the ligand
-#     ligand_universe = mda.Merge(ligand_atoms)
+    # Create a new Universe with only the ligand
+    ligand_universe = mda.Merge(ligand_atoms)
 
-#     # Save the ligand Universe as a PDB file
-#     ligand_universe.atoms.write(output_pdb_filename)
+    # Save the ligand Universe as a PDB file
+    ligand_universe.atoms.write("lig.pdb")
+    
+    # use openbabel to convert pdb to sdf
+    mol = next(pybel.readfile("pdb", "lig.pdb"))
+    mol.write("sdf", output_filename)
+    #remove the temporary pdb file
+    os.remove("lig.pdb")
 
 def convert_pdb_to_sdf(input_pdb_filename, output_sdf_filename):
     """Convert ligand PDB file to SDF file for analysis using Open Babel.
