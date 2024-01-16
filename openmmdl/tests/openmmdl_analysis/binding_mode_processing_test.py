@@ -30,7 +30,10 @@ def sample_dataframe_bindingmode_processing():
         'DONOR_IDX': {0: 0, 1: 0, 2: 0, 3: 0},
         'LOCATION': {0: 0, 1: 0, 2: 0, 3: 0},
         'METAL_IDX': {0: 0, 1: 0, 2: 0, 3: 0},
-        'METAL_TYPE': {0: 0, 1: 0, 2: 0, 3: 0}
+        'METAL_TYPE': {0: 0, 1: 0, 2: 0, 3: 0},
+        'RESTYPE_LIG': {0: 0, 1: 0, 2: 0, 3: 0},
+        'TARGET_IDX': {0: 0, 1: 0, 2: 0, 3: 0},
+        'COORDINATION': {0: 0, 1: 0, 2: 0, 3: 0}
     }
 
     # Add 'halogen' and 'hbond' data to the existing DataFrame
@@ -43,6 +46,8 @@ def sample_dataframe_bindingmode_processing():
     data['DONOR_IDX'][4] = 0
     data['LIG_IDX_LIST'][4] = 0
     data['LIG_GROUP'][4] = 0  # LIG_GROUP for 'pication
+    data['RESTYPE_LIG'][4] = 0 
+    data['TARGET_IDX'][4] = 0
 
     data['FRAME'][5] = 5  # Add a new 'FRAME' value
     data['Prot_partner'][5] = 'A'  # Add a new 'Prot_partner' value
@@ -55,6 +60,8 @@ def sample_dataframe_bindingmode_processing():
     data['LIG_IDX_LIST'][5] = 0
     data['DONOR_IDX'][5] = 0
     data['LIG_GROUP'][5] = 0  # LIG_GROUP for 'pication
+    data['RESTYPE_LIG'][5] = 0 
+    data['TARGET_IDX'][5] = 0
 
     # Add 'waterbridge' cases where PROTISDON is both True and False
     data['FRAME'][6] = 6  # Add a new 'FRAME' value
@@ -67,6 +74,8 @@ def sample_dataframe_bindingmode_processing():
     data['LIG_IDX_LIST'][6] = 0
     data['PROTISDON'][6] = True  # PROTISDON is True for 'waterbridge'
     data['LIG_GROUP'][6] = 0  # LIG_GROUP for 'pication
+    data['RESTYPE_LIG'][6] = 0
+    data['TARGET_IDX'][6] = 0
 
     data['FRAME'][7] = 7  # Add a new 'FRAME' value
     data['Prot_partner'][7] = 'B'  # Add a new 'Prot_partner' value
@@ -78,6 +87,8 @@ def sample_dataframe_bindingmode_processing():
     data['ACCEPTOR_IDX'][7] = 0
     data['LIG_IDX_LIST'][7] = 0 # LIG_IDX_LIST for 'pication'
     data['LIG_GROUP'][7] = 0  # LIG_GROUP for 'pication
+    data['RESTYPE_LIG'][7] = 0 
+    data['TARGET_IDX'][7] = 0
 
     # Add 'pistacking' case
     data['FRAME'][8] = 8  # Add a new 'FRAME' value
@@ -90,6 +101,8 @@ def sample_dataframe_bindingmode_processing():
     data['DONOR_IDX'][8] = 0 
     data['PROTISDON'][8] = False
     data['DONORTYPE'][8] = 0  # DON_IDX
+    data['RESTYPE_LIG'][8] = 0 
+    data['TARGET_IDX'][8] = 0
 
     # Add 'pication' case
     data['FRAME'][9] = 9  # Add a new 'FRAME' value
@@ -102,6 +115,8 @@ def sample_dataframe_bindingmode_processing():
     data['PROTISDON'][9] = False
     data['DONOR_IDX'][9] = 0 
     data['DONORTYPE'][9] = 0  # DON_IDX
+    data['RESTYPE_LIG'][9] = 0 
+    data['TARGET_IDX'][9] = 0
     
     # Add 'metal' interaction case
     data['FRAME'][10] = 10  # Add a new 'FRAME' value
@@ -112,6 +127,9 @@ def sample_dataframe_bindingmode_processing():
     data['LOCATION'][10] = 'site1'  # Location
     data['ACCEPTOR_IDX'][10] = 0
     data['DONOR_IDX'][10] = 0
+    data['RESTYPE_LIG'][10] = 'A' 
+    data['TARGET_IDX'][10] = 401
+    data['COORDINATION'][10] = "site1"
 
     data['FRAME'][11] = 11  # Add a new 'FRAME' value
     data['Prot_partner'][11] = 'A'  # Add a new 'Prot_partner' value
@@ -119,16 +137,18 @@ def sample_dataframe_bindingmode_processing():
     data['LIG_IDX_LIST'][11] = [7, 8]  # Ligand index list for 'saltbridge PI'
     data['LIG_GROUP'][11] = 'Group4'  # Ligand group for 'saltbridge PI'
     data['PROTISPOS'][11] = False  # PROTISPOS is False for 'saltbridge PI'
+    data['RESTYPE_LIG'][11] = 0
+    data['TARGET_IDX'][11] = 0
 
     # Add 'hydrophobic' case where 'ring_found' is False
     data['FRAME'][12] = 12  # Add a new 'FRAME' value
     data['Prot_partner'][12] = 'C'  # Add a new 'Prot_partner' value
     data['INTERACTION'][12] = 'hydrophobic'  # Add 'hydrophobic' interaction
     data['LIGCARBONIDX'][12] = 104  # LIGCARBONIDX for 'hydrophobic' (not in any ring)
+    data['RESTYPE_LIG'][12] = 0 
+    data['TARGET_IDX'][12] = 0
 
     return pd.DataFrame(data)
-
-
 
 def test_gather_interactions(sample_dataframe_bindingmode_processing):
     df = sample_dataframe_bindingmode_processing
@@ -396,3 +416,42 @@ def test_df_iteration_numbering():
 
     expected_100ASPA_4005_Donor_waterbridge_values = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
     assert (df['100ASPA_4005_Donor_waterbridge'] == expected_100ASPA_4005_Donor_waterbridge_values).all()
+
+@pytest.fixture
+def sample_data():
+    # Create sample data for testing
+    df = pd.DataFrame({
+        'FRAME': [1, 2, 3],
+        'Column1': [10, 20, 30],
+        'Column2': [40, 50, 60]
+    })
+
+    new_df = pd.DataFrame({
+        'FRAME': [1, 2, 3],
+        'Column1': [100, 200, 300],
+        'Column2': [400, 500, 600]
+    })
+
+    unique_data = {'Column1': 'Column1', 'Column2': 'Column2'}
+
+    return df, new_df, unique_data
+
+def test_update_values(sample_data):
+    # Arrange
+    df, new_df, unique_data = sample_data
+
+    # Set 'FRAME' as the index for new_df
+    new_df = new_df.set_index('FRAME')
+
+    # Act
+    update_values(df, new_df, unique_data)
+
+    # Assert
+    expected_df = pd.DataFrame({
+        'FRAME': [1, 2, 3],
+        'Column1': [100, 200, 300],
+        'Column2': [400, 500, 600]
+    })
+
+    # Check if the specific values are updated
+    assert df[['Column1', 'Column2']].equals(expected_df[['Column1', 'Column2']])
