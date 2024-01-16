@@ -11,7 +11,7 @@ import unittest
 from unittest.mock import Mock, patch
 from plip.structure.preparation import PDBComplex, LigandFinder, Mol, PLInteraction
 
-from openmmdl.openmmdl_analysis.interaction_gathering import characterize_complex, retrieve_plip_interactions, create_df_from_binding_site, process_frame, process_trajectory, fill_missing_frames, process_trajectory
+from openmmdl.openmmdl_analysis.interaction_gathering import *
 
 
 test_data_directory = Path("openmmdl/tests/data/in")
@@ -20,6 +20,7 @@ frame_file = f"{test_data_directory}/processing_frame_1.pdb"
 
 binding_site_id = "UNK:X:0"
 lig_name = "UNK"
+peptide = "X"
 
 # Test the function
 def test_characterize_complex():
@@ -32,6 +33,13 @@ def test_characterize_complex():
 def test_retrieve_plip_interactions():
     # Call the function
     interactions = retrieve_plip_interactions(topology_file, lig_name)
+
+    # Check if the function returns a dictionary
+    assert isinstance(interactions, dict)
+
+def test_retrieve_plip_interactions_peptide():
+    # Call the function
+    interactions = retrieve_plip_interactions_peptide(topology_file, peptide)
 
     # Check if the function returns a dictionary
     assert isinstance(interactions, dict)
@@ -60,6 +68,40 @@ def test_create_df_from_binding_site():
     assert isinstance(df_invalid, pd.DataFrame)
     assert df_invalid.shape == (2, 2)
     assert list(df_invalid.columns) == ["ColumnA", "ColumnB"]
+
+
+@pytest.fixture
+def input_pdb_filename(tmp_path):
+    input_pdb_filename = tmp_path / "input.pdb"
+    
+    # Create a mock PDB file with 10 atoms
+    input_pdb_content = """ATOM      1  N   UNK A 454      43.493  48.319  35.835  1.00  0.00      A    N  
+ATOM      2  N1  UNK A 454      44.740  47.862  35.697  1.00  0.00      A    N  
+ATOM      3  C14 UNK A 454      44.608  46.866  34.829  1.00  0.00      A    C  
+ATOM      4  N2  UNK A 454      43.265  46.644  34.450  1.00  0.00      A    N  
+ATOM      5  C7  UNK A 454      42.607  47.556  35.077  1.00  0.00      A    C  
+ATOM      6  H5  UNK A 454      41.542  47.701  34.954  1.00  0.00      A    H  
+ATOM      7  H10 UNK A 454      45.308  46.132  34.453  1.00  0.00      A    H  
+ATOM      8  C   UNK A 454      43.168  49.513  36.656  1.00  0.00      A    C  
+ATOM      9  C2  UNK A 454      42.743  50.705  35.818  1.00  0.00      A    C  
+ATOM     10  C4  UNK A 454      43.545  51.052  34.671  1.00  0.00      A    C"""
+
+    input_pdb_filename.write_text(input_pdb_content)
+    return input_pdb_filename
+
+def test_change_lig_to_residue():
+    topology_file = f"{test_data_directory}/complex.pdb"
+    shutil.copy(str(topology_file), '.')
+    topology_file = "complex.pdb"
+
+    # Change ligand to residue
+    change_lig_to_residue(str(topology_file), 'UNK', 'NEW')
+
+    # Read the output PDB file and check if residues are modified
+    with open(topology_file, 'r') as output_file:
+        modified_lines = output_file.readlines()
+        assert any('NEW' in line for line in modified_lines)
+        assert all('UNK' not in line for line in modified_lines)
 
 
 def test_process_frame_with_sample_data():
@@ -96,7 +138,7 @@ def test_process_trajectory():
 
     interaction_list = pd.DataFrame(columns=["RESNR", "RESTYPE", "RESCHAIN", "RESNR_LIG", "RESTYPE_LIG", "RESCHAIN_LIG", "DIST", "LIGCARBONIDX", "PROTCARBONIDX", "LIGCOO", "PROTCOO"])
 
-    interaction_list = process_trajectory(pdb_md, dataframe, num_processes, lig_name)
+    interaction_list = process_trajectory(pdb_md, dataframe, num_processes, lig_name, special_ligand=None, peptide=None)
 
     assert interaction_list is not None
     assert len(interaction_list) > 10
@@ -121,8 +163,5 @@ def test_fill_missing_frames():
     assert all(filled_df.loc[filled_df['FRAME'] == 3, 'Value1'] == 'skip')
 
     assert isinstance(filled_df, pd.DataFrame)
-
-
-
 if __name__ == "__main":
     pytest.main()
