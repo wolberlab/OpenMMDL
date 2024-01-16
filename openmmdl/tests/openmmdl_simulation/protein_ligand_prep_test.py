@@ -23,7 +23,7 @@ import simtk.openmm as mm
 
 
 from openmmdl.openmmdl_simulation.scripts.forcefield_water import ff_selection, water_forcefield_selection, water_model_selection, generate_forcefield, generate_transitional_forcefield
-from openmmdl.openmmdl_simulation.scripts.protein_ligand_prep import protein_choice, prepare_ligand, rdkit_to_openmm, merge_protein_and_ligand, water_padding_solvent_builder, water_absolute_solvent_builder, membrane_builder, water_conversion
+from openmmdl.openmmdl_simulation.scripts.protein_ligand_prep import prepare_ligand, rdkit_to_openmm, merge_protein_and_ligand, water_padding_solvent_builder, water_absolute_solvent_builder, membrane_builder, water_conversion
 from openmmdl.openmmdl_simulation.scripts.post_md_conversions import mdtraj_conversion, MDanalysis_conversion
 
 
@@ -32,7 +32,6 @@ ligand = 'CVV.sdf'
 ligand_name = "UNK"
 minimization = False
 sanitization = False
-protein_prepared = "Yes"
 ff = 'AMBER14'
 water = 'SPC/E'
 add_membrane = False
@@ -64,10 +63,11 @@ TEST_MOL_FILE = f"{test_data_directory}/CVV.mol"
 TEST_MOL2_FILE = f"{test_data_directory}/CVV.mol2"
 TEST_PROTEIN = f"{test_data_directory}/6b73.pdb"
 
+protein_pdb = pdbfixer.PDBFixer(str(TEST_PROTEIN))
+
 
 ligand_prepared = prepare_ligand(TEST_LIGAND_FILE,minimize_molecule=minimization)
 omm_ligand = rdkit_to_openmm(ligand_prepared, ligand_name)
-protein_pdb = protein_choice(protein_is_prepared=protein_prepared,protein=TEST_PROTEIN)
 forcefield_selected = ff_selection(ff)
 water_selected = water_forcefield_selection(water=water,forcefield_selection=ff_selection(ff))
 model_water = water_model_selection(water=water,forcefield_selection=ff_selection(ff))
@@ -75,20 +75,17 @@ forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=wate
 complex_topology, complex_positions = merge_protein_and_ligand(protein_pdb, omm_ligand)
 modeller = app.Modeller(complex_topology, complex_positions)
 
-# Test the protein_choice function
-def test_protein_choice():
-    prepared_protein = protein_choice("Yes", TEST_PROTEIN)
-    assert isinstance(prepared_protein, pdbfixer.PDBFixer)
-
 # Test the prepare_ligand function
 def test_prepare_ligand():
     # Test the function with the sample ligand file.
     rdkit_mol_sdf = prepare_ligand(TEST_LIGAND_FILE, minimize_molecule=False)
+    rdkit_mol_mol2_2 = prepare_ligand(TEST_MOL2_FILE, minimize_molecule=True)
     rdkit_mol_mol = prepare_ligand(TEST_MOL_FILE, minimize_molecule=False)
     rdkit_mol_mol2 = prepare_ligand(TEST_MOL2_FILE, minimize_molecule=False)
     
     # Add your assertions here to check if the preparation worked as expected
     assert rdkit_mol_sdf is not None  # Check if the result is not None
+    assert rdkit_mol_mol2_2 is not None  # Check if the result is not None
     assert rdkit_mol_mol is not None  # Check if the result is not None
     assert rdkit_mol_mol2 is not None  # Check if the result is not None
 
