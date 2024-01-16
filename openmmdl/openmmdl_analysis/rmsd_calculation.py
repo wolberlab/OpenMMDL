@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import os
 
 import MDAnalysis as mda
 import MDAnalysis.transformations as trans
@@ -37,8 +38,14 @@ def rmsd_for_atomgroups(prot_lig_top_file, prot_lig_traj_file, selection1, selec
     rmsd_df = pd.DataFrame(np.round(rmsd_analysis.rmsd[:, 2:], 2), columns=columns)
     rmsd_df.index.name = "frame"
 
+    # Create the directory if it doesn't exist
+    output_directory = './RMSD/'
+    os.makedirs(output_directory, exist_ok=True)
+
+    # Save the RMSD values to a CSV file in the created directory
     rmsd_df.to_csv('./RMSD/RMSD_over_time.csv', sep=' ')
 
+    # Plot and save the RMSD over time as a PNG file
     rmsd_df.plot(title="RMSD of protein and ligand")
     plt.ylabel("RMSD (Å)")
     plt.savefig('./RMSD/RMSD_over_time.png')
