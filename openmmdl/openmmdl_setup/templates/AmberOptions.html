@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 {% block title %}Prepare Amber Files{% endblock %}
 
-{% macro fileinput(id) %}
+{% macro fileinput(id, title) %}
 <div class="input-group">
     <label class="btn btn-default btn-file input-group-addon" >
         Browse... <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" onchange="optionChanged()" />
     </label>
-    <span id="{{ id }}_label" class="form-control" style="overflow: hidden;overflow-wrap: anywhere;" title=""/>
+    <span id="{{ id }}_label" class="form-control" style="overflow: hidden;overflow-wrap: anywhere;" title="{{title}}"/>
 </div>
 {% endmacro %}
 
@@ -268,7 +268,7 @@
                 <div class="col-lg-12">
                   <div class="form-group">
                     <label for="spLigFile1" class=" control-label col-md-3">PDB File</label>
-                    <div class="col-md-9" style="margin-bottom: 15px">{{ fileinput('spLigFile') }}</div>
+                    <div class="col-md-9" style="margin-bottom: 15px">{{ fileinput('spLigFile', 'As the special ligand usually comes with receptor from RCSB website, here we would ask the user to submit it only in pdb format.') }}</div>
                   </div>
 
                   <div class="form-group">

@@ -104,21 +104,21 @@ def configureFiles():
         has_files = session['has_files']
         if has_files == "yes":
             if 'prmtopFile' not in request.files or request.files['prmtopFile'].filename == '' or 'inpcrdFile' not in request.files or request.files['inpcrdFile'].filename == '':
-                # They didn't select prmtop or incprd file.  Send them back.
+                # if the user doesn't select prmtop or incprd file.  Send them back.
                 return showConfigureFiles() 
             session['nmLig'] = 'nmLig' in request.form
             session['spLig'] = 'spLig' in request.form
             if session['nmLig']:
-                if 'nmLigFile' not in request.files or request.files['nmLigFile'].filename == '':
-                    # They didn't select a nmLig file.  Send them back.
+                # If the user doesn't type the resname of the ligand. Send them back.
+                if 'nmLigName' not in request.form or request.form['nmLigName'] == '':
                     return showConfigureFiles()
                 else:
-                    session['nmLigFile'] = request.form.get('nmLigFile', '')
+                    session['nmLigName'] = request.form.get('nmLigName', '')
             if session['spLig']:
-                if 'spLigFile' not in request.files or request.files['spLigFile'].filename == '':
-                    # They didn't select a spLig file.  Send them back.
-                    session['spLigFile'] = request.form.get('spLigFile', '')
+                if 'spLigName' not in request.form or request.form['spLigName'] == '':
                     return showConfigureFiles()
+                else:
+                    session['spLigName'] = request.form.get('spLigName', '')
             saveUploadedFiles()         
         elif has_files == "no":                
             configureDefaultAmberOptions()
@@ -344,12 +344,7 @@ def createAmberBashScript():
     if session['spLig']:
         a_script.append('# Special Ligand')
         spLigFile = uploadedFiles['spLigFile'][0][1]
-        a_script.append('spLigFile=%s # the file name of ligand without suffix `.pdb` or `.sdf' % spLigFile[:-4] )
-        # depending on the uploaded file format,convert it to pdb or sdf file.
-        if spLigFile[-4:] == '.sdf':
-            a_script.append('obabel ${spLigFile}.sdf -O ${spLigFile}.pdb -p # convert to pdb file for tleap. -p: add hydrogens appropriate for pH7.4')
-        elif spLigFile[-4:] == '.pdb':
-            a_script.append('obabel ${spLigFile}.pdb -O ${spLigFile}.sdf -p  # convert to sdf file for openmmdl_analysis, -p: add hydrogens appropriate for pH7.4')
+        a_script.append('spLigFile=%s # the file name of ligand without suffix `.pdb`' % spLigFile[:-4] )
         prepcFile = uploadedFiles['prepcFile'][0][1]
         prepcFile = prepcFile [:-6]
         a_script.append('prepc=%s # the file name without suffix `prepc`' % prepcFile )
@@ -566,21 +561,6 @@ def extractLigName(LigFileName):
         LigName = 'UNL'
     elif LigFileName[-4:] == '.pdb':
         LigName = LigFileName[:-4]
-        #LigName = ''  # Initialize LigName with a default value
-
-        #with open(LigFile[0].name, 'rb') as f:
-        #    #f.seek(0)
-        #    line = f.readline()
-        #    print(f"LigFile[0]: {LigFile[0]}")
-        #    print(f"LigFile[0].name: {f}")
-        #    print(f"line: {line}")
-        #    while line:
-        #        #if line.startswith(b'ATOM') or line.startswith(b'HETATM'):
-        #        if line.strip() and (line.startswith(b'ATOM') or line.startswith(b'HETATM')):
-        #            # split the line and get the vaule of the fourth column
-        #            print(f"line.split():{line}")
-        #            LigName = line.split()[3].decode('utf-8')
-        #            break
 
     return LigName
 
@@ -907,7 +887,7 @@ os.chdir(outputDir)""")
     script.append('from openmmdl.openmmdl_simulation.scripts.cleaning_procedures import cleanup, create_directory_if_not_exists, copy_file, organize_files, post_md_file_movement \n')
     
     script.append('import simtk.openmm.app as app')
-    script.append('from simtk.openmm.app import PDBFile, Modeller, PDBReporter, StateDataReporter, DCDReporter, CheckpointReporter')
+    script.append('from simtk.openmm.app import PDBFile, Modeller, PDBReporter, StateDataReporter, DCDReporter, CheckpointReporter, AmberPrmtopFile, AmberInpcrdFile')
     script.append('from simtk.openmm import unit, Platform, MonteCarloBarostat, LangevinMiddleIntegrator')
     script.append('from simtk.openmm import Vec3')
     script.append('import simtk.openmm as mm')
@@ -938,49 +918,57 @@ os.chdir(outputDir)""")
         script.append('''####### Add the Amber Files in the Folder with this Script ####### \n''')
         # amber_files related variables
         if session['has_files'] == 'yes':
-            script.append("prmtop_file='%s'" % uploadedFiles['prmtopFile'][0][1])
-            script.append('inpcrd_file="%s"' % uploadedFiles['inpcrdFile'][0][1])
+            script.append("prmtop_file = '%s'" % uploadedFiles['prmtopFile'][0][1])
+            script.append('inpcrd_file = "%s"' % uploadedFiles['inpcrdFile'][0][1])
+
+            # ligand related variables
+            if session['nmLig'] == True:
+                nmLigName = session['nmLigName'] # e.g. 'UNL'
+            else:
+                nmLigName = None
+
+            if session['spLig'] == True: # success
+                spLigName = session['spLigName'] # e.g. 'HEME'
+            else:
+                spLigName = None 
 
         elif session['has_files'] == 'no':
             script.append("prmtop_file = 'system.%s.prmtop'" % session['water_ff'])
-            script.append("inpcrd_file = 'system.%s.inpcrd' " % session['water_ff'])
+            script.append("inpcrd_file = 'system.%s.inpcrd' " % session['water_ff']) 
 
-        # ligand related variables
-        if session['nmLig'] == True: # success # falied when has_files:no > check nmLigFile but don't submit
-            nmLigFileName = uploadedFiles['nmLigFile'][0][1] # e.g. '8QY.pdb'
-            nmLigFileNamePrefix = nmLigFileName[:-4] # e.g. '8QY'
-            nmLigName = extractLigName(nmLigFileName) # e.g '8QY' or 'UNL' # resname in topology
-            script.append("nmLig_file='%s'" % nmLigFileName)
-            script.append("nmLig_name='%s'" % nmLigName)
-        else:
-            nmLigFileName = None
-            nmLigFileNamePrefix = None
-            nmLigName = None
+            # ligand related variables
+            if session['nmLig'] == True: 
+                nmLigFileName = uploadedFiles['nmLigFile'][0][1] # e.g. '8QY.pdb'
+                nmLigName = extractLigName(nmLigFileName) # e.g '8QY' or 'UNL' # resname in topology
+            else:
+                nmLigFileName = None
+                nmLigName = None
 
-        if session['spLig'] == True: # success 
-            spLigFileName = uploadedFiles['spLigFile'][0][1]
-            spLigFileNamePrefix = spLigFileName[:-4]
-            spLigName = extractLigName(spLigFileName)
-            script.append("spLig_file='%s'" % spLigFileName)
-            script.append("spLig_name='%s'" % spLigName)
-        else:
-            spLigFileName = None
-            spLigFileNamePrefix = None
-            spLigName = None       
+            if session['spLig'] == True: # success 
+                spLigFileName = uploadedFiles['spLigFile'][0][1]
+                spLigName = extractLigName(spLigFileName)
+            else:
+                spLigFileName = None
+                spLigName = None    
+
 
         ## Feed prmtop_file and inpcrd_file to OpenMM Reader
         script.append("prmtop = AmberPrmtopFile(prmtop_file)")
         script.append("inpcrd = AmberInpcrdFile(inpcrd_file)")
         
         ##################### For debugging #################################
+        # print all key-value pairs in session
+        # print(f"session is {session}")
         print(f'fileType is {fileType}')
         print(f"session['has_files'] is {session['has_files']}")
         print(f"session['nmLig'] is {session['nmLig']}")
         print(f"session['spLig'] is {session['spLig']}")
-        print(f"nmLigFileName is {nmLigFileName}")
-        print(f"nmLigName is {nmLigName}")
-        print(f"spLigFileName is {spLigFileName}")
-        print(f"spLigName is {spLigName}")
+        print(f'nmLigName is {nmLigName}')
+        print(f'spLigName is {spLigName}')
+        #print(f"nmLigFileName is {nmLigFileName}")
+        #print(f"nmLigName is {nmLigName}")
+        #print(f"spLigFileName is {spLigFileName}")
+        #print(f"spLigName is {spLigName}")
         ######################################################################
 
     if fileType == 'pdb':
@@ -1249,7 +1237,7 @@ with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
         if fileType == 'pdb':
             script.append("simulation.reporters.append(PDBReporter(f'output_{protein}', pdbInterval))")
         elif fileType == 'amber':
-            script.append("simulation.reporters.append(PDBReporter(f'output_{prmtop_file}', pdbInterval))")
+            script.append("simulation.reporters.append(PDBReporter(f'output_{prmtop_file[:-7]}.pdb', pdbInterval))")
     if session['writeDCD']:
         script.append('simulation.reporters.append(dcdReporter)')
     if session['writeData']:
@@ -1327,12 +1315,15 @@ with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
         elif session['sdfFile'] == '':
             script.append("post_md_file_movement(protein)")
     elif fileType == "amber":
-        if session['nmLig'] == False and session['spLig'] == False:
+        if session['has_files'] == 'yes': # In this case, no ligand file will be uploaded, thus not neccessary to assign value to argument `ligands`
             script.append("post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file)")
-        elif session['nmLig'] and session['spLig'] == False:
-            script.append("post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file, ligands=['%s.sdf'])" % nmLigFileNamePrefix)
-        elif session['nmLig'] and session['spLig']:
-            script.append("post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file, ligands=['%s.sdf', '%s.sdf'])" % (nmLigFileNamePrefix, spLigFileNamePrefix))
+        elif session['has_files'] == 'no':
+            if session['nmLig'] == False and session['spLig'] == False:
+                script.append("post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file)")
+            elif session['nmLig'] and session['spLig'] == False:
+                script.append("post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file, ligands=['%s'])" % nmLigFileName)
+            elif session['nmLig'] and session['spLig']:
+                script.append("post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file, ligands=['%s', '%s'])" % (nmLigFileName, spLigFileName))
 
     # session[openmmdl_analysis]
     if session['openmmdl_analysis'] == "Yes":
@@ -1354,9 +1345,9 @@ with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
                 if session['nmLig'] == False and session['spLig'] == False:
                     script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                 elif session['nmLig'] and session['spLig'] == False:
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigFileNamePrefix, nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                 elif session['nmLig'] and session['spLig']:
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigFileNamePrefix, nmLigName, spLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))                   
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigName, spLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))                   
         # session[analysis_selection] == 'analysis_prot'
         elif session['analysis_selection'] == 'analysis_prot_lig':
             script.append("os.chdir('Final_Output/Prot_Lig')")
@@ -1369,9 +1360,9 @@ with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
                 if session['nmLig'] == False and session['spLig'] == False:
                     script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                 elif session['nmLig'] and session['spLig'] == False:
-                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigFileNamePrefix, nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                 elif session['nmLig'] and session['spLig']:
-                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -l %s.sdf -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigFileNamePrefix, nmLigName, spLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))                   
+                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigName, spLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))                   
         # session[analysis_selection] == 'analysis_all_prot'
         elif session['analysis_selection'] == 'analysis_all_prot_lig':
             if fileType == "pdb":
@@ -1391,13 +1382,13 @@ with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
                     script.append("os.chdir('../Prot_Lig')")
                     script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                 elif session['nmLig'] and session['spLig'] == False:
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigFileNamePrefix, nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                     script.append("os.chdir('../Prot_Lig')")
-                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -l %s.sdf -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigFileNamePrefix, nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))    
+                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))    
                 elif session['nmLig'] and session['spLig']:
-                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s.sdf -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigFileNamePrefix, nmLigName, spLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
+                    script.append("analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigName, spLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))
                     script.append("os.chdir('../Prot_Lig')")
-                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -l %s.sdf -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigFileNamePrefix, nmLigName, spLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))    
+                    script.append("analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s' " % (top_ext, traj_ext, nmLigName, spLigName, session['binding_mode'], session['min_transition'], session['rmsd_diff'], session['pml_generation'], session['stable_water'], session['wc_distance']))    
     
     return "\n".join(script)
 

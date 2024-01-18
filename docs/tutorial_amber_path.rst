@@ -61,7 +61,7 @@ When selected, users can choose the Prmtop and Inpcrd files via the file browser
 If the above system contains ligands and conducting MD post-analysis using OpenMMDL is needed, checking the ligand box based on the ligand type, and then type the resname of the ligand in the `prmtop` file in the textfield.
 
 .. tip::
-   The way to find the resname of the ligand is to open the `prmtop` file in a text editor and search for '%FLAG RESIDUE_LABEL'. The resname of the ligand should be the last one after the common amimo acids and before the lipids and water.For example, as shown in below picture, the ligand rename in this `prmtop` file is 'UNL'.
+   To find the resname of the ligand, open the `prmtop` file in a text editor and search for '%FLAG RESIDUE_LABEL'. The resname of the ligand should be the last one listed after the common amino acids and before the lipids and water molecules. For example, in the image below, the ligand is labeled as 'UNL' in this `prmtop` file.
 
    .. figure:: /_static/images/tutorials/Amber_Path/lig_resname_prmtop.png
       :figwidth: 500px
@@ -130,6 +130,8 @@ Upon selecting the 'Normal Ligand' option, the parameter settings for the ligand
   
 - Finally, select the 'Charge Method' from the drop-down menu.
 
+The `obabel` tool will be utilized to convert the ligand file format between PDB and SDF formats.
+
 Warning: When the file format is pdb, the prefix of the filename should be the same as the ligand name in the PDB file. For instance, the ligand name in the PDB file is '8QY', and the filename should be '8QY.pdb'.
 
 In this tutorial, we will select the ligand '8QY.pdb', set the charge value to 1, select the 'GAFF2' force field, and choose the 'bcc' charge method.
@@ -141,6 +143,8 @@ For ligands that `Antechamber` cannot process, such as cofactors like heme in CY
 .. figure:: /_static/images/tutorials/Amber_Path/specialLigand.png
    :figwidth: 700px
    :align: center
+
+Warning: As the special ligand usually comes with receptor from RCSB website, here we would ask the user to submit it only in pdb format.
 
 Users can select either one or both of the above types of ligands at one time.
 
