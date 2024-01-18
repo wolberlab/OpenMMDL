@@ -52,8 +52,8 @@
     <div id="nmLigOptions" hidden>
         <div class="col-lg-12">
             <div class="form-group">
-                <label for="nmLigFile" class="control-label col-md-2">Ligand Resname</label>
-                <div class="col-md-10">{{ textfield('nmLigFile', 'The way to find the resname of the ligand is to open the prmtop file in a text editor and search for `%FLAG RESIDUE_LABEL`. The resname of the ligand should be the last one after the common amimo acids and before the lipids and water.')}}</div>
+                <label for="nmLigName" class="control-label col-md-2">Ligand Resname</label>
+                <div class="col-md-10">{{ textfield('nmLigName', 'The way to find the resname of the ligand is to open the prmtop file in a text editor and search for `%FLAG RESIDUE_LABEL`. The resname of the ligand should be the last one after the common amimo acids and before the lipids and water.')}}</div>
             </div>
         </div>
     </div>
@@ -68,8 +68,8 @@
     <div id="spLigOptions" hidden>
         <div class="col-lg-12">
             <div class="form-group">
-                <label for="spLigFile" class=" control-label col-md-2">Ligand Resname</label>
-                <div class="col-md-10">{{ textfield('spLigFile', 'The way to find the resname of the ligand is to open the prmtop file in a text editor and search for `%FLAG RESIDUE_LABEL`. The resname of the ligand should be the last one after the common amimo acids and before the lipids and water.')}}</div>
+                <label for="spLigName" class=" control-label col-md-2">Ligand Resname</label>
+                <div class="col-md-10">{{ textfield('spLigName', 'The way to find the resname of the ligand is to open the prmtop file in a text editor and search for `%FLAG RESIDUE_LABEL`. The resname of the ligand should be the last one after the common amimo acids and before the lipids and water.')}}</div>
             </div>
         </div>
     </div>
@@ -98,10 +98,10 @@ function optionChanged() {
 
     var nmLig = document.getElementById("nmLig").checked;
     var spLig = document.getElementById("spLig").checked;
-    var nmLigFile = document.getElementById("nmLigFile");
-    var spLigFile = document.getElementById("spLigFile");
-    var nmLigFileValue = document.getElementById("nmLigFile").value;
-    var spLigFileValue = document.getElementById("spLigFile").value;
+    var nmLigName = document.getElementById("nmLigName");
+    var spLigName = document.getElementById("spLigName");
+    var nmLigNameValue = document.getElementById("nmLigName").value;
+    var spLigNameValue = document.getElementById("spLigName").value;
     
     var continueButton = document.getElementById('continue');
 
@@ -127,11 +127,11 @@ function optionChanged() {
             //nmLig = false; 
             //spLig = false; 
             // disable to type the ligand resname;
-            nmLigFile.disabled = true;
-            spLigFile.disabled = true;
+            nmLigName.disabled = true;
+            spLigName.disabled = true;
             // if the user submitted previously, firstly, erase the files;
-            nmLigFile.value = null;
-            spLigFile.value = null;
+            nmLigName.value = null;
+            spLigName.value = null;
             // secondly, hide the options;
             document.getElementById('nmLigOptions').hidden = true;
             document.getElementById('spLigOptions').hidden = true;
@@ -159,30 +159,30 @@ function optionChanged() {
             // if the nmLig or spLig is checked, firstly enable to submit the files.
             
             if (nmLig) {
-                nmLigFile.disabled = false;
+                nmLigName.disabled = false;
                 // secondly, show the options.
                 document.getElementById('nmLigOptions').hidden = false;
             } else {
                 // if the nmLig is not checked, firstly, disable to submit the files.
-                nmLigFile.disabled = true;
+                nmLigName.disabled = true;
                 // secondly, hide the options.
                 document.getElementById('nmLigOptions').hidden = true;
                 // thirdly, erase the files.
-                nmLigFileValue = null;
+                nmLigNameValue = null;
             };
 
             
             if (spLig) {
-                spLigFile.disabled = false;
+                spLigName.disabled = false;
                 // secondly, show the options.
                 document.getElementById('spLigOptions').hidden = false;
             } else {
                 // if the spLig is not checked, firstly, disable to submit the files.
-                spLigFile.disabled = true;
+                spLigName.disabled = true;
                 // secondly, hide the options.
                 document.getElementById('spLigOptions').hidden = true;
                 // thirdly, erase the files.
-                spLigFileValue = null;
+                spLigNameValue = null;
             };
              
             // For the continue button,
@@ -191,13 +191,13 @@ function optionChanged() {
 
             // Check if prmtopFile and inpcrdFile are uploaded
             if (prmtopFileValue && inpcrdFileValue) {
-                 // if both nmLig and spLig are checked, the continue button will be enabled only if both nmLigFile and spLigFile are selected.
+                 // if both nmLig and spLig are checked, the continue button will be enabled only if both nmLigName and spLigName are selected.
                 if (nmLig && spLig) {
-                    continueButton.disabled = !(nmLigFileValue && spLigFileValue);
-                } else if (nmLig) { // if the nmLig is checked, the continue button will be enabled only if the nmLigFile is selected.
-                    continueButton.disabled = !nmLigFileValue;
-                } else if (spLig) { // if the spLig is checked, the continue button will be enabled only if the spLigFile is selected.
-                    continueButton.disabled = !spLigFileValue;
+                    continueButton.disabled = !(nmLigNameValue && spLigNameValue);
+                } else if (nmLig) { // if the nmLig is checked, the continue button will be enabled only if the nmLigName is selected.
+                    continueButton.disabled = !nmLigNameValue;
+                } else if (spLig) { // if the spLig is checked, the continue button will be enabled only if the spLigName is selected.
+                    continueButton.disabled = !spLigNameValue;
                 } else { // if neither nmLig nor spLig is checked, enable the continue button
                     continueButton.disabled = false;
                 }
