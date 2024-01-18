@@ -17,6 +17,8 @@ from openmmdl.openmmdl_analysis.interaction_gathering import *
 test_data_directory = Path("openmmdl/tests/data/in")
 topology_file = f"{test_data_directory}/complex.pdb"
 frame_file = f"{test_data_directory}/processing_frame_1.pdb"
+topology_metal = f"{test_data_directory}/metal_top.pdb"
+trajetory_metal = f"{test_data_directory}/metal_traj_25.dcd"
 
 binding_site_id = "UNK:X:0"
 lig_name = "UNK"
@@ -143,6 +145,59 @@ def test_process_trajectory():
     assert interaction_list is not None
     assert len(interaction_list) > 10
     
+def test_process_frame_special_with_files():
+    test_data_directory = "openmmdl/tests/data/in"  # Replace with the actual path to your test data directory
+    topology_metal = f"{test_data_directory}/metal_top.pdb"
+    trajetory_metal = f"{test_data_directory}/metal_traj_25.dcd"
+
+    # Load PDB and DCD files using mdanalysis.Universe
+    import MDAnalysis as mda
+    u = mda.Universe(topology_metal, trajetory_metal)
+
+    lig_name = "UNK"  # Replace with the actual ligand name
+    special = "HEM"  # Replace with the actual special residue name
+    frame = 0
+
+    result = process_frame_special(frame, u, lig_name, special)
+
+    assert isinstance(result, list)
+    assert all(isinstance(df, pd.DataFrame) for df in result)
+
+    # Add more specific assertions based on the expected behavior of the function
+    # For example, check if the columns in the DataFrame are as expected, or if certain conditions hold
+
+    # Clean up any temporary files created during the test
+    for frame in range(len(u.trajectory)):
+        temp_file = f'processing_frame_{frame}.pdb'
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
+
+def test_process_frame_wrapper():
+
+    test_data_directory = "openmmdl/tests/data/in"  # Replace with the actual path to your test data directory
+    topology_metal = f"{test_data_directory}/metal_top.pdb"
+    trajetory_metal = f"{test_data_directory}/metal_traj_25.dcd"
+    ligand_special = f"{test_data_directory}/ligand_special.pdb"
+    shutil.copy(str(topology_metal), '.')
+    shutil.copy(str(trajetory_metal), '.')
+    shutil.copy(str(ligand_special), '.')
+    topology_metal = "metal_top.pdb"
+    trajetory_metal = "metal_traj_25.dcd"
+
+    # Load PDB and DCD files using MDAnalysis
+    pdb_md = mda.Universe(topology_metal, trajetory_metal)
+    lig_name = "UNK"  # Replace with the actual ligand name
+    special_ligand = "HEM"  # Replace with the actual special ligand name
+    peptide = None  # Replace with the actual peptide name
+    frame_idx = 2
+
+    args = (frame_idx, pdb_md, lig_name, special_ligand, peptide)
+    result = process_frame_wrapper(args)
+
+    # Perform assertions based on the expected behavior of the process_frame_special function
+    assert isinstance(result, tuple)
+    assert len(result) == 2
+    assert isinstance(result[0], int)
 
 
 def test_fill_missing_frames():
