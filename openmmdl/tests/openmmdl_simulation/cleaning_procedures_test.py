@@ -75,6 +75,34 @@ def test_organize_files(mock_rename, mock_exists):
     for call in mock_rename.call_args_list:
         print(call)
 
+#def test_post_md_file_movement():
+#    # Get the absolute path to the test data directory
+#    test_data_directory = Path("openmmdl/tests/data/in")
+#
+#    # Define the full path to the input files
+#    ligand = test_data_directory / 'CVV.sdf'
+#    protein_name = test_data_directory / '6b73.pdb'
+#    prmtop = test_data_directory / '6b73.prmtop'
+#    inpcrd = test_data_directory / '6b73.inpcrd'
+#    
+#    # Assert that the input files exist before moving
+#    assert os.path.exists(ligand)
+#    assert os.path.exists(protein_name)
+#    assert os.path.exists(prmtop)
+#    assert os.path.exists(inpcrd)
+#
+#    # Call the post_md_file_movement function
+#    post_md_file_movement(protein_name, prmtop, inpcrd, ligand)
+#    
+#    # Check if the files have been organized and moved to the correct directories
+#    input_files_dir = Path("Input_Files")
+#
+#    assert os.path.exists(input_files_dir)
+#    assert os.path.exists(input_files_dir / "6b73.pdb")
+#    assert os.path.exists(input_files_dir / "6b73.prmtop")
+#    assert os.path.exists(input_files_dir / "6b73.inpcrd")
+#    assert os.path.exists(input_files_dir / "CVV.sdf")
+
 def test_post_md_file_movement():
     # Get the absolute path to the test data directory
     test_data_directory = Path("openmmdl/tests/data/in")
