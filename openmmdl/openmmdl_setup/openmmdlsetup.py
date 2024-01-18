@@ -918,8 +918,8 @@ os.chdir(outputDir)""")
         script.append('''####### Add the Amber Files in the Folder with this Script ####### \n''')
         # amber_files related variables
         if session['has_files'] == 'yes':
-            script.append("prmtop_file='%s'" % uploadedFiles['prmtopFile'][0][1])
-            script.append('inpcrd_file="%s"' % uploadedFiles['inpcrdFile'][0][1])
+            script.append("prmtop_file = '%s'" % uploadedFiles['prmtopFile'][0][1])
+            script.append('inpcrd_file = "%s"' % uploadedFiles['inpcrdFile'][0][1])
 
             # ligand related variables
             if session['nmLig'] == True:
@@ -939,20 +939,16 @@ os.chdir(outputDir)""")
             # ligand related variables
             if session['nmLig'] == True: 
                 nmLigFileName = uploadedFiles['nmLigFile'][0][1] # e.g. '8QY.pdb'
-                nmLigFileNamePrefix = nmLigFileName[:-4] # e.g. '8QY'
                 nmLigName = extractLigName(nmLigFileName) # e.g '8QY' or 'UNL' # resname in topology
             else:
                 nmLigFileName = None
-                nmLigFileNamePrefix = None
                 nmLigName = None
 
             if session['spLig'] == True: # success 
                 spLigFileName = uploadedFiles['spLigFile'][0][1]
-                spLigFileNamePrefix = spLigFileName[:-4]
                 spLigName = extractLigName(spLigFileName)
             else:
                 spLigFileName = None
-                spLigFileNamePrefix = None
                 spLigName = None    
 
 
@@ -1241,7 +1237,7 @@ with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
         if fileType == 'pdb':
             script.append("simulation.reporters.append(PDBReporter(f'output_{protein}', pdbInterval))")
         elif fileType == 'amber':
-            script.append("simulation.reporters.append(PDBReporter(f'output_{prmtop_file}', pdbInterval))")
+            script.append("simulation.reporters.append(PDBReporter(f'output_{prmtop_file[:-7]}.pdb', pdbInterval))")
     if session['writeDCD']:
         script.append('simulation.reporters.append(dcdReporter)')
     if session['writeData']:
