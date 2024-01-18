@@ -150,6 +150,154 @@ def sample_dataframe_bindingmode_processing():
 
     return pd.DataFrame(data)
 
+
+ 
+@pytest.fixture
+def sample_dataframe_bindingmode_processing_with_peptides():
+    data = {
+        'FRAME': {0: 1, 1: 2, 2: 3, 3: 2},
+        'Prot_partner': {0: '62VAL', 1: 'SER144', 2: 'GLU321', 3: 'ILE432'},
+        'INTERACTION': {0: 'hydrophobic', 1: 'hbond', 2: 'saltbridge', 3: 'hydrophobic'},
+        'LIGCARBONIDX': {0: 101, 1: 102, 2: 103, 3: 102},
+        'DONORIDX': {0: 201, 1: 202, 2: 203, 3: 202},
+        'ACCEPTORIDX': {0: 301, 1: 302, 2: 303, 3: 302},
+        'PROTISDON': {0: True, 1: False, 2: True, 3: False},
+        'LIG_IDX_LIST': {0: [1, 2], 1: [3, 4], 2: [5, 6], 3: [3, 4]},
+        'LIG_GROUP': {0: 'Group1', 1: 'Group2', 2: 'Group3', 3: 'Group1'},
+        'PROTISPOS': {0: True, 1: False, 2: True, 3: True},
+        'DON_IDX': {0: 0, 1: 0, 2: 0, 3: 0},
+        'DONORTYPE': {0: 0, 1: 0, 2: 0, 3: 0},
+        'ACCEPTOR_IDX': {0: 0, 1: 0, 2: 0, 3: 0},
+        'DONOR_IDX': {0: 0, 1: 0, 2: 0, 3: 0},
+        'LOCATION': {0: 0, 1: 0, 2: 0, 3: 0},
+        'METAL_IDX': {0: 0, 1: 0, 2: 0, 3: 0},
+        'METAL_TYPE': {0: 0, 1: 0, 2: 0, 3: 0},
+        'RESTYPE_LIG': {0: 'ILE', 1: 'TYR', 2: 'ARG', 3: 'VAL'},
+        'TARGET_IDX': {0: 0, 1: 0, 2: 0, 3: 0},
+        'COORDINATION': {0: 0, 1: 0, 2: 0, 3: 0},
+        'RESNR_LIG' : {0: '101', 1: '202', 2: '155', 3: '102'}
+    }
+     
+    # Additional data for peptide interactions
+    data['FRAME'][4] = 4
+    data['Prot_partner'][4] = 'LEU248'
+    data['INTERACTION'][4] = 'halogen'
+    data['DON_IDX'][4] = 501
+    data['DONORTYPE'][4] = 'F'
+    data['ACCEPTOR_IDX'][4] = 0
+    data['DONOR_IDX'][4] = 0
+    data['LIG_IDX_LIST'][4] = 0
+    data['LIG_GROUP'][4] = 0
+    data['RESTYPE_LIG'][4] = 'ILE'
+    data['TARGET_IDX'][4] = 0
+    data['RESNR_LIG'][4] = '501'
+ 
+    data['FRAME'][5] = 5
+    data['Prot_partner'][5] = 'SER300'
+    data['INTERACTION'][5] = 'hbond'
+    data['ACCEPTORIDX'][5] = 301
+    data['DON_IDX'][5] = 0
+    data['DONORTYPE'][5] = 0
+    data['PROTISDON'][5] = True
+    data['ACCEPTOR_IDX'][5] = 0
+    data['LIG_IDX_LIST'][5] = 0
+    data['DONOR_IDX'][5] = 0
+    data['LIG_GROUP'][5] = 0
+    data['RESTYPE_LIG'][5] = 'HIS'
+    data['TARGET_IDX'][5] = 0
+    data['RESNR_LIG'][5] = '301'
+ 
+    data['FRAME'][6] = 6
+    data['Prot_partner'][6] = 'TYR343'
+    data['INTERACTION'][6] = 'waterbridge'
+    data['ACCEPTOR_IDX'][6] = 401
+    data['DON_IDX'][6] = 0
+    data['DONORTYPE'][6] = 0
+    data['DONOR_IDX'][6] = 0
+    data['LIG_IDX_LIST'][6] = 0
+    data['PROTISDON'][6] = True
+    data['LIG_GROUP'][6] = 0
+    data['RESTYPE_LIG'][6] = 'SER'
+    data['TARGET_IDX'][6] = 0
+    data['RESNR_LIG'][6] = '455'
+
+    data['FRAME'][7] = 7
+    data['Prot_partner'][7] = 'ILE178'
+    data['INTERACTION'][7] = 'waterbridge'
+    data['DONOR_IDX'][7] = 501
+    data['DON_IDX'][7] = 0
+    data['DONORTYPE'][7] = 0
+    data['PROTISDON'][7] = False
+    data['ACCEPTOR_IDX'][7] = 0
+    data['LIG_IDX_LIST'][7] = 0
+    data['LIG_GROUP'][7] = 0
+    data['RESTYPE_LIG'][7] = 'TYR'
+    data['TARGET_IDX'][7] = 0
+    data['RESNR_LIG'][7] = '467'
+
+    data['FRAME'][8] = 8
+    data['Prot_partner'][8] = 'PHE344'
+    data['INTERACTION'][8] = 'pistacking'
+    data['LIG_IDX_LIST'][8] = [7, 8]
+    data['LIG_GROUP'][8] = 0
+    data['ACCEPTOR_IDX'][8] = 0
+    data['DON_IDX'][8] = 0
+    data['DONOR_IDX'][8] = 0
+    data['PROTISDON'][8] = False
+    data['DONORTYPE'][8] = 0
+    data['RESTYPE_LIG'][8] = 'PHE'
+    data['TARGET_IDX'][8] = 0
+    data['RESNR_LIG'][8] = '398'
+ 
+    data['FRAME'][9] = 9
+    data['Prot_partner'][9] = 'PHE754'
+    data['INTERACTION'][9] = 'pication'
+    data['LIG_IDX_LIST'][9] = [9, 10]
+    data['LIG_GROUP'][9] = 'B'
+    data['ACCEPTOR_IDX'][9] = 0
+    data['DON_IDX'][9] = 0
+    data['PROTISDON'][9] = False
+    data['DONOR_IDX'][9] = 0
+    data['DONORTYPE'][9] = 0
+    data['RESTYPE_LIG'][9] = 'ARG'
+    data['TARGET_IDX'][9] = 0
+    data['RESNR_LIG'][9] = '245'
+     
+    data['FRAME'][10] = 10
+    data['Prot_partner'][10] = 'LYS567'
+    data['INTERACTION'][10] = 'pication'
+    data['LIG_IDX_LIST'][10] = [9, 10]
+    data['LIG_GROUP'][10] = 'B'
+    data['RESTYPE_LIG'][10] = 'PHE'
+    data['TARGET_IDX'][10] = 501
+    data['RESNR_LIG'][10] = '228'
+ 
+    data['FRAME'][11] = 11
+    data['Prot_partner'][11] = 'LYS567'
+    data['INTERACTION'][11] = 'saltbridge'
+    data['LIG_IDX_LIST'][11] = [7, 8]
+    data['LIG_GROUP'][11] = 'Group4'
+    data['PROTISPOS'][11] = False
+    data['RESTYPE_LIG'][11] = 'GLU'
+    data['TARGET_IDX'][11] = 0
+    data['RESNR_LIG'][11] = '423'
+ 
+    data['FRAME'][12] = 12
+    data['Prot_partner'][12] = 'HEM144'
+    data['INTERACTION'][12] = 'metal'
+    data['METAL_IDX'][12] = 401  # METAL_IDX for 'metal'
+    data['METAL_TYPE'][12] = 'Fe'  # Metal type
+    data['LOCATION'][12] = 'site1'  # Location
+    data['ACCEPTOR_IDX'][12] = 0
+    data['DON_IDX'][12] = 0
+    data['RESTYPE_LIG'][12] = 'HIS'  # Assuming 'A' as the RESTYPE_LIG for the metal interaction
+    data['TARGET_IDX'][12] = 401
+    data['COORDINATION'][12] = "site1"
+    data['RESNR_LIG'][12] = '256'
+ 
+    return pd.DataFrame(data)
+
+
 def test_gather_interactions(sample_dataframe_bindingmode_processing):
     df = sample_dataframe_bindingmode_processing
     ligand_rings = [[101], [102], [103]]  # Define sample ligand rings for testing
@@ -177,6 +325,36 @@ def test_gather_interactions(sample_dataframe_bindingmode_processing):
 }
     # Check if the actual result matches the expected result
     assert result == expected_result
+
+def test_gather_interactions_with_peptides(sample_dataframe_bindingmode_processing_with_peptides):
+    df = sample_dataframe_bindingmode_processing_with_peptides
+    ligand_rings = [[101], [102], [103]]  # Define sample ligand rings for testing
+
+    result = gather_interactions(df, ligand_rings, peptide=True)
+ 
+    # Assert that the result is a dictionary
+    assert isinstance(result, dict)
+ 
+    # Check specific values in the generated dictionary for known interactions based on the updated fixture
+    expected_result = {
+        1: {0: '62VAL_101ILE_hydrophobic'},
+        2: {1: 'SER144_202TYR_Donor_hbond', 3: 'ILE432_102VAL_hydrophobic'},
+        3: {2: 'GLU321_155ARG_ARG_NI_saltbridge'},
+        4: {4: 'LEU248_501ILE_F_halogen'},
+        5: {5: 'SER300_301HIS_Acceptor_hbond'},
+        6: {6: 'TYR343_455SER_Acceptor_waterbridge'},
+        7: {7: 'ILE178_467TYR_Donor_waterbridge'},
+        8: {8: 'PHE344_398PHE_pistacking'},
+        9: {9: 'PHE754_245ARG_ARG_pication'},
+        10: {10: 'LYS567_228PHE_PHE_pication'},
+        11: {11: 'LYS567_423GLU_GLU_PI_saltbridge'},
+        12: {12: 'HIS_256HIS_Fe_site1_metal'},
+    }
+ 
+    # Check if the actual result matches the expected result
+    assert result == expected_result
+
+
 
 @pytest.fixture
 def test_remove_duplicates_data():
@@ -417,6 +595,101 @@ def test_df_iteration_numbering():
     expected_100ASPA_4005_Donor_waterbridge_values = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
     assert (df['100ASPA_4005_Donor_waterbridge'] == expected_100ASPA_4005_Donor_waterbridge_values).all()
 
+
+@pytest.fixture
+def sample_dataframe_it_peptides():
+    # Create a sample DataFrame for testing
+    data = {
+        'Unnamed: 0': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        'Prot_partner': ['62VAL', 'SER144', 'GLU321', 'ILE432', 'LEU248', 'SER300', 'TYR343', 'ILE178', 'PHE344', 'PHE754', 'LYS567', 'LYS567', 'HIS'],
+        'LIGCARBONIDX': [101, 202, 155, 102, 501, 301, 467, 467, 398, 245, 228, 423, 256],
+        'INTERACTION': ['hydrophobic', 'hbond', 'saltbridge', 'hydrophobic', 'halogen', 'hbond', 'waterbridge', 'waterbridge', 'pistacking', 'pication', 'pication', 'saltbridge', 'metal'],
+        'PROTISDON': [None, True, None, None, None, True, True, False, None, None, None, False, None],
+        'ACCEPTORIDX': [None, 202, None, None, None, 301, None, None, None, None, None, None, None],
+        'RESNR_LIG': [101, 202, 155, 102, 501, 301, 455, 467, 398, 245, 228, 423, 256],
+        'DONORIDX': [None, None, None, None, None, None, None, None, None, None, None, None, None],
+        'DONORTYPE': [None, None, None, None, 'F', None, None, None, None, None, None, None, None],
+        'LIG_IDX_LIST': [None, None, None, None, None, None, None, None, None, None, None, None, None],
+        'RESTYPE_LIG': ['VAL', 'TYR', 'ARG', 'VAL', 'ILE', 'HIS', 'SER', 'TYR', 'PHE', 'ARG', 'PHE', 'GLU', 'HIS'],
+        'TARGET_IDX': [None, None, None, None, None, None, None, None, None, None, None, None, None],
+        'METAL_TYPE': [None, None, None, None, None, None, None, None, None, None, None, None, 'Fe'],
+        '62VAL_101ILE_hydrophobic': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'SER144_202TYR_Donor_hbond': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'GLU321_155ARG_ARG_NI_saltbridge': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'ILE432_102VAL_hydrophobic': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'LEU248_501ILE_F_halogen': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'SER300_301HIS_Acceptor_hbond': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'TYR343_455SER_Acceptor_waterbridge': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'ILE178_467TYR_Donor_waterbridge': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'PHE344_398PHE_pistacking': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'PHE754_245ARG_ARG_pication': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'LYS567_228PHE_PHE_pication': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'LYS567_423GLU_GLU_PI_saltbridge': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        'HIS_256HIS_Fe_site1_metal': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+    
+    df = pd.DataFrame(data)
+    return df
+
+def test_df_iteration_numbering_with_peptide(sample_dataframe_it_peptides):
+    unique_data = {
+        0: '62VAL_101ILE_hydrophobic',
+        1: 'SER144_202TYR_Donor_hbond',
+        2: 'GLU321_155ARG_ARG_NI_saltbridge',
+        3: 'ILE432_102VAL_hydrophobic',
+        4: 'LEU248_501ILE_F_halogen',
+        5: 'SER300_301HIS_Acceptor_hbond',
+        6: 'TYR343_455SER_Acceptor_waterbridge',
+        7: 'ILE178_467TYR_Donor_waterbridge',
+        8: 'PHE344_398PHE_pistacking',
+        9: 'PHE754_245ARG_ARG_pication',
+        10: 'LYS567_228PHE_PHE_pication',
+        11: 'LYS567_423GLU_GLU_PI_saltbridge',
+        12: 'HIS_256HIS_Fe_site1_metal',
+    }
+
+    df_iteration_numbering(sample_dataframe_it_peptides, unique_data, peptide=True)
+
+    # Assertions similar to the provided ones
+    expected_101ILE_hydrophobic_values = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    assert (sample_dataframe_it_peptides['62VAL_101ILE_hydrophobic'] == expected_101ILE_hydrophobic_values).all()
+
+    expected_202TYR_Donor_hbond_values = [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    assert (sample_dataframe_it_peptides['SER144_202TYR_Donor_hbond'] == expected_202TYR_Donor_hbond_values).all()
+
+    expected_155ARG_ARG_NI_saltbridge_values = [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    assert (sample_dataframe_it_peptides['GLU321_155ARG_ARG_NI_saltbridge'] == expected_155ARG_ARG_NI_saltbridge_values).all()
+
+    expected_102VAL_hydrophobic_values = [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    assert (sample_dataframe_it_peptides['ILE432_102VAL_hydrophobic'] == expected_102VAL_hydrophobic_values).all()
+
+    expected_501ILE_halogen_values = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+    assert (sample_dataframe_it_peptides['LEU248_501ILE_F_halogen'] == expected_501ILE_halogen_values).all()
+
+    expected_301HIS_Acceptor_hbond_values = [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]
+    assert (sample_dataframe_it_peptides['SER300_301HIS_Acceptor_hbond'] == expected_301HIS_Acceptor_hbond_values).all()
+
+    expected_455SER_Acceptor_waterbridge_values = [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+    assert (sample_dataframe_it_peptides['TYR343_455SER_Acceptor_waterbridge'] == expected_455SER_Acceptor_waterbridge_values).all()
+
+    expected_467TYR_Donor_waterbridge_values = [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
+    assert (sample_dataframe_it_peptides['ILE178_467TYR_Donor_waterbridge'] == expected_467TYR_Donor_waterbridge_values).all()
+
+    expected_398PHE_pistacking_values = [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
+    assert (sample_dataframe_it_peptides['PHE344_398PHE_pistacking'] == expected_398PHE_pistacking_values).all()
+
+    expected_245ARG_ARG_pication_values = [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
+    assert (sample_dataframe_it_peptides['PHE754_245ARG_ARG_pication'] == expected_245ARG_ARG_pication_values).all()
+
+    expected_228PHE_PHE_pication_values = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
+    assert (sample_dataframe_it_peptides['LYS567_228PHE_PHE_pication'] == expected_228PHE_PHE_pication_values).all()
+
+    expected_423GLU_GLU_PI_saltbridge_values = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
+    assert (sample_dataframe_it_peptides['LYS567_423GLU_GLU_PI_saltbridge'] == expected_423GLU_GLU_PI_saltbridge_values).all()
+
+    expected_256HIS_Fe_site1_metal_values = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+    assert (sample_dataframe_it_peptides['HIS_256HIS_Fe_site1_metal'] == expected_256HIS_Fe_site1_metal_values).all()
+
 @pytest.fixture
 def sample_data():
     # Create sample data for testing
@@ -452,6 +725,9 @@ def test_update_values(sample_data):
         'Column1': [100, 200, 300],
         'Column2': [400, 500, 600]
     })
+
+    # Check if the specific values are updated
+    assert df[['Column1', 'Column2']].equals(expected_df[['Column1', 'Column2']])
 
     # Check if the specific values are updated
     assert df[['Column1', 'Column2']].equals(expected_df[['Column1', 'Column2']])
