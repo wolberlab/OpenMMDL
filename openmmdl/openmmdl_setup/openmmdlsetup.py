@@ -887,7 +887,7 @@ os.chdir(outputDir)""")
     script.append('from openmmdl.openmmdl_simulation.scripts.cleaning_procedures import cleanup, create_directory_if_not_exists, copy_file, organize_files, post_md_file_movement \n')
     
     script.append('import simtk.openmm.app as app')
-    script.append('from simtk.openmm.app import PDBFile, Modeller, PDBReporter, StateDataReporter, DCDReporter, CheckpointReporter')
+    script.append('from simtk.openmm.app import PDBFile, Modeller, PDBReporter, StateDataReporter, DCDReporter, CheckpointReporter, AmberPrmtopFile, AmberInpcrdFile')
     script.append('from simtk.openmm import unit, Platform, MonteCarloBarostat, LangevinMiddleIntegrator')
     script.append('from simtk.openmm import Vec3')
     script.append('import simtk.openmm as mm')
