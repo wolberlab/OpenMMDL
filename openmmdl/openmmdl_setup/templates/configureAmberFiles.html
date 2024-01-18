@@ -9,6 +9,12 @@
 </div>
 {% endmacro %}
 
+{% macro textfield(id, title, attr) %}
+<input type="text" name="{{ id }}" id="{{ id }}" value="{{ session[id] }}" class="form-control"
+    oninput="optionChanged()" title="{{ title }}" {{ 'disabled' if disabled else '' }}/>
+{% endmacro %}
+
+
 {% block title %}Select Input Files{% endblock %}
 {% block body %}
 <p>Do you have available Amber files? </p>
@@ -33,7 +39,7 @@
 
     <!---For Ligands-->
     <div class="form-group" style="margin-left:100px">
-        <p>Optional: If the above system contains ligands and you want to conduct MD post-analysis using OpenMMDL, please add the ligand file below.</p>
+        <p>Optional: If the above system contains ligands and you want to conduct MD post-analysis using OpenMMDL, please fill in the name of the ligand in the `prmtop` file below.</p>
     </div>
 
     <!--normal ligand-->
@@ -46,8 +52,8 @@
     <div id="nmLigOptions" hidden>
         <div class="col-lg-12">
             <div class="form-group">
-                <label for="nmLigFile" class="control-label col-md-2">SDF File</label>
-                <div class="col-md-10">{{ fileinput('nmLigFile') }}</div>
+                <label for="nmLigFile" class="control-label col-md-2">Ligand Resname</label>
+                <div class="col-md-10">{{ textfield('nmLigFile', 'The way to find the resname of the ligand is to open the prmtop file in a text editor and search for `%FLAG RESIDUE_LABEL`. The resname of the ligand should be the last one after the common amimo acids and before the lipids and water.')}}</div>
             </div>
         </div>
     </div>
@@ -62,8 +68,8 @@
     <div id="spLigOptions" hidden>
         <div class="col-lg-12">
             <div class="form-group">
-                <label for="spLigFile" class=" control-label col-md-2">SDF File</label>
-                <div class="col-md-10">{{ fileinput('spLigFile') }}</div>
+                <label for="spLigFile" class=" control-label col-md-2">Ligand Resname</label>
+                <div class="col-md-10">{{ textfield('spLigFile', 'The way to find the resname of the ligand is to open the prmtop file in a text editor and search for `%FLAG RESIDUE_LABEL`. The resname of the ligand should be the last one after the common amimo acids and before the lipids and water.')}}</div>
             </div>
         </div>
     </div>
@@ -81,30 +87,51 @@
 <script>
 function optionChanged() {
     var hasFiles = document.querySelector('input[name="has_files"]:checked').value;
+
+    var prmtopFile = document.getElementById("prmtopFile");
+    var inpcrdFile = document.getElementById("inpcrdFile");
+    var prmtopFile_label = document.getElementById("prmtopFile_label");
+    var inpcrdFile_label = document.getElementById("inpcrdFile_label");
+    var prmtopFileValue = document.getElementById("prmtopFile").value;
+    var inpcrdFileValue = document.getElementById("inpcrdFile").value;
+
+
+    var nmLig = document.getElementById("nmLig").checked;
+    var spLig = document.getElementById("spLig").checked;
+    var nmLigFile = document.getElementById("nmLigFile");
+    var spLigFile = document.getElementById("spLigFile");
+    var nmLigFileValue = document.getElementById("nmLigFile").value;
+    var spLigFileValue = document.getElementById("spLigFile").value;
+    
+    var continueButton = document.getElementById('continue');
+
     if (hasFiles === "no") {
-            // when the selction is 'no'
-            document.getElementById("continue").disabled = false; // enable the continue button
+            // when the selection is 'no'
+            continueButton.disabled = false; // enable the continue button
             
             // disable to submit the prmtop and inpcrd files; 
-            document.getElementById("prmtopFile").disabled = true; // disable the submit button
-            document.getElementById("inpcrdFile").disabled = true; // disable the submit button
+            prmtopFile.disabled = true; // disable the submit button
+            inpcrdFile.disabled = true; // disable the submit button
             // if the users submitted previously, erase the files.
-            document.getElementById("prmtopFile").value = null; // erase the files
-            document.getElementById("inpcrdFile").value = null; // erase the files
-            document.getElementById("prmtopFile_label").textContent = ""; // erase the files
-            document.getElementById("inpcrdFile_label").textContent = ""; // erase the files
+            prmtopFile.value = null; // erase the files
+            inpcrdFile.value = null; // erase the files
+            prmtopFile_label.textContent = ""; // erase the files
+            inpcrdFile_label.textContent = ""; // erase the files
 
             // disable to check the checkbox of nmLig and spLig;
-            document.getElementById("nmLig").checked = false; 
-            document.getElementById("spLig").checked = false; 
-            // disable to submit the files.
-            document.getElementById("nmLigFile").disabled = true;
-            document.getElementById("spLigFile").disabled = true;
+            document.getElementById('nmLig').disabled = true;
+            document.getElementById('spLig').disabled = true;
+            // if the users checked previously, uncheck the checkbox.
+            document.getElementById("nmLig").checked = false;
+            document.getElementById("spLig").checked = false;
+            //nmLig = false; 
+            //spLig = false; 
+            // disable to type the ligand resname;
+            nmLigFile.disabled = true;
+            spLigFile.disabled = true;
             // if the user submitted previously, firstly, erase the files;
-            document.getElementById("nmLigFile").value = null;
-            document.getElementById("spLigFile").value = null;
-            document.getElementById("nmLigFile_label").textContent = "";
-            document.getElementById("spLigFile_label").textContent = "";
+            nmLigFile.value = null;
+            spLigFile.value = null;
             // secondly, hide the options;
             document.getElementById('nmLigOptions').hidden = true;
             document.getElementById('spLigOptions').hidden = true;
@@ -114,65 +141,53 @@ function optionChanged() {
             // when the selection is 'yes'
 
             // enable to submit the prmtop and inpcrd files;
-            document.getElementById("prmtopFile").disabled = false;
-            document.getElementById("inpcrdFile").disabled = false;
+            prmtopFile.disabled = false;
+            inpcrdFile.disabled = false;
             // get the prmtop and inpcrd files, 
             prmtopFiles = document.getElementById("prmtopFile").files; // get the prmtop files
             inpcrdFiles = document.getElementById("inpcrdFile").files; // get the inpcrd files
             // and show the file names.
-            document.getElementById("prmtopFile_label").textContent = (prmtopFiles.length == 0 ? "" : prmtopFiles[0].name); // show the prmtop file name
-            document.getElementById("inpcrdFile_label").textContent = (inpcrdFiles.length == 0 ? "" : inpcrdFiles[0].name); // show the inpcrd file name
+            prmtopFile_label.textContent = (prmtopFiles.length == 0 ? "" : prmtopFiles[0].name); // show the prmtop file name
+            inpcrdFile_label.textContent = (inpcrdFiles.length == 0 ? "" : inpcrdFiles[0].name); // show the inpcrd file name
             
 
             // if ligands are contained in the modelling system.
             // enable to check the checkbox of nmLig and spLig;
+            document.getElementById('nmLig').disabled = false;
+            document.getElementById('spLig').disabled = false;
 
             // if the nmLig or spLig is checked, firstly enable to submit the files.
-            var nmLig = document.getElementById("nmLig").checked;
+            
             if (nmLig) {
-                document.getElementById("nmLigFile").disabled = false;
+                nmLigFile.disabled = false;
                 // secondly, show the options.
                 document.getElementById('nmLigOptions').hidden = false;
-                // thirdly, get the files,
-                nmLigFile = document.getElementById("nmLigFile").files;
-                // and show the file names.
-                document.getElementById("nmLigFile_label").textContent = (nmLigFile.length == 0 ? "" : nmLigFile[0].name);
             } else {
                 // if the nmLig is not checked, firstly, disable to submit the files.
-                document.getElementById("nmLigFile").disabled = true;
+                nmLigFile.disabled = true;
                 // secondly, hide the options.
                 document.getElementById('nmLigOptions').hidden = true;
                 // thirdly, erase the files.
-                document.getElementById("nmLigFile").value = null;
-                document.getElementById("nmLigFile_label").textContent = "";
+                nmLigFileValue = null;
             };
 
-            var spLig = document.getElementById("spLig").checked;
+            
             if (spLig) {
-                document.getElementById("spLigFile").disabled = false;
+                spLigFile.disabled = false;
                 // secondly, show the options.
                 document.getElementById('spLigOptions').hidden = false;
-                // thirdly, get the files,
-                spLigFile = document.getElementById("spLigFile").files;
-                // and show the file names.
-                document.getElementById("spLigFile_label").textContent = (spLigFile.length == 0 ? "" : spLigFile[0].name);
             } else {
                 // if the spLig is not checked, firstly, disable to submit the files.
-                document.getElementById("spLigFile").disabled = true;
+                spLigFile.disabled = true;
                 // secondly, hide the options.
                 document.getElementById('spLigOptions').hidden = true;
                 // thirdly, erase the files.
-                document.getElementById("spLigFile").value = null;
-                document.getElementById("spLigFile_label").textContent = "";
+                spLigFileValue = null;
             };
              
             // For the continue button,
             // if the prmtop and inpcrd files are submitted, the continue button will be enabled.
-            var nmLigFileValue = document.getElementById("nmLigFile").value;
-            var spLigFileValue = document.getElementById("spLigFile").value;
-            var prmtopFileValue = document.getElementById("prmtopFile").value;
-            var inpcrdFileValue = document.getElementById("inpcrdFile").value;
-            var continueButton = document.getElementById('continue');
+            
 
             // Check if prmtopFile and inpcrdFile are uploaded
             if (prmtopFileValue && inpcrdFileValue) {
@@ -190,9 +205,8 @@ function optionChanged() {
                 continueButton.disabled = true;
             }
     }
-    optionChanged();
 }
-    
+optionChanged();
 
 </script>
 {% endblock %}
