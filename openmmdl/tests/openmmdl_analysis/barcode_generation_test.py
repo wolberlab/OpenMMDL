@@ -68,26 +68,26 @@ def test_plot_barcodes():
     assert save_path is not None
 
 
-    def test_plot_waterbridge_piechart(tmp_path):
-        # Prepare inputs
-        df_all = pd.DataFrame({
-            'interaction1': [1, 0, 1, 0],
-            'interaction2': [0, 1, 0, 1],
-            'waterid': [1, 2, 1, 2]
-        })
-        waterbridge_barcodes = [np.array([1, 0, 1, 0]), np.array([0, 1, 0, 1])]
-        waterbridge_interactions = ['interaction1', 'interaction2']
+def test_plot_waterbridge_piechart(tmp_path):
+    # Prepare inputs
+    df_all = pd.DataFrame({
+        'interaction1': [1, 0, 1, 0],
+        'interaction2': [0, 1, 0, 1],
+        'WATER_IDX': [1, 2, 1, 2],  # changed 'waterid' to 'WATER_IDX'
+        'FRAME': [0, 1, 2, 3]  # added 'FRAME' column
+    })
+    waterbridge_barcodes = [np.array([1, 0, 1, 0]), np.array([0, 1, 0, 1])]
+    waterbridge_interactions = ['interaction1', 'interaction2']
 
-        # Change the current working directory to tmp_path
+    # Change the current working directory to tmp_path
 
+    # Use os.makedirs 
+    os.makedirs(f"{tmp_path}/Barcodes/Waterbridge_Piecharts/", exist_ok=True)
 
-        # Use os.makedirs 
-        os.makedirs(f"{tmp_path}/Barcodes/Waterbridge_Piecharts/", exist_ok=True)
+    # Call the function
+    plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions)
 
-        # Call the function
-        plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions)
-
-        # Check if the output files are created
-        for interaction in waterbridge_interactions:
-            outname_png = f"./Barcodes/Waterbridge_Piecharts/{interaction}.png"
-            assert os.path.isfile(outname_png), f"File {outname_png} not found."
+    # Check if the output files are created
+    for interaction in waterbridge_interactions:
+        outname_png = f"./Barcodes/Waterbridge_Piecharts/{interaction}.png"
+        assert os.path.isfile(outname_png), f"File {outname_png} not found."
