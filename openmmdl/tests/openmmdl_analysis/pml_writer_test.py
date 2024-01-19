@@ -177,18 +177,21 @@ def test_generate_bindingmode_pharmacophore(tmp_path):
     }
     core_compound = "ligand"
     sysname = "system"
-    outname = "test_output"
     id_num = 0
 
-    # Change the current working directory to tmp_path
-    os.chdir(tmp_path)
-    os.mkdir("Binding_Modes_Markov_States")
+    # Create a symbolic link in the temporary directory
+    os.symlink(os.path.abspath("./Binding_Modes_Markov_States"), f"{tmp_path}/Binding_Modes_Markov_States")
+
+    # Prepare the output filename
+    outname = "test_output"
 
     # Call the function
     generate_bindingmode_pharmacophore(dict_bindingmode, core_compound, sysname, outname, id_num)
 
+    # Prepare the full output path
+    outname_pml = f"{tmp_path}/Binding_Modes_Markov_States/{outname}.pml"
+
     # Check if the output file is created
-    outname_pml = f"./Binding_Modes_Markov_States/{outname}.pml"
     assert os.path.isfile(outname_pml), f"File {outname_pml} not found."
 
     # Check if the generated XML is valid

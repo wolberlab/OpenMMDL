@@ -79,10 +79,10 @@ def test_plot_barcodes():
         waterbridge_interactions = ['interaction1', 'interaction2']
 
         # Change the current working directory to tmp_path
-        os.chdir(tmp_path)
 
-        # Use os.makedirs instead of os.mkdir
-        os.makedirs("./Barcodes/Waterbridge_Piecharts/", exist_ok=True)
+
+        # Use os.makedirs 
+        os.makedirs(f"{tmp_path}/Barcodes/Waterbridge_Piecharts/", exist_ok=True)
 
         # Call the function
         plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions)
