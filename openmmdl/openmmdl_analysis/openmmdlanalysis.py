@@ -410,24 +410,17 @@ def main():
     top_10_binding_modes_df = pd.DataFrame(result_dict)
     top_10_binding_modes_df.to_csv('top_10_binding_modes.csv')
     print("\033[1mFound representative frame for each binding mode\033[0m")
-    # save bindingmode pdb
+    # save bindingmode pdb and .pml
+    id_num = 0
     for index, row in top_10_binding_modes_df.iterrows():
         b_mode = row['Binding Mode']
         rep_frame = int(row['Representative Frame'])
         pdb_md.trajectory[rep_frame]
         frame_atomgroup = pdb_md.atoms
         frame_atomgroup.write(f"./Binding_Modes_Markov_States/{b_mode}.pdb")
-    
-    print("\033[1mBinding mode pdb files saved\033[0m")
-        
-    
-    id_num = 0
-    if generate_pml:
-        for index, row in top_10_binding_modes_df.iterrows():
-            b_mode = row['Binding Mode']
-            first_occurance = row['First Frame']
-            filtered_df_all = df_all[df_all['FRAME'] == first_occurance]
-            filtered_df_bindingmodes = grouped_frames_treshold[grouped_frames_treshold['FRAME'] == first_occurance]
+        if generate_pml:
+            filtered_df_all = df_all[df_all['FRAME'] == rep_frame]
+            filtered_df_bindingmodes = grouped_frames_treshold[grouped_frames_treshold['FRAME'] == rep_frame]
             bindingmode_dict = {}
             for index, row in filtered_df_bindingmodes.iterrows():
                 for column in filtered_df_bindingmodes.columns:
@@ -454,6 +447,8 @@ def main():
                                     bindingmode_dict[column]["LIGCOO"].append(ligcoo_values)
                                     bindingmode_dict[column]["PROTCOO"].append(protcoo_values)
             generate_bindingmode_pharmacophore(bindingmode_dict, ligand, f"{ligand}_complex", b_mode, id_num)
+    
+    print("\033[1mBinding mode pdb files saved\033[0m")
         
     
     hydrophobic_interactions = df_all.filter(regex='hydrophobic').columns
