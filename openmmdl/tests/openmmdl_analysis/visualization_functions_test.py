@@ -6,10 +6,15 @@ import subprocess
 import os
 from pathlib import Path
 import matplotlib.pyplot as plt
+from unittest.mock import patch, Mock
 import pytest
 from openmmdl.openmmdl_analysis.visualization_functions import *
 
-package_path = Path("openmmdl/openmmdl_analysis")
+test_data_directory_files = Path("openmmdl/tests/data/in")
+clouds = test_data_directory_files / 'clouds.json'
+waters_pdb = test_data_directory_files / 'interacting_waters.pdb'
+waters_dcd = test_data_directory_files / 'interacting_waters.dcd'
+waters_pkl = test_data_directory_files / 'interacting_waters.pkl'
 
 # visualization_functions tests
 @pytest.fixture
@@ -98,6 +103,8 @@ def sample_dataframe():
         ('(49.0, 50.0, 51.0)', 'halogen', 'False', 'False', '(52.0, 53.0, 54.0)'),
         ('(55.0, 56.0, 57.0)', 'metal', 'False', 'False', '(58.0, 59.0, 60.0)'),
         ('(61.0, 62.0, 63.0)', 'hydrophobic', 'False', 'False', '(64.0, 65.0, 66.0)'),
+        ('(61.0, 62.0, 63.0)', 'saltbridge', 'False', 'True', '(64.0, 65.0, 66.0)'),
+        ('(61.0, 62.0, 63.0)', 'saltbridge', 'False', 'False', '(64.0, 65.0, 66.0)'),
         ('(67.0, 68.0, 69.0)', 'donor', 'True', 'False', '(70.0, 71.0, 72.0)'),
         ('(73.0, 74.0, 75.0)', 'acceptor', 'False', 'False', '(76.0, 77.0, 78.0)'),
         ('(79.0, 80.0, 81.0)', 'negative_ionizable', 'False', 'True', '(82.0, 83.0, 84.0)'),
@@ -166,3 +173,21 @@ def test_save_interacting_waters_trajectory(input_paths):
     # Cleanup: Remove the created files after the test
     os.remove(f"{outputpath}interacting_waters.pdb")
     os.remove(f"{outputpath}interacting_waters.dcd")
+
+
+def test_visualization():
+    shutil.copy(str(clouds), '.')
+    shutil.copy(str(waters_pdb), '.')
+    shutil.copy(str(waters_dcd), '.')
+    shutil.copy(str(waters_pkl), '.')
+    ligand_name = "LET"
+    receptor_type = "protein"
+    height = "1000px"
+    width = "1000px"
+
+    # Call the function with sample data
+    result = visualization(ligand_name, receptor_type, height, width)
+
+    # Perform assertions based on the expected outcome
+    assert result is not None
+    # Add more assertions based on your specific requirements
