@@ -40,7 +40,7 @@ def test_highlight_numbers():
         "155PHEA 4205 4206 4207 4216 4217 4218 pistacking",
         "59ARGA 4194 F halogen",
         "166ARGA 4202,4203 Carboxylate NI saltbridge",
-        "165ASPA 4202 Amine PI saltbridge"
+        "165ASPA 4202 Amine PI saltbridge",
         "HEM 4202 FE 4 metal"
     ]
 
@@ -59,6 +59,7 @@ def test_highlight_numbers():
     assert highlighted_waterbridge is not None
     assert highlighted_halogen is not None
     assert highlighted_ni is not None
+    assert highlighted_pi is not None and len(highlighted_pi) > 0  
     assert highlighted_pication is not None
     assert highlighted_metal is not None
     
