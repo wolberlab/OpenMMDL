@@ -91,3 +91,19 @@ def test_plot_waterbridge_piechart(tmp_path):
     for interaction in waterbridge_interactions:
         outname_png = f"./Barcodes/Waterbridge_Piecharts/{interaction}.png"
         assert os.path.isfile(outname_png), f"File {outname_png} not found."
+
+        # Additional assertions for content or specific properties of the generated files
+        img = plt.imread(outname_png)
+        assert img is not None, f"Unable to read image file {outname_png}."
+
+        # Retrieve the percentage directly from the Axes object
+        percentage_text = plt.gca().texts[0].get_text()
+        assert percentage_text is not None, "Percentage text is None."
+
+        # Retrieve the title directly from the Axes object
+        title_text = plt.gca().get_title()
+        assert title_text is not None, "Title text is None."
+
+        # You can add more assertions based on your specific requirements
+        # For example, check if the file size is greater than zero, etc.
+        assert os.path.getsize(outname_png) > 0, f"File {outname_png} is empty."
