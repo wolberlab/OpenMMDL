@@ -9,7 +9,22 @@ import os
 import MDAnalysis as mda
 
 
-def generate_ligand_image(ligand_name, complex_pdb_file, ligand_no_h_pdb_file, smiles_file, output_png_filename):
+def generate_ligand_image(
+    ligand_name,
+    complex_pdb_file,
+    ligand_no_h_pdb_file,
+    smiles_file,
+    output_png_filename,
+):
+    """Generates a PNG image of the ligand.
+
+    Args:
+        ligand_name (str): Name of the ligand in the protein-ligand complex topology.
+        complex_pdb_file (str): Path to the protein-ligand complex PDB file.
+        ligand_no_h_pdb_file (str): Path to the ligand PDB file without hydrogens.
+        smiles_file (str): Path to the SMILES file with the reference ligand.
+        output_png_filename (str): Name of the output PNG file.
+    """
     # Load complex and ligand structures
     complex = mda.Universe(complex_pdb_file)
     ligand_no_h = mda.Universe(ligand_no_h_pdb_file)
@@ -49,25 +64,18 @@ def generate_ligand_image(ligand_name, complex_pdb_file, ligand_no_h_pdb_file, s
     img.save(output_png_filename)
 
 
-
-
 def split_interaction_data(data):
-    """
-    Splits the Input which consists of the ResNr and ResType, Atom indices, interaction type in multiple parts.
+    """Splits the Input which consists of the ResNr and ResType, Atom indices, interaction type in multiple parts.
 
-    Parameters
-    ----------
-    data : list of str
-        A list of ResNr and ResType, Atom indices, interaction type that needs to be split.
+    Args:
+        data (list): A list of ResNr and ResType, Atom indices, interaction type that needs to be split.
 
-    Returns
-    -------
-    list of str :
-        A new list of the interaction data that consists of three parts, being the protein_partner_name that represents the interacting protein residue, numeric codes, that represent the atom indices of the interacting atoms of the ligand and the interaction type.
+    Returns:
+        list: A new list of the interaction data that consists of three parts, being the protein_partner_name that represents the interacting protein residue, numeric codes, that represent the atom indices of the interacting atoms of the ligand and the interaction type.
     """
     split_data = []
     for item in data:
-        parts = item.split('_')
+        parts = item.split("_")
         protein_partner_name = parts[0]
         numeric_codes = " ".join(parts[1:-1])  # Join numeric codes with spaces
         interaction_type = parts[-1]
@@ -78,19 +86,14 @@ def split_interaction_data(data):
 
 
 def highlight_numbers(split_data, starting_idx):
-    """
-    Extracts the data from the split_data output of the interactions and categorizes it to its respective list.
+    """Extracts the data from the split_data output of the interactions and categorizes it to its respective list.
 
-    Parameters
-    ----------
-    split_data : list of str
-        A list of interaction data items, where each item contains information about protein partner name, numeric codes and interaction type.
-    starting_idx : list
-        Starting index of the ligand atom indices used for identifying the correct atom to highlight.
-        
-    Returns
-    -------
-    tuple : A tuple that contains list of all of the highlighted atoms of all of the interactions.
+    Args:
+        split_data (list): A list of interaction data items, where each item contains information about protein partner name, numeric codes and interaction type.
+        starting_idx (list): Starting index of the ligand atom indices used for identifying the correct atom to highlight.
+
+    Returns:
+        tuple: A tuple that contains list of all of the highlighted atoms of all of the interactions.
         - highlighted_hbond_donor (list of int): Atom indices for hydrogen bond donors.
         - highlighted_hbond_acceptor (list of int): Atom indices for hydrogen bond acceptors.
         - highlighted_hbond_both (list of int): Atom indices for interactions that are both donors and acceptors.
@@ -104,7 +107,7 @@ def highlight_numbers(split_data, starting_idx):
         - highlighted_metal (list of int): Atom indices for metal interactions.
     """
     highlighted_hbond_acceptor = []
-    highlighted_hbond_donor = []    
+    highlighted_hbond_donor = []
     highlighted_hydrophobic = []
     highlighted_hbond_both = []
     highlighted_waterbridge = []
@@ -117,22 +120,21 @@ def highlight_numbers(split_data, starting_idx):
     complex = mda.Universe("complex.pdb")
     ligand_no_h = mda.Universe("lig_no_h.pdb")
     lig_noh = ligand_no_h.select_atoms("all")
-    
-    
+
     for item in split_data:
         parts = item.split()
         protein_partner_name = parts[0]
         numeric_codes = parts[1:-1]
         interaction_type = parts[-1]
 
-        if interaction_type == 'hbond':
+        if interaction_type == "hbond":
             parts = item.split()
             protein_partner_name = parts[0]
             numeric_codes = parts[1:-2]
             type = parts[-2]
             interaction_type = parts[-1]
             for code in numeric_codes:
-                atom_index = int(code)  
+                atom_index = int(code)
                 complex_id = complex.select_atoms(f"id {atom_index}")
                 for atom in complex_id:
                     atom_name = atom.name
@@ -140,11 +142,11 @@ def highlight_numbers(split_data, starting_idx):
                     if lig_atom.name == atom_name:
                         lig_real_index = lig_atom.id
                 if type == "Donor":
-                    highlighted_hbond_donor.append(lig_real_index-1)
+                    highlighted_hbond_donor.append(lig_real_index - 1)
                 elif type == "Acceptor":
-                    highlighted_hbond_acceptor.append(lig_real_index-1)                 
+                    highlighted_hbond_acceptor.append(lig_real_index - 1)
 
-        elif interaction_type == 'hydrophobic':
+        elif interaction_type == "hydrophobic":
             parts = item.split()
             protein_partner_name = parts[0]
             numeric_codes = parts[1:-1]
@@ -157,9 +159,9 @@ def highlight_numbers(split_data, starting_idx):
                 for lig_atom in lig_noh:
                     if lig_atom.name == atom_name:
                         lig_real_index = lig_atom.id
-                highlighted_hydrophobic.append(lig_real_index-1)
+                highlighted_hydrophobic.append(lig_real_index - 1)
 
-        elif interaction_type == 'waterbridge':
+        elif interaction_type == "waterbridge":
             parts = item.split()
             protein_partner_name = parts[0]
             numeric_codes = parts[1:-2]
@@ -172,15 +174,15 @@ def highlight_numbers(split_data, starting_idx):
                 for lig_atom in lig_noh:
                     if lig_atom.name == atom_name:
                         lig_real_index = lig_atom.id
-                highlighted_waterbridge.append(lig_real_index-1)
+                highlighted_waterbridge.append(lig_real_index - 1)
 
-        elif interaction_type == 'pistacking':
+        elif interaction_type == "pistacking":
             parts = item.split()
             protein_partner_name = parts[0]
             numeric_codes = parts[1:-1]
             print(numeric_codes)
             interaction_type = parts[-1]
-            split_codes = numeric_codes[0].split(',')
+            split_codes = numeric_codes[0].split(",")
             print(split_codes)
             for code in split_codes:
                 atom_index = int(code)
@@ -190,9 +192,9 @@ def highlight_numbers(split_data, starting_idx):
                 for lig_atom in lig_noh:
                     if lig_atom.name == atom_name:
                         lig_real_index = lig_atom.id
-                highlighted_pistacking.append(lig_real_index-1)
+                highlighted_pistacking.append(lig_real_index - 1)
 
-        elif interaction_type == 'halogen':
+        elif interaction_type == "halogen":
             parts = item.split()
             protein_partner_name = parts[0]
             numeric_codes = parts[1:-2]
@@ -206,16 +208,16 @@ def highlight_numbers(split_data, starting_idx):
                 for lig_atom in lig_noh:
                     if lig_atom.name == atom_name:
                         lig_real_index = lig_atom.id
-                highlighted_halogen.append(lig_real_index-1)
+                highlighted_halogen.append(lig_real_index - 1)
 
-        elif interaction_type == 'saltbridge':
+        elif interaction_type == "saltbridge":
             parts = item.split()
             protein_partner_name = parts[0]
             numeric_codes = parts[1:-3]
             interaction_type = parts[-1]
             saltbridge_type = parts[-2]
             if saltbridge_type == "NI":
-                split_codes = numeric_codes[0].split(',')
+                split_codes = numeric_codes[0].split(",")
                 numeric_values = [int(code) for code in split_codes]
                 for code in numeric_values:
                     atom_index = int(code)
@@ -225,7 +227,7 @@ def highlight_numbers(split_data, starting_idx):
                     for lig_atom in lig_noh:
                         if lig_atom.name == atom_name:
                             lig_real_index = lig_atom.id
-                    highlighted_ni.append(lig_real_index-1)
+                    highlighted_ni.append(lig_real_index - 1)
             if saltbridge_type == "PI":
                 for code in numeric_codes:
                     atom_index = int(code)
@@ -235,9 +237,9 @@ def highlight_numbers(split_data, starting_idx):
                     for lig_atom in lig_noh:
                         if lig_atom.name == atom_name:
                             lig_real_index = lig_atom.id
-                    highlighted_pi.append(lig_real_index-1)
+                    highlighted_pi.append(lig_real_index - 1)
 
-        elif interaction_type == 'pication':
+        elif interaction_type == "pication":
             parts = item.split()
             protein_partner_name = parts[0]
             numeric_codes = parts[1:-2]
@@ -251,9 +253,9 @@ def highlight_numbers(split_data, starting_idx):
                 for lig_atom in lig_noh:
                     if lig_atom.name == atom_name:
                         lig_real_index = lig_atom.id
-                highlighted_pication.append(lig_real_index-1)
+                highlighted_pication.append(lig_real_index - 1)
 
-        elif interaction_type == 'metal':
+        elif interaction_type == "metal":
             parts = item.split()
             special_ligand = parts[0]
             ligidx = parts[1]
@@ -265,44 +267,53 @@ def highlight_numbers(split_data, starting_idx):
             for lig_atom in lig_noh:
                 if lig_atom.name == atom_name:
                     lig_real_index = lig_atom.id
-            highlighted_metal.append(lig_real_index-1)
-    
-    for value in highlighted_hbond_donor[:]:  # Using a copy of the list to avoid modifying while iterating
+            highlighted_metal.append(lig_real_index - 1)
+
+    for value in highlighted_hbond_donor[
+        :
+    ]:  # Using a copy of the list to avoid modifying while iterating
         if value in highlighted_hbond_acceptor:
             highlighted_hbond_donor.remove(value)
             highlighted_hbond_acceptor.remove(value)
             highlighted_hbond_both.append(value)
-    
-    return highlighted_hbond_donor, highlighted_hbond_acceptor, highlighted_hbond_both, highlighted_hydrophobic, highlighted_waterbridge, highlighted_pistacking, highlighted_halogen, highlighted_ni, highlighted_pi, highlighted_pication, highlighted_metal
+
+    return (
+        highlighted_hbond_donor,
+        highlighted_hbond_acceptor,
+        highlighted_hbond_both,
+        highlighted_hydrophobic,
+        highlighted_waterbridge,
+        highlighted_pistacking,
+        highlighted_halogen,
+        highlighted_ni,
+        highlighted_pi,
+        highlighted_pication,
+        highlighted_metal,
+    )
+
 
 def generate_interaction_dict(interaction_type, keys):
-    """
-    Generates a dictionary of interaction RGB color model based on the provided interaction type..
+    """Generates a dictionary of interaction RGB color model based on the provided interaction type.
 
-    Parameters
-    ----------
-    interaction_type : str
-        The type of the interaction, for example 'hydrophobic'.
-    highlighted_atoms : list
-        List of the highlighted atoms that display an interaction.
-        
-    Returns
-    -------
-    dict :
-        A dictionary with the interaction types are associated with their respective RGB color codes.
+    Args:
+        interaction_type (str): The type of the interaction, for example 'hydrophobic'.
+        keys (list): List of the highlighted atoms that display an interaction.
+
+    Returns:
+        dict: A dictionary with the interaction types are associated with their respective RGB color codes.
     """
     interaction_dict = {
-        'hbond_acceptor': (1.0, 0.6, 0.6),
-        'hbond_both': (0.6, 0.0, 0.5),
-        'hbond_donor': (0.3, 0.5, 1.0),
-        'hydrophobic': (1.0, 1.0, 0.0),
-        'waterbridge': (0.0, 1.0, 0.9),
-        'pistacking': (0.0, 0.0, 1.0),
-        'halogen': (1.0, 0.0, 0.9),
-        'ni': (0.0, 0.0, 1.0),
-        'pi': (1.0, 0.0, 0.0),
-        'pication': (0.0, 0.0, 1.0),
-        'metal': (1.0, 0.6, 0.0)
+        "hbond_acceptor": (1.0, 0.6, 0.6),
+        "hbond_both": (0.6, 0.0, 0.5),
+        "hbond_donor": (0.3, 0.5, 1.0),
+        "hydrophobic": (1.0, 1.0, 0.0),
+        "waterbridge": (0.0, 1.0, 0.9),
+        "pistacking": (0.0, 0.0, 1.0),
+        "halogen": (1.0, 0.0, 0.9),
+        "ni": (0.0, 0.0, 1.0),
+        "pi": (1.0, 0.0, 0.0),
+        "pication": (0.0, 0.0, 1.0),
+        "metal": (1.0, 0.6, 0.0),
     }
 
     interaction_dict = {int(key): interaction_dict[interaction_type] for key in keys}
@@ -311,19 +322,11 @@ def generate_interaction_dict(interaction_type, keys):
 
 
 def update_dict(target_dict, *source_dicts):
-    """
-    Updates the dictionary wth the keys and values from other dictionaries.
+    """Updates the dictionary wth the keys and values from other dictionaries.
 
-    Parameters
-    ----------
-    target_dict : dict
-        The dictionary that needs to be updated with new keys and values.
-    *source_dicts: dict
-        One or multiple dictionaries that are used to update the target dictionary with new keys and values.
-        
-    Returns
-    -------
-    None
+    Args:
+        target_dict (dict): The dictionary that needs to be updated with new keys and values.
+        source_dicts (dict): One or multiple dictionaries that are used to update the target dictionary with new keys and values.
     """
     for source_dict in source_dicts:
         for key, value in source_dict.items():
@@ -332,25 +335,19 @@ def update_dict(target_dict, *source_dicts):
                 target_dict[int_key] = value
 
 
-def create_and_merge_images(binding_mode, occurrence_percent, split_data, merged_image_paths):
-    """
-    Create and merge images to generate a legend for binding modes.
+def create_and_merge_images(
+    binding_mode, occurrence_percent, split_data, merged_image_paths
+):
+    """Create and merge images to generate a legend for binding modes.
 
-    Parameters
-    ----------
-    binding_mode : str
-        The name of the binding mode.
-    occurrence_percent: float
-        The percentage occurrence of the binding mode.
-    split_data: list of str
-        Data of the interaction used to generate the legend.
-    merged_image_paths: list
-        A list with the paths to the rdkit figures.
-        
-    Returns
-    -------
-    list :
-        A list containing the file paths of the merged images, which are the rdkit figure with the legend.
+    Args:
+        binding_mode (str): Name of the binding mode.
+        occurrence_percent (float): The percentage of the binding mode occurrence.
+        split_data (list): Data of the interactions used to generate the legend.
+        merged_image_paths (list): A list with the paths to the rdkit figures.
+
+    Returns:
+        _type_: _description_
     """
     # Create the main figure and axis
     fig = pylab.figure()
@@ -362,54 +359,65 @@ def create_and_merge_images(binding_mode, occurrence_percent, split_data, merged
 
     # Plot lines on the same axis and collect them into a list
     lines = []
-    filtered_split_data = [entry for entry in split_data if 'FRAME' not in entry]
+    filtered_split_data = [entry for entry in split_data if "FRAME" not in entry]
     for i, data in enumerate(filtered_split_data):
         y = data_points[i]
         label = data.split()[-1]
-        if label == 'saltbridge':
+        if label == "saltbridge":
             type = data.split()[-2]
-        if label == 'hydrophobic':
-            line, = ax.plot(x, y, label=data, color=(0.8, 1, 0), linewidth=5.0)
-        elif label == 'hbond':
-            line, = ax.plot(x, y, label=data, color=(1.0, 0.6, 0.6), linewidth=5.0)
-        elif label == 'metal':
-            line, = ax.plot(x, y, label=data, color=(1.0, 0.6, 0.0), linewidth=5.0)
-        elif label == 'saltbridge':
+        if label == "hydrophobic":
+            (line,) = ax.plot(x, y, label=data, color=(0.8, 1, 0), linewidth=5.0)
+        elif label == "hbond":
+            (line,) = ax.plot(x, y, label=data, color=(1.0, 0.6, 0.6), linewidth=5.0)
+        elif label == "metal":
+            (line,) = ax.plot(x, y, label=data, color=(1.0, 0.6, 0.0), linewidth=5.0)
+        elif label == "saltbridge":
             if type == "NI":
-                line, = ax.plot(x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0)
+                (line,) = ax.plot(
+                    x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0
+                )
             elif type == "PI":
-                line, = ax.plot(x, y, label=data, color=(1.0, 0.0, 0.0), linewidth=5.0)
+                (line,) = ax.plot(
+                    x, y, label=data, color=(1.0, 0.0, 0.0), linewidth=5.0
+                )
         else:
-            line, = ax.plot(x, y, label=data)
+            (line,) = ax.plot(x, y, label=data)
         lines.append(line)
 
     # Create a separate figure for the legend
     figlegend = pylab.figure(figsize=(8, 6))
 
     # Add a legend to the subplot (ax) using the lines and full entries as labels
-    legend = figlegend.legend(lines, filtered_split_data, loc='center')
+    legend = figlegend.legend(lines, filtered_split_data, loc="center")
 
     # Set the linewidth of the legend lines to be thicker
     for line in legend.get_lines():
         line.set_linewidth(5.0)
 
     # Add text above the legend
-    figlegend.text(0.5, 0.9, f"{binding_mode}", ha='center', fontsize=12, weight='bold')
-    figlegend.text(0.5, 0.85, f"Occurrence {occurrence_percent}%", ha='center', fontsize=12, weight='bold')
+    figlegend.text(0.5, 0.9, f"{binding_mode}", ha="center", fontsize=12, weight="bold")
+    figlegend.text(
+        0.5,
+        0.85,
+        f"Occurrence {occurrence_percent}%",
+        ha="center",
+        fontsize=12,
+        weight="bold",
+    )
 
     # Save the legend figure to a file
-    legend_filename = f'{binding_mode}_legend.png'
+    legend_filename = f"{binding_mode}_legend.png"
     figlegend.savefig(legend_filename)
 
     # Read the two images
-    image1 = Image.open(f'{binding_mode}.png')
+    image1 = Image.open(f"{binding_mode}.png")
     image2 = Image.open(legend_filename)
 
     # Resize the first image
     image1_size = image1.size
     image2_size = image2.size
     total_width = image1_size[0] + image2_size[0]
-    new_image = Image.new('RGB', (total_width, image1_size[1]))
+    new_image = Image.new("RGB", (total_width, image1_size[1]))
     new_image.paste(image1, (0, 0))
     new_image.paste(image2, (image1_size[0], 0))
 
@@ -421,26 +429,19 @@ def create_and_merge_images(binding_mode, occurrence_percent, split_data, merged
     merged_image_paths.append(merged_image_filename)
 
     # Remove the original files
-    os.remove(f'{binding_mode}.png')
+    os.remove(f"{binding_mode}.png")
     os.remove(legend_filename)
-    os.remove(f'{binding_mode}.svg')
+    os.remove(f"{binding_mode}.svg")
 
     return merged_image_paths
 
-def arranged_figure_generation(merged_image_paths, output_path):
-    """
-    Generate an arranged figure by arranging merged images in rows and columns.
 
-    Parameters
-    ----------
-    merged_image_paths : str
-        Paths of the merged images with the rdkit figure and legend.
-    output_path: dict
-        The path where the arranged output should be saved.
-        
-    Returns
-    -------
-    None
+def arranged_figure_generation(merged_image_paths, output_path):
+    """Generate an arranged figure by arranging merged images in rows and columns.
+
+    Args:
+        merged_image_paths (str): Paths of the merged images with the rdkit figure and legend.
+        output_path (dict): The path where the arranged output should be saved.
     """
     # Open the list of images
     merged_images = [Image.open(path) for path in merged_image_paths]
@@ -458,7 +459,9 @@ def arranged_figure_generation(merged_image_paths, output_path):
     total_height = max_height * num_rows
 
     # Create a new image with the calculated width and height
-    big_figure = Image.new('RGB', (total_width, total_height), (255, 255, 255))  # Set background to white
+    big_figure = Image.new(
+        "RGB", (total_width, total_height), (255, 255, 255)
+    )  # Set background to white
 
     x_offset = 0
     y_offset = 0
@@ -479,7 +482,9 @@ def arranged_figure_generation(merged_image_paths, output_path):
     big_figure.save(output_path, "PNG")
 
     # Rename the merged image
-    os.rename(output_path, "Binding_Modes_Markov_States/" + os.path.basename(output_path))
+    os.rename(
+        output_path, "Binding_Modes_Markov_States/" + os.path.basename(output_path)
+    )
 
     # Remove the individual image files
     for path in merged_image_paths:
