@@ -154,8 +154,3 @@ The Setup script is a modified version of [openmm-setup](https://github.com/open
  
 This Project is based on the 
 [Computational Molecular Science Python Cookiecutter](https://github.com/molssi/cookiecutter-cms) version 1.1.
-
-
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Documentation Status](https://readthedocs.org/projects/openmmdl/badge/?version=latest)](https://openmmdl.readthedocs.io/en/latest/?badge=latest)
-[![CodeQL](https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml/badge.svg)](https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml)
