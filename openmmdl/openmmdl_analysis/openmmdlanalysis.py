@@ -88,7 +88,6 @@ def main():
         #...
         process_trajectory_and_cluster(topology, trajectory, water_eps)
         analyze_protein_and_water_interaction(topology,"representative_waters.pdb", water_eps)
-        sys.exit()   
 
     
     # if input_formats[2] not in args.ligand_sdf:
