@@ -5,9 +5,8 @@ import openmmdl
 
 from pathlib import Path
 
-from openmmdl.openmmdl_analysis.preprocessing import process_pdb_file, convert_pdb_to_sdf
+from openmmdl.openmmdl_analysis.preprocessing import process_pdb_file, convert_pdb_to_sdf, increase_ring_indices, convert_ligand_to_smiles
 from openmmdl.openmmdl_analysis.rmsd_calculation import rmsd_for_atomgroups, RMSD_dist_frames
-from openmmdl.openmmdl_analysis.ligand_processing import increase_ring_indices, convert_ligand_to_smiles
 from openmmdl.openmmdl_analysis.interaction_gathering import characterize_complex, retrieve_plip_interactions, create_df_from_binding_site, process_frame, process_trajectory, fill_missing_frames
 from openmmdl.openmmdl_analysis.binding_mode_processing import gather_interactions, remove_duplicate_values, combine_subdict_values, filtering_values, unique_data_generation, df_iteration_numbering, update_values
 from openmmdl.openmmdl_analysis.markov_state_figure_generation import min_transition_calculation, binding_site_markov_network
