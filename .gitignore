@@ -4,3 +4,6 @@
 # ignore entire folder with all its contents
 openmmdl.egg-info/
 build/
+
+# ignore all __pycache__ folders
+__pycache__/
