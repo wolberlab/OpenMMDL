@@ -8,7 +8,7 @@ OpenMMDL @ Molecular Design Lab
 [![CodeQL](https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml/badge.svg)](https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml)
 
 
-<img src="https://github.com/wolberlab/OpenMMDL/blob/main/openmmdl/openmmdl_setup/static/OpenMMDL_logo.svg" height="250">
+<img src="https://github.com/wolberlab/OpenMMDL/blob/main/openmmdl/openmmdl_setup/static/OpenMMDL_logo_2.png" height="250">
 
 Interface to OpenMM for easy setup of molecular dynamic simulations of
 protein-ligand complexes
