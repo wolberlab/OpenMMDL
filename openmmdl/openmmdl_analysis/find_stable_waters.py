@@ -7,10 +7,15 @@ from tqdm import tqdm
 from io import StringIO
 from Bio.PDB import PDBParser
 
+
 # the following function is called by the last function in this script. It is only to be run if the water was already calculated.
 # finding the water molecules is the campute intensive task, thus i splitted it in the two subtasks.
-def perform_clustering_and_writing(stable_waters, cluster_eps, total_frames, output_directory):
-    def write_pdb_clusters_and_representatives(clustered_waters, min_samples, output_directory):
+def perform_clustering_and_writing(
+    stable_waters, cluster_eps, total_frames, output_directory
+):
+    def write_pdb_clusters_and_representatives(
+        clustered_waters, min_samples, output_directory
+    ):
         atom_counter = 1
         pdb_file_counter = 1
         print("cluster_eps:")
@@ -20,7 +25,9 @@ def perform_clustering_and_writing(stable_waters, cluster_eps, total_frames, out
         sub_output_directory = output_directory + "/clusterSize"
         sub_output_directory += str(min_samples)
         os.makedirs(sub_output_directory, exist_ok=True)
-        with pd.option_context('display.max_rows', None):  # Temporarily set display options
+        with pd.option_context(
+            "display.max_rows", None
+        ):  # Temporarily set display options
             for label, cluster in clustered_waters.groupby("Cluster_Label"):
                 pdb_lines = []
 
@@ -32,7 +39,9 @@ def perform_clustering_and_writing(stable_waters, cluster_eps, total_frames, out
                     atom_counter += 1
 
                 # Write the current cluster to a new PDB file
-                output_filename = os.path.join(sub_output_directory, f"cluster_{label}.pdb")
+                output_filename = os.path.join(
+                    sub_output_directory, f"cluster_{label}.pdb"
+                )
                 with open(output_filename, "w") as pdb_file:
                     pdb_file.write("".join(pdb_lines))
                     print(f"Cluster {label} written")
@@ -42,7 +51,9 @@ def perform_clustering_and_writing(stable_waters, cluster_eps, total_frames, out
         # Write representative water molecules to a PDB file
         representative_waters = clustered_waters.groupby("Cluster_Label").mean()
         representative_waters.reset_index(inplace=True)
-        representative_filename = os.path.join(sub_output_directory, "representative_waters.pdb")
+        representative_filename = os.path.join(
+            sub_output_directory, "representative_waters.pdb"
+        )
         with open(representative_filename, "w") as pdb_file:
             for index, row in representative_waters.iterrows():
                 x, y, z = row["Oxygen_X"], row["Oxygen_Y"], row["Oxygen_Z"]
@@ -51,13 +62,13 @@ def perform_clustering_and_writing(stable_waters, cluster_eps, total_frames, out
 
     # Feature extraction: XYZ coordinates
     X = stable_waters[["Oxygen_X", "Oxygen_Y", "Oxygen_Z"]]
-   
+
     # List of percentages to iterate over
     percentage_values = [25, 50, 75, 90, 99]
 
     # Assuming total_frames and X are defined outside of this snippet
     for percent in percentage_values:
-       # Adjust min_percent based on the current iteration
+        # Adjust min_percent based on the current iteration
         min_percent = percent / 100
 
         # Rest of your code remains the same
@@ -68,12 +79,19 @@ def perform_clustering_and_writing(stable_waters, cluster_eps, total_frames, out
         # Filter out noise and call the writing function
         clustered_waters = stable_waters.copy()
         clustered_waters["Cluster_Label"] = labels
-        clustered_waters = clustered_waters[clustered_waters["Cluster_Label"] != -1]  # Remove noise
+        clustered_waters = clustered_waters[
+            clustered_waters["Cluster_Label"] != -1
+        ]  # Remove noise
 
         # Call the writing function
-        write_pdb_clusters_and_representatives(clustered_waters, min_samples, output_directory)
+        write_pdb_clusters_and_representatives(
+            clustered_waters, min_samples, output_directory
+        )
 
-def process_trajectory_and_cluster(topology, trajectory, water_eps, output_directory="./stableWaters"):
+
+def process_trajectory_and_cluster(
+    topology, trajectory, water_eps, output_directory="./stableWaters"
+):
     # Load the PDB and DCD files
     u = mda.Universe(topology, trajectory)
     output_directory += "_clusterEps_"
@@ -83,7 +101,9 @@ def process_trajectory_and_cluster(topology, trajectory, water_eps, output_direc
     # Get the total number of frames for the progress bar
     total_frames = len(u.trajectory)
     # Create an empty DataFrame to store stable water coordinates
-    stable_waters = pd.DataFrame(columns=["Frame", "Residue", "Oxygen_X", "Oxygen_Y", "Oxygen_Z"])
+    stable_waters = pd.DataFrame(
+        columns=["Frame", "Residue", "Oxygen_X", "Oxygen_Y", "Oxygen_Z"]
+    )
 
     # Initialize variables for the previous frame's data
     prev_frame_coords = {}
@@ -94,9 +114,13 @@ def process_trajectory_and_cluster(topology, trajectory, water_eps, output_direc
         frame_coords = {}
 
         # Iterate through oxygen atoms of the specified water type
-        #for atom in u.select_atoms(f"resname {water_type} and name O"):
+        # for atom in u.select_atoms(f"resname {water_type} and name O"):
         for atom in u.select_atoms(f"resname HOH and name O"):
-            frame_coords[atom.index] = (atom.position[0], atom.position[1], atom.position[2])
+            frame_coords[atom.index] = (
+                atom.position[0],
+                atom.position[1],
+                atom.position[2],
+            )
 
         # Check if it's not the first frame
         if frame_num > 0:
@@ -104,44 +128,70 @@ def process_trajectory_and_cluster(topology, trajectory, water_eps, output_direc
 
             # Iterate through the oxygen atoms in the current frame
             for atom_index, coords in frame_coords.items():
-                prev_coords = prev_frame_coords.get(atom_index, coords)  # Get previous coordinates or use current if not found
+                prev_coords = prev_frame_coords.get(
+                    atom_index, coords
+                )  # Get previous coordinates or use current if not found
 
                 # Calculate the distance between current and previous coordinates
                 distance = np.linalg.norm(np.array(coords) - np.array(prev_coords))
 
                 # If the distance is less than 1 Angstrom, consider it a stable water
                 if distance < 1:
-                    stable_coords.append((frame_num, atom_index, coords[0], coords[1], coords[2]))
+                    stable_coords.append(
+                        (frame_num, atom_index, coords[0], coords[1], coords[2])
+                    )
 
             # Append stable water coordinates to the stable_waters DataFrame
             if stable_coords:  # Check if stable_coords is not empty
-                stable_waters = pd.concat([stable_waters, pd.DataFrame(stable_coords, columns=["Frame", "Residue", "Oxygen_X", "Oxygen_Y", "Oxygen_Z"])])
-                
+                stable_waters = pd.concat(
+                    [
+                        stable_waters,
+                        pd.DataFrame(
+                            stable_coords,
+                            columns=[
+                                "Frame",
+                                "Residue",
+                                "Oxygen_X",
+                                "Oxygen_Y",
+                                "Oxygen_Z",
+                            ],
+                        ),
+                    ]
+                )
+
         # Update the previous frame's coordinates
         prev_frame_coords = frame_coords
 
-    stable_waters.to_csv(os.path.join(output_directory, "stable_waters.csv"), index=False)
+    stable_waters.to_csv(
+        os.path.join(output_directory, "stable_waters.csv"), index=False
+    )
 
     # Call the clustering and writing function with the stable_waters DataFrame and output directory
-    perform_clustering_and_writing(stable_waters, water_eps, total_frames, output_directory)
+    perform_clustering_and_writing(
+        stable_waters, water_eps, total_frames, output_directory
+    )
+
 
 # Call the function with the desired water type and specify the output directory
 # process_trajectory_and_cluster("your_topology.pdb", "your_trajectory.dcd", water_eps=1.0, min_samples=1500, output_directory=".")
 
 
-
 def filter_and_parse_pdb(protein_pdb):
-    with open(protein_pdb, 'r') as pdb_file:
+    with open(protein_pdb, "r") as pdb_file:
         lines = [
-            line for line in pdb_file if (
-                line.startswith('ATOM') and 
-                line[17:20].strip() not in ['HOH', 'WAT'] and
-                line[22:26].strip().isdigit()  # Exclude lines with non-numeric sequence identifiers
+            line
+            for line in pdb_file
+            if (
+                line.startswith("ATOM")
+                and line[17:20].strip() not in ["HOH", "WAT"]
+                and line[22:26]
+                .strip()
+                .isdigit()  # Exclude lines with non-numeric sequence identifiers
             )
         ]
 
     # Convert the list of lines to a string buffer
-    pdb_string = ''.join(lines)
+    pdb_string = "".join(lines)
     pdb_buffer = StringIO(pdb_string)
 
     # Now parse the filtered lines
@@ -150,6 +200,7 @@ def filter_and_parse_pdb(protein_pdb):
 
     return structure
 
+
 def find_interacting_residues(structure, representative_waters, distance_threshold):
     interacting_residues = {}
 
@@ -157,10 +208,22 @@ def find_interacting_residues(structure, representative_waters, distance_thresho
         for chain in model:
             for residue in chain:
                 # Check if the residue is a protein residue (not a heteroatom or water molecule)
-                if residue.id[0] == ' ' and residue.id[2] == ' ' and residue.resname not in ['HOH', 'WAT']:
+                if (
+                    residue.id[0] == " "
+                    and residue.id[2] == " "
+                    and residue.resname not in ["HOH", "WAT"]
+                ):
                     for wat_index, wat_row in representative_waters.iterrows():
-                        wat_coords = np.array([wat_row["Oxygen_X"], wat_row["Oxygen_Y"], wat_row["Oxygen_Z"]])
-                        residue_coords = np.array([atom.get_coord() for atom in residue.get_atoms()][0])
+                        wat_coords = np.array(
+                            [
+                                wat_row["Oxygen_X"],
+                                wat_row["Oxygen_Y"],
+                                wat_row["Oxygen_Z"],
+                            ]
+                        )
+                        residue_coords = np.array(
+                            [atom.get_coord() for atom in residue.get_atoms()][0]
+                        )
 
                         distance = np.linalg.norm(wat_coords - residue_coords)
                         if distance < distance_threshold:
@@ -171,9 +234,10 @@ def find_interacting_residues(structure, representative_waters, distance_thresho
 
     return interacting_residues
 
+
 def read_pdb_as_dataframe(pdb_file):
     lines = []
-    with open(pdb_file, 'r') as f:
+    with open(pdb_file, "r") as f:
         lines = f.readlines()
 
     # Extract relevant information from PDB file lines
@@ -191,22 +255,37 @@ def read_pdb_as_dataframe(pdb_file):
 
     return representative_waters
 
+
 # Encapsulate the code in a function
-def analyze_protein_and_water_interaction(protein_pdb_file, representative_waters_file, cluster_eps, output_directory="./stableWaters", distance_threshold=5.0):
+def analyze_protein_and_water_interaction(
+    protein_pdb_file,
+    representative_waters_file,
+    cluster_eps,
+    output_directory="./stableWaters",
+    distance_threshold=5.0,
+):
     output_directory += "_clusterEps_"
     strEps = str(cluster_eps).replace(".", "")
     output_directory += strEps
-    
+
     # Iterate over subdirectories
     for subdirectory in os.listdir(output_directory):
         subdirectory_path = os.path.join(output_directory, subdirectory)
         if os.path.isdir(subdirectory_path):
             # Perform operations within each subdirectory
-            representative_waters = read_pdb_as_dataframe(os.path.join(subdirectory_path, representative_waters_file))
+            representative_waters = read_pdb_as_dataframe(
+                os.path.join(subdirectory_path, representative_waters_file)
+            )
             filtered_structure = filter_and_parse_pdb(protein_pdb_file)
-            interacting_residues = find_interacting_residues(filtered_structure, representative_waters, distance_threshold)
-            result_df = pd.DataFrame(interacting_residues.items(), columns=['Cluster_Number', 'Interacting_Residues'])
+            interacting_residues = find_interacting_residues(
+                filtered_structure, representative_waters, distance_threshold
+            )
+            result_df = pd.DataFrame(
+                interacting_residues.items(),
+                columns=["Cluster_Number", "Interacting_Residues"],
+            )
             # Save result to each subdirectory
-            result_df.to_csv(os.path.join(subdirectory_path, "interacting_residues.csv"), index=False)
+            result_df.to_csv(
+                os.path.join(subdirectory_path, "interacting_residues.csv"), index=False
+            )
             print(f"Exported interacting_residues.csv in {subdirectory_path}")
-
