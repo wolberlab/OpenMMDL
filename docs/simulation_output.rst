@@ -1,33 +1,32 @@
-**OpenMMDL-Simulation Output Files**
+**OpenMMDL Simulation Output Files**
 =================================
 
-The OpenMMDL Simulation script creates output folders and files during and after the simulation.
+The **OpenMMDL Simulation** script creates output folders and files during and after the simulation.
 
 The following list contains an detailed overview of the folders and files:
 The Optional files are highlighted with an *asteriks**
 
-Analysis
+Input Files
 ------------------------------
-**Analysis**: A folder that contains RMSD Analysis of the MD Simulation performed with MDAnaylsis:
+**Input Files**: A folder that contains the PDF and SDF files, which served as Input Files for the MD Simulation.
+
 
 
 .. list-table::
    :header-rows: 1
-   :widths: 25 50
+   :widths: 25 75
 
    * - Name
      - Description
-   * - RMSD_between_the_frames.png
-     - Displays the RMSD between the frames of the protein and ligand.
-   * - RMSD_over_time.png
-     - Displays the RMSD of the protein, backbone and ligand during the simulation.
-   * - RMSD_over_time.csv
-     -  Displays the Data used in RMSD_over_time.png.
+   * - Protein_name.pdb*
+     - Protein PDB File that served as the input for the MD Simulation.
+   * - ligand_name.sdf*
+     - Ligand SDF File that served as the input for the MD Simulation.
 
 Checkpoints
 ------------------------------
 
-**Checkpoints**: A folder that contains Checkpoints, which can be used to restart the MD Simulation.
+**Checkpoints**: A folder that contains checkpoints, which can be used to restart the MD Simulation.
 
 
 .. list-table::
@@ -43,29 +42,11 @@ Checkpoints
    * - 100x_checkpoint.chk*
      - Checkpoint saved every 1000000 steps.
 
-Input_Files
+MD Files
 ------------------------------
-**Input_Files**: A folder that contains the PDF and SDF files, which served as Input Files for the MD Simulation.
+**MD Files**: A folder that contains the files that were generated during the MD Simulation. This folder contains 3 subfolders.
 
-
-
-.. list-table::
-   :header-rows: 1
-   :widths: 25 75
-
-   * - Name
-     - Description
-   * - Protein_name.pdb*
-     - Protein PDB File that served as the input for the MD Simulation.
-   * - ligand_name.sdf*
-     - Ligand SDF File that served as the input for the MD Simulation.
-
-
-MD_Files
-------------------------------
-**MD_Files**: A folder that contains the files that were generated during the MD Simulation. This folder contains 3 subfolders.
-
-*Pre_MD*: Folder that contains the files that were prepared by the script before the MD Simulation.
+*Pre MD*: Folder that contains the files that were prepared by the script before the MD Simulation.
 
 .. list-table::
    :header-rows: 1
@@ -82,7 +63,7 @@ MD_Files
    * - membrane_protein_name.pdb*
      - Prepared PDB File with membrane.
 
-*Minimization_Equilibration*: Folder that contains topology files after the minimization and equilibration of OpenMM.
+*Minimization Equilibration*: Folder that contains topology files after the minimization and equilibration with **OpenMM**.
 
 .. list-table::
    :header-rows: 1
@@ -95,7 +76,7 @@ MD_Files
    * - Equilibration_protein_name.pdb
      - Prepared PDB File after OpenMM energy minimization and equilibration.
 
-*MD_Output*: Folder that contains the Output trajectory files generated during the MD Simulation.
+*MD Output*: Folder that contains the Output trajectory files generated during the MD Simulation.
 
 
 .. list-table::
@@ -110,12 +91,9 @@ MD_Files
      - Trajectory of the OpenMM Simulation.
 
 
-MD_Postprocessing
+MD Postprocessing
 ------------------------------
-**MD_Postprocessing**: A folder that contains the postprocessing files after the MD Simulation. This folder contains 2 subfolders.
-
-*1_MDTraj*: Folder that contains the centered topology files with old coordinates.
-
+**MD Postprocessing**: A folder that contains the postprocessing files after the MD Simulation.
 
 .. list-table::
    :header-rows: 1
@@ -131,10 +109,20 @@ MD_Postprocessing
      - Trajectory File of the centered protein in DCD Format.
    * - centered_old_coordinates.xtc
      - Trajectory File of the centered protein in XTC Format.
+   * - centered_traj_unaligned.dcd
+     - Trajectory File of the unaligned centered protein in DCD Format with all atoms and new coordinates.
+   * - centered_traj_unaligned.xtc
+     - Trajectory File of the unaligned centered protein in XTC Format with all atoms and new coordinates.
+   * - prot_lig_traj_unaligned.dcd*
+     - Trajectory File of the unaligned centered protein in DCD Format with only protein and ligand atoms and new coordinates.
+   * - prot_lig_traj_unaligned.xtc*
+     - Trajectory File of the unaligned centered protein in XTC Format with only protein and ligand atoms and new coordinates.
      
-     
-*2_MDTraj*: Folder that contains the centered topology files with new coordinates according to the center of mass.
+Final Output
+------------------------------
+**Final Output**: A folder that contains the final files after the MD Simulation, ready to be analyzed. This folder contains 2 subfolders.
 
+1. *All Atoms*: Folder that contains the centered topology files of all atoms with new coordinates according to the center of mass.
 
 .. list-table::
    :header-rows: 1
@@ -142,14 +130,28 @@ MD_Postprocessing
 
    * - Name
      - Description
-   * - centered_top.pdb
+   * - centered_top.pdb*
      - Topology File of the centered protein in PDB Format with all atoms and new coordinates.
-   * - centered_top.gro
+   * - centered_top.gro*
      - Topology File of the centered protein in Gromacs GRO Format with all atoms and new coordinates.
-   * - centered_traj.dcd
-     - Trajectory File of the centered protein in DCD Format with all atoms and new coordinates.
-   * - centered_traj.xtc
-     - Trajectory File of the centered protein in XTC Format with all atoms and new coordinates.
+   * - centered_traj.dcd*
+     - Trajectory File of the aligned centered protein in DCD Format with all atoms and new coordinates.
+   * - centered_traj.xtc*
+     - Trajectory File of the aligned centered protein in XTC Format with all atoms and new coordinates.
+
+
+
+2. *Prot Lig*: Folder that contains the centered topology files of only the protein and ligand atoms with new coordinates according to the center of mass.
+
+
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+
+   * - Name
+     - Description
    * - prot_lig_top.pdb*
      - Topology File of the centered protein in PDB Format with only protein and ligand atoms and new coordinates.
    * - prot_lig_top.gro*

@@ -165,3 +165,37 @@ def test_generate_point_cloud_pml(tmp_path):
         ET.parse(outname_pml)
     except ET.ParseError:
         pytest.fail(f"Invalid XML in {outname_pml}")
+        
+
+def test_generate_bindingmode_pharmacophore(tmp_path):
+    # Prepare inputs
+    dict_bindingmode = {
+        "Acceptor_hbond": {
+            "PROTCOO": [[1, 2, 3]],
+            "LIGCOO": [[4, 5, 6]]
+        }
+    }
+    core_compound = "ligand"
+    sysname = "system"
+    id_num = 0
+
+    # Create a symbolic link in the temporary directory
+    os.symlink(os.path.abspath("./Binding_Modes_Markov_States"), f"{tmp_path}/Binding_Modes_Markov_States")
+
+    # Prepare the output filename
+    outname = "test_output"
+
+    # Call the function
+    generate_bindingmode_pharmacophore(dict_bindingmode, core_compound, sysname, outname, id_num)
+
+    # Prepare the full output path
+    outname_pml = f"{tmp_path}/Binding_Modes_Markov_States/{outname}.pml"
+
+    # Check if the output file is created
+    assert os.path.isfile(outname_pml), f"File {outname_pml} not found."
+
+    # Check if the generated XML is valid
+    try:
+        ET.parse(outname_pml)
+    except ET.ParseError:
+        pytest.fail(f"Invalid XML in {outname_pml}")

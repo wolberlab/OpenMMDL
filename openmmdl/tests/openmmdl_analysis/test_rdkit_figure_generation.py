@@ -4,12 +4,13 @@ import time
 import shutil
 from PIL import Image
 from pathlib import Path
-from openmmdl.openmmdl_analysis.rdkit_figure_generation import split_interaction_data, highlight_numbers, update_dict, create_and_merge_images, arranged_figure_generation, generate_interaction_dict
+from openmmdl.openmmdl_analysis.rdkit_figure_generation import *
 
 test_data_directory = Path("openmmdl/tests/data/openmmdl_analysis/rdkit_figure_generation")
 test_data_directory_files = Path("openmmdl/tests/data/in")
 lig_no_h = test_data_directory_files / 'lig_no_h.pdb'
 complex = test_data_directory_files / 'complex.pdb'
+smi_file = test_data_directory_files / 'lig_no_h.smi'
 current_directory = os.getcwd() 
 output_path = 'all_binding_modes_arranged.png'
 
@@ -39,7 +40,8 @@ def test_highlight_numbers():
         "155PHEA 4205 4206 4207 4216 4217 4218 pistacking",
         "59ARGA 4194 F halogen",
         "166ARGA 4202,4203 Carboxylate NI saltbridge",
-        "165ASPA 4202 Amine PI saltbridge"
+        "165ASPA 4202 Amine PI saltbridge",
+        "HEM 4202 FE 4 metal"
     ]
 
     starting_idx = 1  # Updated starting index
@@ -57,7 +59,9 @@ def test_highlight_numbers():
     assert highlighted_waterbridge is not None
     assert highlighted_halogen is not None
     assert highlighted_ni is not None
+    assert highlighted_pi is not None and len(highlighted_pi) > 0  
     assert highlighted_pication is not None
+    assert highlighted_metal is not None
     
 def test_update_dict():
     # Test case 1: Check if the target dictionary is updated correctly
@@ -219,6 +223,24 @@ def test_arranged_figure_generation():
     # Check if the output file was created
     
     assert output_path is not None
+
+
+output_image_file = "output_image.png"
+
+# Copy the files to the current folder
+shutil.copy(complex, Path.cwd())
+shutil.copy(lig_no_h, Path.cwd())
+shutil.copy(smi_file, Path.cwd())
+
+# Test the generate_ligand_image function
+def test_generate_ligand_image():
+    ligand_name = "UNK"
+    generate_ligand_image(ligand_name, "complex.pdb", "lig_no_h.pdb", "lig_no_h.smi", output_image_file)
+
+    # Assert that the output image file exists
+    assert os.path.exists(output_image_file)
+
+
 
 # Run the tests
 if __name__ == '__main__':

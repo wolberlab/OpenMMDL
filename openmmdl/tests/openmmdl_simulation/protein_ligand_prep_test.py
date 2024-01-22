@@ -103,6 +103,9 @@ def test_water_padding_solvent_builder():
     assert protein_buffer_solved is not None
 
 def test_water_absolute_solvent_builder():
+    test_data_directory = Path("openmmdl/tests/data/in")
+    TEST_PROTEIN = f"{test_data_directory}/6b73.pdb"
+    protein_pdb = pdbfixer.PDBFixer(str(TEST_PROTEIN))
     protein_absolute_solved = water_absolute_solvent_builder(model_water, forcefield, water_box_x, water_box_y, water_box_z, protein_pdb, modeller, water_positive_ion, water_negative_ion, water_ionicstrength, protein)
     assert protein_absolute_solved is not None
 

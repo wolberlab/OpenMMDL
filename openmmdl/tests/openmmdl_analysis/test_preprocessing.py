@@ -1,225 +1,284 @@
-import pytest
 import os
-import time
+import pytest
+import tempfile
 import shutil
-from PIL import Image
+from Bio import PDB
+import numpy as np
+import mdtraj as md
 from pathlib import Path
-from openmmdl.openmmdl_analysis.rdkit_figure_generation import split_interaction_data, highlight_numbers, update_dict, create_and_merge_images, arranged_figure_generation, generate_interaction_dict
+import MDAnalysis as mda
+from openmmdl.openmmdl_analysis.preprocessing import *
 
-test_data_directory = Path("openmmdl/tests/data/openmmdl_analysis/rdkit_figure_generation")
-test_data_directory_files = Path("openmmdl/tests/data/in")
-lig_no_h = test_data_directory_files / 'lig_no_h.pdb'
-complex = test_data_directory_files / 'complex.pdb'
-current_directory = os.getcwd() 
-output_path = 'all_binding_modes_arranged.png'
+pdb_file_path = 'openmmdl/tests/data/in/0_unk_hoh.pdb' 
 
-shutil.copy(str(lig_no_h), '.')
-shutil.copy(str(complex), '.')
+# Define test data paths
+test_data_directory =  Path("openmmdl/tests/data/in")
+pdb_file = test_data_directory / "0_unk_hoh.pdb"
+topology_metal = f"{test_data_directory}/metal_top.pdb"
+ligand_resname = "UNK"
 
-@pytest.mark.parametrize("input_data, expected_output", [
-    (["60GLUA_4206_4207_4216_4217_4218_4205_hydrophobic"], ['60GLUA 4206 4207 4216 4217 4218 4205 hydrophobic']),
-    (["165ASPA_4203_Acceptor_hbond"], ['165ASPA 4203 Acceptor hbond']),
-    (["125TYRA_4192_Acceptor_waterbridge"], ['125TYRA 4192 Acceptor waterbridge']),
-])
-def test_split_interaction_data(input_data, expected_output):
-    result = split_interaction_data(input_data)
-    assert result == expected_output
 
-def test_highlight_numbers():
-    # Input data
-    split_data = [
-        "163GLYA 4202 Acceptor hbond",
-        "165ASPA 4203 Donor hbond",
-        "165ASPA 4222 Donor hbond",
-        "165ASPA 4203 Acceptor hbond",
-        "125TYRA 4192 Acceptor waterbridge",
-        "165ASPA 4222 Donor waterbridge",
-        "161PHEA 4211 4212 4213 4214 4215 4210 hydrophobic",
-        "59ARGA 4205 4206 4207 4216 4217 4218 Aromatic pication",
-        "155PHEA 4205 4206 4207 4216 4217 4218 pistacking",
-        "59ARGA 4194 F halogen",
-        "166ARGA 4202,4203 Carboxylate NI saltbridge",
-        "165ASPA 4202 Amine PI saltbridge"
-    ]
+@pytest.fixture
+def sample_pdb_data():
+    # Provide sample PDB data for testing
+    return """ATOM      1  N   UNK A 454      43.493  48.319  35.835  1.00  0.00      A    N  
+ATOM      2  N1  UNK A 454      44.740  47.862  35.697  1.00  0.00      A    N  
+ATOM      3  C14 UNK A 454      44.608  46.866  34.829  1.00  0.00      A    C  
+ATOM      4  N2  UNK A 454      43.265  46.644  34.450  1.00  0.00      A    N  
+ATOM      5  C7  UNK A 454      42.607  47.556  35.077  1.00  0.00      A    C  
+ATOM      6  H5  UNK A 454      41.542  47.701  34.954  1.00  0.00      A    H  
+ATOM      7  H10 UNK A 454      45.308  46.132  34.453  1.00  0.00      A    H  
+ATOM      8  C   UNK A 454      43.168  49.513  36.656  1.00  0.00      A    C  
+ATOM      9  C2  UNK A 454      42.743  50.705  35.818  1.00  0.00      A    C  
+ATOM     10  C4  UNK A 454      43.545  51.052  34.671  1.00  0.00      A    C  
+ATOM     11  C9  UNK A 454      43.171  52.151  33.897  1.00  0.00      A    C  
+ATOM     12  C13 UNK A 454      42.090  52.924  34.222  1.00  0.00      A    C  
+ATOM     13  C11 UNK A 454      41.393  52.671  35.378  1.00  0.00      A    C  
+ATOM     14  C6  UNK A 454      41.793  51.635  36.268  1.00  0.00      A    C  
+ATOM     15  H4  UNK A 454      41.220  51.358  37.148  1.00  0.00      A    H  
+ATOM     16  H9  UNK A 454      40.518  53.291  35.552  1.00  0.00      A    H  
+ATOM     17  C16 UNK A 454      41.790  54.079  33.432  1.00  0.00      A    C  
+ATOM     18  N4  UNK A 454      41.594  54.934  32.652  1.00  0.00      A    N  
+ATOM     19  H7  UNK A 454      43.694  52.248  32.951  1.00  0.00      A    H  
+ATOM     20  H2  UNK A 454      44.333  50.369  34.369  1.00  0.00      A    H  
+ATOM     21  H   UNK A 454      44.108  49.790  37.148  1.00  0.00      A    H  
+ATOM     22  C1  UNK A 454      42.146  49.054  37.737  1.00  0.00      A    C  
+ATOM     23  C5  UNK A 454      42.675  48.761  39.003  1.00  0.00      A    C  
+ATOM     24  C10 UNK A 454      41.859  48.278  39.998  1.00  0.00      A    C
+ATOM     25  H8  UNK A 454      42.284  48.099  40.981  1.00  0.00      A    H  
+ATOM     26  H3  UNK A 454      43.752  48.806  39.135  1.00  0.00      A    H  
+ATOM     27  C3  UNK A 454      40.774  48.885  37.463  1.00  0.00      A    C  
+ATOM     28  H1  UNK A 454      40.310  49.079  36.500  1.00  0.00      A    H  
+ATOM     29  C8  UNK A 454      39.907  48.435  38.509  1.00  0.00      A    C  
+ATOM     30  H6  UNK A 454      38.833  48.310  38.406  1.00  0.00      A    H  
+ATOM     31  C12 UNK A 454      40.466  48.125  39.823  1.00  0.00      A    C  
+ATOM     32  C15 UNK A 454      39.627  47.605  40.833  1.00  0.00      A    C  
+ATOM     33  N3  UNK A 454      38.981  47.235  41.740  1.00  0.00      A    N """
 
-    starting_idx = 1  # Updated starting index
+@pytest.fixture
+def input_pdb_filename(tmp_path):
+    input_pdb_filename = tmp_path / "input.pdb"
+    with open(input_pdb_filename, 'w') as f:
+        f.write("""ATOM      1  N   SPC A 101      43.493  48.319  35.835  1.00  0.00      A    N  
+ATOM      2  O   TIP3 A 102      44.740  47.862  35.697  1.00  0.00      A    O  
+ATOM      3  C   *   A 103      44.608  46.866  34.829  1.00  0.00      A    C  
+ATOM      4  H   *   A 104      43.265  46.644  34.450  1.00  0.00      A    H  
+ATOM      5  O   WAT A 105      42.607  47.556  35.077  1.00  0.00      A    O  
+ATOM      6  H1  SPC A 106      41.542  47.701  34.954  1.00  0.00      A    H  
+ATOM      7  H2  *   A 107      45.308  46.132  34.453  1.00  0.00      A    H  
+ATOM      8  C   T3P A 108      43.168  49.513  36.656  1.00  0.00      A    C  
+ATOM      9  O   T4P A 109      42.743  50.705  35.818  1.00  0.00      A    O  
+ATOM     10  H   T5P A 110      43.545  51.052  34.671  1.00  0.00      A    H  
+ATOM     11  N   *   A 111      43.171  52.151  33.897  1.00  0.00      A    N  
+ATOM     12  C   SPC A 112      42.090  52.924  34.222  1.00  0.00      A    C  
+ATOM     13  O   *   A 113      41.393  52.671  35.378  1.00  0.00      A    O  
+ATOM     14  C   TIP4 A 114      41.793  51.635  36.268  1.00  0.00      A    C  
+ATOM     15  O   *   A 115      41.220  51.358  37.148  1.00  0.00      A    O  
+ATOM     16  H   *   A 116      40.518  53.291  35.552  1.00  0.00      A    H  
+ATOM     17  C   *   A 117      41.790  54.079  33.432  1.00  0.00      A    C  
+ATOM     18  N   *   A 118      41.594  54.934  32.652  1.00  0.00      A    N  
+ATOM     19  H   *   A 119      43.694  52.248  32.951  1.00  0.00      A    H  
+ATOM     20  H   *   A 120      44.333  50.369  34.369  1.00  0.00      A    H  
+ATOM     21  H   *   A 121      44.108  49.790  37.148  1.00  0.00      A    H  
+ATOM     22  C   *   A 122      42.146  49.054  37.737  1.00  0.00      A    C  
+ATOM     23  C   *   A 123      42.675  48.761  39.003  1.00  0.00      A    C  
+ATOM     24  C   *   A 124      41.859  48.278  39.998  1.00  0.00      A    C """)
 
-    result = highlight_numbers(split_data, starting_idx)
+def test_process_pdb_file():
+    # Define the input and output file paths
+    original_cwd = Path(os.getcwd())
+    input_pdb_filename = test_data_directory / "0_unk_hoh.pdb"
 
-    highlighted_hbond_donor, highlighted_hbond_acceptor, highlighted_hbond_both, \
-    highlighted_hydrophobic, highlighted_waterbridge, highlighted_pistacking, highlighted_halogen, \
-    highlighted_ni, highlighted_pi, highlighted_pication, highlighted_metal = result
+    shutil.copy(str(input_pdb_filename), '.')
 
-    assert highlighted_hbond_donor is not None
-    assert highlighted_hbond_acceptor is not None
-    assert highlighted_hbond_both is not None
-    assert highlighted_hydrophobic is not None
-    assert highlighted_waterbridge is not None
-    assert highlighted_halogen is not None
-    assert highlighted_ni is not None
-    assert highlighted_pication is not None
+    # Process the provided PDB file
+    process_pdb_file(input_pdb_filename)
+
+    # Read the modified output PDB file
+    with open(input_pdb_filename, 'r') as f:
+        modified_data = f.read()
+
+    # Check if the modified data contains the expected residues
+    assert 'HOH' in modified_data
+    assert 'UNK' in modified_data
+
+
+def test_convert_pdb_to_sdf(tmp_path):
+    input_pdb_filename = tmp_path / "input.pdb"
+    output_sdf_filename = tmp_path / "output.sdf"
     
-def test_update_dict():
-    # Test case 1: Check if the target dictionary is updated correctly
-    target_dict = {1: '1', 2: '2'}
-    source_dict = {3: '3', 4: '4'}
-    update_dict(target_dict, source_dict)
-    assert target_dict == {1: '1', 2: '2', 3: '3', 4: '4'}
+    # Create a mock PDB file
+    input_pdb_filename.write_text("""ATOM      1  N   UNK A 454      43.493  48.319  35.835  1.00  0.00      A    N  
+ATOM      2  N1  UNK A 454      44.740  47.862  35.697  1.00  0.00      A    N  
+ATOM      3  C14 UNK A 454      44.608  46.866  34.829  1.00  0.00      A    C  
+ATOM      4  N2  UNK A 454      43.265  46.644  34.450  1.00  0.00      A    N  
+ATOM      5  C7  UNK A 454      42.607  47.556  35.077  1.00  0.00      A    C  
+ATOM      6  H5  UNK A 454      41.542  47.701  34.954  1.00  0.00      A    H  
+ATOM      7  H10 UNK A 454      45.308  46.132  34.453  1.00  0.00      A    H  
+ATOM      8  C   UNK A 454      43.168  49.513  36.656  1.00  0.00      A    C  
+ATOM      9  C2  UNK A 454      42.743  50.705  35.818  1.00  0.00      A    C  
+ATOM     10  C4  UNK A 454      43.545  51.052  34.671  1.00  0.00      A    C  
+ATOM     11  C9  UNK A 454      43.171  52.151  33.897  1.00  0.00      A    C  
+ATOM     12  C13 UNK A 454      42.090  52.924  34.222  1.00  0.00      A    C  
+ATOM     13  C11 UNK A 454      41.393  52.671  35.378  1.00  0.00      A    C  
+ATOM     14  C6  UNK A 454      41.793  51.635  36.268  1.00  0.00      A    C  
+ATOM     15  H4  UNK A 454      41.220  51.358  37.148  1.00  0.00      A    H  
+ATOM     16  H9  UNK A 454      40.518  53.291  35.552  1.00  0.00      A    H  
+ATOM     17  C16 UNK A 454      41.790  54.079  33.432  1.00  0.00      A    C  
+ATOM     18  N4  UNK A 454      41.594  54.934  32.652  1.00  0.00      A    N  
+ATOM     19  H7  UNK A 454      43.694  52.248  32.951  1.00  0.00      A    H  
+ATOM     20  H2  UNK A 454      44.333  50.369  34.369  1.00  0.00      A    H  
+ATOM     21  H   UNK A 454      44.108  49.790  37.148  1.00  0.00      A    H  
+ATOM     22  C1  UNK A 454      42.146  49.054  37.737  1.00  0.00      A    C  
+ATOM     23  C5  UNK A 454      42.675  48.761  39.003  1.00  0.00      A    C  
+ATOM     24  C10 UNK A 454      41.859  48.278  39.998  1.00  0.00      A    C
+ATOM     25  H8  UNK A 454      42.284  48.099  40.981  1.00  0.00      A    H  
+ATOM     26  H3  UNK A 454      43.752  48.806  39.135  1.00  0.00      A    H  
+ATOM     27  C3  UNK A 454      40.774  48.885  37.463  1.00  0.00      A    C  
+ATOM     28  H1  UNK A 454      40.310  49.079  36.500  1.00  0.00      A    H  
+ATOM     29  C8  UNK A 454      39.907  48.435  38.509  1.00  0.00      A    C  
+ATOM     30  H6  UNK A 454      38.833  48.310  38.406  1.00  0.00      A    H  
+ATOM     31  C12 UNK A 454      40.466  48.125  39.823  1.00  0.00      A    C  
+ATOM     32  C15 UNK A 454      39.627  47.605  40.833  1.00  0.00      A    C  
+ATOM     33  N3  UNK A 454      38.981  47.235  41.740  1.00  0.00      A    N""")
 
-    # Test case 2: Check if the function handles multiple source dictionaries
-    target_dict = {}
-    source_dict1 = {1: '1'}
-    source_dict2 = {2: '2', 3: '3'}
-    update_dict(target_dict, source_dict1, source_dict2)
-    assert target_dict == {1: '1', 2: '2', 3: '3'}
+    convert_pdb_to_sdf(str(input_pdb_filename), str(output_sdf_filename))
+    assert output_sdf_filename.exists()
 
-    # Test case 3: Check if the function handles empty source dictionaries
-    target_dict = {1: '1', 2: '2'}
-    update_dict(target_dict)  # No source dictionaries provided
-    assert target_dict == {1: '1', 2: '2'}
+def test_renumber_atoms_in_residues(sample_pdb_data, tmp_path):
+    input_pdb_filename = tmp_path / "input.pdb"
+    output_pdb_filename = tmp_path / "output.pdb"
 
-def test_generate_interaction_dict():
-    # Test with a known interaction type 'hydrophobic'
-    interaction_type = 'hydrophobic'
-    keys = [1, 2, 3]
-    expected_result = {
-        1: (1.0, 1.0, 0.0),
-        2: (1.0, 1.0, 0.0),
-        3: (1.0, 1.0, 0.0)
-    }
-    result = generate_interaction_dict(interaction_type, keys)
-    assert result == expected_result
+    # Create a mock PDB file
+    input_pdb_filename.write_text("""ATOM      1  N   UNK A 454      43.493  48.319  35.835  1.00  0.00      A    N  
+ATOM      2  N1  UNK A 454      44.740  47.862  35.697  1.00  0.00      A    N  
+ATOM      3  C14 UNK A 454      44.608  46.866  34.829  1.00  0.00      A    C  
+ATOM      4  N2  UNK A 454      43.265  46.644  34.450  1.00  0.00      A    N  
+ATOM      5  C7  UNK A 454      42.607  47.556  35.077  1.00  0.00      A    C  
+ATOM      6  H5  UNK A 454      41.542  47.701  34.954  1.00  0.00      A    H  
+ATOM      7  H10 UNK A 454      45.308  46.132  34.453  1.00  0.00      A    H  
+ATOM      8  C   UNK A 454      43.168  49.513  36.656  1.00  0.00      A    C  
+ATOM      9  C2  UNK A 454      42.743  50.705  35.818  1.00  0.00      A    C  
+ATOM     10  C4  UNK A 454      43.545  51.052  34.671  1.00  0.00      A    C  
+ATOM     11  C9  UNK A 454      43.171  52.151  33.897  1.00  0.00      A    C  
+ATOM     12  C13 UNK A 454      42.090  52.924  34.222  1.00  0.00      A    C  
+ATOM     13  C11 UNK A 454      41.393  52.671  35.378  1.00  0.00      A    C  
+ATOM     14  C6  UNK A 454      41.793  51.635  36.268  1.00  0.00      A    C  
+ATOM     15  H4  UNK A 454      41.220  51.358  37.148  1.00  0.00      A    H  
+ATOM     16  H9  UNK A 454      40.518  53.291  35.552  1.00  0.00      A    H  
+ATOM     17  C16 UNK A 454      41.790  54.079  33.432  1.00  0.00      A    C  
+ATOM     18  N4  UNK A 454      41.594  54.934  32.652  1.00  0.00      A    N  
+ATOM     19  H7  UNK A 454      43.694  52.248  32.951  1.00  0.00      A    H  
+ATOM     20  H2  UNK A 454      44.333  50.369  34.369  1.00  0.00      A    H  
+ATOM     21  H   UNK A 454      44.108  49.790  37.148  1.00  0.00      A    H  
+ATOM     22  C1  UNK A 454      42.146  49.054  37.737  1.00  0.00      A    C  
+ATOM     23  C5  UNK A 454      42.675  48.761  39.003  1.00  0.00      A    C  
+ATOM     24  C10 UNK A 454      41.859  48.278  39.998  1.00  0.00      A    C
+ATOM     25  H8  UNK A 454      42.284  48.099  40.981  1.00  0.00      A    H  
+ATOM     26  H3  UNK A 454      43.752  48.806  39.135  1.00  0.00      A    H  
+ATOM     27  C3  UNK A 454      40.774  48.885  37.463  1.00  0.00      A    C  
+ATOM     28  H1  UNK A 454      40.310  49.079  36.500  1.00  0.00      A    H  
+ATOM     29  C8  UNK A 454      39.907  48.435  38.509  1.00  0.00      A    C  
+ATOM     30  H6  UNK A 454      38.833  48.310  38.406  1.00  0.00      A    H  
+ATOM     31  C12 UNK A 454      40.466  48.125  39.823  1.00  0.00      A    C  
+ATOM     32  C15 UNK A 454      39.627  47.605  40.833  1.00  0.00      A    C  
+ATOM     33  N3  UNK A 454      38.981  47.235  41.740  1.00  0.00      A    N""")
 
-def test_create_and_merge_images_with_split_data():
-    # Define test data
-    binding_mode = 'Binding_Mode_1'
-    occurrence_percent = 92
-    split_data = [
-        "166ARGA 4220,4221 Carboxylate NI saltbridge",
-        "161PHEA 4221 Acceptor hbond",
-        "207ILEA 4205 4206 4207 4208 4209 4204 hydrophobic"
-    ]
-    merged_image_paths = []
+    renumber_atoms_in_residues(str(input_pdb_filename), str(output_pdb_filename), 'UNK')
+    assert output_pdb_filename.exists()
 
-    # Define source image paths
-    source_image_path = 'openmmdl/tests/data/openmmdl_analysis/rdkit_figure_generation/Binding_Mode_1.png'
-    source_svg_path = 'openmmdl/tests/data/openmmdl_analysis/rdkit_figure_generation/Binding_Mode_1.svg'
-    source_merged_image_path = 'openmmdl/tests/data/openmmdl_analysis/rdkit_figure_generation/Binding_Mode_1_merged.png'
+@pytest.fixture
+def pdb_file(tmpdir):
+    # Create a temporary PDB file for testing (truncated for brevity)
+    pdb_content = """ATOM      1  N   UNK A 454      43.493  48.319  35.835  1.00  0.00      A    N  
+ATOM      2  N1  UNK A 454      44.740  47.862  35.697  1.00  0.00      A    N  
+ATOM      3  C14 UNK A 454      44.608  46.866  34.829  1.00  0.00      A    C  
+ATOM      4  N2  UNK A 454      43.265  46.644  34.450  1.00  0.00      A    N  
+ATOM      5  C7  UNK A 454      42.607  47.556  35.077  1.00  0.00      A    C  
+ATOM      6  H5  UNK A 454      41.542  47.701  34.954  1.00  0.00      A    H  
+ATOM      7  H10 UNK A 454      45.308  46.132  34.453  1.00  0.00      A    H  
+ATOM      8  C   UNK A 454      43.168  49.513  36.656  1.00  0.00      A    C  
+ATOM      9  C2  UNK A 454      42.743  50.705  35.818  1.00  0.00      A    C  
+ATOM     10  C4  UNK A 454      43.545  51.052  34.671  1.00  0.00      A    C  
+ATOM     11  C9  UNK A 454      43.171  52.151  33.897  1.00  0.00      A    C  
+ATOM     12  C13 UNK A 454      42.090  52.924  34.222  1.00  0.00      A    C  
+ATOM     13  C11 UNK A 454      41.393  52.671  35.378  1.00  0.00      A    C  
+ATOM     14  C6  UNK A 454      41.793  51.635  36.268  1.00  0.00      A    C  
+ATOM     15  H4  UNK A 454      41.220  51.358  37.148  1.00  0.00      A    H  
+ATOM     16  H9  UNK A 454      40.518  53.291  35.552  1.00  0.00      A    H  
+ATOM     17  C16 UNK A 454      41.790  54.079  33.432  1.00  0.00      A    C  
+ATOM     18  N4  UNK A 454      41.594  54.934  32.652  1.00  0.00      A    N  
+ATOM     19  H7  UNK A 454      43.694  52.248  32.951  1.00  0.00      A    H  
+ATOM     20  H2  UNK A 454      44.333  50.369  34.369  1.00  0.00      A    H  
+ATOM     21  H   UNK A 454      44.108  49.790  37.148  1.00  0.00      A    H  
+ATOM     22  C1  UNK A 454      42.146  49.054  37.737  1.00  0.00      A    C  
+ATOM     23  C5  UNK A 454      42.675  48.761  39.003  1.00  0.00      A    C  
+ATOM     24  C10 UNK A 454      41.859  48.278  39.998  1.00  0.00      A    C
+ATOM     25  H8  UNK A 454      42.284  48.099  40.981  1.00  0.00      A    H  
+ATOM     26  H3  UNK A 454      43.752  48.806  39.135  1.00  0.00      A    H  
+ATOM     27  C3  UNK A 454      40.774  48.885  37.463  1.00  0.00      A    C  
+ATOM     28  H1  UNK A 454      40.310  49.079  36.500  1.00  0.00      A    H  
+ATOM     29  C8  UNK A 454      39.907  48.435  38.509  1.00  0.00      A    C  
+ATOM     30  H6  UNK A 454      38.833  48.310  38.406  1.00  0.00      A    H  
+ATOM     31  C12 UNK A 454      40.466  48.125  39.823  1.00  0.00      A    C  
+ATOM     32  C15 UNK A 454      39.627  47.605  40.833  1.00  0.00      A    C  
+ATOM     33  N3  UNK A 454      38.981  47.235  41.740  1.00  0.00      A    N """
 
-    # Copy source image files to the working directory
-    working_directory = os.getcwd()
-    destination_image_path = os.path.join(working_directory, os.path.basename(source_image_path))
-    destination_svg_path = os.path.join(working_directory, os.path.basename(source_svg_path))
-    destination_merged_image_path = os.path.join(working_directory, os.path.basename(source_merged_image_path))
-    shutil.copy(source_image_path, destination_image_path)
-    shutil.copy(source_svg_path, destination_svg_path)
-    shutil.copy(source_merged_image_path, destination_merged_image_path)
+    pdb_path = tmpdir.join("test_input.pdb")
+    pdb_path.write(pdb_content)
+    return str(pdb_path)
+
+def test_convert_pdb_to_sdf(pdb_file, tmpdir):
+    # Define the expected output SDF file path
+    expected_sdf_file = str(tmpdir.join("test_output.sdf"))
+
+    # Call the function with the test PDB file and output SDF file
+    convert_pdb_to_sdf(pdb_file, expected_sdf_file)
+
+    # Check if the output SDF file was created
+    assert os.path.isfile(expected_sdf_file)
 
 
-    # Print the current files in the working directory for debugging
-    files_in_working_directory = os.listdir(working_directory)
-    print("Files in Working Directory before:", files_in_working_directory)
-
-    # Run the function
-    merged_image_paths = create_and_merge_images(binding_mode, occurrence_percent, split_data, merged_image_paths)
-
-
-    # Print the current files in the working directory for debugging
-    files_in_working_directory = os.listdir(working_directory)
-    print("Files in Working Directory after:", files_in_working_directory)
-
-    # Check if the merged image file was created
-    assert len(merged_image_paths) == 1
-
-    # Check if the merged image file is a valid image
-    merged_image_path = merged_image_paths[0]
-    try:
-        with Image.open(merged_image_path) as img:
-            img.verify()
-    except Exception as e:
-        pytest.fail(f"Merged image file is not a valid image: {e}")
+@pytest.fixture
+def sample_pdb_info():
+    return """
+ATOM   741  N   UNK A 454      43.056  48.258  36.260  1.00  0.00      LIG  X  
+ATOM   742  N1  UNK A 454      44.324  47.906  35.996  1.00  0.00      LIG  X  
+ATOM   743  C14 UNK A 454      44.132  46.990  35.061  1.00  0.00      LIG  X  
+    """
 
 
-def test_max_width_and_height_calculation():
-    # Create some example images with different sizes
-    image1 = Image.new('RGB', (100, 200), (255, 255, 255))
-    image2 = Image.new('RGB', (150, 250), (255, 255, 255))
-    merged_images = [image1, image2]
+def test_process_pdb(sample_pdb_info):
+    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as temp_file:
+        temp_filename = temp_file.name
+        temp_file.write(sample_pdb_info)
 
-    # Calculate the maximum width and height
-    max_width = max(image.size[0] for image in merged_images)
-    max_height = max(image.size[1] for image in merged_images)
+    print("Temp Data:")
+    print(temp_filename)
+    output_filename = 'output_pdb_test.pdb'
+    process_pdb(temp_filename, output_filename)
 
-    # Assert the calculated max_width and max_height
-    assert max_width == 150
-    assert max_height == 250
+    with open(output_filename, 'r') as f:
+        modified_data = f.read()
 
-def test_big_figure_creation():
-    # Create example merged images
-    image1 = Image.new('RGB', (100, 200), (255, 255, 255))
-    image2 = Image.new('RGB', (150, 250), (255, 255, 255))
-    merged_images = [image1, image2]
+    print("Modified Data:")
+    print(modified_data)
 
-    # Calculate the maximum width and height
-    max_width = max(image.size[0] for image in merged_images)
-    max_height = max(image.size[1] for image in merged_images)
+    assert ' LIG  N' in modified_data
+    assert ' LIG  C' in modified_data
+    assert ' LIG  X' not in modified_data
 
-    # Determine the number of images per row (in your case, 2 images per row)
-    images_per_row = 2
+    # Clean up temporary and output files
+    os.remove(temp_filename)
+    os.remove(output_filename)
 
-    # Calculate the number of rows and columns required
-    num_rows = (len(merged_images) + images_per_row - 1) // images_per_row
-    total_width = max_width * images_per_row
-    total_height = max_height * num_rows
 
-    # Create a new image with the calculated width and height
-    big_figure = Image.new('RGB', (total_width, total_height), (255, 255, 255))  # Set background to white
+def test_extract_and_save_ligand_as_sdf():
+    input_pdb_filename = topology_metal
+    output_filename = "ligand_changed.sdf"
+    target_resname = ligand_resname
 
-    # Assert the dimensions of the created big_figure
-    assert big_figure.size == (300, 250)  # Width should be 300, height should be 250
+    extract_and_save_ligand_as_sdf(input_pdb_filename, output_filename, target_resname)
 
-def test_arranged_figure_generation():
-    binding_mode1_path = 'openmmdl/tests/data/openmmdl_analysis/rdkit_figure_generation/Binding_Mode_1_merged.png'
-    binding_mode2_path = 'openmmdl/tests/data/openmmdl_analysis/rdkit_figure_generation/Binding_Mode_2_merged.png'
-    all_modes_path = 'openmmdl/tests/data/openmmdl_analysis/rdkit_figure_generation/all_binding_modes_arranged.png'
-    working_directory = os.getcwd()
-    
-    # Print the working directory to verify it's as expected
-    print("Working Directory:", working_directory)
-
-    destination_path_1 = os.path.join(working_directory, os.path.basename(binding_mode1_path))
-    destination_path_2 = os.path.join(working_directory, os.path.basename(binding_mode2_path))
-    destination_path_all = os.path.join(working_directory, os.path.basename(all_modes_path))
-    
-    # Print the destination paths to verify they are constructed correctly
-    print("Destination Path 1:", destination_path_1)
-    print("Destination Path 2:", destination_path_2)
-    print("Destination Path All:", destination_path_all)
-
-    shutil.copy(binding_mode1_path, destination_path_1)
-    shutil.copy(binding_mode2_path, destination_path_2)
-    shutil.copy(all_modes_path, destination_path_all)
-    
-    merged_image_paths = ['Binding_Mode_1_merged.png', 'Binding_Mode_2_merged.png']
-    output_path = 'all_binding_modes_arranged.png'
-    output_path = os.path.join(working_directory, output_path)
-    print(output_path)
-
-    # Run the function
-    arranged_figure_generation(merged_image_paths, output_path)
-    print(output_path)
-
-    # Print the current files in the working directory for debugging
-    files_in_working_directory = os.listdir(working_directory)
-    print("Files in Working Directory:", files_in_working_directory)
-
-    output_path = os.path.join(working_directory, 'Binding_Modes_Markov_States', 'all_binding_modes_arranged.png')
-    print(output_path)
-
-    # Check if the output file was created
-    
-    assert output_path is not None
-
-# Run the tests
-if __name__ == '__main__':
-    pytest.main()
+    assert output_filename is not None
+    os.remove("ligand_changed.sdf")

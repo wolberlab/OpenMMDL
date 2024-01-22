@@ -17,6 +17,9 @@ from openmmdl.openmmdl_analysis.interaction_gathering import *
 test_data_directory = Path("openmmdl/tests/data/in")
 topology_file = f"{test_data_directory}/complex.pdb"
 frame_file = f"{test_data_directory}/processing_frame_1.pdb"
+topology_metal = f"{test_data_directory}/metal_top.pdb"
+trajetory_metal = f"{test_data_directory}/metal_traj_25.dcd"
+ligand_special = f"{test_data_directory}/ligand_special.pdb"
 
 binding_site_id = "UNK:X:0"
 lig_name = "UNK"
@@ -128,6 +131,66 @@ def test_process_frame_with_sample_data():
     for column in expected_columns:
         assert column in result.columns
 
+
+def test_process_frame_with_sample_data_special():
+    # Define a sample frame number
+    frame_number = 1
+    special='HEM'
+
+    destination_file = "processing_frame_1.pdb"
+    destination_file_complex = "complex.pdb"
+    
+    shutil.copy(frame_file, destination_file)
+    shutil.copy(str(ligand_special), '.')
+    shutil.copy(str(topology_metal), '.')
+    shutil.copy(topology_metal, destination_file_complex)
+
+    # Load the sample PDB file into an MDAnalysis Universe
+    sample_universe = mda.Universe(topology_metal, trajetory_metal)
+
+    # Call the process_frame function with the sample data for special ligand 'HEM'
+    result_special = process_frame(frame_number, sample_universe, lig_name, special='HEM')
+
+    # Define the expected columns you want to check for special ligand 'HEM'
+    expected_columns_special = ["FRAME", "INTERACTION", "TARGET_IDX", "RESTYPE", "LOCATION"]  # Add specific columns for special ligand 'HEM'
+
+    # Check if the result is a Pandas DataFrame for special ligand 'HEM'
+    assert isinstance(result_special, pd.DataFrame)
+
+    # Check if all expected columns are present in the result for special ligand 'HEM'
+    for column in expected_columns_special:
+        assert column in result_special.columns
+        
+    shutil.copy(topology_file, destination_file_complex)
+
+
+def test_process_frame_with_sample_data_peptide():
+    # Define a sample frame number
+    frame_number = 1
+
+    # Define paths and filenames
+    peptide_destination_file = f"processing_frame_1.pdb"
+
+    # Copy the frame file to the destination file for testing purposes
+    shutil.copy(frame_file, peptide_destination_file)
+
+    # Load the sample PDB file into an MDAnalysis Universe
+    sample_universe = mda.Universe(topology_file)
+
+    # Call the process_frame function with the sample data for peptide
+    result_peptide = process_frame(frame_number, sample_universe, lig_name, peptide='X', special=None)
+
+    # Define the expected columns you want to check for peptide
+    expected_columns_peptide = ["FRAME", "INTERACTION", "TARGET_IDX"]  # Add specific columns for peptide
+
+    # Check if the result is a Pandas DataFrame for peptide
+    assert isinstance(result_peptide, pd.DataFrame)
+
+    # Check if all expected columns are present in the result for peptide
+    for column in expected_columns_peptide:
+        assert column in result_peptide.columns
+
+
 def test_process_trajectory():
     topology_file = f"{test_data_directory}/0_unk_hoh.pdb"
     trajectory_file = f"{test_data_directory}/all_50.dcd"
@@ -143,25 +206,100 @@ def test_process_trajectory():
     assert interaction_list is not None
     assert len(interaction_list) > 10
     
+def test_process_frame_special_with_files():
+    test_data_directory = "openmmdl/tests/data/in"  # Replace with the actual path to your test data directory
+    topology_metal = f"{test_data_directory}/metal_top.pdb"
+    trajetory_metal = f"{test_data_directory}/metal_traj_25.dcd"
+
+    # Load PDB and DCD files using mdanalysis.Universe
+    import MDAnalysis as mda
+    u = mda.Universe(topology_metal, trajetory_metal)
+
+    lig_name = "UNK"  # Replace with the actual ligand name
+    special = "HEM"  # Replace with the actual special residue name
+    frame = 0
+
+    result = process_frame_special(frame, u, lig_name, special)
+
+    assert isinstance(result, list)
+    assert all(isinstance(df, pd.DataFrame) for df in result)
+
+    # Add more specific assertions based on the expected behavior of the function
+    # For example, check if the columns in the DataFrame are as expected, or if certain conditions hold
+
+    # Clean up any temporary files created during the test
+    for frame in range(len(u.trajectory)):
+        temp_file = f'processing_frame_{frame}.pdb'
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
+
+def test_process_frame_wrapper():
+
+    test_data_directory = "openmmdl/tests/data/in"  # Replace with the actual path to your test data directory
+    topology_metal = f"{test_data_directory}/metal_top.pdb"
+    trajetory_metal = f"{test_data_directory}/metal_traj_25.dcd"
+    ligand_special = f"{test_data_directory}/ligand_special.pdb"
+    shutil.copy(str(topology_metal), '.')
+    shutil.copy(str(trajetory_metal), '.')
+    shutil.copy(str(ligand_special), '.')
+    topology_metal = "metal_top.pdb"
+    trajetory_metal = "metal_traj_25.dcd"
+
+    # Load PDB and DCD files using MDAnalysis
+    pdb_md = mda.Universe(topology_metal, trajetory_metal)
+    lig_name = "UNK"  # Replace with the actual ligand name
+    special_ligand = "HEM"  # Replace with the actual special ligand name
+    peptide = None  # Replace with the actual peptide name
+    frame_idx = 2
+
+    args = (frame_idx, pdb_md, lig_name, special_ligand, peptide)
+    result = process_frame_wrapper(args)
+
+    # Perform assertions based on the expected behavior of the process_frame_special function
+    assert isinstance(result, tuple)
+    assert len(result) == 2
+    assert isinstance(result[0], int)
 
 
 def test_fill_missing_frames():
-    # Create a sample DataFrame with missing frames
-    data = {'FRAME': [1, 2, 4, 5],
-            'Value1': ['A', 'B', 'C', 'D']}
+    # Test Case 1: Basic functionality
+    data = {'FRAME': [1, 2, 4, 5], 'Value1': ['A', 'B', 'C', 'D']}
     df = pd.DataFrame(data)
     md_len = 6
-
-
-    # Call the fill_missing_frames function
-    filled_df = fill_missing_frames(df, md_len)  # md_len = 6, should include frames 1 to 5
-
-    # Assert that all frame numbers from 1 to 5 are present in the 'FRAME' column
+    filled_df = fill_missing_frames(df, md_len)
     assert all(filled_df['FRAME'] == [1, 2, 3, 4, 5])
-
-    # Assert that missing frames have 'Value1' column set to "skip"
     assert all(filled_df.loc[filled_df['FRAME'] == 3, 'Value1'] == 'skip')
 
-    assert isinstance(filled_df, pd.DataFrame)
+    # Test Case 4: No missing frames
+    no_missing_frames_data = {'FRAME': [1, 2, 3, 4, 5, 6], 'Value1': ['A', 'B', 'C', 'D', 'E', 'F']}
+    no_missing_frames_df = pd.DataFrame(no_missing_frames_data)
+    filled_no_missing_frames_df = fill_missing_frames(no_missing_frames_df, md_len=6)
+    assert all(filled_no_missing_frames_df['FRAME'] == [1, 2, 3, 4, 5, 6])  # Should remain unchanged
+
+    # Test Case 5: DataFrame with additional columns
+    data_with_extra_columns = {'FRAME': [1, 2, 4, 5], 'Value1': ['A', 'B', 'C', 'D'], 'Value2': [10, 20, 30, 40]}
+    df_with_extra_columns = pd.DataFrame(data_with_extra_columns)
+
+    # Ensure the original DataFrame has unique frame numbers
+    assert df_with_extra_columns['FRAME'].nunique() == len(df_with_extra_columns)
+
+    filled_df_extra_columns = fill_missing_frames(df_with_extra_columns, md_len=6)
+    expected_frames = [1, 2, 3, 4, 5]
+
+    # Debugging prints
+    print(f'Original DataFrame length: {len(df_with_extra_columns)}')
+    print(f'Filled DataFrame length: {len(filled_df_extra_columns)}')
+    print(f'Expected frames: {expected_frames}')
+
+    # Assert that the resulting DataFrame has unique frame numbers
+    assert filled_df_extra_columns['FRAME'].nunique() == len(filled_df_extra_columns)
+
+    # Assert that the resulting DataFrame has the expected frames
+    assert all(filled_df_extra_columns['FRAME'] == expected_frames)
+
+    # Assert that the length of the resulting DataFrame is equal to the length of expected frames
+    assert len(filled_df_extra_columns) == len(expected_frames)
+
+
 if __name__ == "__main":
     pytest.main()
