@@ -88,7 +88,6 @@ def main():
         #...
         process_trajectory_and_cluster(topology, trajectory, water_eps)
         analyze_protein_and_water_interaction(topology,"representative_waters.pdb", water_eps)
-        sys.exit()   
 
     
     # if input_formats[2] not in args.ligand_sdf:
@@ -396,17 +395,27 @@ def main():
     total_binding_modes = len(all_binding_modes)
     result_dict = {'Binding Mode': [], 'First Frame': [], 'All Frames': [], 'Representative Frame': [], 'Percentage Occurrence': []}
     modes_to_process = top_10_binding_modes.index
-    with multiprocessing.Pool(processes=cpu_count) as pool:
-        partial_process_mode = functools.partial(
-                process_mode,
-                grouped_frames_treshold=grouped_frames_treshold,
-                top_10_binding_modes=top_10_binding_modes,
-                total_binding_modes=total_binding_modes,
-                pdb_md=pdb_md,
-                ligand=ligand,
-                result_dict=result_dict
-            )
-        pool.map(partial_process_mode, modes_to_process)
+    for mode in tqdm(modes_to_process):
+        result_dict['Binding Mode'].append(mode)
+        first_frame = grouped_frames_treshold.loc[grouped_frames_treshold['Binding_fingerprint_treshold'].str.contains(mode), 'FRAME'].iloc[0]
+        all_frames = grouped_frames_treshold.loc[grouped_frames_treshold['Binding_fingerprint_treshold'].str.contains(mode), 'FRAME'].tolist()
+        percent_occurrence = (top_10_binding_modes[mode] / total_binding_modes) * 100
+        result_dict['First Frame'].append(first_frame)
+        result_dict['All Frames'].append(all_frames)
+        result_dict['Percentage Occurrence'].append(percent_occurrence)
+        representative_frame = calculate_representative_frame(pdb_md, all_frames, mode, ligand)
+        result_dict['Representative Frame'].append(representative_frame)
+    # with multiprocessing.Pool(processes=cpu_count) as pool:
+    #     partial_process_mode = functools.partial(
+    #             process_mode,
+    #             grouped_frames_treshold=grouped_frames_treshold,
+    #             top_10_binding_modes=top_10_binding_modes,
+    #             total_binding_modes=total_binding_modes,
+    #             pdb_md=pdb_md,
+    #             ligand=ligand,
+    #             result_dict=result_dict
+    #         )
+    #     pool.map(partial_process_mode, modes_to_process)
     top_10_binding_modes_df = pd.DataFrame(result_dict)
     top_10_binding_modes_df.to_csv('top_10_binding_modes.csv')
     print("\033[1mFound representative frame for each binding mode\033[0m")
