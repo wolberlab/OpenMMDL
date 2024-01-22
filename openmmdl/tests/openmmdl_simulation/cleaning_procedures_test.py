@@ -24,6 +24,26 @@ def test_cleanup(test_protein_name):
     # Check if the file has been removed
     assert not os.path.exists(f'output_{test_protein_name}')
 
+def test_cleanup(test_protein_name):
+    # Create dummy files to be removed
+    with open(f'output_{test_protein_name}', 'w') as dummy_output_file:
+        dummy_output_file.write("Dummy content for output file")
+
+    with open(f'centered_old_coordinates.pdb', 'w') as dummy_pdb_file:
+        dummy_pdb_file.write("Dummy content for pdb file")
+
+    with open(f'centered_old_coordinates.dcd', 'w') as dummy_dcd_file:
+        dummy_dcd_file.write("Dummy content for dcd file")
+
+    # Call the cleanup function
+    cleanup(test_protein_name)
+
+    # Check if the files have been removed
+    assert not os.path.exists(f'output_{test_protein_name}')
+    assert not os.path.exists('centered_old_coordinates.pdb')
+    assert not os.path.exists('centered_old_coordinates.dcd')
+
+
 def test_create_directory_if_not_exists(test_directory_path):
     # Create a test directory
     create_directory_if_not_exists(test_directory_path)
