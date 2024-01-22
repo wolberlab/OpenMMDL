@@ -5,16 +5,13 @@ from openmmforcefields.generators import GAFFTemplateGenerator
 
 def ff_selection(ff):
     """
-    Selects the required xml forcefield file.
-    Parameters
-    ----------
-    ff : str
-        Input of forcefield
-        
-    Returns
-    -------
-    forcefield_selection: str
-        Selected xml forcefield file.
+    Selects the required XML forcefield file.
+
+    Args:
+        ff (str): Input forcefield.
+
+    Returns:
+        str: Selected XML forcefield file.
     """
     forcefield_dict = {
         'AMBER14': 'amber14-all.xml',
@@ -27,21 +24,17 @@ def ff_selection(ff):
 
     return forcefield_dict.get(ff, None)
 
+
 def water_forcefield_selection(water, forcefield_selection):
     """
-    Select the XML filename for water force field parameters based on the chosen force field and water model.
+    Selects the XML filename for water force field parameters based on the chosen force field and water model.
 
-    Parameters
-    ----------
-    water : str 
-        The chosen water model.
-    forcefield_selection : str 
-        The selected force field.
+    Args:
+        water (str): The chosen water model.
+        forcefield_selection (str): The selected force field.
 
-    Returns
-    -------
-    water_model : str
-        The XML filename of the water forcefield.
+    Returns:
+        str: The XML filename of the water forcefield.
     """
     old_amber = {'amber99sb.xml', 'amber99sbildn.xml', 'amber03.xml', 'amber10.xml'}
 
@@ -78,25 +71,20 @@ def water_forcefield_selection(water, forcefield_selection):
             }
         }
         water_model = water_forcefields.get(forcefield_selection, {}).get(water, None)
-        
+
     return water_model
 
 
 def water_model_selection(water, forcefield_selection):
     """
-    Selects the required water model forcefield .xml file according to water selection and previous force field selection.
-    
-    Parameters
-    ----------
-    water : str
-        Water model input.
-    forcefield_selection : str
-        Input of selected forcefield .xml file.
-    
-    Returns
-    ----------
-    water_model : str
-        Water model forcefield .xml file.
+    Selects the required water model forcefield XML file according to water selection and previous force field selection.
+
+    Args:
+        water (str): Water model input.
+        forcefield_selection (str): Input of selected forcefield XML file.
+
+    Returns:
+        str: Water model forcefield XML file.
     """
     old_amber = {'amber99sb.xml', 'amber99sbildn.xml', 'amber03.xml', 'amber10.xml'}
 
@@ -136,75 +124,66 @@ def generate_forcefield(protein_ff, solvent_ff, add_membrane, rdkit_mol=None):
     """
     Generate an OpenMM Forcefield object and register a small molecule.
 
-    Parameters
-    ----------
-    protein_ff: str
-        Input of selected forcefield .xml File
-    solvent_ff: str
-        Input of selected water model forcefield .xml File
-    add_membrane = bool
-    	Selection if the system should be built with a membrane
-    rdkit_mol: rdkit.Chem.rdchem.Mol
-        Small molecule to register in the force field.
-    Returns
-    -------
-    forcefield: simtk.openmm.app.Forcefield
-        Forcefield with a registered small molecule.
+    Args:
+        protein_ff (str): Input of selected forcefield XML File.
+        solvent_ff (str): Input of selected water model forcefield XML File.
+        add_membrane (bool): Selection if the system should be built with a membrane.
+        rdkit_mol (rdkit.Chem.rdchem.Mol): Small molecule to register in the force field.
+
+    Returns:
+        simtk.openmm.app.Forcefield: Forcefield with a registered small molecule.
     """
     old_amber = {'amber99sb.xml', 'amber99sbildn.xml', 'amber03.xml', 'amber10.xml'}
-    
-    # For older amber forcefields the additional lipid17.xml is required for templates
+
+    # For older amber forcefields, the additional lipid17.xml is required for templates
     if add_membrane == True:
         if protein_ff in old_amber:
-            forcefield  = app.ForceField(protein_ff, solvent_ff, 'amber14/lipid17.xml')
+            forcefield = app.ForceField(protein_ff, solvent_ff, 'amber14/lipid17.xml')
         else:
-            forcefield = app.ForceField(protein_ff,solvent_ff)
+            forcefield = app.ForceField(protein_ff, solvent_ff)
     else:
-        forcefield = app.ForceField(protein_ff,solvent_ff)
-    
-    # If a ligand is present, a Forcefield with GAFF will be created for the ligand 
+        forcefield = app.ForceField(protein_ff, solvent_ff)
+
+    # If a ligand is present, a Forcefield with GAFF will be created for the ligand
     if rdkit_mol is not None:
         gaff = GAFFTemplateGenerator(
-            molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True), forcefield = 'gaff-2.11'
+            molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True),
+            forcefield='gaff-2.11'
         )
         forcefield.registerTemplateGenerator(gaff.generator)
 
     return forcefield
-    
+
+
 def generate_transitional_forcefield(protein_ff, solvent_ff, add_membrane, rdkit_mol=None):
     """
     Generate an OpenMM transitional forcefield object with TIP3P water model for membrane building and register a small molecule.
 
-    Parameters
-    ----------
-    protein_ff: str
-        Name of the force field in xml format.
-    solvent_ff: str
-        Name of the water model force field in xml format.
-    add_membrane = bool
-    	Selection if the system should be built with a membrane
-    rdkit_mol: rdkit.Chem.rdchem.Mol, optional
-        Small molecule to register in the force field.    
-    Returns
-    -------
-    transitional_forcefield: simtk.openmm.app.Forcefield
-        A transitional forcefield with tip3p water and a registered small molecule.
+    Args:
+        protein_ff (str): Name of the force field in XML format.
+        solvent_ff (str): Name of the water model force field in XML format.
+        add_membrane (bool): Selection if the system should be built with a membrane.
+        rdkit_mol (rdkit.Chem.rdchem.Mol): Small molecule to register in the force field.
+
+    Returns:
+        simtk.openmm.app.Forcefield: A transitional forcefield with TIP3P water and a registered small molecule.
     """
     old_amber = {'amber99sb.xml', 'amber99sbildn.xml', 'amber03.xml', 'amber10.xml'}
-    
-    # For older amber forcefields the additional lipid17.xml is required for templates
+
+    # For older amber forcefields, the additional lipid17.xml is required for templates
     if add_membrane == True:
         if protein_ff in old_amber:
-            transitional_forcefield  = app.ForceField(protein_ff, 'tip3p.xml', 'amber14/lipid17.xml')
+            transitional_forcefield = app.ForceField(protein_ff, 'tip3p.xml', 'amber14/lipid17.xml')
         else:
-            transitional_forcefield = app.ForceField(protein_ff,'amber14/tip3p.xml')
+            transitional_forcefield = app.ForceField(protein_ff, 'amber14/tip3p.xml')
     else:
-        transitional_forcefield = app.ForceField(protein_ff,solvent_ff)
-    
-    # If a ligand is present, a Forcefield with GAFF will be created for the ligand 
+        transitional_forcefield = app.ForceField(protein_ff, solvent_ff)
+
+    # If a ligand is present, a Forcefield with GAFF will be created for the ligand
     if rdkit_mol is not None:
         gaff = GAFFTemplateGenerator(
-            molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True), forcefield = 'gaff-2.11'
+            molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True),
+            forcefield='gaff-2.11'
         )
         transitional_forcefield.registerTemplateGenerator(gaff.generator)
 
