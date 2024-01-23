@@ -6,6 +6,37 @@ The **OpenMMDL Analysis** script creates output folders and files during and aft
 The following list contains an detailed overview of the folders and files:
 The Optional files are highlighted with an *asteriks**
 
+These are the files that are directly in the same folder, where you start the **OpenMMDL Analysis** from.
+
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Name
+     - Description
+   * - complex.pdb
+     - PDB file of the protein-ligand complex (with the special ligand).
+   * - df_all.csv
+     - Dataframe with the calculated interactions and generated binding mode fingerprints.
+   * - interactions_gathered.csv
+     - Dataframe with the calculated interactions before generating binding mode fingerprints.
+   * - lig.pdb
+     - PDB file of the ligand with hydrogens.
+   * - lig.smi
+     - Smiles file of the ligand.
+   * - ligand_numbering.png*
+     - 2D Depiction of the ligand with the correct Atom numbering, which makes it easier to recognize the interacting atoms in barcodes.
+   * - ligand_special.pdb*
+     - PDB File of the ligand with the special ligand.
+   * - lig_no_h.pdb
+     - PDB file of the ligand without hydrogens.
+   * - missing_frames_filled.csv
+     - Dataframe with the calculated interactions and added frames that have no interactions.
+   * - top_10_binding_modes.csv
+     - Dataframe with the top 10 Binding modes and their occurence.
+
+
 Barcodes
 ------------------------------
 **Barcodes**: A folder that contains the figures of the barcodes for the interactions.
