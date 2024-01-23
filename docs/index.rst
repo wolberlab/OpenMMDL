@@ -3,16 +3,6 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-OpenMMDL  @ Molecular Design Lab
-=========================================================
-.. image::
-   https://img.shields.io/badge/License-MIT-blue.svg
-   :target: https://opensource.org/licenses/MIT
-
-.. image:: https://readthedocs.org/projects/openmmdl/badge/?version=latest
-    :target: https://openmmdl.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
-
 .. figure:: /_static/images/OpenMMDL_logo_2.png
    :figwidth: 600px
    :align: center
@@ -65,14 +55,13 @@ OpenMMDL  @ Molecular Design Lab
 
 .. toctree::
    :maxdepth: 1
-   :caption: Developers:
+   :caption: API Docs
+   
+   openmmdl_simulation_functions
+   openmmdl_analysis_functions
 
-   api
 
-
-
-
-Indices and tables
+Introduction
 ==================
 
 * :ref:`genindex`
