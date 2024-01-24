@@ -81,7 +81,7 @@ from openmmdl.openmmdl_analysis.pml_writer import (
     generate_point_cloud_pml,
 )
 from openmmdl.openmmdl_analysis.find_stable_waters import (
-    process_trajectory_and_cluster,
+    stable_waters_pipeline,
     analyze_protein_and_water_interaction,
 )
 
@@ -207,7 +207,7 @@ def main():
     if not args.ligand_sdf and args.peptide == None and stable_water_analysis:
         print("All analyses will be run which can be done without a ligand present")
         # ...
-        process_trajectory_and_cluster(topology, trajectory, water_eps)
+        stable_waters_pipeline(topology, trajectory, water_eps)
         analyze_protein_and_water_interaction(
             topology, "representative_waters.pdb", water_eps
         )
@@ -826,7 +826,7 @@ def main():
     print("\033[1mAnalysis is Finished.\033[0m")
 
     if stable_water_analysis:
-        process_trajectory_and_cluster(topology, trajectory, water_eps)
+        stable_waters_pipeline(topology, trajectory, water_eps)
         analyze_protein_and_water_interaction(
             topology, "representative_waters.pdb", water_eps
         )
