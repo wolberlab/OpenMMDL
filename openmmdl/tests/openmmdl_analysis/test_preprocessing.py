@@ -9,10 +9,10 @@ from pathlib import Path
 import MDAnalysis as mda
 from openmmdl.openmmdl_analysis.preprocessing import *
 
-pdb_file_path = 'openmmdl/tests/data/in/0_unk_hoh.pdb' 
+pdb_file_path = "openmmdl/tests/data/in/0_unk_hoh.pdb"
 
 # Define test data paths
-test_data_directory =  Path("openmmdl/tests/data/in")
+test_data_directory = Path("openmmdl/tests/data/in")
 pdb_file = test_data_directory / "0_unk_hoh.pdb"
 topology_metal = f"{test_data_directory}/metal_top.pdb"
 ligand_resname = "UNK"
@@ -55,11 +55,13 @@ ATOM     31  C12 UNK A 454      40.466  48.125  39.823  1.00  0.00      A    C
 ATOM     32  C15 UNK A 454      39.627  47.605  40.833  1.00  0.00      A    C  
 ATOM     33  N3  UNK A 454      38.981  47.235  41.740  1.00  0.00      A    N """
 
+
 @pytest.fixture
 def input_pdb_filename(tmp_path):
     input_pdb_filename = tmp_path / "input.pdb"
-    with open(input_pdb_filename, 'w') as f:
-        f.write("""ATOM      1  N   SPC A 101      43.493  48.319  35.835  1.00  0.00      A    N  
+    with open(input_pdb_filename, "w") as f:
+        f.write(
+            """ATOM      1  N   SPC A 101      43.493  48.319  35.835  1.00  0.00      A    N  
 ATOM      2  O   TIP3 A 102      44.740  47.862  35.697  1.00  0.00      A    O  
 ATOM      3  C   *   A 103      44.608  46.866  34.829  1.00  0.00      A    C  
 ATOM      4  H   *   A 104      43.265  46.644  34.450  1.00  0.00      A    H  
@@ -82,33 +84,36 @@ ATOM     20  H   *   A 120      44.333  50.369  34.369  1.00  0.00      A    H
 ATOM     21  H   *   A 121      44.108  49.790  37.148  1.00  0.00      A    H  
 ATOM     22  C   *   A 122      42.146  49.054  37.737  1.00  0.00      A    C  
 ATOM     23  C   *   A 123      42.675  48.761  39.003  1.00  0.00      A    C  
-ATOM     24  C   *   A 124      41.859  48.278  39.998  1.00  0.00      A    C """)
+ATOM     24  C   *   A 124      41.859  48.278  39.998  1.00  0.00      A    C """
+        )
+
 
 def test_process_pdb_file():
     # Define the input and output file paths
     original_cwd = Path(os.getcwd())
     input_pdb_filename = test_data_directory / "0_unk_hoh.pdb"
 
-    shutil.copy(str(input_pdb_filename), '.')
+    shutil.copy(str(input_pdb_filename), ".")
 
     # Process the provided PDB file
     process_pdb_file(input_pdb_filename)
 
     # Read the modified output PDB file
-    with open(input_pdb_filename, 'r') as f:
+    with open(input_pdb_filename, "r") as f:
         modified_data = f.read()
 
     # Check if the modified data contains the expected residues
-    assert 'HOH' in modified_data
-    assert 'UNK' in modified_data
+    assert "HOH" in modified_data
+    assert "UNK" in modified_data
 
 
 def test_convert_pdb_to_sdf(tmp_path):
     input_pdb_filename = tmp_path / "input.pdb"
     output_sdf_filename = tmp_path / "output.sdf"
-    
+
     # Create a mock PDB file
-    input_pdb_filename.write_text("""ATOM      1  N   UNK A 454      43.493  48.319  35.835  1.00  0.00      A    N  
+    input_pdb_filename.write_text(
+        """ATOM      1  N   UNK A 454      43.493  48.319  35.835  1.00  0.00      A    N  
 ATOM      2  N1  UNK A 454      44.740  47.862  35.697  1.00  0.00      A    N  
 ATOM      3  C14 UNK A 454      44.608  46.866  34.829  1.00  0.00      A    C  
 ATOM      4  N2  UNK A 454      43.265  46.644  34.450  1.00  0.00      A    N  
@@ -140,17 +145,20 @@ ATOM     29  C8  UNK A 454      39.907  48.435  38.509  1.00  0.00      A    C
 ATOM     30  H6  UNK A 454      38.833  48.310  38.406  1.00  0.00      A    H  
 ATOM     31  C12 UNK A 454      40.466  48.125  39.823  1.00  0.00      A    C  
 ATOM     32  C15 UNK A 454      39.627  47.605  40.833  1.00  0.00      A    C  
-ATOM     33  N3  UNK A 454      38.981  47.235  41.740  1.00  0.00      A    N""")
+ATOM     33  N3  UNK A 454      38.981  47.235  41.740  1.00  0.00      A    N"""
+    )
 
     convert_pdb_to_sdf(str(input_pdb_filename), str(output_sdf_filename))
     assert output_sdf_filename.exists()
+
 
 def test_renumber_atoms_in_residues(sample_pdb_data, tmp_path):
     input_pdb_filename = tmp_path / "input.pdb"
     output_pdb_filename = tmp_path / "output.pdb"
 
     # Create a mock PDB file
-    input_pdb_filename.write_text("""ATOM      1  N   UNK A 454      43.493  48.319  35.835  1.00  0.00      A    N  
+    input_pdb_filename.write_text(
+        """ATOM      1  N   UNK A 454      43.493  48.319  35.835  1.00  0.00      A    N  
 ATOM      2  N1  UNK A 454      44.740  47.862  35.697  1.00  0.00      A    N  
 ATOM      3  C14 UNK A 454      44.608  46.866  34.829  1.00  0.00      A    C  
 ATOM      4  N2  UNK A 454      43.265  46.644  34.450  1.00  0.00      A    N  
@@ -182,10 +190,12 @@ ATOM     29  C8  UNK A 454      39.907  48.435  38.509  1.00  0.00      A    C
 ATOM     30  H6  UNK A 454      38.833  48.310  38.406  1.00  0.00      A    H  
 ATOM     31  C12 UNK A 454      40.466  48.125  39.823  1.00  0.00      A    C  
 ATOM     32  C15 UNK A 454      39.627  47.605  40.833  1.00  0.00      A    C  
-ATOM     33  N3  UNK A 454      38.981  47.235  41.740  1.00  0.00      A    N""")
+ATOM     33  N3  UNK A 454      38.981  47.235  41.740  1.00  0.00      A    N"""
+    )
 
-    renumber_atoms_in_residues(str(input_pdb_filename), str(output_pdb_filename), 'UNK')
+    renumber_atoms_in_residues(str(input_pdb_filename), str(output_pdb_filename), "UNK")
     assert output_pdb_filename.exists()
+
 
 @pytest.fixture
 def pdb_file(tmpdir):
@@ -228,6 +238,7 @@ ATOM     33  N3  UNK A 454      38.981  47.235  41.740  1.00  0.00      A    N "
     pdb_path.write(pdb_content)
     return str(pdb_path)
 
+
 def test_convert_pdb_to_sdf(pdb_file, tmpdir):
     # Define the expected output SDF file path
     expected_sdf_file = str(tmpdir.join("test_output.sdf"))
@@ -249,24 +260,24 @@ ATOM   743  C14 UNK A 454      44.132  46.990  35.061  1.00  0.00      LIG  X
 
 
 def test_process_pdb(sample_pdb_info):
-    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as temp_file:
+    with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
         temp_filename = temp_file.name
         temp_file.write(sample_pdb_info)
 
     print("Temp Data:")
     print(temp_filename)
-    output_filename = 'output_pdb_test.pdb'
+    output_filename = "output_pdb_test.pdb"
     process_pdb(temp_filename, output_filename)
 
-    with open(output_filename, 'r') as f:
+    with open(output_filename, "r") as f:
         modified_data = f.read()
 
     print("Modified Data:")
     print(modified_data)
 
-    assert ' LIG  N' in modified_data
-    assert ' LIG  C' in modified_data
-    assert ' LIG  X' not in modified_data
+    assert " LIG  N" in modified_data
+    assert " LIG  C" in modified_data
+    assert " LIG  X" not in modified_data
 
     # Clean up temporary and output files
     os.remove(temp_filename)
@@ -282,10 +293,12 @@ def test_extract_and_save_ligand_as_sdf():
 
     assert output_filename is not None
     os.remove("ligand_changed.sdf")
-    
+
+
 test_data_directory = Path("openmmdl/tests/data/in")
 TEST_LIGAND_FILE = f"{test_data_directory}/CVV.sdf"
 TEST_OUTPUT_FILE = "CVV.smi"
+
 
 def test_increase_ring_indices():
     # Test case 1: Check if ring indices are correctly increased
@@ -312,5 +325,3 @@ def test_convert_ligand_to_smiles():
     with open(TEST_OUTPUT_FILE, "r") as smi_file:
         smiles_lines = smi_file.readlines()
         assert len(smiles_lines) > 0  # Check that there are SMILES representations
-
-

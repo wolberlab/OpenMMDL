@@ -7,6 +7,7 @@ from tqdm import tqdm
 from io import StringIO
 from Bio.PDB import PDBParser
 
+
 def trace_waters(topology, trajectory, water_eps):
     # Get the total number of frames for the progress bar
     total_frames = len(u.trajectory)
@@ -77,7 +78,10 @@ def trace_waters(topology, trajectory, water_eps):
     )
     return stable_waters, total_frames
 
-def perform_clustering_and_writing(stable_waters, cluster_eps, total_frames, output_directory):
+
+def perform_clustering_and_writing(
+    stable_waters, cluster_eps, total_frames, output_directory
+):
     # Feature extraction: XYZ coordinates
     X = stable_waters[["Oxygen_X", "Oxygen_Y", "Oxygen_Z"]]
 
@@ -94,43 +98,45 @@ def perform_clustering_and_writing(stable_waters, cluster_eps, total_frames, out
         clustered_waters["Cluster_Label"] = labels
         clustered_waters = clustered_waters[clustered_waters["Cluster_Label"] != -1]
 
-        output_sub_directory = os.path.join(output_directory, f"clusterSize{min_samples}")
+        output_sub_directory = os.path.join(
+            output_directory, f"clusterSize{min_samples}"
+        )
         os.makedirs(output_sub_directory, exist_ok=True)
 
-        write_pdb_clusters_and_representatives(clustered_waters, min_samples, output_sub_directory)
+        write_pdb_clusters_and_representatives(
+            clustered_waters, min_samples, output_sub_directory
+        )
 
-def write_pdb_clusters_and_representatives(clustered_waters, min_samples, output_sub_directory):
+
+def write_pdb_clusters_and_representatives(
+    clustered_waters, min_samples, output_sub_directory
+):
     atom_counter = 1
-        pdb_file_counter = 1
-        print("cluster_eps:")
-        print(cluster_eps)
-        print("minsamples:")
-        print(min_samples)
-        sub_output_directory = output_sub_directory + "/clusterSize"
-        sub_output_directory += str(min_samples)
-        os.makedirs(sub_output_directory, exist_ok=True)
-        with pd.option_context(
-            "display.max_rows", None
-        ):  # Temporarily set display options
-            for label, cluster in clustered_waters.groupby("Cluster_Label"):
-                pdb_lines = []
+    pdb_file_counter = 1
+    print("cluster_eps:")
+    print(cluster_eps)
+    print("minsamples:")
+    print(min_samples)
+    sub_output_directory = output_sub_directory + "/clusterSize"
+    sub_output_directory += str(min_samples)
+    os.makedirs(sub_output_directory, exist_ok=True)
+    with pd.option_context("display.max_rows", None):  # Temporarily set display options
+        for label, cluster in clustered_waters.groupby("Cluster_Label"):
+            pdb_lines = []
+            for _, row in cluster.iterrows():
+                x, y, z = row["Oxygen_X"], row["Oxygen_Y"], row["Oxygen_Z"]
+                atom_counter = 1 if atom_counter > 9999 else atom_counter
+                pdb_line = f"ATOM{atom_counter:6}  O   WAT A{atom_counter:4}    {x:8.3f}{y:8.3f}{z:8.3f}  1.00  0.00           O\n"
+                pdb_lines.append(pdb_line)
+                atom_counter += 1
 
-                for _, row in cluster.iterrows():
-                    x, y, z = row["Oxygen_X"], row["Oxygen_Y"], row["Oxygen_Z"]
-                    atom_counter = 1 if atom_counter > 9999 else atom_counter
-                    pdb_line = f"ATOM{atom_counter:6}  O   WAT A{atom_counter:4}    {x:8.3f}{y:8.3f}{z:8.3f}  1.00  0.00           O\n"
-                    pdb_lines.append(pdb_line)
-                    atom_counter += 1
+            # Write the current cluster to a new PDB file
+            output_filename = os.path.join(sub_output_directory, f"cluster_{label}.pdb")
+            with open(output_filename, "w") as pdb_file:
+                pdb_file.write("".join(pdb_lines))
+                print(f"Cluster {label} written")
 
-                # Write the current cluster to a new PDB file
-                output_filename = os.path.join(
-                    sub_output_directory, f"cluster_{label}.pdb"
-                )
-                with open(output_filename, "w") as pdb_file:
-                    pdb_file.write("".join(pdb_lines))
-                    print(f"Cluster {label} written")
-
-                pdb_file_counter += 1
+            pdb_file_counter += 1
 
         # Write representative water molecules to a PDB file
         representative_waters = clustered_waters.groupby("Cluster_Label").mean()
@@ -144,7 +150,10 @@ def write_pdb_clusters_and_representatives(clustered_waters, min_samples, output
                 pdb_line = f"ATOM{index + 1:6}  O   WAT A{index + 1:4}    {x:8.3f}{y:8.3f}{z:8.3f}  1.00  0.00           O\n"
                 pdb_file.write(pdb_line)
 
-def stable_waters_pipeline(topology, trajectory, water_eps, output_directory="./stableWaters"):
+
+def stable_waters_pipeline(
+    topology, trajectory, water_eps, output_directory="./stableWaters"
+):
     # Load the PDB and DCD files
     u = mda.Universe(topology, trajectory)
     output_directory += "_clusterEps_"
@@ -152,22 +161,17 @@ def stable_waters_pipeline(topology, trajectory, water_eps, output_directory="./
     output_directory += strEps
     os.makedirs(output_directory, exist_ok=True)
     # Create a stable waters list by calling the process_trajectory_and_cluster function
-    stable_waters, total_frames = trace_waters(topology, trajectory, water_eps, output_directory)
+    stable_waters, total_frames = trace_waters(
+        topology, trajectory, water_eps, output_directory
+    )
     # Now call perform_clustering_and_writing with the returned values
-    perform_clustering_and_writing(stable_waters, water_eps, total_frames, output_directory)
+    perform_clustering_and_writing(
+        stable_waters, water_eps, total_frames, output_directory
+    )
+
 
 # Example usage
 # stable_waters_pipeline("topology_file", "trajectory_file", 0.5)
-
-
-
-
-
-
-
-
-
-
 
 
 # Call the function with the desired water type and specify the output directory
