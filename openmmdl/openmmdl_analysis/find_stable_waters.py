@@ -8,7 +8,9 @@ from io import StringIO
 from Bio.PDB import PDBParser
 
 
-def trace_waters(topology, trajectory, water_eps):
+def trace_waters(topology, trajectory, water_eps, output_directory):
+    
+    u = mda.Universe(topology, trajectory)
     # Get the total number of frames for the progress bar
     total_frames = len(u.trajectory)
     # Create an empty DataFrame to store stable water coordinates
@@ -20,7 +22,7 @@ def trace_waters(topology, trajectory, water_eps):
     prev_frame_coords = {}
 
     # Iterate through frames with tqdm for the progress bar
-    for ts in tqdm(u.trajectory, total=total_frames, desc="Processing frames"):
+    for ts in tqdm(u.trajectory, total=total_frames, desc="Processing frames for the wateranalysis"):
         frame_num = ts.frame
         frame_coords = {}
 
@@ -102,7 +104,8 @@ def perform_clustering_and_writing(
             output_directory, f"clusterSize{min_samples}"
         )
         os.makedirs(output_sub_directory, exist_ok=True)
-
+        print("cluster_eps:")
+        print(cluster_eps)
         write_pdb_clusters_and_representatives(
             clustered_waters, min_samples, output_sub_directory
         )
@@ -113,13 +116,9 @@ def write_pdb_clusters_and_representatives(
 ):
     atom_counter = 1
     pdb_file_counter = 1
-    print("cluster_eps:")
-    print(cluster_eps)
     print("minsamples:")
     print(min_samples)
-    sub_output_directory = output_sub_directory + "/clusterSize"
-    sub_output_directory += str(min_samples)
-    os.makedirs(sub_output_directory, exist_ok=True)
+    os.makedirs(output_sub_directory, exist_ok=True)
     with pd.option_context("display.max_rows", None):  # Temporarily set display options
         for label, cluster in clustered_waters.groupby("Cluster_Label"):
             pdb_lines = []
@@ -131,7 +130,7 @@ def write_pdb_clusters_and_representatives(
                 atom_counter += 1
 
             # Write the current cluster to a new PDB file
-            output_filename = os.path.join(sub_output_directory, f"cluster_{label}.pdb")
+            output_filename = os.path.join(output_sub_directory, f"cluster_{label}.pdb")
             with open(output_filename, "w") as pdb_file:
                 pdb_file.write("".join(pdb_lines))
                 print(f"Cluster {label} written")
@@ -142,7 +141,7 @@ def write_pdb_clusters_and_representatives(
         representative_waters = clustered_waters.groupby("Cluster_Label").mean()
         representative_waters.reset_index(inplace=True)
         representative_filename = os.path.join(
-            sub_output_directory, "representative_waters.pdb"
+            output_sub_directory, "representative_waters.pdb"
         )
         with open(representative_filename, "w") as pdb_file:
             for index, row in representative_waters.iterrows():
@@ -155,7 +154,6 @@ def stable_waters_pipeline(
     topology, trajectory, water_eps, output_directory="./stableWaters"
 ):
     # Load the PDB and DCD files
-    u = mda.Universe(topology, trajectory)
     output_directory += "_clusterEps_"
     strEps = str(water_eps).replace(".", "")
     output_directory += strEps
