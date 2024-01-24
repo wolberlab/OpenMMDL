@@ -66,26 +66,28 @@ def test_stable_waters_pipeline():
         shutil.rmtree(dir)
 
 
-
 def test_perform_clustering():
     # Load the stable_waters data from the CSV file
     stable_waters_df = pd.read_csv(csv_file_path)
 
     # Define test parameters
     cluster_eps = 2
-    
+
     u = mda.Universe(topology_file, trajectory_file)
     # Get the total number of frames for the progress bar
     total_frames = len(u.trajectory)
     output_directory = "./test_output_clustering"
 
     # Run the function
-    perform_clustering_and_writing(stable_waters_df, cluster_eps, total_frames, output_directory)
+    perform_clustering_and_writing(
+        stable_waters_df, cluster_eps, total_frames, output_directory
+    )
 
     # Define the regular expression pattern for matching the line
-    pattern = re.compile(r"ATOM\s+\d+\s+O\s+WAT\s+A\s+\d+\s+(-?\d+\.\d+)\s+(-?\d+\.\d+)\s+(-?\d+\.\d+)\s+1\.00\s+0\.00\s+O")
+    pattern = re.compile(
+        r"ATOM\s+\d+\s+O\s+WAT\s+A\s+\d+\s+(-?\d+\.\d+)\s+(-?\d+\.\d+)\s+(-?\d+\.\d+)\s+1\.00\s+0\.00\s+O"
+    )
 
-    
     # Assert subdirectory creation and file creation
     percentage_values = [25, 50, 75, 90, 99]
     for percent in percentage_values:
@@ -95,19 +97,25 @@ def test_perform_clustering():
         assert os.path.isdir(sub_directory), f"Subdirectory for {percent}% not created"
 
         # Assuming the names of files created, adjust as necessary
-        expected_files = ["cluster_0.pdb", "cluster_1.pdb"]  # Replace with actual expected file names
+        expected_files = [
+            "cluster_0.pdb",
+            "cluster_1.pdb",
+        ]  # Replace with actual expected file names
         for file_name in expected_files:
             file_path = os.path.join(sub_directory, file_name)
-            assert os.path.isfile(file_path), f"File {file_name} was not created in {sub_directory}"
-        
+            assert os.path.isfile(
+                file_path
+            ), f"File {file_name} was not created in {sub_directory}"
+
         # Check the contents of the files
         for file_name in expected_files:
             file_path = os.path.join(sub_directory, file_name)
-            with open(file_path, 'r') as file:
+            with open(file_path, "r") as file:
                 # Read file and search for the pattern
                 if not any(pattern.match(line) for line in file):
-                    assert False, f"File {file_name} does not contain the required line format"
- 
+                    assert (
+                        False
+                    ), f"File {file_name} does not contain the required line format"
 
     # Cleanup
     shutil.rmtree(output_directory)
@@ -119,7 +127,7 @@ def test_write_pdb_clusters_and_representatives():
         "Oxygen_X": [1.0, 2.0, 3.0],
         "Oxygen_Y": [4.0, 5.0, 6.0],
         "Oxygen_Z": [7.0, 8.0, 9.0],
-        "Cluster_Label": [0, 0, 1]
+        "Cluster_Label": [0, 0, 1],
     }
     clustered_waters = pd.DataFrame(data)
     min_samples = 2
@@ -130,10 +138,12 @@ def test_write_pdb_clusters_and_representatives():
     os.makedirs(output_sub_directory, exist_ok=True)
 
     # Run the function
-    write_pdb_clusters_and_representatives(clustered_waters, min_samples, output_sub_directory)
+    write_pdb_clusters_and_representatives(
+        clustered_waters, min_samples, output_sub_directory
+    )
 
     # Assert file creation
-    unique_labels = clustered_waters['Cluster_Label'].unique()
+    unique_labels = clustered_waters["Cluster_Label"].unique()
     for label in unique_labels:
         filename = os.path.join(output_sub_directory, f"cluster_{label}.pdb")
         assert os.path.isfile(filename), f"File {filename} not created"
@@ -142,9 +152,9 @@ def test_write_pdb_clusters_and_representatives():
     rep_file = os.path.join(output_sub_directory, "representative_waters.pdb")
     assert os.path.isfile(rep_file), "representative_waters.pdb not created"
 
-
     # Cleanup
     shutil.rmtree(output_sub_directory)
+
 
 def test_filter_and_parse_pdb():
     # Call the function with the sample PDB file
@@ -153,8 +163,8 @@ def test_filter_and_parse_pdb():
     # Check if the returned object is a Structure
     assert isinstance(structure, Structure), "The returned object is not a Structure"
 
+
 def test_find_interacting_residues():
-    
     representative_waters_file = test_data_directory / "representative_waters.pdb"
     distance_threshold = 2.0  # Example threshold
 
@@ -164,30 +174,39 @@ def test_find_interacting_residues():
 
     # Read representative_waters.pdb into a DataFrame
     waters_data = []
-    with open(representative_waters_file, 'r') as file:
+    with open(representative_waters_file, "r") as file:
         for line in file:
             if line.startswith("ATOM"):
                 parts = line.split()
                 x, y, z = map(float, parts[5:8])
                 waters_data.append([x, y, z])
-    representative_waters = pd.DataFrame(waters_data, columns=["Oxygen_X", "Oxygen_Y", "Oxygen_Z"])
+    representative_waters = pd.DataFrame(
+        waters_data, columns=["Oxygen_X", "Oxygen_Y", "Oxygen_Z"]
+    )
 
     # Run find_interacting_residues
-    interacting_residues = find_interacting_residues(structure, representative_waters, distance_threshold)
+    interacting_residues = find_interacting_residues(
+        structure, representative_waters, distance_threshold
+    )
 
     # Assert the results
     assert isinstance(interacting_residues, dict)
     # Example: Check if a specific water molecule interacts with any residues. We now fromthe test data that water 17 should interact.
     assert 17 in interacting_residues
 
+
 def test_read_pdb_as_dataframe():
     # Mock PDB file content
-    mock_pdb_content = "ATOM      1  O   WAT A   1      26.091  60.495  24.828  1.00  0.00           O\n" \
-                       "ATOM      2  O   WAT A   2      30.000  50.000  40.000  1.00  0.00           O\n"
+    mock_pdb_content = (
+        "ATOM      1  O   WAT A   1      26.091  60.495  24.828  1.00  0.00           O\n"
+        "ATOM      2  O   WAT A   2      30.000  50.000  40.000  1.00  0.00           O\n"
+    )
 
     # Expected data
     expected_data = [[26.091, 60.495, 24.828], [30.000, 50.000, 40.000]]
-    expected_df = pd.DataFrame(expected_data, columns=["Oxygen_X", "Oxygen_Y", "Oxygen_Z"])
+    expected_df = pd.DataFrame(
+        expected_data, columns=["Oxygen_X", "Oxygen_Y", "Oxygen_Z"]
+    )
 
     # Mock open function
     with patch("builtins.open", mock_open(read_data=mock_pdb_content)):
@@ -196,14 +215,15 @@ def test_read_pdb_as_dataframe():
 
     # Assert DataFrame content
     pd.testing.assert_frame_equal(result_df, expected_df)
-    
-    
-    
+
+
 def test_analyze_protein_and_water_interaction():
- # Paths to the real PDB files
+    # Paths to the real PDB files
 
     protein_pdb_file = topology_file
-    representative_waters_file = "representative_waters.pdb"  # Assuming this is the correct name
+    representative_waters_file = (
+        "representative_waters.pdb"  # Assuming this is the correct name
+    )
 
     # Setup output directory
     cluster_eps = 1.0  # Example value, adjust as needed
@@ -228,14 +248,13 @@ def test_analyze_protein_and_water_interaction():
         representative_waters_file,
         cluster_eps,
         str(test_output_directory),
-        distance_threshold=5.0
+        distance_threshold=5.0,
     )
 
     # Assert file creation in each subdirectory
     for subdir in mock_subdirectories:
         result_file = output_directory / subdir / "interacting_residues.csv"
         assert result_file.is_file(), f"File {result_file} not created"
-
 
     # Cleanup
     shutil.rmtree(output_directory)

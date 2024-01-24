@@ -9,7 +9,16 @@ from Bio.PDB import PDBParser
 
 
 def trace_waters(topology, trajectory, output_directory):
-    
+    """trace the water molecules in a trajectory and write all which move below one Angstrom distance. To adjust the distance alter the integer
+    Args:
+        topology (pdb_file_name): Path to the topology file.
+        trajectory (dcd_file_name): Path to the trajectory file.
+        output_directory (str): Directory where output files will be saved.
+
+    Returns:
+        pd.DataFrame: DataFrame containing stable water coordinates.
+        int: Total number of frames.
+    """
     u = mda.Universe(topology, trajectory)
     # Get the total number of frames for the progress bar
     total_frames = len(u.trajectory)
@@ -22,7 +31,9 @@ def trace_waters(topology, trajectory, output_directory):
     prev_frame_coords = {}
 
     # Iterate through frames with tqdm for the progress bar
-    for ts in tqdm(u.trajectory, total=total_frames, desc="Processing frames for the wateranalysis"):
+    for ts in tqdm(
+        u.trajectory, total=total_frames, desc="Processing frames for the wateranalysis"
+    ):
         frame_num = ts.frame
         frame_coords = {}
 
@@ -84,6 +95,16 @@ def trace_waters(topology, trajectory, output_directory):
 def perform_clustering_and_writing(
     stable_waters, cluster_eps, total_frames, output_directory
 ):
+    """
+    Args:
+        stable_waters (pd.DataFrame): DataFrame containing stable water coordinates.
+        cluster_eps (float): DBSCAN clustering epsilon parameter. This is in Angstrom in this case, and defines which Water distances should be within one cluster
+        total_frames (int): Total number of frames.
+        output_directory (str): Directory where output files will be saved.
+
+    Returns:
+        None, it writes files.
+    """
     # Feature extraction: XYZ coordinates
     X = stable_waters[["Oxygen_X", "Oxygen_Y", "Oxygen_Z"]]
 
@@ -115,6 +136,15 @@ def perform_clustering_and_writing(
 def write_pdb_clusters_and_representatives(
     clustered_waters, min_samples, output_sub_directory
 ):
+    """
+    Args:
+        clustered_waters (pd.DataFrame): DataFrame containing clustered water coordinates.
+        min_samples (int): Minimum number of samples for DBSCAN clustering.
+        output_sub_directory (str): Subdirectory where output PDB files will be saved.
+
+    Returns:
+        None, it will output PDB files.
+    """
     atom_counter = 1
     pdb_file_counter = 1
     print("minsamples:")
@@ -156,24 +186,37 @@ def write_pdb_clusters_and_representatives(
 def stable_waters_pipeline(
     topology, trajectory, water_eps, output_directory="./stableWaters"
 ):
+    """Function to run the pipeline to extract stable water clusters, and their representatives from a PDB & DCD file
+    Args:
+        topology (PDB_file_name): Path to the topology file.
+        trajectory (DCD_file_name): Path to the trajectory file.
+        water_eps (float): DBSCAN clustering epsilon parameter.
+        output_directory (str, optional): Directory where output files will be saved. Default is "./stableWaters".
+
+    Returns:
+        None, it starts the pipeline which will create output files.
+    """
     # Load the PDB and DCD files
     output_directory += "_clusterEps_"
     strEps = str(water_eps).replace(".", "")
     output_directory += strEps
     os.makedirs(output_directory, exist_ok=True)
     # Create a stable waters list by calling the process_trajectory_and_cluster function
-    stable_waters, total_frames = trace_waters(
-        topology, trajectory, output_directory
-    )
+    stable_waters, total_frames = trace_waters(topology, trajectory, output_directory)
     # Now call perform_clustering_and_writing with the returned values
     perform_clustering_and_writing(
         stable_waters, water_eps, total_frames, output_directory
     )
 
 
-
-
 def filter_and_parse_pdb(protein_pdb):
+    """This function reads in a PDB and returns the structure with bioparser.
+    Args:
+        protein_pdb (PDB_file_path): Path to a protein PDB file.
+
+    Returns:
+        Structure: PDB structure object.
+    """
     with open(protein_pdb, "r") as pdb_file:
         lines = [
             line
@@ -199,6 +242,15 @@ def filter_and_parse_pdb(protein_pdb):
 
 
 def find_interacting_residues(structure, representative_waters, distance_threshold):
+    """This function maps waters (e.g. the representative waters) to interacting residues of a different PDB structure input. Use "filter_and_parse_pdb" to get the input for this function
+    Args:
+        structure (Structure): PDB structure object.
+        representative_waters (pd.DataFrame): DataFrame containing representative water coordinates.
+        distance_threshold (float): Threshold distance for identifying interacting residues.
+
+    Returns:
+        dict: Dictionary mapping cluster numbers to interacting residues.
+    """
     interacting_residues = {}
 
     for model in structure:
@@ -233,6 +285,13 @@ def find_interacting_residues(structure, representative_waters, distance_thresho
 
 
 def read_pdb_as_dataframe(pdb_file):
+    """Helper function reading a PDB
+    Args:
+        pdb_file (str): Path to the PDB file.
+
+    Returns:
+        pd.DataFrame: DataFrame containing PDB data.
+    """
     lines = []
     with open(pdb_file, "r") as f:
         lines = f.readlines()
@@ -261,6 +320,17 @@ def analyze_protein_and_water_interaction(
     output_directory="./stableWaters",
     distance_threshold=5.0,
 ):
+    """Analyse the interaction of residues to water molecules using a threshold that can be specified when calling the function
+    Args:
+        protein_pdb_file (str): Path to the protein PDB file without waters.
+        representative_waters_file (str): Path to the representative waters PDB file, or any PDB file containing only waters
+        cluster_eps (float): DBSCAN clustering epsilon parameter.
+        output_directory (str, optional): Directory where output files will be saved. Default is "./stableWaters".
+        distance_threshold (float, optional): Threshold distance for identifying interacting residues. Default is 5.0 (Angstrom).
+
+    Returns:
+        None, it will write a csv file.
+    """
     output_directory += "_clusterEps_"
     strEps = str(cluster_eps).replace(".", "")
     output_directory += strEps
