@@ -8,7 +8,7 @@ from io import StringIO
 from Bio.PDB import PDBParser
 
 
-def trace_waters(topology, trajectory, water_eps, output_directory):
+def trace_waters(topology, trajectory, output_directory):
     
     u = mda.Universe(topology, trajectory)
     # Get the total number of frames for the progress bar
@@ -98,6 +98,7 @@ def perform_clustering_and_writing(
 
         clustered_waters = stable_waters.copy()
         clustered_waters["Cluster_Label"] = labels
+        print(clustered_waters["Cluster_Label"])
         clustered_waters = clustered_waters[clustered_waters["Cluster_Label"] != -1]
 
         output_sub_directory = os.path.join(
@@ -150,6 +151,8 @@ def write_pdb_clusters_and_representatives(
                 pdb_file.write(pdb_line)
 
 
+# Example usage
+# stable_waters_pipeline("topology_file", "trajectory_file", 0.5)
 def stable_waters_pipeline(
     topology, trajectory, water_eps, output_directory="./stableWaters"
 ):
@@ -160,7 +163,7 @@ def stable_waters_pipeline(
     os.makedirs(output_directory, exist_ok=True)
     # Create a stable waters list by calling the process_trajectory_and_cluster function
     stable_waters, total_frames = trace_waters(
-        topology, trajectory, water_eps, output_directory
+        topology, trajectory, output_directory
     )
     # Now call perform_clustering_and_writing with the returned values
     perform_clustering_and_writing(
@@ -168,12 +171,6 @@ def stable_waters_pipeline(
     )
 
 
-# Example usage
-# stable_waters_pipeline("topology_file", "trajectory_file", 0.5)
-
-
-# Call the function with the desired water type and specify the output directory
-# process_trajectory_and_cluster("your_topology.pdb", "your_trajectory.dcd", water_eps=1.0, min_samples=1500, output_directory=".")
 
 
 def filter_and_parse_pdb(protein_pdb):
@@ -256,7 +253,7 @@ def read_pdb_as_dataframe(pdb_file):
     return representative_waters
 
 
-# Encapsulate the code in a function
+# Analyse protein and water interaction, get the residues and the corresponding weater molecules that interact.
 def analyze_protein_and_water_interaction(
     protein_pdb_file,
     representative_waters_file,
