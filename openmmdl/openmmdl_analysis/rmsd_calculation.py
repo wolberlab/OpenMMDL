@@ -4,9 +4,8 @@ import numpy as np
 import os
 
 import MDAnalysis as mda
-import MDAnalysis.transformations as trans
 
-from MDAnalysis.analysis import rms, diffusionmap, align
+from MDAnalysis.analysis import rms, diffusionmap
 from MDAnalysis.analysis.distances import dist
 
 

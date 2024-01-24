@@ -6,6 +6,37 @@ The **OpenMMDL Analysis** script creates output folders and files during and aft
 The following list contains an detailed overview of the folders and files:
 The Optional files are highlighted with an *asteriks**
 
+These are the files that are directly in the same folder, where you start the **OpenMMDL Analysis** from.
+
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Name
+     - Description
+   * - complex.pdb
+     - PDB file of the protein-ligand complex (with the special ligand).
+   * - df_all.csv
+     - Dataframe with the calculated interactions and generated binding mode fingerprints.
+   * - interactions_gathered.csv
+     - Dataframe with the calculated interactions before generating binding mode fingerprints.
+   * - lig.pdb
+     - PDB file of the ligand with hydrogens.
+   * - lig.smi
+     - Smiles file of the ligand.
+   * - ligand_numbering.png*
+     - 2D Depiction of the ligand with the correct Atom numbering, which makes it easier to recognize the interacting atoms in barcodes.
+   * - ligand_special.pdb*
+     - PDB File of the ligand with the special ligand.
+   * - lig_no_h.pdb
+     - PDB file of the ligand without hydrogens.
+   * - missing_frames_filled.csv
+     - Dataframe with the calculated interactions and added frames that have no interactions.
+   * - top_10_binding_modes.csv
+     - Dataframe with the top 10 Binding modes and their occurence.
+
+
 Barcodes
 ------------------------------
 **Barcodes**: A folder that contains the figures of the barcodes for the interactions.
@@ -40,7 +71,7 @@ Barcodes
 Binding_Modes_Markov_States
 ------------------------------
 
-**Binding_Modes_Markov_States**: A folder that contains the figures of the Markov state figures and 2D depiction figure of the  top 10 occuring binding modes.
+**Binding_Modes_Markov_States**: A folder that contains the figures of the markov state figures and 2D depiction figure of the top 10 occuring binding modes in addition to PDB and PML files of the representative frames of the binding modes.
 
 
 .. list-table::
@@ -49,18 +80,24 @@ Binding_Modes_Markov_States
 
    * - Name
      - Description
-   * - checkpoint.chk
-     - Checkpoint saved every 10000 steps.
-   * - 10x_checkpoint.chk
-     - Checkpoint saved every 100000 steps.
-   * - 100x_checkpoint.chk*
-     - Checkpoint saved every 1000000 steps.
+   * - all_binding_modes_arranged.png
+     - Figure of the 2D depictions of the top 10 binding modes with the interacting protein partners.
+   * - Binding_mode_x.pdb
+     - PDB File of the representative frame of the binding mode.
+   * - Binding_mode_x.pml*
+     - PML File of the representative frame of the binding mode.
+   * - markov_chain_plot_1.png
+     - Markov Chain Figure displaying Binding modes with a minimum transition of 1% of the frames between the binding modes.
+   * - markov_chain_plot_2.png
+     - Markov Chain Figure displaying Binding modes with a minimum transition of 2% of the frames between the binding modes.
+   * - markov_chain_plot_5.png
+     - Markov Chain Figure displaying Binding modes with a minimum transition of 5% of the frames between the binding modes.
+   * - markov_chain_plot_10.png
+     - Markov Chain Figure displaying Binding modes with a minimum transition of 10% of the frames between the binding modes.
 
-MD Files
+RMSD
 ------------------------------
-**MD Files**: A folder that contains the files that were generated during the MD Simulation. This folder contains 3 subfolders.
-
-*Pre MD*: Folder that contains the files that were prepared by the script before the MD Simulation.
+**RMSD**: A folder that contains the files for the RMSD calculation during the simulation. The RMSD over time is default, while the RMSD between the frames is optional
 
 .. list-table::
    :header-rows: 1
@@ -68,46 +105,16 @@ MD Files
 
    * - Name
      - Description
-   * - prepared_no_solvent_protein_name.pdb
-     - Prepared PDB File without solvent or membrane.
-   * - solvent_padding_protein_name.pdb*
-     - Prepared PDB File with padding solvent.
-   * - solvent_absoulte_protein_name.pdb*
-     - Prepared PDB File with absolute solvent.
-   * - membrane_protein_name.pdb*
-     - Prepared PDB File with membrane.
+   * - RMSD_over_time.csv
+     - CSV File with the values of the RMSD  of the protein/backbone/ligand during the simulation time.
+   * - RMSD_over_time.png
+     - Figure of the RMSD of the protein/backbone/ligand during the simulation time.
+   * - RMSD_between_the_frames.png*
+     - Matrix figure displaying the RMSD between each consecutive frame.
 
-*Minimization Equilibration*: Folder that contains topology files after the minimization and equilibration with **OpenMM**.
-
-.. list-table::
-   :header-rows: 1
-   :widths: 25 75
-
-   * - Name
-     - Description
-   * - Energyminimization_protein_name.pdb
-     - Prepared PDB File after OpenMM energy minimization.
-   * - Equilibration_protein_name.pdb
-     - Prepared PDB File after OpenMM energy minimization and equilibration.
-
-*MD Output*: Folder that contains the Output trajectory files generated during the MD Simulation.
-
-
-.. list-table::
-   :header-rows: 1
-   :widths: 25 75
-
-   * - Name
-     - Description
-   * - output_protein_name.pdb
-     - PDB Topology File of the first frame of the simulation.
-   * - trajectory.dcd
-     - Trajectory of the OpenMM Simulation.
-
-
-MD Postprocessing
+Visualization
 ------------------------------
-**MD Postprocessing**: A folder that contains the postprocessing files after the MD Simulation.
+**Visualization**: A folder that contains the files necessary for the visualization of the output in nglview.
 
 .. list-table::
    :header-rows: 1
@@ -132,45 +139,5 @@ MD Postprocessing
    * - prot_lig_traj_unaligned.xtc*
      - Trajectory File of the unaligned centered protein in XTC Format with only protein and ligand atoms and new coordinates.
      
-Final Output
-------------------------------
-**Final Output**: A folder that contains the final files after the MD Simulation, ready to be analyzed. This folder contains 2 subfolders.
 
-1. *All Atoms*: Folder that contains the centered topology files of all atoms with new coordinates according to the center of mass.
-
-.. list-table::
-   :header-rows: 1
-   :widths: 25 75
-
-   * - Name
-     - Description
-   * - centered_top.pdb*
-     - Topology File of the centered protein in PDB Format with all atoms and new coordinates.
-   * - centered_top.gro*
-     - Topology File of the centered protein in Gromacs GRO Format with all atoms and new coordinates.
-   * - centered_traj.dcd*
-     - Trajectory File of the aligned centered protein in DCD Format with all atoms and new coordinates.
-   * - centered_traj.xtc*
-     - Trajectory File of the aligned centered protein in XTC Format with all atoms and new coordinates.
-
-
-
-2. *Prot Lig*: Folder that contains the centered topology files of only the protein and ligand atoms with new coordinates according to the center of mass.
-
-
-
-.. list-table::
-   :header-rows: 1
-   :widths: 25 75
-
-
-   * - Name
-     - Description
-   * - prot_lig_top.pdb*
-     - Topology File of the centered protein in PDB Format with only protein and ligand atoms and new coordinates.
-   * - prot_lig_top.gro*
-     - Topology File of the centered protein in Gromacs GRO Format with only protein and ligand atoms and new coordinates.
-   * - prot_lig_traj.dcd*
-     - Trajectory File of the centered protein in DCD Format with only protein and ligand atoms and new coordinates.
-   * - prot_lig_traj.xtc*
      - Trajectory File of the centered protein in XTC Format with only protein and ligand atoms and new coordinates.
