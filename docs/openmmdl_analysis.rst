@@ -22,18 +22,23 @@ Mandatory:
 
     -t = topology file of the simulation (in .pdb format)
     -d = trajectory file of the simulation (in .dcd format)
-    -l = ligand by itself as reference for the analysis (in .sdf format)
-    -n = name of the ligand in the topology file 
+
 
 Optional:
 
 .. code-block:: text
 
+    -n = Ligand Name (3 Letter Code in PDB)
+    -l = Ligand in SDF Format
     -b = binding mode treshold. Is used to remove interactions under the defined procentual occurence from the binding mode generation. The default is 40% (accepted values: 0-100)
-    -df = dataframe file. Can be used if previous analysis was allready performed and the dataframe file is available. This will skip the analysis of the trajectory and go straight to the output generation. The default name of this file is "interactions_gathered.csv"
+    -df = Dataframe (use if the interactions were already calculated, default name would be "interactions_gathered.csv")
     -m = minimal transition threshold. Is used for the display of the binding mode transitions in the markov state chains network figure. The default value is 1
-    -c = CPU count. The number of CPU's to be used for interaction calculation. The default is is half of the available CPU's
-    -p = output .pml files. This will generate .pml files for each binding mode as well as a .pml of the point clouds. The default is False (accepted values: True/False)
+    -c = CPU count, specify how many CPUs should be used, default is half of the CPU count.
+    -p = Generate .pml files for pharmacophore visualization. The default is False (accepted values: True/False)
+    -s = special ligand name to calculate interactions with special ligands.
+    -nuc = Treat nucleic acids as receptor
+    -pep = Calculate interactions with peptides. Give the peptides chain name as input. Defaults to None
+    -r = Calculate RMSD difference between frames. The default is False (accepted values: True/False)
     -w = stable-water-analysis. Defines if the analysis of stable water molecules should be performed. The default is False (accepted values: True/False)
     --watereps = the EPS of the clutering part during the water analysis. will only result in something if "-w True" is added. Accepts float (in Angstrom). 
 
