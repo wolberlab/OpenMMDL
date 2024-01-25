@@ -3,12 +3,12 @@
 
 The **OpenMMDL Simulation** script creates output folders and files during and after the simulation.
 
-The following list contains an detailed overview of the folders and files:
-The Optional files are highlighted with an *asteriks**
+The following list contains a detailed overview of the folders and files:
+The Optional files are highlighted with an *asterisk**
 
 Input Files
 ------------------------------
-**Input Files**: A folder that contains the PDF and SDF files, which served as Input Files for the MD Simulation.
+**Input Files**: A folder that contains the PDB and SDF files, which served as input files for the MD simulation.
 
 
 
@@ -19,9 +19,9 @@ Input Files
    * - Name
      - Description
    * - Protein_name.pdb*
-     - Protein PDB File that served as the input for the MD Simulation.
+     - Protein PDB file that served as the input for the MD simulation.
    * - ligand_name.sdf*
-     - Ligand SDF File that served as the input for the MD Simulation.
+     - Ligand SDF file that served as the input for the MD simulation.
 
 Checkpoints
 ------------------------------
@@ -44,9 +44,9 @@ Checkpoints
 
 MD Files
 ------------------------------
-**MD Files**: A folder that contains the files that were generated during the MD Simulation. This folder contains 3 subfolders.
+**MD Files**: A folder that contains the files that were generated during the MD simulation. This folder contains 3 subfolders.
 
-*Pre MD*: Folder that contains the files that were prepared by the script before the MD Simulation.
+*Pre MD*: Folder that contains the files that were prepared by the script before the MD simulation.
 
 .. list-table::
    :header-rows: 1
@@ -55,13 +55,13 @@ MD Files
    * - Name
      - Description
    * - prepared_no_solvent_protein_name.pdb
-     - Prepared PDB File without solvent or membrane.
+     - Prepared PDB file without solvent or membrane.
    * - solvent_padding_protein_name.pdb*
-     - Prepared PDB File with padding solvent.
+     - Prepared PDB file with padding solvent.
    * - solvent_absoulte_protein_name.pdb*
-     - Prepared PDB File with absolute solvent.
+     - Prepared PDB file with absolute solvent.
    * - membrane_protein_name.pdb*
-     - Prepared PDB File with membrane.
+     - Prepared PDB file with membrane.
 
 *Minimization Equilibration*: Folder that contains topology files after the minimization and equilibration with **OpenMM**.
 
@@ -72,11 +72,11 @@ MD Files
    * - Name
      - Description
    * - Energyminimization_protein_name.pdb
-     - Prepared PDB File after OpenMM energy minimization.
+     - Prepared PDB file after OpenMM energy minimization.
    * - Equilibration_protein_name.pdb
-     - Prepared PDB File after OpenMM energy minimization and equilibration.
+     - Prepared PDB file after OpenMM energy minimization and equilibration.
 
-*MD Output*: Folder that contains the Output trajectory files generated during the MD Simulation.
+*MD Output*: Folder that contains the output trajectory files generated during the MD simulation.
 
 
 .. list-table::
@@ -86,14 +86,14 @@ MD Files
    * - Name
      - Description
    * - output_protein_name.pdb
-     - PDB Topology File of the first frame of the simulation.
+     - PDB topology file of the first frame of the simulation.
    * - trajectory.dcd
      - Trajectory of the OpenMM Simulation.
 
 
 MD Postprocessing
 ------------------------------
-**MD Postprocessing**: A folder that contains the postprocessing files after the MD Simulation.
+**MD Postprocessing**: A folder that contains the postprocessing files after the MD simulation.
 
 .. list-table::
    :header-rows: 1
@@ -102,25 +102,25 @@ MD Postprocessing
    * - Name
      - Description
    * - centered_old_coordinates_top.pdb
-     - Topology File of the centered protein in PDB Format.
+     - Topology file of the centered protein in PDB format.
    * - centered_old_coordinates_top.gro
-     - Topology File of the centered protein in Gromacs GRO Format.
+     - Topology file of the centered protein in Gromacs GRO format.
    * - centered_old_coordinates.dcd
-     - Trajectory File of the centered protein in DCD Format.
+     - Trajectory file of the centered protein in DCD format.
    * - centered_old_coordinates.xtc
-     - Trajectory File of the centered protein in XTC Format.
+     - Trajectory file of the centered protein in XTC format.
    * - centered_traj_unaligned.dcd
-     - Trajectory File of the unaligned centered protein in DCD Format with all atoms and new coordinates.
+     - Trajectory file of the unaligned centered protein in DCD format with all atoms and new coordinates.
    * - centered_traj_unaligned.xtc
-     - Trajectory File of the unaligned centered protein in XTC Format with all atoms and new coordinates.
+     - Trajectory file of the unaligned centered protein in XTC format with all atoms and new coordinates.
    * - prot_lig_traj_unaligned.dcd*
-     - Trajectory File of the unaligned centered protein in DCD Format with only protein and ligand atoms and new coordinates.
+     - Trajectory file of the unaligned centered protein in DCD format with only protein and ligand atoms and new coordinates.
    * - prot_lig_traj_unaligned.xtc*
-     - Trajectory File of the unaligned centered protein in XTC Format with only protein and ligand atoms and new coordinates.
+     - Trajectory file of the unaligned centered protein in XTC format with only protein and ligand atoms and new coordinates.
      
 Final Output
 ------------------------------
-**Final Output**: A folder that contains the final files after the MD Simulation, ready to be analyzed. This folder contains 2 subfolders.
+**Final Output**: A folder that contains the final files after the MD simulation, ready to be analyzed. This folder contains 2 subfolders.
 
 1. *All Atoms*: Folder that contains the centered topology files of all atoms with new coordinates according to the center of mass.
 
@@ -131,13 +131,13 @@ Final Output
    * - Name
      - Description
    * - centered_top.pdb*
-     - Topology File of the centered protein in PDB Format with all atoms and new coordinates.
+     - Topology file of the centered protein in PDB format with all atoms and new coordinates.
    * - centered_top.gro*
-     - Topology File of the centered protein in Gromacs GRO Format with all atoms and new coordinates.
+     - Topology file of the centered protein in Gromacs GRO format with all atoms and new coordinates.
    * - centered_traj.dcd*
-     - Trajectory File of the aligned centered protein in DCD Format with all atoms and new coordinates.
+     - Trajectory file of the aligned centered protein in DCD format with all atoms and new coordinates.
    * - centered_traj.xtc*
-     - Trajectory File of the aligned centered protein in XTC Format with all atoms and new coordinates.
+     - Trajectory file of the aligned centered protein in XTC format with all atoms and new coordinates.
 
 
 
@@ -153,10 +153,10 @@ Final Output
    * - Name
      - Description
    * - prot_lig_top.pdb*
-     - Topology File of the centered protein in PDB Format with only protein and ligand atoms and new coordinates.
+     - Topology file of the centered protein in PDB format with only protein and ligand atoms and new coordinates.
    * - prot_lig_top.gro*
-     - Topology File of the centered protein in Gromacs GRO Format with only protein and ligand atoms and new coordinates.
+     - Topology file of the centered protein in Gromacs GRO format with only protein and ligand atoms and new coordinates.
    * - prot_lig_traj.dcd*
-     - Trajectory File of the centered protein in DCD Format with only protein and ligand atoms and new coordinates.
+     - Trajectory file of the centered protein in DCD format with only protein and ligand atoms and new coordinates.
    * - prot_lig_traj.xtc*
-     - Trajectory File of the centered protein in XTC Format with only protein and ligand atoms and new coordinates.
+     - Trajectory file of the centered protein in XTC format with only protein and ligand atoms and new coordinates.
