@@ -119,7 +119,6 @@ def perform_clustering_and_writing(
 
         clustered_waters = stable_waters.copy()
         clustered_waters["Cluster_Label"] = labels
-        print(clustered_waters["Cluster_Label"])
         clustered_waters = clustered_waters[clustered_waters["Cluster_Label"] != -1]
 
         output_sub_directory = os.path.join(
