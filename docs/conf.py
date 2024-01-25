@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'openmmdl'
-copyright = ("2022, Valerij Talagayev & Yu Chen. Project structure based on the "
+copyright = ("2022, Valerij Talagayev, Yu Chen, Niklas Piet Doering & Leon Obendorf. Project structure based on the "
              "Computational Molecular Science Python Cookiecutter version 1.1")
 author = 'Valerij Talagayev & Yu Chen'
 
