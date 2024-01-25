@@ -34,6 +34,8 @@ Optional:
     -m = minimal transition threshold. Is used for the display of the binding mode transitions in the markov state chains network figure. The default value is 1
     -c = CPU count. The number of CPU's to be used for interaction calculation. The default is is half of the available CPU's
     -p = output .pml files. This will generate .pml files for each binding mode as well as a .pml of the point clouds. The default is False (accepted values: True/False)
+    -w = stable-water-analysis. Defines if the analysis of stable water molecules should be performed. The default is False (accepted values: True/False)
+    --watereps = the EPS of the clutering part during the water analysis. will only result in something if "-w True" is added. Accepts float (in Angstrom). 
 
 Application
 ------------------------------
@@ -118,3 +120,7 @@ After editing the variables, you can run the whole notebook and view the interac
     :align: center
     
 (CDK2 receptor with ligand LS3 (PDB: 1KE7))
+
+Stable water analysis
+------------------------------
+This feature will analyze if within the MD stable water molecules are present. It will first collect all water molecules that move only slightly during the MD, then create clusters, where the clustzer size is the EPS value given by --watereps (e.g. --waterepes 1.0, for clusters in the size of 1 Angstrom). All clusters are exported as PDBs with atoms at the position where a stable watermolecule was present within the respective cluster. This will be performed for clusters present in 25% of the MD, 50%, 75%, 90% and 99% in seperate folders. Furthermore, for each of these percentages one PDB with "representative water molecules" will be written. This contains one water moelcule for each cluster. You can load this water PDB onto the protein. Lastly the stable water analysis will output a csv file containing the interactions of protein residues with stable waters (using the representative water molecules). This function could potentially be called with any PDB file containing only waters and one PDB file containing a Protein (with or without ligand), and would result into a list of which residue might interact with which water molecule. Overall the stable water analysis might be useful for inhibitor optimization and determining structure activity relationship. Further information and example images are given within the OpenMMDL paper. 
