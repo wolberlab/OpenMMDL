@@ -25,7 +25,7 @@ This will open the **OpenMMDL Setup**, which you can use for the creation of the
 There are two possible options to create the input files for **OpenMMDL Simulation**:
 
 1. The PDBFixer path, where a `pdb` file of the protein is used as an input for the preparation and simulation.
-The tutorial for the PDBFixer Path can be found :doc:`here </tutorial_pdb_path>`.
+The tutorial for the PDBFixer path can be found :doc:`here </tutorial_pdb_path>`.
 
 Here is the table of the currently available forcefields and water models for the PDBFixer path: 
 
