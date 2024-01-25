@@ -1,7 +1,7 @@
 **Installation**
 ===============
 
-This page details how to install openmmdl on your local device. 
+This page details how to install **OpenMMDL** on your local device. 
 
 
 The first step of the installation of **OpenMMDL** on your device consists in the cloning of **OpenMMDL** to your home directory.
