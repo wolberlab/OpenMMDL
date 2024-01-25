@@ -6,8 +6,8 @@ The **OpenMMDL Analysis** script creates output folders and files during and aft
 The following list contains an detailed overview of the folders and files:
 The Optional files are highlighted with an *asteriks**
 
-These are the files that are directly in the same folder, where you start the **OpenMMDL Analysis** from.
 
+The following Files are generated and stored directly in the working folder where you start the **OpenMMDL Analysis** from:
 
 .. list-table::
    :header-rows: 1
@@ -16,25 +16,25 @@ These are the files that are directly in the same folder, where you start the **
    * - Name
      - Description
    * - complex.pdb
-     - PDB file of the protein-ligand complex (with the special ligand).
+     - PDB file of the protein, ligand, waters 10Å around the ligand and special ligand if selected).
    * - df_all.csv
-     - Dataframe with the calculated interactions and generated binding mode fingerprints.
+     - CSV file of the calculated interaction together with the generated fingerprints.
    * - interactions_gathered.csv
-     - Dataframe with the calculated interactions before generating binding mode fingerprints.
+     - CSV File of the calculated interaction together without the generated fingerprints.
    * - lig.pdb
      - PDB file of the ligand with hydrogens.
    * - lig.smi
      - Smiles file of the ligand.
    * - ligand_numbering.png*
-     - 2D Depiction of the ligand with the correct Atom numbering, which makes it easier to recognize the interacting atoms in barcodes.
+     - File that displays the ligand in 2D depiction with the correct assignment of atom numbers, which makes it easier to understand the interacting atoms.
    * - ligand_special.pdb*
      - PDB File of the ligand with the special ligand.
    * - lig_no_h.pdb
      - PDB file of the ligand without hydrogens.
    * - missing_frames_filled.csv
-     - Dataframe with the calculated interactions and added frames that have no interactions.
+     - CSV File of the calculated interactions with added frames for frames without interactions
    * - top_10_binding_modes.csv
-     - Dataframe with the top 10 Binding modes and their occurence.
+     - CSV File of the top 10 most occuring binding modes.
 
 
 Barcodes
@@ -114,7 +114,7 @@ RMSD
 
 Visualization
 ------------------------------
-**Visualization**: A folder that contains the files necessary for the visualization of the output in nglview.
+**Binding Modes Markov States**: A folder that contains the Figures for the binding modes, the pdb files and pml files of the representative frames of the binding modes and the markov chain figure with the transitions between the binding modes.
 
 .. list-table::
    :header-rows: 1
@@ -122,22 +122,11 @@ Visualization
 
    * - Name
      - Description
-   * - centered_old_coordinates_top.pdb
+   * - clouds.json
      - Topology File of the centered protein in PDB Format.
-   * - centered_old_coordinates_top.gro
+   * - interacting_waters.dcd
      - Topology File of the centered protein in Gromacs GRO Format.
-   * - centered_old_coordinates.dcd
+   * - interacting_waters.pdb
      - Trajectory File of the centered protein in DCD Format.
-   * - centered_old_coordinates.xtc
+   * - interacting_waters.pkl
      - Trajectory File of the centered protein in XTC Format.
-   * - centered_traj_unaligned.dcd
-     - Trajectory File of the unaligned centered protein in DCD Format with all atoms and new coordinates.
-   * - centered_traj_unaligned.xtc
-     - Trajectory File of the unaligned centered protein in XTC Format with all atoms and new coordinates.
-   * - prot_lig_traj_unaligned.dcd*
-     - Trajectory File of the unaligned centered protein in DCD Format with only protein and ligand atoms and new coordinates.
-   * - prot_lig_traj_unaligned.xtc*
-     - Trajectory File of the unaligned centered protein in XTC Format with only protein and ligand atoms and new coordinates.
-     
-
-     - Trajectory File of the centered protein in XTC Format with only protein and ligand atoms and new coordinates.
