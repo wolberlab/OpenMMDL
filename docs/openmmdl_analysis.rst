@@ -38,6 +38,7 @@ Optional:
     -s = special ligand name to calculate interactions with special ligands.
     -nuc = Treat nucleic acids as receptor
     -pep = Calculate interactions with peptides. Give the peptide chain name as input. Defaults to None
+    -ref = Add a reference PDB to renumber the residue numbers. Defaults to None (accepted values: str of PDB)
     -r = Calculate the RMSD difference between frames. The default is False (accepted values: True/False)
     -w = stable-water-analysis. Defines if the analysis of stable water molecules should be performed. The default is False (accepted values: True/False)
     --watereps = the EPS of the clustering part during the water analysis. will only result in something if "-w True" is added. Accepts float (in Angstrom). 
