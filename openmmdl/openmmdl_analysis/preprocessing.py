@@ -179,37 +179,3 @@ def process_pdb(input_file, output_file):
 
     with open(output_file, "w") as f:
         f.write(modified_data)
-
-
-def move_hydrogens_to_end(structure, target_residue_name):
-    """Moves hydrogens to the last lines of theresidue in the PDB file.
-
-    Args:
-        structure (Bio.structure): Structure object containing the PDB file.
-        target_residue_name (str): Name of the residue in the PDB file.
-    """
-    # Counter for atom numbering within each residue
-    atom_counter = 1
-
-    # Iterate over all models in the structure
-    for model in structure:
-        # Iterate over all chains in the model
-        for chain in model:
-            # Iterate over all residues in the chain
-            for residue in chain:
-                # Check if the residue name matches the target residue name
-                if residue.resname == target_residue_name:
-                    # Collect hydrogen atoms in the residue
-                    hydrogen_atoms = [atom for atom in residue if atom.element == "H"]
-
-                    # Remove hydrogen atoms from the residue
-                    for hydrogen_atom in hydrogen_atoms:
-                        residue.detach_child(hydrogen_atom.id)
-
-                    # Add hydrogen atoms to the end of the residue with renumbering
-                    for hydrogen_atom in hydrogen_atoms:
-                        hydrogen_atom.serial_number = atom_counter
-                        atom_counter += 1
-                        # Change the residue name to avoid conflicts
-                        hydrogen_atom.name = f"H{atom_counter}"
-                        residue.add(hydrogen_atom)
