@@ -14,9 +14,9 @@ def cleanup(protein_name):
     """
     print("Cleaning Up :)")
     try:
-        os.remove(f'output_{protein_name}')
-        os.remove(f'centered_old_coordinates.pdb')
-        os.remove(f'centered_old_coordinates.dcd')
+        os.remove(f"output_{protein_name}")
+        os.remove(f"centered_old_coordinates.pdb")
+        os.remove(f"centered_old_coordinates.dcd")
     except FileNotFoundError:
         print("One or more files not found. Cleanup skipped.")
     print("Cleanup is done.")
@@ -112,7 +112,8 @@ def post_md_file_movement(
     ]
     destination_pre_md = "MD_Files/Pre_MD"
     organize_files(
-        [f"{prefix}{protein_name}" for prefix in source_pre_md_files], destination_pre_md
+        [f"{prefix}{protein_name}" for prefix in source_pre_md_files],
+        destination_pre_md,
     )
 
     # Organize topology files after minimization and equilibration
@@ -124,9 +125,7 @@ def post_md_file_movement(
     )
 
     # Organize simulation output files
-    organize_files(
-        [f"output_{protein_name}", "trajectory.dcd"], "MD_Files/MD_Output"
-    )
+    organize_files([f"output_{protein_name}", "trajectory.dcd"], "MD_Files/MD_Output")
 
     # Organize MDtraj and MDAnalysis files
     organize_files(

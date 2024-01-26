@@ -185,7 +185,7 @@ def plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interact
         )
 
 
-def plot_bacodes_grouped(interactions, df_all, interaction_type, peptide=False):
+def plot_bacodes_grouped(interactions, df_all, interaction_type):
     """generates barcode figures and groups them by ligandatom, aswell as total interaction barcode for a giveen lingenatom.
 
     Args:

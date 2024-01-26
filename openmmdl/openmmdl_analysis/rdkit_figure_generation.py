@@ -347,7 +347,7 @@ def create_and_merge_images(
         merged_image_paths (list): A list with the paths to the rdkit figures.
 
     Returns:
-        _type_: _description_
+        list: Paths to the merged images.
     """
     # Create the main figure and axis
     fig = pylab.figure()
@@ -440,8 +440,8 @@ def arranged_figure_generation(merged_image_paths, output_path):
     """Generate an arranged figure by arranging merged images in rows and columns.
 
     Args:
-        merged_image_paths (str): Paths of the merged images with the rdkit figure and legend.
-        output_path (dict): The path where the arranged output should be saved.
+        merged_image_paths (list): Paths of the merged images with the rdkit figure and legend.
+        output_path (dict): The paths where the arranged output should be saved.
     """
     # Open the list of images
     merged_images = [Image.open(path) for path in merged_image_paths]

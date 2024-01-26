@@ -99,11 +99,15 @@ def merge_protein_and_ligand(protein, ligand):
         complex_positions (simtk.unit.quantity.Quantity): The merged positions.
     """
     # combine topologies
-    md_protein_topology = md.Topology.from_openmm(protein.topology)  # using mdtraj for protein top
+    md_protein_topology = md.Topology.from_openmm(
+        protein.topology
+    )  # using mdtraj for protein top
     md_ligand_topology = md.Topology.from_openmm(
         ligand.topology
     )  # using mdtraj for ligand top
-    md_complex_topology = md_protein_topology.join(md_ligand_topology)  # add them together
+    md_complex_topology = md_protein_topology.join(
+        md_ligand_topology
+    )  # add them together
 
     complex_topology = md_complex_topology.to_openmm()
 
@@ -112,11 +116,13 @@ def merge_protein_and_ligand(protein, ligand):
 
     # create an array for storing all atom positions as tupels containing a value and a unit
     # called OpenMM Quantities
-    complex_positions = unit.Quantity(
-        np.zeros([total_atoms, 3]), unit=unit.nanometers
-    )
-    complex_positions[: len(protein.positions)] = protein.positions  # add protein positions
-    complex_positions[len(protein.positions) :] = ligand.positions  # add ligand positions
+    complex_positions = unit.Quantity(np.zeros([total_atoms, 3]), unit=unit.nanometers)
+    complex_positions[: len(protein.positions)] = (
+        protein.positions
+    )  # add protein positions
+    complex_positions[len(protein.positions) :] = (
+        ligand.positions
+    )  # add ligand positions
 
     return complex_topology, complex_positions
 
@@ -153,11 +159,7 @@ def water_padding_solvent_builder(
         PDBFile.writeFile(protein_pdb.topology, protein_pdb.positions, outfile)
 
     # Adds solvent to the selected protein
-    if (
-        model_water == "charmm"
-        or model_water == "tip3pfb"
-        or model_water == "tip3"
-    ):
+    if model_water == "charmm" or model_water == "tip3pfb" or model_water == "tip3":
         modeller.addSolvent(
             forcefield,
             padding=water_padding_distance * unit.nanometers,
@@ -228,23 +230,17 @@ def water_absolute_solvent_builder(
         PDBFile.writeFile(protein_pdb.topology, protein_pdb.positions, outfile)
 
     # Adds solvent to the selected protein
-    if (
-        model_water == "charmm"
-        or model_water == "tip3pfb"
-        or model_water == "tip3"
-    ):
+    if model_water == "charmm" or model_water == "tip3pfb" or model_water == "tip3":
         modeller.addSolvent(
             forcefield,
-            boxSize=Vec3(water_box_x, water_box_y, water_box_z)
-            * unit.nanometers,
+            boxSize=Vec3(water_box_x, water_box_y, water_box_z) * unit.nanometers,
             positiveIon=water_positive_ion,
             negativeIon=water_negative_ion,
             ionicStrength=water_ionicstrength * unit.molar,
         )
     elif model_water == "charmm_tip4pew":
         protein_pdb.addSolvent(
-            boxSize=Vec3(water_box_x, water_box_y, water_box_z)
-            * unit.nanometers,
+            boxSize=Vec3(water_box_x, water_box_y, water_box_z) * unit.nanometers,
             positiveIon=water_positive_ion,
             negativeIon=water_negative_ion,
             ionicStrength=water_ionicstrength * unit.molar,
@@ -255,8 +251,7 @@ def water_absolute_solvent_builder(
         modeller.addSolvent(
             forcefield,
             model=model_water,
-            boxSize=Vec3(water_box_x, water_box_y, water_box_z)
-            * unit.nanometers,
+            boxSize=Vec3(water_box_x, water_box_y, water_box_z) * unit.nanometers,
             positiveIon=water_positive_ion,
             negativeIon=water_negative_ion,
             ionicStrength=water_ionicstrength * unit.molar,
@@ -268,6 +263,7 @@ def water_absolute_solvent_builder(
     print(f"Protein with absolute solvent prepared")
 
     return modeller
+
 
 def membrane_builder(
     ff,

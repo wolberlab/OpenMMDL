@@ -164,7 +164,7 @@ def change_lig_to_residue(file_path, old_residue_name, new_residue_name):
     Args:
         file_path (str): Filepath of the topology file.
         old_residue_name (str): Residue name of the ligand.
-        new_residue_name (str): New residue name of the ligand now changed to mimic a residue.
+        new_residue_name (str): New residue name of the ligand now changed to mimic an amino acid residue.
     """
     with open(file_path, "r") as file:
         lines = file.readlines()
@@ -371,7 +371,7 @@ def process_trajectory(
 
     Args:
         pdb_md (mda universe): MDAnalysis Universe class representation of the topology and the trajectory of the file that is being processed.
-        dataframe (pandas dataframe): Name of a CSV file as str, where the interaction data will be read from if not None.
+        dataframe (str): Name of a CSV file as str, where the interaction data will be read from if not None.
         num_processes (int): The number of CPUs that will be used for the processing of the protein-ligand trajectory. Defaults to half of the CPUs in the system.
         lig_name (str): Name of the Ligand in the complex that will be analyzed.
         special_ligand (str): Name of the special ligand in the complex that will be analyzed.

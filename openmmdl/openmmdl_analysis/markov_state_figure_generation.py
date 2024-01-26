@@ -24,7 +24,7 @@ def min_transition_calculation(min_transition):
 
 
 def binding_site_markov_network(
-    total_frames, min_transitions, combined_dict, font_size=None, size_node=None
+    total_frames, min_transitions, combined_dict, font_size=12, size_node=200
 ):
     """Generate Markov Chain plots based on transition probabilities.
 

@@ -14,12 +14,12 @@ def ff_selection(ff):
         str: Selected XML forcefield file.
     """
     forcefield_dict = {
-        'AMBER14': 'amber14-all.xml',
-        'AMBER99SB': 'amber99sb.xml',
-        'AMBER99SB-ILDN': 'amber99sbildn.xml',
-        'AMBER03': 'amber03.xml',
-        'AMBER10': 'amber10.xml',
-        'CHARMM36': 'charmm36.xml',
+        "AMBER14": "amber14-all.xml",
+        "AMBER99SB": "amber99sb.xml",
+        "AMBER99SB-ILDN": "amber99sbildn.xml",
+        "AMBER03": "amber03.xml",
+        "AMBER10": "amber10.xml",
+        "CHARMM36": "charmm36.xml",
     }
 
     return forcefield_dict.get(ff, None)
@@ -36,39 +36,39 @@ def water_forcefield_selection(water, forcefield_selection):
     Returns:
         str: The XML filename of the water forcefield.
     """
-    old_amber = {'amber99sb.xml', 'amber99sbildn.xml', 'amber03.xml', 'amber10.xml'}
+    old_amber = {"amber99sb.xml", "amber99sbildn.xml", "amber03.xml", "amber10.xml"}
 
     # Define a dictionary to map water models
     water_model_mapping = {
-        'TIP3P': 'tip3p.xml',
-        'TIP3P-FB': 'tip3pfb.xml',
-        'SPC/E': 'spce.xml',
-        'TIP4P-Ew': 'tip4pew.xml',
-        'TIP4P-FB': 'tip4pfb.xml',
-        'TIP5P': 'tip5p.xml'
+        "TIP3P": "tip3p.xml",
+        "TIP3P-FB": "tip3pfb.xml",
+        "SPC/E": "spce.xml",
+        "TIP4P-Ew": "tip4pew.xml",
+        "TIP4P-FB": "tip4pfb.xml",
+        "TIP5P": "tip5p.xml",
     }
 
     if forcefield_selection in old_amber:
         water_model = water_model_mapping.get(water, None)
     else:
         water_forcefields = {
-            'amber14-all.xml': {
-                'TIP3P': 'amber14/tip3p.xml',
-                'TIP3P-FB': 'amber14/tip3pfb.xml',
-                'SPC/E': 'amber14/spce.xml',
-                'TIP4P-Ew': 'amber14/tip4pew.xml',
-                'TIP4P-FB': 'amber14/tip4pfb.xml',
+            "amber14-all.xml": {
+                "TIP3P": "amber14/tip3p.xml",
+                "TIP3P-FB": "amber14/tip3pfb.xml",
+                "SPC/E": "amber14/spce.xml",
+                "TIP4P-Ew": "amber14/tip4pew.xml",
+                "TIP4P-FB": "amber14/tip4pfb.xml",
             },
-            'charmm36.xml': {
-                'CHARMM default': 'charmm36/water.xml',
-                'TIP3P-PME-B': 'charmm36/tip3p-pme-b.xml',
-                'TIP3P-PME-F': 'charmm36/tip3p-pme-f.xml',
-                'SPC/E': 'charmm36/spce.xml',
-                'TIP4P-Ew': 'charmm36/tip4pew.xml',
-                'TIP4P-2005': 'charmm36/tip4p2005.xml',
-                'TIP5P': 'charmm36/tip5p.xml',
-                'TIP5P-Ew': 'charmm36/tip5pew.xml',
-            }
+            "charmm36.xml": {
+                "CHARMM default": "charmm36/water.xml",
+                "TIP3P-PME-B": "charmm36/tip3p-pme-b.xml",
+                "TIP3P-PME-F": "charmm36/tip3p-pme-f.xml",
+                "SPC/E": "charmm36/spce.xml",
+                "TIP4P-Ew": "charmm36/tip4pew.xml",
+                "TIP4P-2005": "charmm36/tip4p2005.xml",
+                "TIP5P": "charmm36/tip5p.xml",
+                "TIP5P-Ew": "charmm36/tip5pew.xml",
+            },
         }
         water_model = water_forcefields.get(forcefield_selection, {}).get(water, None)
 
@@ -86,32 +86,32 @@ def water_model_selection(water, forcefield_selection):
     Returns:
         str: Water model forcefield XML file.
     """
-    old_amber = {'amber99sb.xml', 'amber99sbildn.xml', 'amber03.xml', 'amber10.xml'}
+    old_amber = {"amber99sb.xml", "amber99sbildn.xml", "amber03.xml", "amber10.xml"}
 
     water_model_mapping = {
-        'TIP3P': 'tip3p',
-        'TIP3P-FB': 'tip3pfb',
-        'SPC/E': 'spce',
-        'TIP4P-Ew': 'tip4pew',
-        'TIP4P-FB': 'tip4pfb',
+        "TIP3P": "tip3p",
+        "TIP3P-FB": "tip3pfb",
+        "SPC/E": "spce",
+        "TIP4P-Ew": "tip4pew",
+        "TIP4P-FB": "tip4pfb",
     }
 
     if forcefield_selection in old_amber:
         water_model = water_model_mapping.get(water)
-    elif forcefield_selection == 'amber14-all.xml':
-        if water == 'TIP5P':
+    elif forcefield_selection == "amber14-all.xml":
+        if water == "TIP5P":
             return None  # 'TIP5P' is not available in 'amber14-all.xml'
         water_model = water_model_mapping.get(water)
-    elif forcefield_selection == 'charmm36.xml':
+    elif forcefield_selection == "charmm36.xml":
         charmm_water_mapping = {
-            'CHARMM default': 'charmm',
-            'TIP3P-PME-B': 'charmm',
-            'TIP3P-PME-F': 'charmm',
-            'SPC/E': 'charmm',
-            'TIP4P-Ew': 'tip4pew',
-            'TIP4P-2005': 'tip4pew',
-            'TIP5P': 'tip5p',
-            'TIP5P-Ew': 'tip5p',
+            "CHARMM default": "charmm",
+            "TIP3P-PME-B": "charmm",
+            "TIP3P-PME-F": "charmm",
+            "SPC/E": "charmm",
+            "TIP4P-Ew": "tip4pew",
+            "TIP4P-2005": "tip4pew",
+            "TIP5P": "tip5p",
+            "TIP5P-Ew": "tip5p",
         }
         water_model = charmm_water_mapping.get(water)
     else:
@@ -133,12 +133,12 @@ def generate_forcefield(protein_ff, solvent_ff, add_membrane, rdkit_mol=None):
     Returns:
         simtk.openmm.app.Forcefield: Forcefield with a registered small molecule.
     """
-    old_amber = {'amber99sb.xml', 'amber99sbildn.xml', 'amber03.xml', 'amber10.xml'}
+    old_amber = {"amber99sb.xml", "amber99sbildn.xml", "amber03.xml", "amber10.xml"}
 
     # For older amber forcefields, the additional lipid17.xml is required for templates
     if add_membrane == True:
         if protein_ff in old_amber:
-            forcefield = app.ForceField(protein_ff, solvent_ff, 'amber14/lipid17.xml')
+            forcefield = app.ForceField(protein_ff, solvent_ff, "amber14/lipid17.xml")
         else:
             forcefield = app.ForceField(protein_ff, solvent_ff)
     else:
@@ -148,14 +148,16 @@ def generate_forcefield(protein_ff, solvent_ff, add_membrane, rdkit_mol=None):
     if rdkit_mol is not None:
         gaff = GAFFTemplateGenerator(
             molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True),
-            forcefield='gaff-2.11'
+            forcefield="gaff-2.11",
         )
         forcefield.registerTemplateGenerator(gaff.generator)
 
     return forcefield
 
 
-def generate_transitional_forcefield(protein_ff, solvent_ff, add_membrane, rdkit_mol=None):
+def generate_transitional_forcefield(
+    protein_ff, solvent_ff, add_membrane, rdkit_mol=None
+):
     """
     Generate an OpenMM transitional forcefield object with TIP3P water model for membrane building and register a small molecule.
 
@@ -168,14 +170,16 @@ def generate_transitional_forcefield(protein_ff, solvent_ff, add_membrane, rdkit
     Returns:
         simtk.openmm.app.Forcefield: A transitional forcefield with TIP3P water and a registered small molecule.
     """
-    old_amber = {'amber99sb.xml', 'amber99sbildn.xml', 'amber03.xml', 'amber10.xml'}
+    old_amber = {"amber99sb.xml", "amber99sbildn.xml", "amber03.xml", "amber10.xml"}
 
     # For older amber forcefields, the additional lipid17.xml is required for templates
     if add_membrane == True:
         if protein_ff in old_amber:
-            transitional_forcefield = app.ForceField(protein_ff, 'tip3p.xml', 'amber14/lipid17.xml')
+            transitional_forcefield = app.ForceField(
+                protein_ff, "tip3p.xml", "amber14/lipid17.xml"
+            )
         else:
-            transitional_forcefield = app.ForceField(protein_ff, 'amber14/tip3p.xml')
+            transitional_forcefield = app.ForceField(protein_ff, "amber14/tip3p.xml")
     else:
         transitional_forcefield = app.ForceField(protein_ff, solvent_ff)
 
@@ -183,7 +187,7 @@ def generate_transitional_forcefield(protein_ff, solvent_ff, add_membrane, rdkit
     if rdkit_mol is not None:
         gaff = GAFFTemplateGenerator(
             molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True),
-            forcefield='gaff-2.11'
+            forcefield="gaff-2.11",
         )
         transitional_forcefield.registerTemplateGenerator(gaff.generator)
 
