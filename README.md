@@ -12,7 +12,7 @@ OpenMMDL @ Molecular Design Lab
 
 <img src="https://github.com/wolberlab/OpenMMDL/blob/main/openmmdl/openmmdl_setup/static/OpenMMDL_logo_2.png" height="250">
 
-Interface to OpenMM for easy setup of molecular dynamic simulations of
+Interface to **OpenMM** for easy setup of molecular dynamic simulations of
 protein-ligand complexes
 
 http://openmmdl.readthedocs.io/
@@ -28,7 +28,7 @@ Open a new terminal and clone this repository
 
 #### Install all required dependencies in a separate environment
 
-OpenMMDL is written in python 3.10 and uses several packages, which can
+**OpenMMDL** is written in Python 3.10 and uses several packages, which can
 be easily installed on a separate environment using conda (we recommend
 using miniconda):
 
@@ -43,24 +43,23 @@ After installation, activate the conda environment:
 
     pip install .
 
-## OpenMMDL-Setup
+## OpenMMDL Setup
 
-OpenMMDL-Setup will setup an MD simulation for OpenMM (i.e. create all
-the needed files for running the simulation)
+**OpenMMDL Setup** will allow you to prepare the files needed to perform an protein-ligand complex MD simulation with **OpenMM**.
 
 ### Usage
 
-Start the setup process by executing the command:
+Start **OpenMMDL Setup** by executing the command:
 
     openmmdl_setup
 
-The setup interface is displayed through a web browser, but it is still
+The **OpenMMDL Setup** interface is displayed through a web browser, but it is still
 a single-user desktop application, not a web application. It should
 automatically open a web browser displaying the user interface. If that does not happen for any reason, open a browser and point it to
 the address displayed in the console window (e.g. http://127.0.0.1:5000).
 
-Download the processed PDB File and python script, which serve as input
-for the simulation script.
+Download the processed PDB file and Python script, which will serve as input
+for the **OpenMMDL Simulation** script.
 
 ## OpenMMDL-Simulation
 
