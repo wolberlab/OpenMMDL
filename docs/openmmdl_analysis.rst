@@ -13,7 +13,7 @@ This page details the variables required to run the analysis and showcases the a
 
 Variables
 ------------------------------
-OpenMMDL-Analysis consists of mandatory and optional variables. The following are listed down below:
+**OpenMMDL Analysis** consists of mandatory and optional variables. The following are listed down below:
 
 
 Mandatory:
