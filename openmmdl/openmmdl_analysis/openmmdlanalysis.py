@@ -31,6 +31,7 @@ from tqdm import tqdm
 
 from openmmdl.openmmdl_analysis.preprocessing import (
     process_pdb_file,
+    renumber_protein_residues,
     renumber_atoms_in_residues,
     process_pdb,
     extract_and_save_ligand_as_sdf,
@@ -179,6 +180,12 @@ def main():
         default=None,
     )
     parser.add_argument(
+        "-ref",
+        dest="reference",
+        help="Add a reference PDB to renumber the residue numbers",
+        default=None,
+    )
+    parser.add_argument(
         "-w",
         dest="stable_water_analysis",
         help="Should stable water analysis be performed? True or False",
@@ -231,8 +238,12 @@ def main():
     generate_pml = bool(args.generate_pml)
     receptor_nucleic = bool(args.receptor_nucleic)
     special_ligand = args.special_ligand
+    reference = args.reference
     peptide = args.peptide
 
+    if reference != None:
+        print("\033[1mPDB File residues are being renumbered\033[0m")
+        renumber_protein_residues(topology, reference, topology)
     process_pdb_file(topology)
     print("\033[1mFiles are preprocessed\033[0m")
 

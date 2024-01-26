@@ -3,12 +3,61 @@ import subprocess
 import os
 import re
 import rdkit
+import mdtraj as md
 from rdkit import Chem
 from rdkit.Chem import Draw
 from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
 from openbabel import pybel
 
+
+def renumber_protein_residues(input_pdb, reference_pdb, output_pdb):
+    """Renumber protein residues in a molecular dynamics trajectory based on a reference structure.
+
+    Args:
+        input_pdb (str): Path to the input PDB file representing the molecular dynamics trajectory to be renumbered.
+        reference_pdb (str): Path to the reference PDB file representing the molecular dynamics trajectory used as a reference.
+        output_pdb (str): Path to the output PDB file where the renumbered trajectory will be saved..
+    """
+    # Load trajectories
+    traj_input = md.load(input_pdb)
+    traj_reference = md.load(reference_pdb)
+
+    # Get the topology DataFrames
+    input_top_df, _ = traj_input.topology.to_dataframe()
+    ref_top_df, _ = traj_reference.topology.to_dataframe()
+
+    # List of common protein residue names including additional residues
+    protein_residues = [
+        "ALA", "ARG", "ASN", "ASP", "CYS", "GLN", "GLU", "GLY", "HIS", "ILE",
+        "LEU", "LYS", "MET", "PHE", "PRO", "SER", "THR", "TRP", "TYR", "VAL",
+        "ACE", "NME", "HIE", "HID", "HIP",
+    ]
+
+    # Iterate over each chain in the reference topology
+    for chain_id in ref_top_df["chainID"].unique():
+        # Extract residue indices from the reference topology for the current chain
+        ref_residue_indices = ref_top_df[
+            (ref_top_df["chainID"] == chain_id)
+            & ref_top_df["resName"].isin(protein_residues)
+        ]["resSeq"].values - 1
+
+        # Update residue indices in the input topology DataFrame for the current chain
+        mask = (
+            (input_top_df["chainID"] == chain_id)
+            & input_top_df["resName"].isin(protein_residues)
+        )
+        input_top_df.loc[mask, "resSeq"] = ref_residue_indices + 1
+
+    # Create a new topology from the modified DataFrame
+    new_top = md.Topology.from_dataframe(input_top_df)
+
+    # Update the topology in the input trajectory
+    new_traj = traj_input.slice(range(traj_input.n_frames))
+    new_traj.topology = new_top
+
+    # Save the renumbered trajectory to a new PDB file
+    new_traj.save(output_pdb)
 
 def increase_ring_indices(ring, lig_index):
     """Increases the atom indices in a ring of the ligand obtained from the ligand to fit the atom indices present in the protein-ligand complex.
