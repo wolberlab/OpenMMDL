@@ -40,11 +40,11 @@ Optional:
     -pep = Calculate interactions with peptides. Give the peptide chain name as input. Defaults to None
     -r = Calculate the RMSD difference between frames. The default is False (accepted values: True/False)
     -w = stable-water-analysis. Defines if the analysis of stable water molecules should be performed. The default is False (accepted values: True/False)
-    --watereps = the EPS of the clutering part during the water analysis. will only result in something if "-w True" is added. Accepts float (in Angstrom). 
+    --watereps = the EPS of the clustering part during the water analysis. will only result in something if "-w True" is added. Accepts float (in Angstrom). 
 
 Application
 ------------------------------
-An example of how a command line input for OpenMMDL-Analysis should look like is:
+An example of how a command line input for **OpenMMDL Analysis** should look like is:
 
 .. code-block:: text
     openmmdl_analysis -t topology.pdb -d trajectory.dcd -l ligand.sdf -n 'LIG'
@@ -52,11 +52,11 @@ An example of how a command line input for OpenMMDL-Analysis should look like is
 If you need help with the command line input, you can always just use:
 
 .. code-block:: text
-    openmmdl_analysis
+    openmmdl_analysis -h all
 
 Results
 ------------------------------
-The results of the analysis with OpenMMDL-Analysis are stored in the current working directory. 
+The results of the analysis with **OpenMMDL Analysis** are stored in the current working directory. 
 
 You will optain the following files and folders:
 
