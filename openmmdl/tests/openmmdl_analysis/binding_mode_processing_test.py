@@ -1814,3 +1814,12 @@ def test_update_values(sample_data):
 
     # Check if the specific values are updated
     assert df[["Column1", "Column2"]].equals(expected_df[["Column1", "Column2"]])
+    
+    
+def test_calculate_representative_frame():
+    test_data_directory = "openmmdl/tests/data/in"
+    test_data_directory = Path("openmmdl/tests/data/in")
+    # load mdtraj trajectory
+    md = mda.Universe(f"{test_data_directory}/interacting_waters.pdb", f"{test_data_directory}/interacting_waters.dcd")
+    rep = calculate_representative_frame(md, [i for i in range(1, 10)], "UNK")
+    assert rep == 3
