@@ -2,6 +2,7 @@
 openmmdl_simulation.py
 Perform Simulations of Protein-ligand complexes with OpenMM
 """
+
 import argparse
 import sys
 import warnings
@@ -457,9 +458,9 @@ def main():
 
         # Check if the fingerprint has been encountered before
         if fingerprint in treshold_fingerprint_dict:
-            grouped_frames_treshold.at[
-                index, "Binding_fingerprint_treshold"
-            ] = treshold_fingerprint_dict[fingerprint]
+            grouped_frames_treshold.at[index, "Binding_fingerprint_treshold"] = (
+                treshold_fingerprint_dict[fingerprint]
+            )
         else:
             # Assign a new label if the fingerprint is new
             label = f"Binding_Mode_{label_counter}"

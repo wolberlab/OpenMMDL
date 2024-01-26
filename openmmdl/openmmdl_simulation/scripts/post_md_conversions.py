@@ -17,14 +17,14 @@ def mdtraj_conversion(pdb_file, mdtraj_output):
     mdtraj_frames = md.load_dcd("trajectory.dcd", top=pdb_file)
     mdtraj_frames.image_molecules()
     if "dcd" in mdtraj_output:
-        mdtraj_frames.save_dcd(f'centered_old_coordinates.dcd')
+        mdtraj_frames.save_dcd(f"centered_old_coordinates.dcd")
     if "xtc" in mdtraj_output:
-        mdtraj_frames.save_xtc(f'centered_old_coordinates.xtc')
+        mdtraj_frames.save_xtc(f"centered_old_coordinates.xtc")
     mdtraj_first_frame = mdtraj_frames[0:1]
     if "pdb" in mdtraj_output:
-        mdtraj_first_frame.save_pdb(f'centered_old_coordinates_top.pdb')
+        mdtraj_first_frame.save_pdb(f"centered_old_coordinates_top.pdb")
     if "gro" in mdtraj_output:
-        mdtraj_first_frame.save_gro(f'centered_old_coordinates_top.gro')
+        mdtraj_first_frame.save_gro(f"centered_old_coordinates_top.gro")
 
 
 def MDanalysis_conversion(
@@ -55,79 +55,89 @@ def MDanalysis_conversion(
         topology_trajectory_all_atoms.center_of_mass()
     )
     topology_trajectory_protein_ligand = topology_trajectory.select_atoms(
-        f'protein or resname {ligand_name} or resname {special_ligname}'
+        f"protein or resname {ligand_name} or resname {special_ligname}"
     )
 
     if "pdb" in mda_output:
         if output_selection != "mda_prot_lig":
-            with mda.Writer(f'centered_traj_unaligned.dcd', topology_trajectory_all_atoms.n_atoms) as w:
+            with mda.Writer(
+                f"centered_traj_unaligned.dcd", topology_trajectory_all_atoms.n_atoms
+            ) as w:
                 for ts in topology_trajectory.trajectory[1:]:
                     w.write(topology_trajectory_all_atoms)
-            topology_trajectory_all_atoms.write(f'centered_top.pdb')
-            topology_ref_all_pdb = mda.Universe(f'centered_top.pdb')
+            topology_trajectory_all_atoms.write(f"centered_top.pdb")
+            topology_ref_all_pdb = mda.Universe(f"centered_top.pdb")
             mobile_all_pdb = mda.Universe(
-                f'centered_top.pdb', f'centered_traj_unaligned.dcd'
+                f"centered_top.pdb", f"centered_traj_unaligned.dcd"
             )
             alignment_all_pdb = align.AlignTraj(
                 mobile_all_pdb,
                 topology_ref_all_pdb,
                 select="protein and name CA",
                 weights="mass",
-                filename=f'centered_traj.dcd',
+                filename=f"centered_traj.dcd",
             )
             alignment_all_pdb.run()
 
         if output_selection != "mda_all":
-            with mda.Writer(f'prot_lig_traj_unaligned.dcd', topology_trajectory_protein_ligand.n_atoms) as w:
+            with mda.Writer(
+                f"prot_lig_traj_unaligned.dcd",
+                topology_trajectory_protein_ligand.n_atoms,
+            ) as w:
                 for ts in topology_trajectory.trajectory[1:]:
                     w.write(topology_trajectory_protein_ligand)
-            topology_trajectory_protein_ligand.write(f'prot_lig_top.pdb')
-            topology_ref_prot_lig_pdb = mda.Universe(f'prot_lig_top.pdb')
+            topology_trajectory_protein_ligand.write(f"prot_lig_top.pdb")
+            topology_ref_prot_lig_pdb = mda.Universe(f"prot_lig_top.pdb")
             mobile_prot_lig_pdb = mda.Universe(
-                f'prot_lig_top.pdb', f'prot_lig_traj_unaligned.dcd'
+                f"prot_lig_top.pdb", f"prot_lig_traj_unaligned.dcd"
             )
             alignment_prot_lig_pdb = align.AlignTraj(
                 mobile_prot_lig_pdb,
                 topology_ref_prot_lig_pdb,
                 select="protein and name CA",
                 weights="mass",
-                filename=f'prot_lig_traj.dcd',
+                filename=f"prot_lig_traj.dcd",
             )
             alignment_prot_lig_pdb.run()
 
     if "gro" in mda_output:
         if output_selection != "mda_prot_lig":
-            with mda.Writer(f'centered_traj_unaligned.xtc', topology_trajectory_all_atoms.n_atoms) as w:
+            with mda.Writer(
+                f"centered_traj_unaligned.xtc", topology_trajectory_all_atoms.n_atoms
+            ) as w:
                 for ts in topology_trajectory.trajectory[1:]:
                     w.write(topology_trajectory_all_atoms)
-            topology_trajectory_all_atoms.write(f'centered_top.gro')
-            topology_ref_all_gro = mda.Universe(f'centered_top.gro')
+            topology_trajectory_all_atoms.write(f"centered_top.gro")
+            topology_ref_all_gro = mda.Universe(f"centered_top.gro")
             mobile_all_gro = mda.Universe(
-                f'centered_top.gro', f'centered_traj_unaligned.xtc'
+                f"centered_top.gro", f"centered_traj_unaligned.xtc"
             )
             alignment_all_gro = align.AlignTraj(
                 mobile_all_gro,
                 topology_ref_all_gro,
                 select="protein and name CA",
                 weights="mass",
-                filename=f'centered_traj.xtc',
+                filename=f"centered_traj.xtc",
             )
             alignment_all_gro.run()
 
         if output_selection != "mda_all":
-            with mda.Writer(f'prot_lig_traj_unaligned.xtc', topology_trajectory_protein_ligand.n_atoms) as w:
+            with mda.Writer(
+                f"prot_lig_traj_unaligned.xtc",
+                topology_trajectory_protein_ligand.n_atoms,
+            ) as w:
                 for ts in topology_trajectory.trajectory[1:]:
                     w.write(topology_trajectory_protein_ligand)
-            topology_trajectory_protein_ligand.write(f'prot_lig_top.gro')
-            topology_ref_prot_lig_gro = mda.Universe(f'prot_lig_top.gro')
+            topology_trajectory_protein_ligand.write(f"prot_lig_top.gro")
+            topology_ref_prot_lig_gro = mda.Universe(f"prot_lig_top.gro")
             mobile_prot_lig_gro = mda.Universe(
-                f'prot_lig_top.gro', f'prot_lig_traj_unaligned.xtc'
+                f"prot_lig_top.gro", f"prot_lig_traj_unaligned.xtc"
             )
             alignment_prot_lig_gro = align.AlignTraj(
                 mobile_prot_lig_gro,
                 topology_ref_prot_lig_gro,
                 select="protein and name CA",
                 weights="mass",
-                filename=f'prot_lig_traj.xtc',
+                filename=f"prot_lig_traj.xtc",
             )
             alignment_prot_lig_gro.run()

@@ -12,7 +12,7 @@ def generate_pharmacophore_centers(df, interactions):
         interactions (list): list of interactions to generate pharmacophore from
 
     Returns:
-        dict: interaction from wicht pharmacophore is generated as key and list of coordinates as value
+        dict: Dict of interactions from which pharmacophore is generated as key and list of coordinates as value
     """
     coord_pattern = re.compile(r"\(([\d.-]+), ([\d.-]+), ([\d.-]+)\)")
     pharmacophore = {}
@@ -44,7 +44,7 @@ def generate_pharmacophore_vectors(df, interactions):
         interactions (list): list of interactions to generate pharmacophore from
 
     Returns:
-        dict: interaction from wicht pharmacophore is generated as key and list of coordinates as value (first coords are ligand side, second are protein side)
+        dict: Dict of interactions from which pharmacophore is generated as key and list of coordinates as value (first coords are ligand side, second are protein side)
     """
     coord_pattern = re.compile(r"\(([\d.-]+), ([\d.-]+), ([\d.-]+)\)")
     pharmacophore = {}
@@ -409,7 +409,7 @@ def generate_pharmacophore_centers_all_points(df, interactions):
         interactions (list): list of interactions to generate pharmacophore from
 
     Returns:
-        dict: interaction from which pharmacophore is generated as key and list of coordinates as value
+        dict: Dict of interactions from which pharmacophore is generated as key and list of coordinates as value
     """
     coord_pattern = re.compile(r"\(([\d.-]+), ([\d.-]+), ([\d.-]+)\)")
     pharmacophore = {}

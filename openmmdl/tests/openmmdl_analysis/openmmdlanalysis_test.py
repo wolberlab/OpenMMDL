@@ -5,15 +5,60 @@ import openmmdl
 
 from pathlib import Path
 
-from openmmdl.openmmdl_analysis.preprocessing import process_pdb_file, convert_pdb_to_sdf, increase_ring_indices, convert_ligand_to_smiles
-from openmmdl.openmmdl_analysis.rmsd_calculation import rmsd_for_atomgroups, RMSD_dist_frames
-from openmmdl.openmmdl_analysis.interaction_gathering import characterize_complex, retrieve_plip_interactions, create_df_from_binding_site, process_frame, process_trajectory, fill_missing_frames
-from openmmdl.openmmdl_analysis.binding_mode_processing import gather_interactions, remove_duplicate_values, combine_subdict_values, filtering_values, unique_data_generation, df_iteration_numbering, update_values
-from openmmdl.openmmdl_analysis.markov_state_figure_generation import min_transition_calculation, binding_site_markov_network
-from openmmdl.openmmdl_analysis.rdkit_figure_generation import split_interaction_data, highlight_numbers, generate_interaction_dict, update_dict, create_and_merge_images, arranged_figure_generation
-from openmmdl.openmmdl_analysis.barcode_generation import barcodegeneration,plot_barcodes,plot_waterbridge_piechart
-from openmmdl.openmmdl_analysis.visualization_functions import interacting_water_ids, save_interacting_waters_trajectory, cloud_json_generation
-from openmmdl.openmmdl_analysis.pml_writer import generate_md_pharmacophore_cloudcenters, generate_bindingmode_pharmacophore, generate_pharmacophore_centers_all_points, generate_point_cloud_pml
+from openmmdl.openmmdl_analysis.preprocessing import (
+    process_pdb_file,
+    increase_ring_indices,
+    convert_ligand_to_smiles,
+)
+from openmmdl.openmmdl_analysis.rmsd_calculation import (
+    rmsd_for_atomgroups,
+    RMSD_dist_frames,
+)
+from openmmdl.openmmdl_analysis.interaction_gathering import (
+    characterize_complex,
+    retrieve_plip_interactions,
+    create_df_from_binding_site,
+    process_frame,
+    process_trajectory,
+    fill_missing_frames,
+)
+from openmmdl.openmmdl_analysis.binding_mode_processing import (
+    gather_interactions,
+    remove_duplicate_values,
+    combine_subdict_values,
+    filtering_values,
+    unique_data_generation,
+    df_iteration_numbering,
+    update_values,
+)
+from openmmdl.openmmdl_analysis.markov_state_figure_generation import (
+    min_transition_calculation,
+    binding_site_markov_network,
+)
+from openmmdl.openmmdl_analysis.rdkit_figure_generation import (
+    split_interaction_data,
+    highlight_numbers,
+    generate_interaction_dict,
+    update_dict,
+    create_and_merge_images,
+    arranged_figure_generation,
+)
+from openmmdl.openmmdl_analysis.barcode_generation import (
+    barcodegeneration,
+    plot_barcodes,
+    plot_waterbridge_piechart,
+)
+from openmmdl.openmmdl_analysis.visualization_functions import (
+    interacting_water_ids,
+    save_interacting_waters_trajectory,
+    cloud_json_generation,
+)
+from openmmdl.openmmdl_analysis.pml_writer import (
+    generate_md_pharmacophore_cloudcenters,
+    generate_bindingmode_pharmacophore,
+    generate_pharmacophore_centers_all_points,
+    generate_point_cloud_pml,
+)
 
 # Print current working directory
 print("Current working directory:", os.getcwd())
@@ -24,13 +69,14 @@ print("Full path to input file:", os.path.abspath(input_pdb_filename))
 
 test_data_directory = Path("openmmdl/tests/data/in")
 
+
 @pytest.fixture(scope="session")
 def test_data_dir(tmp_path_factory):
     data_dir = tmp_path_factory.mktemp("test_data")
     return data_dir
 
 
-#def test_script_execution(test_data_dir):
+# def test_script_execution(test_data_dir):
 #    # Define the root directory
 #    root_dir = "/home/runner/work/OpenMMDL/OpenMMDL"
 #
@@ -46,11 +92,11 @@ def test_data_dir(tmp_path_factory):
 #    trajectory_file = os.path.join(root_dir, "openmmdl/tests/data/in/all_50.dcd")
 #    ligand_sdf_file = os.path.join(input_data_path, "lig.sdf")
 #    ligand_name = "UNK"
-    
+
 #    cmd = f" openmmdl_analysis -t {topology_file} -d {trajectory_file} -l {ligand_sdf_file} -n {ligand_name} -b 10 -c 2"
-    
+
 #    result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=test_data_dir)
-    
+
 #    assert result.returncode == 0, f"Script execution failed with error:\n{result.stderr.decode()}"
 
 #    # Check that expected output files are generated
@@ -67,7 +113,7 @@ def test_data_dir(tmp_path_factory):
 #    assert os.path.exists(hydro_file_path), "The 'hydrophobic_barcodes.png' file is missing inside 'Barcodes'."
 
 
-    # Check for the presence of "Binding_Modes_Markov_States" folder
+# Check for the presence of "Binding_Modes_Markov_States" folder
 #    markov_states_folder = os.path.join(test_data_dir, "Binding_Modes_Markov_States")
 #    assert os.path.exists(markov_states_folder), "The 'Binding_Modes_Markov_States' folder is missing."
 

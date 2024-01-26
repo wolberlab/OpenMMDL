@@ -197,7 +197,7 @@ def visualization(
         width (str, optional): width of the visualization. Defaults to '1000px'.
 
     Returns:
-        nglview widget: returns the nglview widget containing the visualization
+        nglview widget: returns an nglview.widget object containing the visualization
     """
     with open("clouds.json") as f:
         data = json.load(f)
@@ -254,7 +254,7 @@ def visualization(
 
 
 def run_visualization():
-    """Runs the visualization notebook in the current directory. The notebook is copied from the package directory to the current directory."""
+    """Runs the visualization notebook in the current directory. The visualization notebook is copied from the package directory to the current directory and automaticaly started."""
     package_dir = os.path.dirname(__file__)
     notebook_path = os.path.join(package_dir, "visualization.ipynb")
     current_dir = os.getcwd()
