@@ -114,7 +114,7 @@ RMSD
 
 Visualization
 ------------------------------
-**Visualization**: A folder that contains the figures for the binding modes, the pdb files and pml files of the representative frames of the binding modes and the markov chain figure with the transitions between the binding modes.
+**Visualization**: A folder the files that are necessary for the NGLView visualization of the interactions.
 
 .. list-table::
    :header-rows: 1
@@ -123,10 +123,10 @@ Visualization
    * - Name
      - Description
    * - clouds.json
-     - Topology file of the centered protein in PDB format.
+     - JSON file that contains the information for the point clouds.
    * - interacting_waters.dcd
-     - Topology file of the centered protein in Gromacs GRO format.
+     - Trajectory file for the point clouds visualization.
    * - interacting_waters.pdb
-     - Trajectory file of the centered protein in DCD format.
+     - Topology file for the point clouds visualization.
    * - interacting_waters.pkl
-     - Trajectory file of the centered protein in XTC format.
+     - pickle file of the interacting water ids for the point clouds visualization.
