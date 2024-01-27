@@ -61,24 +61,24 @@ the address displayed in the console window (e.g. http://127.0.0.1:5000).
 Download the processed PDB file and Python script, which will serve as input
 for the **OpenMMDL Simulation** script.
 
-## OpenMMDL-Simulation
+## OpenMMDL Simulation
 
-OpenMMDL-Simulation starts the MD simulation with the inputs acquired
-from OpenMMDL-Setup
+**OpenMMDL Simulation** starts the MD simulation with the inputs acquired
+from **OpenMMDL Setup**.
 
 ### Usage
 
 Start the simulation with the following Inputs:
 
 #### Mandatory:
--f = name of the folder, where the MD simulation files are stored
+-f = Name of the folder, where the MD simulation files are stored
 
 -t = Topology file of your protein from the setup including the path
 
 -s = Python script from the setup including the path
 
 #### Optional:
--l = SDF File of the ligand, if the ligand was selected during the
+-l = SDF file of the ligand, if the ligand was selected during OpenMMDL
 Setup. The SDF file name should be consistent with the input in the setup
 
 -c = Coordinates file of Amber
@@ -88,12 +88,12 @@ Setup. The SDF file name should be consistent with the input in the setup
 
     openmmdl_simulation -f {path/to/folder_name} -t {path/to/topology} -s {path/to/script} -l {path/to/ligand}
 
-## OpenMMDL-Analysis
+## OpenMMDL Analysis
 
-OpenMMDL-Analysis performs an analysis of the MD simulation obtained from OpenMMDL-Simulation.
+**OpenMMDL Analysis** performs an analysis of the MD simulation obtained from **OpenMMDL Simulation**.
 It analyzes the protein-ligand complex interactions throughout the MD trajectory, delivering the list of
-all possible interactions. In addition, it generates interaction fingerprints, provides the most occurring binding modes
-, and displays the transitions between the separate binding modes.
+all possible interactions. In addition, it generates interaction fingerprints, provides the most occurring so called Binding Modes
+and displays the transitions between the separate binding modes.
 
 If there is no ligand given, OpenMMDL-Analysis will instead analyze the trajectory on stable watermolecules
 and cluster those at positions where in at least 75% of the MD a watermolecule is present. Outputs include a PDB with representative waters
@@ -105,32 +105,34 @@ and a CSV of nearby protein Residuenumbers and chains as well as PDBs of each wa
 Start the analysis with the following Inputs:
 
 #### Mandatory:
--t = Topology file (PDB)
-
--d = Trajectory file (DCD)
-
--l = SDF File of the ligand
-
--n = Name of the ligand in the PDB file
+-t = topology file of the simulation (in .pdb format)
+-d = trajectory file of the simulation (in .dcd format)
 
 #### Optional:
--b = Binding mode treshold, which is used to remove interactions under a certain procentual occurence treshold from the binding mode generation, default is 40 (values: 0-100)
-
--df = Dataframe File, if all of the interaction already were calculated. The default name of this file, which is obtained after calculating the interactions is interactions_gathered.csv
-
--m = Minimal Transition, which is a treshold applied for the display of the binding mode transitions via a markov chains network figure, the defaul value is 1.
-
--c = CPU count, which will be used to calculate interactions. The default value is half of the CPU count.
+-n = Ligand name (3 letter code in PDB)
+-l = Ligand in SDF format
+-b = binding mode threshold. Is used to remove interactions under the defined procentual occurence from the binding mode generation. The default is 40% (accepted values: 0-100)
+-df = Dataframe (use if the interactions were already calculated, default name would be "interactions_gathered.csv")
+-m = minimal transition threshold. Is used for the display of the binding mode transitions in the Markov state chains network figure. The default value is 1
+-c = CPU count, specify how many CPUs should be used, default is half of the CPU count.
+-p = Generate .pml files for pharmacophore visualization. The default is False (accepted values: True/False)
+-s = special ligand name to calculate interactions with special ligands.
+-nuc = Treat nucleic acids as receptor
+-pep = Calculate interactions with peptides. Give the peptide chain name as input. Defaults to None
+-ref = Add a reference PDB to renumber the residue numbers. Defaults to None (accepted values: str of PDB)
+-r = Calculate the RMSD difference between frames. The default is False (accepted values: True/False)
+-w = stable-water-analysis. Defines if the analysis of stable water molecules should be performed. The default is False (accepted values: True/False)
+--watereps = the EPS of the clustering part during the water analysis. will only result in something if "-w True" is added. Accepts float (in Angstrom).
 
 #### Command line example with default values
 
-    openmmdl_analysis -t {path/to/topology} -d {path/to/trajectory} -l {path/to/sdf_ligand} -n {Ligand_name}
+    openmmdl_analysis -t {path/to/topology} -d {path/to/trajectory} -n {Ligand_name}
 
 
 #### Visualization
 Most of the analysis outputs are JEPG images and do not need any further preparation to be viewed.
 
-For the visualization of your trajectory with interaction pointclouds you can use the jupyter notebook prepared in the OpenMMDL repository.
+For the visualization of your trajectory with interaction pointclouds you can use the jupyter notebook prepared in the **OpenMMDL** repository.
 
 Or use this command:
 ```
