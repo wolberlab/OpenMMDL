@@ -45,7 +45,7 @@ After installation, activate the conda environment:
 
 ## OpenMMDL Setup
 
-**OpenMMDL Setup** will allow you to prepare the files needed to perform an protein-ligand complex MD simulation with **OpenMM**.
+**OpenMMDL Setup** will allow you to prepare the files needed to perform a  protein-ligand complex MD simulation with **OpenMM**.
 
 ### Usage
 
@@ -92,12 +92,12 @@ Setup. The SDF file name should be consistent with the input in the setup
 
 **OpenMMDL Analysis** performs an analysis of the MD simulation obtained from **OpenMMDL Simulation**.
 It analyzes the protein-ligand complex interactions throughout the MD trajectory, delivering the list of
-all possible interactions. In addition, it generates interaction fingerprints, provides the most occurring so called Binding Modes
+all possible interactions. In addition, it generates interaction fingerprints, provides the most occurring so-called Binding Modes
 and displays the transitions between the separate binding modes.
 
-If there is no ligand given, OpenMMDL-Analysis will instead analyze the trajectory on stable watermolecules
-and cluster those at positions where in at least 75% of the MD a watermolecule is present. Outputs include a PDB with representative waters
-and a CSV of nearby protein Residuenumbers and chains as well as PDBs of each water cluster.
+If there is no ligand given, **OpenMMDL Analysis** will instead analyze the trajectory on stable water molecules
+and cluster those at positions where in at least 75% frames of the MD a water molecule is present. Outputs include a PDB with representative waters
+and a CSV of nearby protein residue numbers and chains as well as PDBs of each water cluster.
 
 
 ### Usage
@@ -152,11 +152,11 @@ Or use this command:
 ```
 openmmdl_visualization
 ```
-Then edit the notebook to include the output of your analyis.
+Then edit the notebook to include the output of your analysis.
 ## Copyright
 Copyright (c) 2022, Valerij Talagayev, Yu Chen,  Niklas Piet Doering & Leon Obendorf (Wolber lab)
 
-#### Acknowledgements
+#### Acknowledgments
 
 The Script is based upon the OpenMM Toolkit [OpenMM](https://github.com/openmm)
 Many thanks to all of the creators and contributors of the OpenMM Toolkit, especially a big thank you to [jchodera](https://github.com/jchodera), [peastman](https://github.com/peastman), [mikemhenry](https://github.com/mikemhenry) and the whole [choderalab](https://github.com/choderalab) 
