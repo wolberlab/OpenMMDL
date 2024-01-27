@@ -106,22 +106,36 @@ Start the analysis with the following Inputs:
 
 #### Mandatory:
 -t = topology file of the simulation (in .pdb format)
+
 -d = trajectory file of the simulation (in .dcd format)
 
 #### Optional:
 -n = Ligand name (3 letter code in PDB)
+
 -l = Ligand in SDF format
+
 -b = binding mode threshold. Is used to remove interactions under the defined procentual occurence from the binding mode generation. The default is 40% (accepted values: 0-100)
+
 -df = Dataframe (use if the interactions were already calculated, default name would be "interactions_gathered.csv")
+
 -m = minimal transition threshold. Is used for the display of the binding mode transitions in the Markov state chains network figure. The default value is 1
+
 -c = CPU count, specify how many CPUs should be used, default is half of the CPU count.
+
 -p = Generate .pml files for pharmacophore visualization. The default is False (accepted values: True/False)
+
 -s = special ligand name to calculate interactions with special ligands.
+
 -nuc = Treat nucleic acids as receptor
+
 -pep = Calculate interactions with peptides. Give the peptide chain name as input. Defaults to None
+
 -ref = Add a reference PDB to renumber the residue numbers. Defaults to None (accepted values: str of PDB)
+
 -r = Calculate the RMSD difference between frames. The default is False (accepted values: True/False)
+
 -w = stable-water-analysis. Defines if the analysis of stable water molecules should be performed. The default is False (accepted values: True/False)
+
 --watereps = the EPS of the clustering part during the water analysis. will only result in something if "-w True" is added. Accepts float (in Angstrom).
 
 #### Command line example with default values
