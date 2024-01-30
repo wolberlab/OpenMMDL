@@ -782,7 +782,7 @@ def main():
 
     for interaction_type, interaction_data in interaction_types.items():
         plot_bacodes_grouped(
-            interaction_data, df_all, interaction_type, peptide=peptide
+            interaction_data, df_all, interaction_type
         )
 
     plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions)
