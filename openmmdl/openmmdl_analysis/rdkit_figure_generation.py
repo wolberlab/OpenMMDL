@@ -14,54 +14,68 @@ def generate_ligand_image(
     complex_pdb_file,
     ligand_no_h_pdb_file,
     smiles_file,
-    output_png_filename,
+    output_svg_filename,
 ):
-    """Generates a PNG image of the ligand.
+    """Generates a SVG image of the ligand.
 
     Args:
         ligand_name (str): Name of the ligand in the protein-ligand complex topology.
         complex_pdb_file (str): Path to the protein-ligand complex PDB file.
         ligand_no_h_pdb_file (str): Path to the ligand PDB file without hydrogens.
         smiles_file (str): Path to the SMILES file with the reference ligand.
-        output_png_filename (str): Name of the output PNG file.
+        output_svg_filename (str): Name of the output SVG file.
     """
-    # Load complex and ligand structures
-    complex = mda.Universe(complex_pdb_file)
-    ligand_no_h = mda.Universe(ligand_no_h_pdb_file)
-    lig_noh = ligand_no_h.select_atoms("all")
-    complex_lig = complex.select_atoms(f"resname {ligand_name}")
+    try:
+        # Load complex and ligand structures
+        complex = mda.Universe(complex_pdb_file)
+        ligand_no_h = mda.Universe(ligand_no_h_pdb_file)
+        lig_noh = ligand_no_h.select_atoms("all")
+        complex_lig = complex.select_atoms(f"resname {ligand_name}")
 
-    # Load ligand from PDB file
-    mol = Chem.MolFromPDBFile(ligand_no_h_pdb_file)
-    lig_rd = mol
+        # Load ligand from PDB file
+        mol = Chem.MolFromPDBFile(ligand_no_h_pdb_file)
+        lig_rd = mol
 
-    # Load reference SMILES
-    with open(smiles_file, "r") as file:
-        reference_smiles = file.read().strip()
-    reference_mol = Chem.MolFromSmiles(reference_smiles)
+        # Load reference SMILES
+        with open(smiles_file, "r") as file:
+            reference_smiles = file.read().strip()
+        reference_mol = Chem.MolFromSmiles(reference_smiles)
 
-    # Prepare ligand
-    prepared_ligand = AllChem.AssignBondOrdersFromTemplate(reference_mol, lig_rd)
-    AllChem.Compute2DCoords(prepared_ligand)
+        # Prepare ligand
+        prepared_ligand = AllChem.AssignBondOrdersFromTemplate(reference_mol, lig_rd)
+        AllChem.Compute2DCoords(prepared_ligand)
 
-    # Map atom indices between ligand_no_h and complex
-    for atom in prepared_ligand.GetAtoms():
-        atom_index = atom.GetIdx()
-        for lig_atom in lig_noh:
-            lig_index = lig_atom.index
-            if atom_index == lig_index:
-                lig_atom_name = lig_atom.name
-                for comp_lig in complex_lig:
-                    comp_lig_name = comp_lig.name
-                    if lig_atom_name == comp_lig_name:
-                        num = int(comp_lig.id)
-                        atom.SetAtomMapNum(num)
+        # Map atom indices between ligand_no_h and complex
+        for atom in prepared_ligand.GetAtoms():
+            atom_index = atom.GetIdx()
+            for lig_atom in lig_noh:
+                lig_index = lig_atom.index
+                if atom_index == lig_index:
+                    lig_atom_name = lig_atom.name
+                    for comp_lig in complex_lig:
+                        comp_lig_name = comp_lig.name
+                        if lig_atom_name == comp_lig_name:
+                            num = int(comp_lig.id)
+                            atom.SetAtomMapNum(num)
 
-    # Generate a PNG image of the ligand
-    img = Draw.MolToImage(prepared_ligand, size=(2500, 2500))
+        # Generate a SVG image of the ligand without highlighting atoms
+        drawer = Draw.MolDraw2DSVG(5120, 3200)
+        drawer.drawOptions().addStereoAnnotation = True  # Add stereo information if available
+        drawer.DrawMolecule(prepared_ligand)
 
-    # Save the image to a file
-    img.save(output_png_filename)
+        # Adjust font size in the SVG output using the FontSize method
+        font_size = drawer.FontSize()
+        drawer.SetFontSize(font_size * 0.5)  # You can adjust the multiplier as needed
+
+        drawer.FinishDrawing()
+        svg = drawer.GetDrawingText().replace("svg:", "")
+
+        # Save the SVG image to the specified output file
+        with open(output_svg_filename, "w") as f:
+            f.write(svg)
+
+    except Exception as e:
+        print(f"Error: {e}")
 
 
 def split_interaction_data(data):
