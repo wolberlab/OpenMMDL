@@ -69,7 +69,7 @@ from openmmdl.openmmdl_analysis.rdkit_figure_generation import (
 from openmmdl.openmmdl_analysis.barcode_generation import (
     barcodegeneration,
     plot_waterbridge_piechart,
-    plot_bacodes_grouped,
+    plot_barcodes_grouped,
 )
 from openmmdl.openmmdl_analysis.visualization_functions import (
     interacting_water_ids,
@@ -192,12 +192,18 @@ def main():
         default=False,
     )
     parser.add_argument(
+        "-rep",
+        dest = "representative_frame",
+        help = "Calculate the representative frame for each binding mode. Defaults to False",
+        default = False,
+    )
+    parser.add_argument(
         "--watereps",
         dest="water_eps",
         help="Set the Eps for clustering, this defines how big clusters can be spatially in Angstrom",
         default=1.0,
     )
-
+    
     input_formats = [".pdb", ".dcd", ".sdf", ".csv"]
     args = parser.parse_args()
     if input_formats[0] not in args.topology:
@@ -240,6 +246,7 @@ def main():
     special_ligand = args.special_ligand
     reference = args.reference
     peptide = args.peptide
+    generate_representative_frame = args.representative_frame
 
     if reference != None:
         print("\033[1mPDB File residues are being renumbered\033[0m")
@@ -669,87 +676,88 @@ def main():
         "Representative Frame": [],
         "Percentage Occurrence": [],
     }
-    modes_to_process = top_10_binding_modes.index
-    for mode in tqdm(modes_to_process):
-        result_dict["Binding Mode"].append(mode)
-        first_frame = grouped_frames_treshold.loc[
-            grouped_frames_treshold["Binding_fingerprint_treshold"].str.contains(mode),
-            "FRAME",
-        ].iloc[0]
-        all_frames = grouped_frames_treshold.loc[
-            grouped_frames_treshold["Binding_fingerprint_treshold"].str.contains(mode),
-            "FRAME",
-        ].tolist()
-        percent_occurrence = (top_10_binding_modes[mode] / total_binding_modes) * 100
-        result_dict["First Frame"].append(first_frame)
-        result_dict["All Frames"].append(all_frames)
-        result_dict["Percentage Occurrence"].append(percent_occurrence)
-        representative_frame = calculate_representative_frame(
-            pdb_md, all_frames, ligand
-        )
-        result_dict["Representative Frame"].append(representative_frame)
-    top_10_binding_modes_df = pd.DataFrame(result_dict)
-    top_10_binding_modes_df.to_csv("top_10_binding_modes.csv")
-    print("\033[1mFound representative frame for each binding mode\033[0m")
-    # save bindingmode pdb and .pml
-    id_num = 0
-    for index, row in top_10_binding_modes_df.iterrows():
-        b_mode = row["Binding Mode"]
-        rep_frame = int(row["Representative Frame"])
-        pdb_md.trajectory[rep_frame]
-        frame_atomgroup = pdb_md.atoms
-        frame_atomgroup.write(f"./Binding_Modes_Markov_States/{b_mode}.pdb")
-        if generate_pml:
-            filtered_df_all = df_all[df_all["FRAME"] == rep_frame]
-            filtered_df_bindingmodes = grouped_frames_treshold[
-                grouped_frames_treshold["FRAME"] == rep_frame
-            ]
-            bindingmode_dict = {}
-            for index, row in filtered_df_bindingmodes.iterrows():
-                for column in filtered_df_bindingmodes.columns:
-                    if column not in [
-                        "FRAME",
-                        "FRAME.1",
-                        "fingerprint",
-                        "Binding_fingerprint_treshold",
-                    ]:
-                        if row[column] == 1:
-                            if column not in bindingmode_dict:
-                                bindingmode_dict[column] = {
-                                    "LIGCOO": [],
-                                    "PROTCOO": [],
-                                }  # Initialize a nested dictionary for each key if not already present
-                            for index2, row2 in filtered_df_all.iterrows():
-                                if row2[column] == 1:
-                                    # Extract the string representation of the tuple
-                                    tuple_string = row2["LIGCOO"]
-                                    # Split the string into individual values using a comma as the delimiter
-                                    ligcoo_values = tuple_string.strip("()").split(",")
-                                    # Convert the string values to float
-                                    ligcoo_values = [
-                                        float(value.strip()) for value in ligcoo_values
-                                    ]
-
-                                    # Extract the string representation of the tuple for PROTCOO
-                                    tuple_string = row2["PROTCOO"]
-                                    # Split the string into individual values using a comma as the delimiter
-                                    protcoo_values = tuple_string.strip("()").split(",")
-                                    # Convert the string values to float
-                                    protcoo_values = [
-                                        float(value.strip()) for value in protcoo_values
-                                    ]
-
-                                    bindingmode_dict[column]["LIGCOO"].append(
-                                        ligcoo_values
-                                    )
-                                    bindingmode_dict[column]["PROTCOO"].append(
-                                        protcoo_values
-                                    )
-            generate_bindingmode_pharmacophore(
-                bindingmode_dict, ligand, f"{ligand}_complex", b_mode, id_num
+    if generate_representative_frame:
+        modes_to_process = top_10_binding_modes.index
+        for mode in tqdm(modes_to_process):
+            result_dict["Binding Mode"].append(mode)
+            first_frame = grouped_frames_treshold.loc[
+                grouped_frames_treshold["Binding_fingerprint_treshold"].str.contains(mode),
+                "FRAME",
+            ].iloc[0]
+            all_frames = grouped_frames_treshold.loc[
+                grouped_frames_treshold["Binding_fingerprint_treshold"].str.contains(mode),
+                "FRAME",
+            ].tolist()
+            percent_occurrence = (top_10_binding_modes[mode] / total_binding_modes) * 100
+            result_dict["First Frame"].append(first_frame)
+            result_dict["All Frames"].append(all_frames)
+            result_dict["Percentage Occurrence"].append(percent_occurrence)
+            representative_frame = calculate_representative_frame(
+                pdb_md, all_frames, ligand
             )
+            result_dict["Representative Frame"].append(representative_frame)
+        top_10_binding_modes_df = pd.DataFrame(result_dict)
+        top_10_binding_modes_df.to_csv("top_10_binding_modes.csv")
+        print("\033[1mFound representative frame for each binding mode\033[0m")
+        # save bindingmode pdb and .pml
+        id_num = 0
+        for index, row in top_10_binding_modes_df.iterrows():
+            b_mode = row["Binding Mode"]
+            rep_frame = int(row["Representative Frame"])
+            pdb_md.trajectory[rep_frame]
+            frame_atomgroup = pdb_md.atoms
+            frame_atomgroup.write(f"./Binding_Modes_Markov_States/{b_mode}.pdb")
+            if generate_pml:
+                filtered_df_all = df_all[df_all["FRAME"] == rep_frame]
+                filtered_df_bindingmodes = grouped_frames_treshold[
+                    grouped_frames_treshold["FRAME"] == rep_frame
+                ]
+                bindingmode_dict = {}
+                for index, row in filtered_df_bindingmodes.iterrows():
+                    for column in filtered_df_bindingmodes.columns:
+                        if column not in [
+                            "FRAME",
+                            "FRAME.1",
+                            "fingerprint",
+                            "Binding_fingerprint_treshold",
+                        ]:
+                            if row[column] == 1:
+                                if column not in bindingmode_dict:
+                                    bindingmode_dict[column] = {
+                                        "LIGCOO": [],
+                                        "PROTCOO": [],
+                                    }  # Initialize a nested dictionary for each key if not already present
+                                for index2, row2 in filtered_df_all.iterrows():
+                                    if row2[column] == 1:
+                                        # Extract the string representation of the tuple
+                                        tuple_string = row2["LIGCOO"]
+                                        # Split the string into individual values using a comma as the delimiter
+                                        ligcoo_values = tuple_string.strip("()").split(",")
+                                        # Convert the string values to float
+                                        ligcoo_values = [
+                                            float(value.strip()) for value in ligcoo_values
+                                        ]
 
-    print("\033[1mBinding mode pdb files saved\033[0m")
+                                        # Extract the string representation of the tuple for PROTCOO
+                                        tuple_string = row2["PROTCOO"]
+                                        # Split the string into individual values using a comma as the delimiter
+                                        protcoo_values = tuple_string.strip("()").split(",")
+                                        # Convert the string values to float
+                                        protcoo_values = [
+                                            float(value.strip()) for value in protcoo_values
+                                        ]
+
+                                        bindingmode_dict[column]["LIGCOO"].append(
+                                            ligcoo_values
+                                        )
+                                        bindingmode_dict[column]["PROTCOO"].append(
+                                            protcoo_values
+                                        )
+                generate_bindingmode_pharmacophore(
+                    bindingmode_dict, ligand, f"{ligand}_complex", b_mode, id_num
+                )
+
+        print("\033[1mBinding mode pdb files saved\033[0m")
 
     hydrophobic_interactions = df_all.filter(regex="hydrophobic").columns
     acceptor_interactions = df_all.filter(regex="Acceptor_hbond").columns
@@ -781,7 +789,7 @@ def main():
     }
 
     for interaction_type, interaction_data in interaction_types.items():
-        plot_bacodes_grouped(
+        plot_barcodes_grouped(
             interaction_data, df_all, interaction_type
         )
 

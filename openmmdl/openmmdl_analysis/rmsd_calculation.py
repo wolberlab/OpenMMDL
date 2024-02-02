@@ -44,7 +44,7 @@ def rmsd_for_atomgroups(
     # Plot and save the RMSD over time as a PNG file
     rmsd_df.plot(title="RMSD of protein and ligand")
     plt.ylabel("RMSD (Å)")
-    plt.savefig("./RMSD/RMSD_over_time.png")
+    plt.savefig("./RMSD/RMSD_over_time.svg")
 
     return rmsd_df
 
@@ -96,5 +96,5 @@ def RMSD_dist_frames(prot_lig_top_file, prot_lig_traj_file, lig, nucleic=False):
 
     fig.colorbar(img1, ax=ax, orientation="horizontal", fraction=0.1, label="RMSD (Å)")
 
-    plt.savefig("./RMSD/RMSD_between_the_frames.png")
+    plt.savefig("./RMSD/RMSD_between_the_frames.svg")
     return pairwise_rmsd_prot, pairwise_rmsd_lig
