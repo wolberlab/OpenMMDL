@@ -655,7 +655,7 @@ def main():
         # Create Figure with all Binding modes
         arranged_figure_generation(merged_image_paths, "all_binding_modes_arranged.png")
         generate_ligand_image(
-            ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", "ligand_numbering.png"
+            ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", "ligand_numbering.svg"
         )
         print("\033[1mBinding mode figure generated\033[0m")
 
