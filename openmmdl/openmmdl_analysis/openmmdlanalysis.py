@@ -529,135 +529,138 @@ def main():
             columns_with_value_1[treshold].update(columns_set)
 
     # Generate an Figure for each of the binding modes with rdkit Drawer with the atoms interacting highlighted by colors
-    if peptide is None:
-        matplotlib.use("Agg")
-        binding_site = {}
-        merged_image_paths = []
-        for binding_mode, values in columns_with_value_1.items():
-            binding_site[binding_mode] = values
-            occurrence_count = top_10_nodes_with_occurrences[binding_mode]
-            occurrence_percent = 100 * occurrence_count / total_frames
-            with open("lig.smi", "r") as file:
-                reference_smiles = (
-                    file.read().strip()
-                )  # Read the SMILES from the file and remove any leading/trailing whitespace
-            reference_mol = Chem.MolFromSmiles(reference_smiles)
-            prepared_ligand = AllChem.AssignBondOrdersFromTemplate(
-                reference_mol, lig_rd
-            )
-            # Generate 2D coordinates for the molecule
-            AllChem.Compute2DCoords(prepared_ligand)
-            split_data = split_interaction_data(values)
-            # Get the highlighted atom indices based on interaction type
-            (
-                highlighted_hbond_donor,
-                highlighted_hbond_acceptor,
-                highlighted_hbond_both,
-                highlighted_hydrophobic,
-                highlighted_waterbridge,
-                highlighted_pistacking,
-                highlighted_halogen,
-                highlighted_ni,
-                highlighted_pi,
-                highlighted_pication,
-                highlighted_metal,
-            ) = highlight_numbers(split_data, starting_idx=lig_index)
+    try:
+        if peptide is None:
+            matplotlib.use("Agg")
+            binding_site = {}
+            merged_image_paths = []
+            for binding_mode, values in columns_with_value_1.items():
+                binding_site[binding_mode] = values
+                occurrence_count = top_10_nodes_with_occurrences[binding_mode]
+                occurrence_percent = 100 * occurrence_count / total_frames
+                with open("lig.smi", "r") as file:
+                    reference_smiles = (
+                        file.read().strip()
+                    )  # Read the SMILES from the file and remove any leading/trailing whitespace
+                reference_mol = Chem.MolFromSmiles(reference_smiles)
+                prepared_ligand = AllChem.AssignBondOrdersFromTemplate(
+                    reference_mol, lig_rd
+                )
+                # Generate 2D coordinates for the molecule
+                AllChem.Compute2DCoords(prepared_ligand)
+                split_data = split_interaction_data(values)
+                # Get the highlighted atom indices based on interaction type
+                (
+                    highlighted_hbond_donor,
+                    highlighted_hbond_acceptor,
+                    highlighted_hbond_both,
+                    highlighted_hydrophobic,
+                    highlighted_waterbridge,
+                    highlighted_pistacking,
+                    highlighted_halogen,
+                    highlighted_ni,
+                    highlighted_pi,
+                    highlighted_pication,
+                    highlighted_metal,
+                ) = highlight_numbers(split_data, starting_idx=lig_index)
 
-            # Generate a dictionary for hydrogen bond acceptors
-            hbond_acceptor_dict = generate_interaction_dict(
-                "hbond_acceptor", highlighted_hbond_acceptor
-            )
-            # Generate a dictionary for hydrogen bond acceptors and donors
-            hbond_both_dict = generate_interaction_dict(
-                "hbond_both", highlighted_hbond_both
-            )
-            # Generate a dictionary for hydrogen bond donors
-            hbond_donor_dict = generate_interaction_dict(
-                "hbond_donor", highlighted_hbond_donor
-            )
-            # Generate a dictionary for hydrophobic features
-            hydrophobic_dict = generate_interaction_dict(
-                "hydrophobic", highlighted_hydrophobic
-            )
-            # Generate a dictionary for water bridge interactions
-            waterbridge_dict = generate_interaction_dict(
-                "waterbridge", highlighted_waterbridge
-            )
-            # Generate a dictionary for pistacking
-            pistacking_dict = generate_interaction_dict(
-                "pistacking", highlighted_pistacking
-            )
-            # Generate a dictionary for halogen interactions
-            halogen_dict = generate_interaction_dict("halogen", highlighted_halogen)
-            # Generate a dictionary for negative ionizables
-            ni_dict = generate_interaction_dict("ni", highlighted_ni)
-            # Generate a dictionary for negative ionizables
-            pi_dict = generate_interaction_dict("pi", highlighted_pi)
-            # Generate a dictionary for pication
-            pication_dict = generate_interaction_dict("pication", highlighted_pication)
-            # Generate a dictionary for metal interactions
-            metal_dict = generate_interaction_dict("metal", highlighted_metal)
+                # Generate a dictionary for hydrogen bond acceptors
+                hbond_acceptor_dict = generate_interaction_dict(
+                    "hbond_acceptor", highlighted_hbond_acceptor
+                )
+                # Generate a dictionary for hydrogen bond acceptors and donors
+                hbond_both_dict = generate_interaction_dict(
+                    "hbond_both", highlighted_hbond_both
+                )
+                # Generate a dictionary for hydrogen bond donors
+                hbond_donor_dict = generate_interaction_dict(
+                    "hbond_donor", highlighted_hbond_donor
+                )
+                # Generate a dictionary for hydrophobic features
+                hydrophobic_dict = generate_interaction_dict(
+                    "hydrophobic", highlighted_hydrophobic
+                )
+                # Generate a dictionary for water bridge interactions
+                waterbridge_dict = generate_interaction_dict(
+                    "waterbridge", highlighted_waterbridge
+                )
+                # Generate a dictionary for pistacking
+                pistacking_dict = generate_interaction_dict(
+                    "pistacking", highlighted_pistacking
+                )
+                # Generate a dictionary for halogen interactions
+                halogen_dict = generate_interaction_dict("halogen", highlighted_halogen)
+                # Generate a dictionary for negative ionizables
+                ni_dict = generate_interaction_dict("ni", highlighted_ni)
+                # Generate a dictionary for negative ionizables
+                pi_dict = generate_interaction_dict("pi", highlighted_pi)
+                # Generate a dictionary for pication
+                pication_dict = generate_interaction_dict("pication", highlighted_pication)
+                # Generate a dictionary for metal interactions
+                metal_dict = generate_interaction_dict("metal", highlighted_metal)
 
-            # Call the function to update hbond_donor_dict with values from other dictionaries
-            update_dict(
-                hbond_donor_dict,
-                hbond_acceptor_dict,
-                hydrophobic_dict,
-                hbond_both_dict,
-                waterbridge_dict,
-                pistacking_dict,
-                halogen_dict,
-                ni_dict,
-                pi_dict,
-                pication_dict,
-                metal_dict,
+                # Call the function to update hbond_donor_dict with values from other dictionaries
+                update_dict(
+                    hbond_donor_dict,
+                    hbond_acceptor_dict,
+                    hydrophobic_dict,
+                    hbond_both_dict,
+                    waterbridge_dict,
+                    pistacking_dict,
+                    halogen_dict,
+                    ni_dict,
+                    pi_dict,
+                    pication_dict,
+                    metal_dict,
+                )
+
+                # Convert the highlight_atoms to int type for rdkit drawer
+                highlight_atoms = [
+                    int(x)
+                    for x in highlighted_hbond_donor
+                    + highlighted_hbond_acceptor
+                    + highlighted_hbond_both
+                    + highlighted_hydrophobic
+                    + highlighted_waterbridge
+                    + highlighted_pistacking
+                    + highlighted_halogen
+                    + highlighted_ni
+                    + highlighted_pi
+                    + highlighted_pication
+                    + highlighted_metal
+                ]
+                highlight_atoms = list(set(highlight_atoms))
+
+                # Convert the RDKit molecule to SVG format with atom highlights
+                drawer = rdMolDraw2D.MolDraw2DSVG(600, 600)
+                drawer.DrawMolecule(
+                    prepared_ligand,
+                    highlightAtoms=highlight_atoms,
+                    highlightAtomColors=hbond_donor_dict,
+                )
+                drawer.FinishDrawing()
+                svg = drawer.GetDrawingText().replace("svg:", "")
+
+                # Save the SVG to a file
+                with open(f"{binding_mode}.svg", "w") as f:
+                    f.write(svg)
+
+                # Convert the svg to an png
+                cairosvg.svg2png(url=f"{binding_mode}.svg", write_to=f"{binding_mode}.png")
+
+                # Generate the interactions legend and combine it with the ligand png
+                merged_image_paths = create_and_merge_images(
+                    binding_mode, occurrence_percent, split_data, merged_image_paths
+                )
+
+            # Create Figure with all Binding modes
+            arranged_figure_generation(merged_image_paths, "all_binding_modes_arranged.png")
+            generate_ligand_image(
+                ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", "ligand_numbering.svg"
             )
-
-            # Convert the highlight_atoms to int type for rdkit drawer
-            highlight_atoms = [
-                int(x)
-                for x in highlighted_hbond_donor
-                + highlighted_hbond_acceptor
-                + highlighted_hbond_both
-                + highlighted_hydrophobic
-                + highlighted_waterbridge
-                + highlighted_pistacking
-                + highlighted_halogen
-                + highlighted_ni
-                + highlighted_pi
-                + highlighted_pication
-                + highlighted_metal
-            ]
-            highlight_atoms = list(set(highlight_atoms))
-
-            # Convert the RDKit molecule to SVG format with atom highlights
-            drawer = rdMolDraw2D.MolDraw2DSVG(600, 600)
-            drawer.DrawMolecule(
-                prepared_ligand,
-                highlightAtoms=highlight_atoms,
-                highlightAtomColors=hbond_donor_dict,
-            )
-            drawer.FinishDrawing()
-            svg = drawer.GetDrawingText().replace("svg:", "")
-
-            # Save the SVG to a file
-            with open(f"{binding_mode}.svg", "w") as f:
-                f.write(svg)
-
-            # Convert the svg to an png
-            cairosvg.svg2png(url=f"{binding_mode}.svg", write_to=f"{binding_mode}.png")
-
-            # Generate the interactions legend and combine it with the ligand png
-            merged_image_paths = create_and_merge_images(
-                binding_mode, occurrence_percent, split_data, merged_image_paths
-            )
-
-        # Create Figure with all Binding modes
-        arranged_figure_generation(merged_image_paths, "all_binding_modes_arranged.png")
-        generate_ligand_image(
-            ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", "ligand_numbering.svg"
-        )
-        print("\033[1mBinding mode figure generated\033[0m")
+            print("\033[1mBinding mode figure generated\033[0m")
+    except Exception as e:
+        print(f"Ligand could not be recognized, use the -l option")
 
     df_all = pd.read_csv("df_all.csv")
 
