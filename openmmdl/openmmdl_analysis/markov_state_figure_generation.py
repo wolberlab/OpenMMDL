@@ -24,7 +24,7 @@ def min_transition_calculation(min_transition):
 
 
 def binding_site_markov_network(
-    total_frames, min_transitions, combined_dict, font_size=12, size_node=200
+    total_frames, min_transitions, combined_dict, font_size=36, size_node=200
 ):
     """Generate Markov Chain plots based on transition probabilities.
 
@@ -35,7 +35,7 @@ def binding_site_markov_network(
         font_size (int, optional): The font size for the node labels. The default value is set to 12.
         size_node (int, optional): The size of the nodes in the Markov Chain plot. the default value is set to 200.
     """
-    font_size = 12 if font_size is None else font_size
+    font_size = 36 if font_size is None else font_size
     size_node = 200 if size_node is None else size_node
 
     # Calculate the number of elements in each part
@@ -164,10 +164,10 @@ def binding_site_markov_network(
             self_loop_occurences[state] = count / len(combined_dict["all"]) * 100
 
         # Generate the Markov Chain plot
-        plt.figure(figsize=(30, 30))  # Increased figure size
+        plt.figure(figsize=(60, 60))  # Increased figure size
         plt.title(
             f"Markov Chain Plot {min_transition_percent}% Frames Transition",
-            fontsize=35,
+            fontsize=72,
         )
 
         # Draw nodes and edges
@@ -215,7 +215,7 @@ def binding_site_markov_network(
                         connectionstyle=connection_style,
                     )
                     nx.draw_networkx_edge_labels(
-                        G, pos, edge_labels={(u, v): edge_label}, font_size=13
+                        G, pos, edge_labels={(u, v): edge_label}, font_size=26
                     )
             else:
                 edge_colors.append("grey")  # Use black for non-significant transitions
@@ -238,7 +238,7 @@ def binding_site_markov_network(
                         connectionstyle=connection_style,
                     )
                     nx.draw_networkx_edge_labels(
-                        G, pos, edge_labels={(u, v): edge_label}, font_size=13
+                        G, pos, edge_labels={(u, v): edge_label}, font_size=36
                     )
 
         # Update the node colors based on their appearance percentages in each part
@@ -311,14 +311,15 @@ def binding_site_markov_network(
             verticalalignment="center",
         )
 
+        
         # Add the legend to the plot
-        plt.legend(handles=legend_handles, loc="upper right")
+        plt.legend(handles=legend_handles, loc="upper right", fontsize=48)
 
         plt.axis("off")
         plt.tight_layout()
 
-        # Save the plot as a PNG file
-        plot_filename = f"markov_chain_plot_{min_transition_percent}.png"
+        # Save the plot as a SVG file
+        plot_filename = f"markov_chain_plot_{min_transition_percent}.svg"
         plot_path = os.path.join("Binding_Modes_Markov_States", plot_filename)
         os.makedirs(
             "Binding_Modes_Markov_States", exist_ok=True
