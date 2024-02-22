@@ -400,7 +400,7 @@ def createAmberBashScript():
             "################################## Ligand ######################################"
         )
     if session["nmLig"]:
-        a_script.append("# Normal Ligand")
+        a_script.append("# Normal Ligand that is compatible with GAFF force field")
         nmLigFile = uploadedFiles["nmLigFile"][0][1]
         a_script.append(
             "nmLigFile=%s # the file name of ligand without suffix `.pdb` or `.sdf`"
@@ -444,7 +444,7 @@ def createAmberBashScript():
         )
 
     if session["spLig"]:
-        a_script.append("# Special Ligand")
+        a_script.append("# Special Ligand that is incompatible with GAFF force field")
         spLigFile = uploadedFiles["spLigFile"][0][1]
         a_script.append(
             "spLigFile=%s # the file name of ligand without suffix `.pdb`"

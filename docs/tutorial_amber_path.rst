@@ -109,7 +109,7 @@ Depends on the type of ligand the user intends to simulate, two options are avai
 
 2.1 **Normal Ligand**. 
 
-It refers to the small molecule that is made up of C, N, O, S, P, H, F, Cl, Br and I. The Amber files for the ligand will be generated using `Antechamber` and `Parmchk2`.
+It refers to the small molecule that is made up of C, N, O, S, P, H, F, Cl, Br and I, thus is compatible with GAFF and can be processed by `Antechamber` and `Parmchk2`.
 
 .. figure:: /_static/images/tutorials/Amber_Path/normalLigand.png
    :figwidth: 700px
