@@ -377,12 +377,26 @@ def create_and_merge_images(
     for i, data in enumerate(filtered_split_data):
         y = data_points[i]
         label = data.split()[-1]
-        if label == "saltbridge":
-            type = data.split()[-2]
+        type = data.split()[-2]
         if label == "hydrophobic":
             (line,) = ax.plot(x, y, label=data, color=(0.8, 1, 0), linewidth=5.0)
         elif label == "hbond":
-            (line,) = ax.plot(x, y, label=data, color=(1.0, 0.6, 0.6), linewidth=5.0)
+            if type == "Acceptor":
+                (line,) = ax.plot(
+                    x, y, label=data, color=(1.0, 0.6, 0.6), linewidth=5.0
+                )
+            elif type == "Donor":
+                (line,) = ax.plot(
+                    x, y, label=data, color=(0.3, 0.5, 1.0), linewidth=5.0
+                )
+        elif label == "halogen":
+            (line,) = ax.plot(x, y, label=data, color=(1.0, 0.0, 0.9), linewidth=5.0)
+        elif label == "pistacking":
+            (line,) = ax.plot(x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0)
+        elif label == "pication":
+            (line,) = ax.plot(x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0)
+        elif label == "waterbridge":
+            (line,) = ax.plot(x, y, label=data, color=(0.0, 1.0, 0.9), linewidth=5.0)
         elif label == "metal":
             (line,) = ax.plot(x, y, label=data, color=(1.0, 0.6, 0.0), linewidth=5.0)
         elif label == "saltbridge":

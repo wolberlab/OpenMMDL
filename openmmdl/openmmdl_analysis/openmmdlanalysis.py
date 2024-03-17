@@ -603,13 +603,13 @@ def main():
                 update_dict(
                     hbond_donor_dict,
                     hbond_acceptor_dict,
+                    ni_dict,
+                    pi_dict,
                     hydrophobic_dict,
                     hbond_both_dict,
                     waterbridge_dict,
                     pistacking_dict,
                     halogen_dict,
-                    ni_dict,
-                    pi_dict,
                     pication_dict,
                     metal_dict,
                 )
@@ -620,12 +620,12 @@ def main():
                     for x in highlighted_hbond_donor
                     + highlighted_hbond_acceptor
                     + highlighted_hbond_both
+                    + highlighted_ni
+                    + highlighted_pi
                     + highlighted_hydrophobic
                     + highlighted_waterbridge
                     + highlighted_pistacking
                     + highlighted_halogen
-                    + highlighted_ni
-                    + highlighted_pi
                     + highlighted_pication
                     + highlighted_metal
                 ]
