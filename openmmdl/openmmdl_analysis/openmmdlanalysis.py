@@ -146,7 +146,7 @@ def main():
     parser.add_argument(
         "-c",
         dest="cpu_count",
-        help="CPU Count, specify how many CPUs should be used, default is half of the CPU count",
+        help="cores, specify how many PC cores should be used, default is half of the PC cores",
         default=os.cpu_count() // 2,
     )
     parser.add_argument(
