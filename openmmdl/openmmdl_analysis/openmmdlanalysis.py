@@ -197,26 +197,44 @@ def main():
         help = "Calculate the representative frame for each binding mode. Defaults to False",
         default = False,
     )
+   
     parser.add_argument(
         "--watereps",
         dest="water_eps",
         help="Set the Eps for clustering, this defines how big clusters can be spatially in Angstrom",
         default=1.0,
     )
-    
-    input_formats = [".pdb", ".dcd", ".sdf", ".csv"]
-    args = parser.parse_args()
-    if input_formats[0] not in args.topology:
-        print("PDB is missing, try the absolute path")
-    if input_formats[1] not in args.trajectory:
-        print("DCD is missing, try the absolute path")
+   
 
+    pdb_md = None
+    input_formats = [".pdb", ".dcd", ".sdf", ".csv", ".tpr", ".xtc", "trr",]
+    args = parser.parse_args()
+    if input_formats[0] not in args.topology and input_formats[4] not in args.topology:
+        print("Topology is missing, try the absolute path")
+    if input_formats[1] not in args.trajectory and input_formats[5] not in args.trajectory and input_formats[6] not in args.trajectory :
+        print("Trajectory is missing, try the absolute path")
+    
     # set variables for analysis and preprocess input files
     topology = args.topology
     trajectory = args.trajectory
-
+    # enable gromacs support and write topology and trajectory files
+    if ".tpr" in args.topology and (".xtc" in args.trajectory or ".trr" in args.trajectory):
+        print("\033[1mGromacs format detected. Writing compatible file formats.\033[0m")
+        u = mda.Universe(args.topology, args.trajectory)
+        with mda.Writer("trajectory.dcd", n_atoms=u.atoms.n_atoms) as W:
+            first_frame_saved = False
+            for ts in u.trajectory:
+                if not first_frame_saved:
+                    with mda.Writer("topology.pdb", n_atoms=u.atoms.n_atoms) as pdb_writer:
+                        pdb_writer.write(u.atoms)
+                        first_frame_saved = True
+                W.write(u.atoms)
+        pdb_md = mda.Universe("topology.pdb", "trajectory.dcd")
+        topology = "topology.pdb"
+        trajectory = "trajectory.dcd"
     water_eps = float(args.water_eps)
     stable_water_analysis = bool(args.stable_water_analysis)
+    
     # The following is the current water analysis if no ligand is present.
     if not args.ligand_sdf and args.peptide == None and stable_water_analysis:
         print("All analyses will be run which can be done without a ligand present")
@@ -246,6 +264,7 @@ def main():
     special_ligand = args.special_ligand
     reference = args.reference
     peptide = args.peptide
+    
     generate_representative_frame = args.representative_frame
 
     if reference != None:
@@ -258,8 +277,10 @@ def main():
         extract_and_save_ligand_as_sdf(topology, "./lig.sdf", ligand)
         ligand_sdf = "./lig.sdf"
 
-    pdb_md = mda.Universe(topology, trajectory)
-
+    if not pdb_md:
+        pdb_md = mda.Universe(topology, trajectory)
+    
+    
     # Writing out the complex of the protein and ligand with water around 10A of the ligand
     complex = pdb_md.select_atoms(
         f"protein or nucleic or resname {ligand} or (resname HOH and around 10 resname {ligand}) or resname {special_ligand}"
@@ -283,7 +304,12 @@ def main():
 
         # getting Ring Information from the ligand pdb file
         lig_rd = rdkit.Chem.rdmolfiles.MolFromPDBFile("lig.pdb")
-        lig_rd_ring = lig_rd.GetRingInfo()
+        try:
+            lig_rd_ring = lig_rd.GetRingInfo()
+        except AttributeError:
+            print("\033[1mCould not get the ring information.\033[0m")
+            print("\033[1mTry to remove lone pairs prior to running an analysis!\033[0m")
+            exit()
 
         # getting the index of the first atom of the ligand from the complex pdb
         novel_complex = mda.Universe("complex.pdb")
