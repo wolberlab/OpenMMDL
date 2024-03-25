@@ -217,7 +217,7 @@ def main():
     # set variables for analysis and preprocess input files
     topology = args.topology
     trajectory = args.trajectory
-    #enable gromacs support and write topology and trajectory files
+    # enable gromacs support and write topology and trajectory files
     if ".tpr" in args.topology and (".xtc" in args.trajectory or ".trr" in args.trajectory):
         print("\033[1mGromacs format detected. Writing compatible file formats.\033[0m")
         u = mda.Universe(args.topology, args.trajectory)
