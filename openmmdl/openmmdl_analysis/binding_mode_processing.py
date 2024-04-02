@@ -6,6 +6,7 @@ from MDAnalysis.analysis import rms, diffusionmap
 from MDAnalysis.analysis.distances import dist
 from tqdm import tqdm
 from pathlib import Path
+from numba import jit  
 
 
 def gather_interactions(df, ligand_rings, peptide=None):
@@ -639,7 +640,7 @@ def update_values(df, new, unique_data):
         values_to_update = new.loc[frame_value, list(unique_data.values())]
         df.loc[idx, list(unique_data.values())] = values_to_update
 
-
+@jit
 def calc_rmsd_2frames(ref, frame):
     """
     RMSD calculation between a reference and a frame.
@@ -656,8 +657,18 @@ def calc_rmsd_2frames(ref, frame):
 
 
 def calculate_distance_matrix(pdb_md, selection):
+    distances = np.zeros((len(pdb_md.trajectory), len(pdb_md.trajectory)))
     # calculate distance matrix
-    distances = diffusionmap.DistanceMatrix(pdb_md, selection).run().dist_matrix
+    for i in tqdm(range(len(pdb_md.trajectory))):
+        pdb_md.trajectory[i]
+        frame_i = pdb_md.select_atoms(selection).positions
+        # distances[i] = md.rmsd(traj_aligned, traj_aligned, frame=i)
+        for j in range(i + 1, len(pdb_md.trajectory)):
+            pdb_md.trajectory[j]
+            frame_j = pdb_md.select_atoms(selection).positions
+            rmsd = calc_rmsd_2frames(frame_i, frame_j)
+            distances[i][j] = rmsd
+            distances[j][i] = rmsd
     return distances
 
 
