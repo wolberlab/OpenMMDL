@@ -29,23 +29,47 @@ def renumber_protein_residues(input_pdb, reference_pdb, output_pdb):
 
     # List of common protein residue names including additional residues
     protein_residues = [
-        "ALA", "ARG", "ASN", "ASP", "CYS", "GLN", "GLU", "GLY", "HIS", "ILE",
-        "LEU", "LYS", "MET", "PHE", "PRO", "SER", "THR", "TRP", "TYR", "VAL",
-        "ACE", "NME", "HIE", "HID", "HIP",
+        "ALA",
+        "ARG",
+        "ASN",
+        "ASP",
+        "CYS",
+        "GLN",
+        "GLU",
+        "GLY",
+        "HIS",
+        "ILE",
+        "LEU",
+        "LYS",
+        "MET",
+        "PHE",
+        "PRO",
+        "SER",
+        "THR",
+        "TRP",
+        "TYR",
+        "VAL",
+        "ACE",
+        "NME",
+        "HIE",
+        "HID",
+        "HIP",
     ]
 
     # Iterate over each chain in the reference topology
     for chain_id in ref_top_df["chainID"].unique():
         # Extract residue indices from the reference topology for the current chain
-        ref_residue_indices = ref_top_df[
-            (ref_top_df["chainID"] == chain_id)
-            & ref_top_df["resName"].isin(protein_residues)
-        ]["resSeq"].values - 1
+        ref_residue_indices = (
+            ref_top_df[
+                (ref_top_df["chainID"] == chain_id)
+                & ref_top_df["resName"].isin(protein_residues)
+            ]["resSeq"].values
+            - 1
+        )
 
         # Update residue indices in the input topology DataFrame for the current chain
-        mask = (
-            (input_top_df["chainID"] == chain_id)
-            & input_top_df["resName"].isin(protein_residues)
+        mask = (input_top_df["chainID"] == chain_id) & input_top_df["resName"].isin(
+            protein_residues
         )
         input_top_df.loc[mask, "resSeq"] = ref_residue_indices + 1
 
@@ -58,6 +82,7 @@ def renumber_protein_residues(input_pdb, reference_pdb, output_pdb):
 
     # Save the renumbered trajectory to a new PDB file
     new_traj.save(output_pdb)
+
 
 def increase_ring_indices(ring, lig_index):
     """Increases the atom indices in a ring of the ligand obtained from the ligand to fit the atom indices present in the protein-ligand complex.

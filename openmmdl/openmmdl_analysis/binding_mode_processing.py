@@ -1,9 +1,12 @@
 import os
 import itertools
 import pandas as pd
-from MDAnalysis.analysis import rms
+import numpy as np
+from MDAnalysis.analysis import rms, diffusionmap
+from MDAnalysis.analysis.distances import dist
 from tqdm import tqdm
 from pathlib import Path
+from numba import jit  
 
 
 def gather_interactions(df, ligand_rings, peptide=None):
@@ -637,8 +640,39 @@ def update_values(df, new, unique_data):
         values_to_update = new.loc[frame_value, list(unique_data.values())]
         df.loc[idx, list(unique_data.values())] = values_to_update
 
+@jit
+def calc_rmsd_2frames(ref, frame):
+    """
+    RMSD calculation between a reference and a frame.
+    """
+    dist = np.zeros(len(frame))
+    for atom in range(len(frame)):
+        dist[atom] = (
+            (ref[atom][0] - frame[atom][0]) ** 2
+            + (ref[atom][1] - frame[atom][1]) ** 2
+            + (ref[atom][2] - frame[atom][2]) ** 2
+        )
 
-def calculate_representative_frame(traj, bmode_frame_list, lig):
+    return np.sqrt(dist.mean())
+
+
+def calculate_distance_matrix(pdb_md, selection):
+    distances = np.zeros((len(pdb_md.trajectory), len(pdb_md.trajectory)))
+    # calculate distance matrix
+    for i in tqdm(range(len(pdb_md.trajectory))):
+        pdb_md.trajectory[i]
+        frame_i = pdb_md.select_atoms(selection).positions
+        # distances[i] = md.rmsd(traj_aligned, traj_aligned, frame=i)
+        for j in range(i + 1, len(pdb_md.trajectory)):
+            pdb_md.trajectory[j]
+            frame_j = pdb_md.select_atoms(selection).positions
+            rmsd = calc_rmsd_2frames(frame_i, frame_j)
+            distances[i][j] = rmsd
+            distances[j][i] = rmsd
+    return distances
+
+
+def calculate_representative_frame(bmode_frames, DM):
     """Calculates the most representative frame for a bindingmode. This is based uppon the averagwe RMSD of a frame to all other frames in the binding mode.
 
     Args:
@@ -649,30 +683,24 @@ def calculate_representative_frame(traj, bmode_frame_list, lig):
     Returns:
         int: Number of the most representative frame.
     """
-    representative_frame = -1
-    min_mean_rmsd = 1000.0
-    for reference_frame in bmode_frame_list:
-        rmsd_values = []
-        traj.trajectory[reference_frame]
-        reference_frame_state = traj.select_atoms(
-            f"protein or nucleic or resname {lig}"
-        ).positions
-        for frame in bmode_frame_list:
-            if frame != reference_frame:
-                traj.trajectory[frame]
-                calculation_frame_state = traj.select_atoms(
-                    f"protein or nucleic or resname {lig}"
-                ).positions
-                calc_rmsd = rms.rmsd(
-                    reference_frame_state,
-                    calculation_frame_state,
-                    center=True,
-                    superposition=True,
-                )
-                rmsd_values.append(calc_rmsd)
-        mean_rmsd = sum(rmsd_values) / len(rmsd_values)
-        if mean_rmsd < min_mean_rmsd:
-            min_mean_rmsd = mean_rmsd
-            representative_frame = reference_frame
+    frames = bmode_frames
+    mean_rmsd_per_frame = {}
+    # first loop  : first frame
+    for frame_i in frames:
+        mean_rmsd_per_frame[frame_i] = 0
+        # we will add the rmsd between theses 2 frames and then calcul the
+        # mean
+        for frame_j in frames:
+            # We don't want to calcul the same frame.
+            if not frame_j == frame_i:
+                # we add to the corresponding value in the list of all rmsd
+                # the RMSD betwween frame_i and frame_j
+                mean_rmsd_per_frame[frame_i] += DM[frame_i - 1, frame_j - 1]
+        # mean calculation
+        mean_rmsd_per_frame[frame_i] /= len(frames)
 
-    return representative_frame
+        # Representative frame = frame with lower RMSD between all other
+        # frame of the cluster
+        repre = min(mean_rmsd_per_frame, key=mean_rmsd_per_frame.get)
+
+    return repre

@@ -15,3 +15,4 @@ cairosvg=2.7.1
 nglview=3.0.6
 jupyter
 ambertools=22.0
+numba>=0.59.1

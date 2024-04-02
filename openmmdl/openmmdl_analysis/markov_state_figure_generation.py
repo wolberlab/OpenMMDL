@@ -311,7 +311,6 @@ def binding_site_markov_network(
             verticalalignment="center",
         )
 
-        
         # Add the legend to the plot
         plt.legend(handles=legend_handles, loc="upper right", fontsize=48)
 
