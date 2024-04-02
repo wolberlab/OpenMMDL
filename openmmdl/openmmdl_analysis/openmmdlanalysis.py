@@ -52,6 +52,7 @@ from openmmdl.openmmdl_analysis.binding_mode_processing import (
     df_iteration_numbering,
     update_values,
     calculate_representative_frame,
+    calculate_distance_matrix,
 )
 from openmmdl.openmmdl_analysis.markov_state_figure_generation import (
     min_transition_calculation,
@@ -680,6 +681,7 @@ def main():
         "Percentage Occurrence": [],
     }
     if generate_representative_frame:
+        DM = calculate_distance_matrix(pdb_md, f"protein or nucleic or resname {ligand} or resname {special_ligand}")
         modes_to_process = top_10_binding_modes.index
         for mode in tqdm(modes_to_process):
             result_dict["Binding Mode"].append(mode)
@@ -696,7 +698,7 @@ def main():
             result_dict["All Frames"].append(all_frames)
             result_dict["Percentage Occurrence"].append(percent_occurrence)
             representative_frame = calculate_representative_frame(
-                pdb_md, all_frames, ligand
+                all_frames , DM
             )
             result_dict["Representative Frame"].append(representative_frame)
         top_10_binding_modes_df = pd.DataFrame(result_dict)
