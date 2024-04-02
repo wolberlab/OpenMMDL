@@ -379,7 +379,7 @@ def create_and_merge_images(
         label = data.split()[-1]
         type = data.split()[-2]
         if label == "hydrophobic":
-            (line,) = ax.plot(x, y, label=data, color=(0.8, 1, 0), linewidth=5.0)
+            (line,) = ax.plot(x, y, label=data, color=(1.0, 1.0, 0.0), linewidth=5.0)
         elif label == "hbond":
             if type == "Acceptor":
                 (line,) = ax.plot(
