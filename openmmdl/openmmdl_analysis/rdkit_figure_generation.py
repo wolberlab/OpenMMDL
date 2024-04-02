@@ -60,7 +60,9 @@ def generate_ligand_image(
 
         # Generate a SVG image of the ligand without highlighting atoms
         drawer = Draw.MolDraw2DSVG(5120, 3200)
-        drawer.drawOptions().addStereoAnnotation = True  # Add stereo information if available
+        drawer.drawOptions().addStereoAnnotation = (
+            True  # Add stereo information if available
+        )
         drawer.DrawMolecule(prepared_ligand)
 
         # Adjust font size in the SVG output using the FontSize method

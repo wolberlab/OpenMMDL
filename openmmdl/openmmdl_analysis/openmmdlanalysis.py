@@ -194,39 +194,54 @@ def main():
     )
     parser.add_argument(
         "-rep",
-        dest = "representative_frame",
-        help = "Calculate the representative frame for each binding mode. Defaults to False",
-        default = False,
+        dest="representative_frame",
+        help="Calculate the representative frame for each binding mode. Defaults to False",
+        default=False,
     )
-   
+
     parser.add_argument(
         "--watereps",
         dest="water_eps",
         help="Set the Eps for clustering, this defines how big clusters can be spatially in Angstrom",
         default=1.0,
     )
-   
 
     pdb_md = None
-    input_formats = [".pdb", ".dcd", ".sdf", ".csv", ".tpr", ".xtc", "trr",]
+    input_formats = [
+        ".pdb",
+        ".dcd",
+        ".sdf",
+        ".csv",
+        ".tpr",
+        ".xtc",
+        "trr",
+    ]
     args = parser.parse_args()
     if input_formats[0] not in args.topology and input_formats[4] not in args.topology:
         print("Topology is missing, try the absolute path")
-    if input_formats[1] not in args.trajectory and input_formats[5] not in args.trajectory and input_formats[6] not in args.trajectory :
+    if (
+        input_formats[1] not in args.trajectory
+        and input_formats[5] not in args.trajectory
+        and input_formats[6] not in args.trajectory
+    ):
         print("Trajectory is missing, try the absolute path")
-    
+
     # set variables for analysis and preprocess input files
     topology = args.topology
     trajectory = args.trajectory
     # enable gromacs support and write topology and trajectory files
-    if ".tpr" in args.topology and (".xtc" in args.trajectory or ".trr" in args.trajectory):
+    if ".tpr" in args.topology and (
+        ".xtc" in args.trajectory or ".trr" in args.trajectory
+    ):
         print("\033[1mGromacs format detected. Writing compatible file formats.\033[0m")
         u = mda.Universe(args.topology, args.trajectory)
         with mda.Writer("trajectory.dcd", n_atoms=u.atoms.n_atoms) as W:
             first_frame_saved = False
             for ts in u.trajectory:
                 if not first_frame_saved:
-                    with mda.Writer("topology.pdb", n_atoms=u.atoms.n_atoms) as pdb_writer:
+                    with mda.Writer(
+                        "topology.pdb", n_atoms=u.atoms.n_atoms
+                    ) as pdb_writer:
                         pdb_writer.write(u.atoms)
                         first_frame_saved = True
                 W.write(u.atoms)
@@ -235,7 +250,7 @@ def main():
         trajectory = "trajectory.dcd"
     water_eps = float(args.water_eps)
     stable_water_analysis = bool(args.stable_water_analysis)
-    
+
     # The following is the current water analysis if no ligand is present.
     if not args.ligand_sdf and args.peptide == None and stable_water_analysis:
         print("All analyses will be run which can be done without a ligand present")
@@ -265,7 +280,7 @@ def main():
     special_ligand = args.special_ligand
     reference = args.reference
     peptide = args.peptide
-    
+
     generate_representative_frame = args.representative_frame
 
     if reference != None:
@@ -280,8 +295,7 @@ def main():
 
     if not pdb_md:
         pdb_md = mda.Universe(topology, trajectory)
-    
-    
+
     # Writing out the complex of the protein and ligand with water around 10A of the ligand
     complex = pdb_md.select_atoms(
         f"protein or nucleic or resname {ligand} or (resname HOH and around 10 resname {ligand}) or resname {special_ligand}"
@@ -309,7 +323,9 @@ def main():
             lig_rd_ring = lig_rd.GetRingInfo()
         except AttributeError:
             print("\033[1mCould not get the ring information.\033[0m")
-            print("\033[1mTry to remove lone pairs prior to running an analysis!\033[0m")
+            print(
+                "\033[1mTry to remove lone pairs prior to running an analysis!\033[0m"
+            )
             exit()
 
         # getting the index of the first atom of the ligand from the complex pdb
@@ -503,9 +519,9 @@ def main():
 
         # Check if the fingerprint has been encountered before
         if fingerprint in treshold_fingerprint_dict:
-            grouped_frames_treshold.at[index, "Binding_fingerprint_treshold"] = (
-                treshold_fingerprint_dict[fingerprint]
-            )
+            grouped_frames_treshold.at[
+                index, "Binding_fingerprint_treshold"
+            ] = treshold_fingerprint_dict[fingerprint]
         else:
             # Assign a new label if the fingerprint is new
             label = f"Binding_Mode_{label_counter}"
@@ -622,7 +638,9 @@ def main():
                 # Generate a dictionary for negative ionizables
                 pi_dict = generate_interaction_dict("pi", highlighted_pi)
                 # Generate a dictionary for pication
-                pication_dict = generate_interaction_dict("pication", highlighted_pication)
+                pication_dict = generate_interaction_dict(
+                    "pication", highlighted_pication
+                )
                 # Generate a dictionary for metal interactions
                 metal_dict = generate_interaction_dict("metal", highlighted_metal)
 
@@ -673,7 +691,9 @@ def main():
                     f.write(svg)
 
                 # Convert the svg to an png
-                cairosvg.svg2png(url=f"{binding_mode}.svg", write_to=f"{binding_mode}.png")
+                cairosvg.svg2png(
+                    url=f"{binding_mode}.svg", write_to=f"{binding_mode}.png"
+                )
 
                 # Generate the interactions legend and combine it with the ligand png
                 merged_image_paths = create_and_merge_images(
@@ -681,7 +701,9 @@ def main():
                 )
 
             # Create Figure with all Binding modes
-            arranged_figure_generation(merged_image_paths, "all_binding_modes_arranged.png")
+            arranged_figure_generation(
+                merged_image_paths, "all_binding_modes_arranged.png"
+            )
             generate_ligand_image(
                 ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", "ligand_numbering.svg"
             )
@@ -707,25 +729,32 @@ def main():
         "Percentage Occurrence": [],
     }
     if generate_representative_frame:
-        DM = calculate_distance_matrix(pdb_md, f"protein or nucleic or resname {ligand} or resname {special_ligand}")
+        DM = calculate_distance_matrix(
+            pdb_md,
+            f"protein or nucleic or resname {ligand} or resname {special_ligand}",
+        )
         modes_to_process = top_10_binding_modes.index
         for mode in tqdm(modes_to_process):
             result_dict["Binding Mode"].append(mode)
             first_frame = grouped_frames_treshold.loc[
-                grouped_frames_treshold["Binding_fingerprint_treshold"].str.contains(mode),
+                grouped_frames_treshold["Binding_fingerprint_treshold"].str.contains(
+                    mode
+                ),
                 "FRAME",
             ].iloc[0]
             all_frames = grouped_frames_treshold.loc[
-                grouped_frames_treshold["Binding_fingerprint_treshold"].str.contains(mode),
+                grouped_frames_treshold["Binding_fingerprint_treshold"].str.contains(
+                    mode
+                ),
                 "FRAME",
             ].tolist()
-            percent_occurrence = (top_10_binding_modes[mode] / total_binding_modes) * 100
+            percent_occurrence = (
+                top_10_binding_modes[mode] / total_binding_modes
+            ) * 100
             result_dict["First Frame"].append(first_frame)
             result_dict["All Frames"].append(all_frames)
             result_dict["Percentage Occurrence"].append(percent_occurrence)
-            representative_frame = calculate_representative_frame(
-                all_frames , DM
-            )
+            representative_frame = calculate_representative_frame(all_frames, DM)
             result_dict["Representative Frame"].append(representative_frame)
         top_10_binding_modes_df = pd.DataFrame(result_dict)
         top_10_binding_modes_df.to_csv("top_10_binding_modes.csv")
@@ -763,19 +792,25 @@ def main():
                                         # Extract the string representation of the tuple
                                         tuple_string = row2["LIGCOO"]
                                         # Split the string into individual values using a comma as the delimiter
-                                        ligcoo_values = tuple_string.strip("()").split(",")
+                                        ligcoo_values = tuple_string.strip("()").split(
+                                            ","
+                                        )
                                         # Convert the string values to float
                                         ligcoo_values = [
-                                            float(value.strip()) for value in ligcoo_values
+                                            float(value.strip())
+                                            for value in ligcoo_values
                                         ]
 
                                         # Extract the string representation of the tuple for PROTCOO
                                         tuple_string = row2["PROTCOO"]
                                         # Split the string into individual values using a comma as the delimiter
-                                        protcoo_values = tuple_string.strip("()").split(",")
+                                        protcoo_values = tuple_string.strip("()").split(
+                                            ","
+                                        )
                                         # Convert the string values to float
                                         protcoo_values = [
-                                            float(value.strip()) for value in protcoo_values
+                                            float(value.strip())
+                                            for value in protcoo_values
                                         ]
 
                                         bindingmode_dict[column]["LIGCOO"].append(
@@ -820,9 +855,7 @@ def main():
     }
 
     for interaction_type, interaction_data in interaction_types.items():
-        plot_barcodes_grouped(
-            interaction_data, df_all, interaction_type
-        )
+        plot_barcodes_grouped(interaction_data, df_all, interaction_type)
 
     plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions)
     print("\033[1mBarcodes generated\033[0m")

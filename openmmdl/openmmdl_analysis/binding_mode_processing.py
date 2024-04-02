@@ -8,7 +8,6 @@ from tqdm import tqdm
 from pathlib import Path
 
 
-
 def gather_interactions(df, ligand_rings, peptide=None):
     """Process a DataFrame with the protein-ligand interaction and generate column names for each unique interaction.
 
@@ -647,17 +646,20 @@ def calc_rmsd_2frames(ref, frame):
     """
     dist = np.zeros(len(frame))
     for atom in range(len(frame)):
-        dist[atom] = ((ref[atom][0] - frame[atom][0]) ** 2 +
-                      (ref[atom][1] - frame[atom][1]) ** 2 +
-                      (ref[atom][2] - frame[atom][2]) ** 2)
+        dist[atom] = (
+            (ref[atom][0] - frame[atom][0]) ** 2
+            + (ref[atom][1] - frame[atom][1]) ** 2
+            + (ref[atom][2] - frame[atom][2]) ** 2
+        )
 
-    return (np.sqrt(dist.mean()))
+    return np.sqrt(dist.mean())
 
 
 def calculate_distance_matrix(pdb_md, selection):
-    #calculate distance matrix
+    # calculate distance matrix
     distances = diffusionmap.DistanceMatrix(pdb_md, selection).run().dist_matrix
     return distances
+
 
 def calculate_representative_frame(bmode_frames, DM):
     """Calculates the most representative frame for a bindingmode. This is based uppon the averagwe RMSD of a frame to all other frames in the binding mode.
@@ -684,11 +686,10 @@ def calculate_representative_frame(bmode_frames, DM):
                 # the RMSD betwween frame_i and frame_j
                 mean_rmsd_per_frame[frame_i] += DM[frame_i - 1, frame_j - 1]
         # mean calculation
-        mean_rmsd_per_frame[frame_i] /= (len(frames))
+        mean_rmsd_per_frame[frame_i] /= len(frames)
 
         # Representative frame = frame with lower RMSD between all other
         # frame of the cluster
         repre = min(mean_rmsd_per_frame, key=mean_rmsd_per_frame.get)
-        
-    return repre
 
+    return repre
