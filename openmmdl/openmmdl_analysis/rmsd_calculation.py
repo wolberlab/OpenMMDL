@@ -10,7 +10,7 @@ from MDAnalysis.analysis.distances import dist
 
 
 def rmsd_for_atomgroups(
-    prot_lig_top_file, prot_lig_traj_file, selection1, selection2=None
+    prot_lig_top_file, prot_lig_traj_file, fig_type, selection1, selection2=None
 ):
     """Calulate the RMSD for selected atom groups, and save the csv file and plot.
 
@@ -44,12 +44,12 @@ def rmsd_for_atomgroups(
     # Plot and save the RMSD over time as a PNG file
     rmsd_df.plot(title="RMSD of protein and ligand")
     plt.ylabel("RMSD (Å)")
-    plt.savefig("./RMSD/RMSD_over_time.svg")
+    plt.savefig(f"./RMSD/RMSD_over_time.{fig_type}")
 
     return rmsd_df
 
 
-def RMSD_dist_frames(prot_lig_top_file, prot_lig_traj_file, lig, nucleic=False):
+def RMSD_dist_frames(prot_lig_top_file, prot_lig_traj_file, fig_type, lig, nucleic=False):
     """Calculate the RMSD between all frames in a matrix.
 
     Args:
@@ -96,5 +96,5 @@ def RMSD_dist_frames(prot_lig_top_file, prot_lig_traj_file, lig, nucleic=False):
 
     fig.colorbar(img1, ax=ax, orientation="horizontal", fraction=0.1, label="RMSD (Å)")
 
-    plt.savefig("./RMSD/RMSD_between_the_frames.svg")
+    plt.savefig(f"./RMSD/RMSD_between_the_frames.{fig_type}")
     return pairwise_rmsd_prot, pairwise_rmsd_lig

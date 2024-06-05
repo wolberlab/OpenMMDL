@@ -205,6 +205,13 @@ def main():
         help="Set the Eps for clustering, this defines how big clusters can be spatially in Angstrom",
         default=1.0,
     )
+    
+    parser.add_argument(
+        "--figure",
+        dest="figure_type",
+        help="File type for the figures, default is png. Can be changed to all file types supported by matplotlib.",
+        default="png",
+    )
 
     pdb_md = None
     input_formats = [
@@ -280,6 +287,7 @@ def main():
     special_ligand = args.special_ligand
     reference = args.reference
     peptide = args.peptide
+    fig_type = args.figure_type
 
     generate_representative_frame = args.representative_frame
 
@@ -364,33 +372,36 @@ def main():
         rmsd_for_atomgroups(
             f"{topology}",
             f"{trajectory}",
+            fig_type,
             selection1="nucleicbackbone",
             selection2=["nucleic", f"resname {ligand}"],
         )
         if frame_rmsd != "No":
             RMSD_dist_frames(
-                f"{topology}", f"{trajectory}", lig=f"{ligand}", nucleic=True
+                f"{topology}", f"{trajectory}", fig_type, lig=f"{ligand}", nucleic=True
             )
             print("\033[1mRMSD calculated\033[0m")
     elif peptide != None:
         rmsd_for_atomgroups(
             f"{topology}",
             f"{trajectory}",
+            fig_type,
             selection1="backbone",
             selection2=["protein", f"chainID {peptide}"],
         )
         if frame_rmsd != "No":
-            RMSD_dist_frames(f"{topology}", f"{trajectory}", lig=f"chainID {peptide}")
+            RMSD_dist_frames(f"{topology}", f"{trajectory}", fig_type, lig=f"chainID {peptide}")
             print("\033[1mRMSD calculated\033[0m")
     else:
         rmsd_for_atomgroups(
             f"{topology}",
             f"{trajectory}",
+            fig_type,
             selection1="backbone",
             selection2=["protein", f"resname {ligand}"],
         )
         if frame_rmsd != "No":
-            RMSD_dist_frames(f"{topology}", f"{trajectory}", lig=f"{ligand}")
+            RMSD_dist_frames(f"{topology}", f"{trajectory}", fig_type, lig=f"{ligand}")
             print("\033[1mRMSD calculated\033[0m")
 
     if receptor_nucleic:
@@ -538,7 +549,7 @@ def main():
     # Generate Markov state figures of the binding modes
     total_frames = len(pdb_md.trajectory) - 1
     min_transitions = min_transition_calculation(min_transition)
-    binding_site_markov_network(total_frames, min_transitions, combined_dict)
+    binding_site_markov_network(total_frames, min_transitions, combined_dict, fig_type)
     print("\033[1mMarkov State Figure generated\033[0m")
 
     # Get the top 10 nodes with the most occurrences
@@ -692,7 +703,7 @@ def main():
 
                 # Convert the svg to an png
                 cairosvg.svg2png(
-                    url=f"{binding_mode}.svg", write_to=f"{binding_mode}.png"
+                    url=f"{binding_mode}.{fig_type}", write_to=f"{binding_mode}.png"
                 )
 
                 # Generate the interactions legend and combine it with the ligand png
@@ -705,7 +716,7 @@ def main():
                 merged_image_paths, "all_binding_modes_arranged.png"
             )
             generate_ligand_image(
-                ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", "ligand_numbering.svg"
+                ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", f"ligand_numbering.{fig_type}"
             )
             print("\033[1mBinding mode figure generated\033[0m")
     except Exception as e:
@@ -855,9 +866,9 @@ def main():
     }
 
     for interaction_type, interaction_data in interaction_types.items():
-        plot_barcodes_grouped(interaction_data, df_all, interaction_type)
+        plot_barcodes_grouped(interaction_data, df_all, interaction_type, fig_type)
 
-    plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions)
+    plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions, fig_type)
     print("\033[1mBarcodes generated\033[0m")
 
     interacting_water_id_list = interacting_water_ids(df_all, waterbridge_interactions)
