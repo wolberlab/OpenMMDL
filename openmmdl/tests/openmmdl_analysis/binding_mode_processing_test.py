@@ -1821,5 +1821,6 @@ def test_calculate_representative_frame():
     test_data_directory = Path("openmmdl/tests/data/in")
     # load mdtraj trajectory
     md = mda.Universe(f"{test_data_directory}/interacting_waters.pdb", f"{test_data_directory}/interacting_waters.dcd")
-    rep = calculate_representative_frame(md, [i for i in range(1, 10)], "UNK")
+    dm = calculate_distance_matrix(md, "protein or resname UNK")
+    rep = calculate_representative_frame([i for i in range(1, 10)], dm)
     assert rep == 3
