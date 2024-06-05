@@ -105,7 +105,7 @@ def plot_barcodes(barcodes, save_path):
     plt.savefig(f"./Barcodes/{save_path}", dpi=300, bbox_inches="tight")
 
 
-def plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions):
+def plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions, fig_type):
     """Generates piecharts for each waterbridge interaction with the water ids of the interacting waters.
 
     Args:
@@ -179,13 +179,13 @@ def plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interact
         # Adjust the position of the subplots within the figure
         plt.subplots_adjust(top=0.99, bottom=0.01)  # You can change the value as needed
         plt.savefig(
-            f"Barcodes/Waterbridge_Piecharts/{waterbridge_interaction}.svg",
+            f"Barcodes/Waterbridge_Piecharts/{waterbridge_interaction}.{fig_type}",
             bbox_inches="tight",
             dpi=300,
         )
 
 
-def plot_barcodes_grouped(interactions, df_all, interaction_type):
+def plot_barcodes_grouped(interactions, df_all, interaction_type, fig_type):
     """generates barcode figures and groups them by ligandatom, aswell as total interaction barcode for a giveen lingenatom.
 
     Args:
@@ -225,7 +225,7 @@ def plot_barcodes_grouped(interactions, df_all, interaction_type):
         os.makedirs(f"./Barcodes/{ligatom}", exist_ok=True)
         plot_barcodes(
             ligatom_interaction_barcodes,
-            f"{ligatom}/{ligatom}_{interaction_type}_barcodes.svg",
+            f"{ligatom}/{ligatom}_{interaction_type}_barcodes.{fig_type}",
         )
 
         barcodes_list = list(ligatom_interaction_barcodes.values())
@@ -234,4 +234,4 @@ def plot_barcodes_grouped(interactions, df_all, interaction_type):
         grouped_array = grouped_array.astype(int)
         total_interactions[ligatom] = grouped_array
 
-    plot_barcodes(total_interactions, f"{interaction_type}_interactions.svg")
+    plot_barcodes(total_interactions, f"{interaction_type}_interactions.{fig_type}")

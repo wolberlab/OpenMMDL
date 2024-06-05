@@ -24,7 +24,7 @@ def min_transition_calculation(min_transition):
 
 
 def binding_site_markov_network(
-    total_frames, min_transitions, combined_dict, font_size=36, size_node=200
+    total_frames, min_transitions, combined_dict, fig_type, font_size=36, size_node=200
 ):
     """Generate Markov Chain plots based on transition probabilities.
 
@@ -317,8 +317,8 @@ def binding_site_markov_network(
         plt.axis("off")
         plt.tight_layout()
 
-        # Save the plot as a SVG file
-        plot_filename = f"markov_chain_plot_{min_transition_percent}.svg"
+        # Save the plot
+        plot_filename = f"markov_chain_plot_{min_transition_percent}.{fig_type}"
         plot_path = os.path.join("Binding_Modes_Markov_States", plot_filename)
         os.makedirs(
             "Binding_Modes_Markov_States", exist_ok=True
