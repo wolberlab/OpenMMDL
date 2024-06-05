@@ -1,6 +1,6 @@
 import simtk.openmm.app as app
 from openff.toolkit.topology import Molecule
-from openmmforcefields.generators import GAFFTemplateGenerator
+from openmmforcefields.generators import GAFFTemplateGenerator, SMIRNOFFTemplateGenerator
 
 
 def ff_selection(ff):
@@ -120,7 +120,7 @@ def water_model_selection(water, forcefield_selection):
     return water_model
 
 
-def generate_forcefield(protein_ff, solvent_ff, add_membrane, rdkit_mol=None):
+def generate_forcefield(protein_ff, solvent_ff, add_membrane, sm_generator, rdkit_mol=None):
     """
     Generate an OpenMM Forcefield object and register a small molecule.
 
@@ -146,17 +146,24 @@ def generate_forcefield(protein_ff, solvent_ff, add_membrane, rdkit_mol=None):
 
     # If a ligand is present, a Forcefield with GAFF will be created for the ligand
     if rdkit_mol is not None:
-        gaff = GAFFTemplateGenerator(
-            molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True),
-            forcefield="gaff-2.11",
-        )
-        forcefield.registerTemplateGenerator(gaff.generator)
-
+        if sm_generator == "Gaff":
+            gaff = GAFFTemplateGenerator(
+                molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True),
+                forcefield="gaff-2.11",
+            )
+            transitional_forcefield.registerTemplateGenerator(gaff.generator)
+        elif sm_generator == "smirnoff":
+            smirnoff = SMIRNOFFTemplateGenerator(
+                molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True),
+                forcefield="openff-2.1.0.offxml",
+            )
+            transitional_forcefield.registerTemplateGenerator(smirnoff.generator)
+            
     return forcefield
 
 
 def generate_transitional_forcefield(
-    protein_ff, solvent_ff, add_membrane, rdkit_mol=None
+    protein_ff, solvent_ff, add_membrane, sm_generator, rdkit_mol=None
 ):
     """
     Generate an OpenMM transitional forcefield object with TIP3P water model for membrane building and register a small molecule.
@@ -185,10 +192,17 @@ def generate_transitional_forcefield(
 
     # If a ligand is present, a Forcefield with GAFF will be created for the ligand
     if rdkit_mol is not None:
-        gaff = GAFFTemplateGenerator(
-            molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True),
-            forcefield="gaff-2.11",
-        )
-        transitional_forcefield.registerTemplateGenerator(gaff.generator)
+        if sm_generator == "Gaff":
+            gaff = GAFFTemplateGenerator(
+                molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True),
+                forcefield="gaff-2.11",
+            )
+            transitional_forcefield.registerTemplateGenerator(gaff.generator)
+        elif sm_generator == "smirnoff":
+            smirnoff = SMIRNOFFTemplateGenerator(
+                molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True),
+                forcefield="openff-2.1.0.offxml",
+            )
+            transitional_forcefield.registerTemplateGenerator(smirnoff.generator)
 
     return transitional_forcefield
