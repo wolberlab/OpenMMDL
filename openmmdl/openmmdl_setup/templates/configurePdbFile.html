@@ -46,6 +46,13 @@ Select the pdb input file and options for how to model it.
         <div class="col-md-10" title="The supported formats are SDF, MOL and MOL2"> {{fileinput('sdfFile') }}</div>
     </div>
     <div class="form-group">
+    <label for="smallMoleculeForceField" class="control-label col-md-2">Small Molecule Force Field</label>
+    <div class="col-md-10"><select name="smallMoleculeForceField" id="smallMoleculeForceField" class="form-control" title="Select the preferred small molecule force field" onchange="optionChanged()">
+        <option value="gaff" selected>GAFF</option>
+        <option value="smirnoff">SMIRNOFF</option>
+    </select></div>
+    </div>
+    <div class="form-group">
     <label for="ligandMinimization" class="control-label col-md-2">Ligand Minimization</label>
     <div class="col-md-10"><select name="ligandMinimization" id="ligandMinimization" class="form-control" title="Minimize ligand with MMFF94 rdkit without protein" onchange="optionChanged()">
         <option value="False" selected>No</option>
