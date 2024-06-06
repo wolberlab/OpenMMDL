@@ -20,9 +20,10 @@ def test_binding_site_markov_network():
     total_frames = 1000
     min_transitions = [5, 10]
     combined_dict = {"all": ["A", "B", "A", "C", "B", "A", "C", "A", "A", "B"]}
+    fig_type = "png"
 
     # Run the function
-    binding_site_markov_network(total_frames, min_transitions, combined_dict)
+    binding_site_markov_network(total_frames, min_transitions, combined_dict, fig_type)
 
     # Check if the output file exists for each min_transition
     for min_transition_percent in min_transitions:
