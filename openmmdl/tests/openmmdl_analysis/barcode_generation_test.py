@@ -78,6 +78,7 @@ def test_plot_waterbridge_piechart(tmp_path):
     })
     waterbridge_barcodes = [np.array([1, 0, 1, 0]), np.array([0, 1, 0, 1])]
     waterbridge_interactions = ['interaction1', 'interaction2']
+    fig_type = 'png'
 
     # Change the current working directory to tmp_path
 
@@ -85,7 +86,7 @@ def test_plot_waterbridge_piechart(tmp_path):
     os.makedirs(f"{tmp_path}/Barcodes/Waterbridge_Piecharts/", exist_ok=True)
 
     # Call the function
-    plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions)
+    plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions, fig_type)
 
     # Check if the output files are created
     for interaction in waterbridge_interactions:
@@ -122,9 +123,10 @@ def test_plot_bacodes_grouped(tmp_path):
     # Define interactions and interaction_type
     interactions = ['atom1_atom2_interaction', 'atom3_atom4_interaction']
     interaction_type = 'interaction'
+    fig_type = 'png'
     
     working_directory = os.getcwd()
-    plot_bacodes_grouped(interactions, df_all, interaction_type)
+    plot_bacodes_grouped(interactions, df_all, interaction_type, fig_type)
     # Check if the output files were created
     assert os.path.exists(os.path.join(working_directory, "Barcodes", "atom2", f"atom2_{interaction_type}_barcodes.png"))
     assert os.path.exists(os.path.join(working_directory, "Barcodes", "atom4", f"atom4_{interaction_type}_barcodes.png"))

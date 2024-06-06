@@ -4,7 +4,7 @@ channels:
   - conda-forge  # Add the conda-forge channel here
 
 dependencies:
-  - python=3.8
+  - python=3.10
   - pip
   - setuptools>=61.0
   - versioningit~=2.0
@@ -25,6 +25,7 @@ dependencies:
   - flask>=2.2.2
   - cairosvg=2.7.1
   - nglview=3.0.6
+  - numba>=0.59.1
   - jupyter
   # Add any additional runtime dependencies from pyproject.toml here
   # - package_name=version

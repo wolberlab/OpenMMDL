@@ -23,6 +23,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          conda install -y python=3.10
           conda env update --file environment.yml --name base 
 
       - name: Install package and its entry points
