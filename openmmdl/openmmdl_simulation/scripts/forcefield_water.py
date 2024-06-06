@@ -156,7 +156,7 @@ def generate_forcefield(protein_ff, solvent_ff, add_membrane, smallMoleculeForce
 
             smirnoff = SMIRNOFFTemplateGenerator(
                 molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True),
-                forcefield="openff-1.0.0",
+                forcefield="openff-2.2.0",
             )
             forcefield.registerTemplateGenerator(smirnoff.generator)
             
@@ -202,7 +202,7 @@ def generate_transitional_forcefield(
         elif smallMoleculeForceField == "smirnoff":
             smirnoff = SMIRNOFFTemplateGenerator(
                 molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True),
-                forcefield="openff-1.0.0",
+                forcefield="openff-2.2.0",
             )
             transitional_forcefield.registerTemplateGenerator(smirnoff.generator)
 
