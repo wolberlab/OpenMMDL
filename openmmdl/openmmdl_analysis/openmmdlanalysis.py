@@ -703,7 +703,7 @@ def main():
 
                 # Convert the svg to an png
                 cairosvg.svg2png(
-                    url=f"{binding_mode}.{fig_type}", write_to=f"{binding_mode}.png"
+                    url=f"{binding_mode}.svg", write_to=f"{binding_mode}.png"
                 )
 
                 # Generate the interactions legend and combine it with the ligand png
