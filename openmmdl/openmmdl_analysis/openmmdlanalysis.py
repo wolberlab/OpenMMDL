@@ -716,8 +716,12 @@ def main():
                 merged_image_paths, "all_binding_modes_arranged.png"
             )
             generate_ligand_image(
-                ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", f"ligand_numbering.{fig_type}"
+                ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", f"ligand_numbering.svg"
             )
+            if fig_type == "png":
+                cairosvg.svg2png(
+                    url=f"ligand_numbering.svg", write_to=f"ligand_numbering.png"
+                )
             print("\033[1mBinding mode figure generated\033[0m")
     except Exception as e:
         print(f"Ligand could not be recognized, use the -l option")
