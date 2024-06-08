@@ -97,27 +97,6 @@ def increase_ring_indices(ring, lig_index):
     return [atom_idx + lig_index for atom_idx in ring]
 
 
-def convert_ligand_to_smiles(input_sdf, output_smi):
-    """Converts ligand structures from an SDF file to SMILES :) format
-
-    Args:
-        input_sdf (str): Path to the SDF file with the ligand that wll be converted.
-        output_smi (str): Path to the output SMILES files.
-    """
-    # Create a molecule supplier from an SDF file
-    mol_supplier = Chem.SDMolSupplier(input_sdf)
-
-    # Open the output SMILES file for writing
-    with open(output_smi, "w") as output_file:
-        # Iterate through molecules and convert each to SMILES
-        for mol in mol_supplier:
-            if mol is not None:  # Make sure the molecule was successfully read
-                smiles = Chem.MolToSmiles(mol)
-                output_file.write(smiles + "\n")
-            else:
-                print("nono")
-
-
 def process_pdb_file(input_pdb_filename):
     """Process a PDB file to make it compatible with the openmmdl_analysis package.
 
