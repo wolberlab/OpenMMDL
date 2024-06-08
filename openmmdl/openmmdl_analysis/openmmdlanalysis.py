@@ -716,7 +716,7 @@ def main():
                 merged_image_paths, "all_binding_modes_arranged.png"
             )
             generate_ligand_image(
-                ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", f"ligand_numbering.svg"
+                ligand, "complex.pdb", "lig_no_h.pdb", f"ligand_numbering.svg"
             )
             if fig_type == "png":
                 cairosvg.svg2png(
