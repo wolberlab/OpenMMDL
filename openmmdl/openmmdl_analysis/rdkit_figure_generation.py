@@ -13,7 +13,6 @@ def generate_ligand_image(
     ligand_name,
     complex_pdb_file,
     ligand_no_h_pdb_file,
-    smiles_file,
     output_svg_filename,
 ):
     """Generates a SVG image of the ligand.
@@ -22,7 +21,6 @@ def generate_ligand_image(
         ligand_name (str): Name of the ligand in the protein-ligand complex topology.
         complex_pdb_file (str): Path to the protein-ligand complex PDB file.
         ligand_no_h_pdb_file (str): Path to the ligand PDB file without hydrogens.
-        smiles_file (str): Path to the SMILES file with the reference ligand.
         output_svg_filename (str): Name of the output SVG file.
     """
     try:
