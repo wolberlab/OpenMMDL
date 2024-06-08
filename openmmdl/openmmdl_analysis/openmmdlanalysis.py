@@ -35,7 +35,6 @@ from openmmdl.openmmdl_analysis.preprocessing import (
     renumber_atoms_in_residues,
     process_pdb,
     extract_and_save_ligand_as_sdf,
-    convert_ligand_to_smiles,
 )
 from openmmdl.openmmdl_analysis.rmsd_calculation import (
     rmsd_for_atomgroups,
@@ -363,7 +362,6 @@ def main():
             ligand_rings.append(current_ring)
         print("\033[1mLigand ring data gathered\033[0m")
 
-        convert_ligand_to_smiles(ligand_sdf, output_smi="lig.smi")
     if peptide != None:
         ligand_rings = None
 
