@@ -592,15 +592,10 @@ def main():
                 binding_site[binding_mode] = values
                 occurrence_count = top_10_nodes_with_occurrences[binding_mode]
                 occurrence_percent = 100 * occurrence_count / total_frames
-                with open("lig.smi", "r") as file:
-                    reference_smiles = (
-                        file.read().strip()
-                    )  # Read the SMILES from the file and remove any leading/trailing whitespace
-                reference_mol = Chem.MolFromSmiles(reference_smiles)
-                prepared_ligand = AllChem.AssignBondOrdersFromTemplate(
-                    reference_mol, lig_rd
-                )
-                # Generate 2D coordinates for the molecule
+                # Convert ligand to RDKit with Converter
+                lig_atoms = complex_lig.convert_to("RDKIT")
+                # Remove Hydrogens and get 2D representation
+                prepared_ligand = Chem.RemoveAllHs(lig_atoms)
                 AllChem.Compute2DCoords(prepared_ligand)
                 split_data = split_interaction_data(values)
                 # Get the highlighted atom indices based on interaction type
