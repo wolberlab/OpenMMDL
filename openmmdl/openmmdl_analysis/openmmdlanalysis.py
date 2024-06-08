@@ -297,8 +297,8 @@ def main():
     print("\033[1mFiles are preprocessed\033[0m")
 
     if ligand_sdf == None:
-        extract_and_save_ligand_as_sdf(topology, "./lig.sdf", ligand)
-        ligand_sdf = "./lig.sdf"
+        extract_and_save_ligand_as_sdf(topology, "./ligand_prepared.sdf", ligand)
+        ligand_sdf = "./ligand_prepared.sdf"
 
     if not pdb_md:
         pdb_md = mda.Universe(topology, trajectory)
