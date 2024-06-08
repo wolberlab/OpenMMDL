@@ -5,10 +5,8 @@ import re
 import rdkit
 import mdtraj as md
 from rdkit import Chem
-from rdkit.Chem import Draw
-from rdkit.Chem import AllChem
+from rdkit.Chem import Draw, AllChem, SDWriter
 from rdkit.Chem.Draw import rdMolDraw2D
-from openbabel import pybel
 
 
 def renumber_protein_residues(input_pdb, reference_pdb, output_pdb):
@@ -138,17 +136,13 @@ def extract_and_save_ligand_as_sdf(input_pdb_filename, output_filename, target_r
         print(f"No ligand with residue name '{target_resname}' found in the PDB file.")
         return
 
-    # Create a new Universe with only the ligand
-    ligand_universe = mda.Merge(ligand_atoms)
+    #Using RDKit Converter to get SDF File
+    lig_atoms = ligand_atoms.convert_to("RDKIT")
 
-    # Save the ligand Universe as a PDB file
-    ligand_universe.atoms.write("lig.pdb")
-
-    # use openbabel to convert pdb to sdf
-    mol = next(pybel.readfile("pdb", "lig.pdb"))
-    mol.write("sdf", output_filename, overwrite=True)
-    # remove the temporary pdb file
-    os.remove("lig.pdb")
+    #Write out the SDF file
+    writer = SDWriter(output_filename)
+    writer.write(lig_atoms)
+    writer.close()
 
 
 def renumber_atoms_in_residues(input_pdb_file, output_pdb_file, lig_name):
