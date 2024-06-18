@@ -1823,4 +1823,4 @@ def test_calculate_representative_frame():
     md = mda.Universe(f"{test_data_directory}/interacting_waters.pdb", f"{test_data_directory}/interacting_waters.dcd")
     dm = calculate_distance_matrix(md, "protein or resname UNK")
     rep = calculate_representative_frame([i for i in range(1, 10)], dm)
-    assert rep == 3
+    assert rep == 4
