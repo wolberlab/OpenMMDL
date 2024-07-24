@@ -22,13 +22,13 @@ Mandatory:
 
     -t = topology file of the simulation (in .pdb format)
     -d = trajectory file of the simulation (in .dcd format)
+    -n = Ligand name (3 letter code in PDB)
 
 
 Optional:
 
 .. code-block:: text
 
-    -n = Ligand name (3 letter code in PDB)
     -l = Ligand in SDF format
     -b = binding mode threshold. Is used to remove interactions under the defined procentual occurence from the binding mode generation. The default is 40% (accepted values: 0-100)
     -df = Dataframe (use if the interactions were already calculated, default name would be "interactions_gathered.csv")
@@ -39,9 +39,10 @@ Optional:
     -nuc = Treat nucleic acids as receptor
     -pep = Calculate interactions with peptides. Give the peptide chain name as input. Defaults to None
     -ref = Add a reference PDB to renumber the residue numbers. Defaults to None (accepted values: str of PDB)
-    -r = Calculate the RMSD difference between frames. The default is False (accepted values: True/False)
+    -r = Calculate the RMSD difference between frames. The default is False (accepted values: True/False) (if False no representative frame for the binding modes will be generated)
     -w = stable-water-analysis. Defines if the analysis of stable water molecules should be performed. The default is False (accepted values: True/False)
     --watereps = the EPS of the clustering part during the water analysis. will only result in something if "-w True" is added. Accepts float (in Angstrom). 
+    --figure = File type for the figures, default is png. Can be changed to all file types supported by matplotlib.
 
 Application
 ------------------------------
