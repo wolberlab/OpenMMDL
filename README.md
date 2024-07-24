@@ -109,8 +109,9 @@ Start the analysis with the following Inputs:
 
 -d = trajectory file of the simulation (in .dcd format)
 
-#### Optional:
 -n = Ligand name (3 letter code in PDB)
+
+#### Optional:
 
 -l = Ligand in SDF format
 
@@ -137,6 +138,8 @@ Start the analysis with the following Inputs:
 -w = stable-water-analysis. Defines if the analysis of stable water molecules should be performed. The default is False (accepted values: True/False)
 
 --watereps = the EPS of the clustering part during the water analysis. will only result in something if "-w True" is added. Accepts float (in Angstrom).
+
+--figure = File type for the figures, default is png. Can be changed to all file types supported by matplotlib.
 
 #### Command line example with default values
 
