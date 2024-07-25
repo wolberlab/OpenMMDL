@@ -105,7 +105,9 @@ def plot_barcodes(barcodes, save_path):
     plt.savefig(f"./Barcodes/{save_path}", dpi=300, bbox_inches="tight")
 
 
-def plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions, fig_type):
+def plot_waterbridge_piechart(
+    df_all, waterbridge_barcodes, waterbridge_interactions, fig_type
+):
     """Generates piecharts for each waterbridge interaction with the water ids of the interacting waters.
 
     Args:

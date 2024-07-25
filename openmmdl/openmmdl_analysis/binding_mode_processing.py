@@ -6,7 +6,7 @@ from MDAnalysis.analysis import rms, diffusionmap
 from MDAnalysis.analysis.distances import dist
 from tqdm import tqdm
 from pathlib import Path
-from numba import jit  
+from numba import jit
 
 
 def gather_interactions(df, ligand_rings, peptide=None):
@@ -639,6 +639,7 @@ def update_values(df, new, unique_data):
         frame_value = row["FRAME"]
         values_to_update = new.loc[frame_value, list(unique_data.values())]
         df.loc[idx, list(unique_data.values())] = values_to_update
+
 
 @jit
 def calc_rmsd_2frames(ref, frame):

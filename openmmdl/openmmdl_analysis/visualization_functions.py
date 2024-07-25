@@ -7,6 +7,7 @@ import nglview as nv
 import subprocess
 import os
 import shutil
+import argparse
 
 from openmmdl.openmmdl_analysis.barcode_generation import waterids_barcode_generator
 
@@ -255,8 +256,47 @@ def visualization(
 
 def run_visualization():
     """Runs the visualization notebook in the current directory. The visualization notebook is copied from the package directory to the current directory and automaticaly started."""
-    package_dir = os.path.dirname(__file__)
-    notebook_path = os.path.join(package_dir, "visualization.ipynb")
-    current_dir = os.getcwd()
-    shutil.copyfile(notebook_path, f"{current_dir}/visualization.ipynb")
-    subprocess.run(["jupyter", "notebook", "visualization.ipynb"])
+
+    logo = "\n".join(
+        [
+            "     ,-----.    .-------.     .-''-.  ,---.   .--.,---.    ,---.,---.    ,---. ______       .---.      ",
+            "   .'  .-,  '.  \  _(`)_ \  .'_ _   \ |    \  |  ||    \  /    ||    \  /    ||    _ `''.   | ,_|      ",
+            "  / ,-.|  \ _ \ | (_ o._)| / ( ` )   '|  ,  \ |  ||  ,  \/  ,  ||  ,  \/  ,  || _ | ) _  \,-./  )      ",
+            " ;  \  '_ /  | :|  (_,_) /. (_ o _)  ||  |\_ \|  ||  |\_   /|  ||  |\_   /|  ||( ''_'  ) |\  '_ '`)    ",
+            " |  _`,/ \ _/  ||   '-.-' |  (_,_)___||  _( )_\  ||  _( )_/ |  ||  _( )_/ |  || . (_) `. | > (_)  )    ",
+            " : (  '\_/ \   ;|   |     '  \   .---.| (_ o _)  || (_ o _) |  || (_ o _) |  ||(_    ._) '(  .  .-'    ",
+            "  \ `_/  \  ) / |   |      \  `-'    /|  (_,_)\  ||  (_,_)  |  ||  (_,_)  |  ||  (_.\.' /  `-'`-'|___  ",
+            "   '. \_/``'.'  /   )       \       / |  |    |  ||  |      |  ||  |      |  ||       .'    |        \ ",
+            "     '-----'    `---'        `'-..-'  '--'    '--''--'      '--''--'      '--''-----'`      `--------` ",
+            "              Prepare and Perform OpenMM Protein-Ligand MD Simulations                                 ",
+            "                                     Alpha Version                                                     ",
+        ]
+    )
+    parser = argparse.ArgumentParser(
+        prog="openmmdl_analysis",
+        description=logo,
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    parser.add_argument(
+        "--type",
+        dest="type",
+        help="Software you wish to visualize openmmdl interactions with. Options: nglview, pymol. Default: nglview",
+        default="nglview",
+    )
+    if parser.parse_args().type == "nglview":
+        package_dir = os.path.dirname(__file__)
+        notebook_path = os.path.join(package_dir, "visualization.ipynb")
+        current_dir = os.getcwd()
+        shutil.copyfile(notebook_path, f"{current_dir}/visualization.ipynb")
+        subprocess.run(["jupyter", "notebook", "visualization.ipynb"])
+    if parser.parse_args().type == "pymol":
+        package_dir = os.path.dirname(__file__)
+        pymol_script_path = os.path.join(package_dir, "visualization_pymol.py")
+        current_dir = os.getcwd()
+        shutil.copyfile(pymol_script_path, f"{current_dir}/visualization_pymol.py")
+        print(
+            """\033[1mWARNING!!! 
+To run the visualization script in pymol, please run the following commands in pymol:\033[0m
+    \x1B[3mrun visualization_pymol.py\x1B[0m
+    \x1B[3mopenmdl_visualization PATH_TO_interacting_waters.pdb, modulePATH_TO_clouds.json\x1B[0m"""
+        )

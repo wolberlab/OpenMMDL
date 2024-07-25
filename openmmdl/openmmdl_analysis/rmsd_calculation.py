@@ -49,7 +49,9 @@ def rmsd_for_atomgroups(
     return rmsd_df
 
 
-def RMSD_dist_frames(prot_lig_top_file, prot_lig_traj_file, fig_type, lig, nucleic=False):
+def RMSD_dist_frames(
+    prot_lig_top_file, prot_lig_traj_file, fig_type, lig, nucleic=False
+):
     """Calculate the RMSD between all frames in a matrix.
 
     Args:
