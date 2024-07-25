@@ -149,13 +149,25 @@ Start the analysis with the following Inputs:
 #### Visualization
 Most of the analysis outputs are JEPG images and do not need any further preparation to be viewed.
 
-For the visualization of your trajectory with interaction pointclouds you can use the jupyter notebook prepared in the **OpenMMDL** repository.
+For the visualization of your complex with interaction pointclouds you can use NGLView with the jupyter notebook prepared in the **OpenMMDL** repository or visualize the pointclouds in PyMOL.
 
-Or use this command:
+### Usage
 ```
 openmmdl_visualization
 ```
-Then edit the notebook to include the output of your analysis.
+#### Optional:
+--type = Software you wish to visualize openmmdl interactions with. Options: nglview, pymol. Default: nglview
+#### NGLView
+After running the start comand a jupyter notebook will automatically open.
+Edit the notebook to include the output files of your analysis.
+Then run all cells.
+#### PyMOL
+After running the start comand a python skript will apear in your directory.
+Open up PyMOL then run these two comands in the PyMOL console:
+```
+run visualization_pymol.py
+openmdl_visualization PATH_TO_interacting_waters.pdb, modulePATH_TO_clouds.json
+```
 ## Copyright
 Copyright (c) 2022, Valerij Talagayev, Yu Chen,  Niklas Piet Doering & Leon Obendorf (Wolber lab)
 
