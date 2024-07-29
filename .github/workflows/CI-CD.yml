@@ -7,14 +7,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Python 3.10
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:
-          python-version: '3.10'
+          python-version: ${{ matrix.python-version }}
 
       - name: Add conda to system path
         run: |
@@ -23,7 +25,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          conda install -y python=3.10
+          conda install -y python=${{ matrix.python-version }}
           conda env update --file environment.yml --name base 
 
       - name: Install package and its entry points
