@@ -37,10 +37,9 @@ from openmmdl.openmmdl_analysis.preprocessing import (
     extract_and_save_ligand_as_sdf,
     convert_ligand_to_smiles,
 )
-from openmmdl.openmmdl_analysis.rmsd_calculation import (
-    rmsd_for_atomgroups,
-    RMSD_dist_frames,
-)
+
+from openmmdl.openmmdl_analysis.rmsd_calculation import RMSDAnalyzer
+
 from openmmdl.openmmdl_analysis.interaction_gathering import (
     process_trajectory,
     fill_missing_frames,
@@ -367,40 +366,35 @@ def main():
         ligand_rings = None
 
     os.makedirs("RMSD", exist_ok=True)
+    analyzer = RMSDAnalyzer(f"{topology}", f"{trajectory}")
     if receptor_nucleic:
-        rmsd_for_atomgroups(
-            f"{topology}",
-            f"{trajectory}",
+        rmsd_df = analyzer.rmsd_for_atomgroups(
             fig_type,
             selection1="nucleicbackbone",
             selection2=["nucleic", f"resname {ligand}"],
         )
         if frame_rmsd != "No":
-            RMSD_dist_frames(
-                f"{topology}", f"{trajectory}", fig_type, lig=f"{ligand}", nucleic=True
+            pairwise_rmsd_prot, pairwise_rmsd_lig = analyzer.rmsd_dist_frames(
+                fig_type, lig=f"{ligand}", nucleic=True
             )
             print("\033[1mRMSD calculated\033[0m")
     elif peptide != None:
-        rmsd_for_atomgroups(
-            f"{topology}",
-            f"{trajectory}",
+        rmsd_df = analyzer.rmsd_for_atomgroups(
             fig_type,
             selection1="backbone",
             selection2=["protein", f"chainID {peptide}"],
         )
         if frame_rmsd != "No":
-            RMSD_dist_frames(f"{topology}", f"{trajectory}", fig_type, lig=f"chainID {peptide}")
+            pairwise_rmsd_prot, pairwise_rmsd_lig = analyzer.rmsd_dist_frames(fig_type, lig=f"chainID {peptide}")
             print("\033[1mRMSD calculated\033[0m")
     else:
-        rmsd_for_atomgroups(
-            f"{topology}",
-            f"{trajectory}",
+        rmsd_df = analyzer.rmsd_for_atomgroups(
             fig_type,
             selection1="backbone",
             selection2=["protein", f"resname {ligand}"],
         )
         if frame_rmsd != "No":
-            RMSD_dist_frames(f"{topology}", f"{trajectory}", fig_type, lig=f"{ligand}")
+            pairwise_rmsd_prot, pairwise_rmsd_lig = analyzer.rmsd_dist_frames(fig_type, lig=f"{ligand}")
             print("\033[1mRMSD calculated\033[0m")
 
     if receptor_nucleic:
