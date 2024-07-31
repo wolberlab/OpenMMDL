@@ -68,9 +68,8 @@ from openmmdl.openmmdl_analysis.rdkit_figure_generation import (
     generate_ligand_image,
 )
 from openmmdl.openmmdl_analysis.barcode_generation import (
-    barcodegeneration,
-    plot_waterbridge_piechart,
-    plot_barcodes_grouped,
+    BarcodeGenerator,
+    BarcodePlotter,
 )
 from openmmdl.openmmdl_analysis.visualization_functions import (
     interacting_water_ids,
