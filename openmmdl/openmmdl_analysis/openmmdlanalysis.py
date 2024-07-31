@@ -852,8 +852,9 @@ def main():
     metal_interactions = df_all.filter(regex="metal").columns
 
     waterbridge_barcodes = {}
+    barcode_gen = BarcodeGenerator(df_all)
     for waterbridge_interaction in waterbridge_interactions:
-        barcode = barcodegeneration(df_all, waterbridge_interaction)
+        barcode = barcode_gen.generate_barcode(waterbridge_interaction)
         waterbridge_barcodes[waterbridge_interaction] = barcode
 
     interaction_types = {
@@ -869,10 +870,13 @@ def main():
         "metal": metal_interactions,
     }
 
+    # Initialize BarcodePlotter
+    barcode_plotter = BarcodePlotter(df_all)
+    
     for interaction_type, interaction_data in interaction_types.items():
-        plot_barcodes_grouped(interaction_data, df_all, interaction_type, fig_type)
+        barcode_plotter.plot_barcodes_grouped(interaction_data, interaction_type, fig_type)
 
-    plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions, fig_type)
+    barcode_plotter.plot_waterbridge_piechart(waterbridge_barcodes, waterbridge_interactions, fig_type)
     print("\033[1mBarcodes generated\033[0m")
 
     interacting_water_id_list = interacting_water_ids(df_all, waterbridge_interactions)
