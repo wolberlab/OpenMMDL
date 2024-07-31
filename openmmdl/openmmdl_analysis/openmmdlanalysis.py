@@ -57,13 +57,10 @@ from openmmdl.openmmdl_analysis.binding_mode_processing import (
 from openmmdl.openmmdl_analysis.markov_state_figure_generation import MarkovChainAnalysis
 
 from openmmdl.openmmdl_analysis.rdkit_figure_generation import (
-    split_interaction_data,
-    highlight_numbers,
-    generate_interaction_dict,
-    update_dict,
-    create_and_merge_images,
-    arranged_figure_generation,
-    generate_ligand_image,
+    InteractionProcessor,
+    LigandImageGenerator,
+    FigureArranger,
+    ImageMerger,
 )
 from openmmdl.openmmdl_analysis.barcode_generation import (
     BarcodeGenerator,
@@ -577,6 +574,7 @@ def main():
     # Generate an Figure for each of the binding modes with rdkit Drawer with the atoms interacting highlighted by colors
     try:
         if peptide is None:
+            interaction_processor = InteractionProcessor("complex.pdb", "lig_no_h.pdb")
             matplotlib.use("Agg")
             binding_site = {}
             merged_image_paths = []
@@ -594,7 +592,7 @@ def main():
                 )
                 # Generate 2D coordinates for the molecule
                 AllChem.Compute2DCoords(prepared_ligand)
-                split_data = split_interaction_data(values)
+                split_data = interaction_processor.split_interaction_data(values)
                 # Get the highlighted atom indices based on interaction type
                 (
                     highlighted_hbond_donor,
@@ -608,47 +606,47 @@ def main():
                     highlighted_pi,
                     highlighted_pication,
                     highlighted_metal,
-                ) = highlight_numbers(split_data, starting_idx=lig_index)
+                ) = interaction_processor.highlight_numbers(split_data, starting_idx=lig_index)
 
                 # Generate a dictionary for hydrogen bond acceptors
-                hbond_acceptor_dict = generate_interaction_dict(
+                hbond_acceptor_dict = interaction_processor.generate_interaction_dict(
                     "hbond_acceptor", highlighted_hbond_acceptor
                 )
                 # Generate a dictionary for hydrogen bond acceptors and donors
-                hbond_both_dict = generate_interaction_dict(
+                hbond_both_dict = interaction_processor.generate_interaction_dict(
                     "hbond_both", highlighted_hbond_both
                 )
                 # Generate a dictionary for hydrogen bond donors
-                hbond_donor_dict = generate_interaction_dict(
+                hbond_donor_dict = interaction_processor.generate_interaction_dict(
                     "hbond_donor", highlighted_hbond_donor
                 )
                 # Generate a dictionary for hydrophobic features
-                hydrophobic_dict = generate_interaction_dict(
+                hydrophobic_dict = interaction_processor.generate_interaction_dict(
                     "hydrophobic", highlighted_hydrophobic
                 )
                 # Generate a dictionary for water bridge interactions
-                waterbridge_dict = generate_interaction_dict(
+                waterbridge_dict = interaction_processor.generate_interaction_dict(
                     "waterbridge", highlighted_waterbridge
                 )
                 # Generate a dictionary for pistacking
-                pistacking_dict = generate_interaction_dict(
+                pistacking_dict = interaction_processor.generate_interaction_dict(
                     "pistacking", highlighted_pistacking
                 )
                 # Generate a dictionary for halogen interactions
-                halogen_dict = generate_interaction_dict("halogen", highlighted_halogen)
+                halogen_dict = interaction_processor.generate_interaction_dict("halogen", highlighted_halogen)
                 # Generate a dictionary for negative ionizables
-                ni_dict = generate_interaction_dict("ni", highlighted_ni)
+                ni_dict = interaction_processor.generate_interaction_dict("ni", highlighted_ni)
                 # Generate a dictionary for negative ionizables
-                pi_dict = generate_interaction_dict("pi", highlighted_pi)
+                pi_dict = interaction_processor.generate_interaction_dict("pi", highlighted_pi)
                 # Generate a dictionary for pication
-                pication_dict = generate_interaction_dict(
+                pication_dict = interaction_processor.generate_interaction_dict(
                     "pication", highlighted_pication
                 )
                 # Generate a dictionary for metal interactions
-                metal_dict = generate_interaction_dict("metal", highlighted_metal)
+                metal_dict = interaction_processor.generate_interaction_dict("metal", highlighted_metal)
 
                 # Call the function to update hbond_donor_dict with values from other dictionaries
-                update_dict(
+                interaction_processor.update_dict(
                     hbond_donor_dict,
                     hbond_acceptor_dict,
                     ni_dict,
@@ -699,21 +697,22 @@ def main():
                 )
 
                 # Generate the interactions legend and combine it with the ligand png
-                merged_image_paths = create_and_merge_images(
-                    binding_mode, occurrence_percent, split_data, merged_image_paths
-                )
+                image_merger = ImageMerger(binding_mode, occurrence_percent, split_data, merged_image_paths)
+                merged_image_paths = image_merger.create_and_merge_images()
 
             # Create Figure with all Binding modes
-            arranged_figure_generation(
-                merged_image_paths, "all_binding_modes_arranged.png"
+            figure_arranger = FigureArranger(merged_image_paths, "all_binding_modes_arranged.png")
+            figure_arranger.arranged_figure_generation()
+            
+            generator = LigandImageGenerator(
+                ligand,
+                "complex.pdb",
+                "lig_no_h.pdb",
+                "lig.smi",
+                f"ligand_numbering.svg",
+                fig_type
             )
-            generate_ligand_image(
-                ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", f"ligand_numbering.svg"
-            )
-            if fig_type == "png":
-                cairosvg.svg2png(
-                    url=f"ligand_numbering.svg", write_to=f"ligand_numbering.png"
-                )
+            generator.generate_image()
             print("\033[1mBinding mode figure generated\033[0m")
     except Exception as e:
         print(f"Ligand could not be recognized, use the -l option")
