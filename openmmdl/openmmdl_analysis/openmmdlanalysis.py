@@ -53,10 +53,9 @@ from openmmdl.openmmdl_analysis.binding_mode_processing import (
     calculate_representative_frame,
     calculate_distance_matrix,
 )
-from openmmdl.openmmdl_analysis.markov_state_figure_generation import (
-    min_transition_calculation,
-    binding_site_markov_network,
-)
+
+from openmmdl.openmmdl_analysis.markov_state_figure_generation import MarkovChainAnalysis
+
 from openmmdl.openmmdl_analysis.rdkit_figure_generation import (
     split_interaction_data,
     highlight_numbers,
@@ -541,8 +540,8 @@ def main():
 
     # Generate Markov state figures of the binding modes
     total_frames = len(pdb_md.trajectory) - 1
-    min_transitions = min_transition_calculation(min_transition)
-    binding_site_markov_network(total_frames, min_transitions, combined_dict, fig_type)
+    markov_analysis = MarkovChainAnalysis(min_transition)
+    markov_analysis.generate_transition_graph(total_frames, combined_dict, fig_type)
     print("\033[1mMarkov State Figure generated\033[0m")
 
     # Get the top 10 nodes with the most occurrences
