@@ -8,7 +8,7 @@ import subprocess
 import os
 import shutil
 
-from openmmdl.openmmdl_analysis.barcode_generation import waterids_barcode_generator
+from openmmdl.openmmdl_analysis.barcode_generation import BarcodeGenerator
 
 
 def interacting_water_ids(df_all, waterbridge_interactions):
@@ -21,9 +21,10 @@ def interacting_water_ids(df_all, waterbridge_interactions):
     Returns:
         list: list of all unique water ids that form water bridge interactions
     """
+    barcode_gen = BarcodeGenerator(df_all)
     interacting_waters = []
     for waterbridge_interaction in waterbridge_interactions:
-        waterid_barcode = waterids_barcode_generator(df_all, waterbridge_interaction)
+        waterid_barcode = barcode_gen.generate_waterids_barcode(waterbridge_interaction)
         for waterid in waterid_barcode:
             if waterid != 0:
                 interacting_waters.append(waterid)

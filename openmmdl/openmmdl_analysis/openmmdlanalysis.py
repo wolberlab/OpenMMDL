@@ -37,10 +37,9 @@ from openmmdl.openmmdl_analysis.preprocessing import (
     extract_and_save_ligand_as_sdf,
     convert_ligand_to_smiles,
 )
-from openmmdl.openmmdl_analysis.rmsd_calculation import (
-    rmsd_for_atomgroups,
-    RMSD_dist_frames,
-)
+
+from openmmdl.openmmdl_analysis.rmsd_calculation import RMSDAnalyzer
+
 from openmmdl.openmmdl_analysis.interaction_gathering import (
     process_trajectory,
     fill_missing_frames,
@@ -54,23 +53,18 @@ from openmmdl.openmmdl_analysis.binding_mode_processing import (
     calculate_representative_frame,
     calculate_distance_matrix,
 )
-from openmmdl.openmmdl_analysis.markov_state_figure_generation import (
-    min_transition_calculation,
-    binding_site_markov_network,
-)
+
+from openmmdl.openmmdl_analysis.markov_state_figure_generation import MarkovChainAnalysis
+
 from openmmdl.openmmdl_analysis.rdkit_figure_generation import (
-    split_interaction_data,
-    highlight_numbers,
-    generate_interaction_dict,
-    update_dict,
-    create_and_merge_images,
-    arranged_figure_generation,
-    generate_ligand_image,
+    InteractionProcessor,
+    LigandImageGenerator,
+    FigureArranger,
+    ImageMerger,
 )
 from openmmdl.openmmdl_analysis.barcode_generation import (
-    barcodegeneration,
-    plot_waterbridge_piechart,
-    plot_barcodes_grouped,
+    BarcodeGenerator,
+    BarcodePlotter,
 )
 from openmmdl.openmmdl_analysis.visualization_functions import (
     interacting_water_ids,
@@ -368,40 +362,35 @@ def main():
         ligand_rings = None
 
     os.makedirs("RMSD", exist_ok=True)
+    analyzer = RMSDAnalyzer(f"{topology}", f"{trajectory}")
     if receptor_nucleic:
-        rmsd_for_atomgroups(
-            f"{topology}",
-            f"{trajectory}",
+        rmsd_df = analyzer.rmsd_for_atomgroups(
             fig_type,
             selection1="nucleicbackbone",
             selection2=["nucleic", f"resname {ligand}"],
         )
         if frame_rmsd != "No":
-            RMSD_dist_frames(
-                f"{topology}", f"{trajectory}", fig_type, lig=f"{ligand}", nucleic=True
+            pairwise_rmsd_prot, pairwise_rmsd_lig = analyzer.rmsd_dist_frames(
+                fig_type, lig=f"{ligand}", nucleic=True
             )
             print("\033[1mRMSD calculated\033[0m")
     elif peptide != None:
-        rmsd_for_atomgroups(
-            f"{topology}",
-            f"{trajectory}",
+        rmsd_df = analyzer.rmsd_for_atomgroups(
             fig_type,
             selection1="backbone",
             selection2=["protein", f"chainID {peptide}"],
         )
         if frame_rmsd != "No":
-            RMSD_dist_frames(f"{topology}", f"{trajectory}", fig_type, lig=f"chainID {peptide}")
+            pairwise_rmsd_prot, pairwise_rmsd_lig = analyzer.rmsd_dist_frames(fig_type, lig=f"chainID {peptide}")
             print("\033[1mRMSD calculated\033[0m")
     else:
-        rmsd_for_atomgroups(
-            f"{topology}",
-            f"{trajectory}",
+        rmsd_df = analyzer.rmsd_for_atomgroups(
             fig_type,
             selection1="backbone",
             selection2=["protein", f"resname {ligand}"],
         )
         if frame_rmsd != "No":
-            RMSD_dist_frames(f"{topology}", f"{trajectory}", fig_type, lig=f"{ligand}")
+            pairwise_rmsd_prot, pairwise_rmsd_lig = analyzer.rmsd_dist_frames(fig_type, lig=f"{ligand}")
             print("\033[1mRMSD calculated\033[0m")
 
     if receptor_nucleic:
@@ -548,8 +537,8 @@ def main():
 
     # Generate Markov state figures of the binding modes
     total_frames = len(pdb_md.trajectory) - 1
-    min_transitions = min_transition_calculation(min_transition)
-    binding_site_markov_network(total_frames, min_transitions, combined_dict, fig_type)
+    markov_analysis = MarkovChainAnalysis(min_transition)
+    markov_analysis.generate_transition_graph(total_frames, combined_dict, fig_type)
     print("\033[1mMarkov State Figure generated\033[0m")
 
     # Get the top 10 nodes with the most occurrences
@@ -585,6 +574,7 @@ def main():
     # Generate an Figure for each of the binding modes with rdkit Drawer with the atoms interacting highlighted by colors
     try:
         if peptide is None:
+            interaction_processor = InteractionProcessor("complex.pdb", "lig_no_h.pdb")
             matplotlib.use("Agg")
             binding_site = {}
             merged_image_paths = []
@@ -602,7 +592,7 @@ def main():
                 )
                 # Generate 2D coordinates for the molecule
                 AllChem.Compute2DCoords(prepared_ligand)
-                split_data = split_interaction_data(values)
+                split_data = interaction_processor.split_interaction_data(values)
                 # Get the highlighted atom indices based on interaction type
                 (
                     highlighted_hbond_donor,
@@ -616,47 +606,47 @@ def main():
                     highlighted_pi,
                     highlighted_pication,
                     highlighted_metal,
-                ) = highlight_numbers(split_data, starting_idx=lig_index)
+                ) = interaction_processor.highlight_numbers(split_data, starting_idx=lig_index)
 
                 # Generate a dictionary for hydrogen bond acceptors
-                hbond_acceptor_dict = generate_interaction_dict(
+                hbond_acceptor_dict = interaction_processor.generate_interaction_dict(
                     "hbond_acceptor", highlighted_hbond_acceptor
                 )
                 # Generate a dictionary for hydrogen bond acceptors and donors
-                hbond_both_dict = generate_interaction_dict(
+                hbond_both_dict = interaction_processor.generate_interaction_dict(
                     "hbond_both", highlighted_hbond_both
                 )
                 # Generate a dictionary for hydrogen bond donors
-                hbond_donor_dict = generate_interaction_dict(
+                hbond_donor_dict = interaction_processor.generate_interaction_dict(
                     "hbond_donor", highlighted_hbond_donor
                 )
                 # Generate a dictionary for hydrophobic features
-                hydrophobic_dict = generate_interaction_dict(
+                hydrophobic_dict = interaction_processor.generate_interaction_dict(
                     "hydrophobic", highlighted_hydrophobic
                 )
                 # Generate a dictionary for water bridge interactions
-                waterbridge_dict = generate_interaction_dict(
+                waterbridge_dict = interaction_processor.generate_interaction_dict(
                     "waterbridge", highlighted_waterbridge
                 )
                 # Generate a dictionary for pistacking
-                pistacking_dict = generate_interaction_dict(
+                pistacking_dict = interaction_processor.generate_interaction_dict(
                     "pistacking", highlighted_pistacking
                 )
                 # Generate a dictionary for halogen interactions
-                halogen_dict = generate_interaction_dict("halogen", highlighted_halogen)
+                halogen_dict = interaction_processor.generate_interaction_dict("halogen", highlighted_halogen)
                 # Generate a dictionary for negative ionizables
-                ni_dict = generate_interaction_dict("ni", highlighted_ni)
+                ni_dict = interaction_processor.generate_interaction_dict("ni", highlighted_ni)
                 # Generate a dictionary for negative ionizables
-                pi_dict = generate_interaction_dict("pi", highlighted_pi)
+                pi_dict = interaction_processor.generate_interaction_dict("pi", highlighted_pi)
                 # Generate a dictionary for pication
-                pication_dict = generate_interaction_dict(
+                pication_dict = interaction_processor.generate_interaction_dict(
                     "pication", highlighted_pication
                 )
                 # Generate a dictionary for metal interactions
-                metal_dict = generate_interaction_dict("metal", highlighted_metal)
+                metal_dict = interaction_processor.generate_interaction_dict("metal", highlighted_metal)
 
                 # Call the function to update hbond_donor_dict with values from other dictionaries
-                update_dict(
+                interaction_processor.update_dict(
                     hbond_donor_dict,
                     hbond_acceptor_dict,
                     ni_dict,
@@ -707,21 +697,22 @@ def main():
                 )
 
                 # Generate the interactions legend and combine it with the ligand png
-                merged_image_paths = create_and_merge_images(
-                    binding_mode, occurrence_percent, split_data, merged_image_paths
-                )
+                image_merger = ImageMerger(binding_mode, occurrence_percent, split_data, merged_image_paths)
+                merged_image_paths = image_merger.create_and_merge_images()
 
             # Create Figure with all Binding modes
-            arranged_figure_generation(
-                merged_image_paths, "all_binding_modes_arranged.png"
+            figure_arranger = FigureArranger(merged_image_paths, "all_binding_modes_arranged.png")
+            figure_arranger.arranged_figure_generation()
+            
+            generator = LigandImageGenerator(
+                ligand,
+                "complex.pdb",
+                "lig_no_h.pdb",
+                "lig.smi",
+                f"ligand_numbering.svg",
+                fig_type
             )
-            generate_ligand_image(
-                ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", f"ligand_numbering.svg"
-            )
-            if fig_type == "png":
-                cairosvg.svg2png(
-                    url=f"ligand_numbering.svg", write_to=f"ligand_numbering.png"
-                )
+            generator.generate_image()
             print("\033[1mBinding mode figure generated\033[0m")
     except Exception as e:
         print(f"Ligand could not be recognized, use the -l option")
@@ -852,8 +843,9 @@ def main():
     metal_interactions = df_all.filter(regex="metal").columns
 
     waterbridge_barcodes = {}
+    barcode_gen = BarcodeGenerator(df_all)
     for waterbridge_interaction in waterbridge_interactions:
-        barcode = barcodegeneration(df_all, waterbridge_interaction)
+        barcode = barcode_gen.generate_barcode(waterbridge_interaction)
         waterbridge_barcodes[waterbridge_interaction] = barcode
 
     interaction_types = {
@@ -869,10 +861,13 @@ def main():
         "metal": metal_interactions,
     }
 
+    # Initialize BarcodePlotter
+    barcode_plotter = BarcodePlotter(df_all)
+    
     for interaction_type, interaction_data in interaction_types.items():
-        plot_barcodes_grouped(interaction_data, df_all, interaction_type, fig_type)
+        barcode_plotter.plot_barcodes_grouped(interaction_data, interaction_type, fig_type)
 
-    plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions, fig_type)
+    barcode_plotter.plot_waterbridge_piechart(waterbridge_barcodes, waterbridge_interactions, fig_type)
     print("\033[1mBarcodes generated\033[0m")
 
     interacting_water_id_list = interacting_water_ids(df_all, waterbridge_interactions)
