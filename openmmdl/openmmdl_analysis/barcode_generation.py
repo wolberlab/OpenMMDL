@@ -12,6 +12,32 @@ class BarcodeGenerator:
             df (pandas dataframe): Dataframe containing all interactions from plip analysis (typically df_all)
         """
         self.df = df
+        self.interactions = self.gather_interactions()
+
+    def gather_interactions(self):
+        hydrophobic_interactions = self.df.filter(regex="hydrophobic").columns
+        acceptor_interactions = self.df.filter(regex="Acceptor_hbond").columns
+        donor_interactions = self.df.filter(regex="Donor_hbond").columns
+        pistacking_interactions = self.df.filter(regex="pistacking").columns
+        halogen_interactions = self.df.filter(regex="halogen").columns
+        waterbridge_interactions = self.df.filter(regex="waterbridge").columns
+        pication_interactions = self.df.filter(regex="pication").columns
+        saltbridge_ni_interactions = self.df.filter(regex="NI_saltbridge").columns
+        saltbridge_pi_interactions = self.df.filter(regex="PI_saltbridge").columns
+        metal_interactions = self.df.filter(regex="metal").columns
+
+        return {
+            "hydrophobic": hydrophobic_interactions,
+            "acceptor": acceptor_interactions,
+            "donor": donor_interactions,
+            "pistacking": pistacking_interactions,
+            "halogen": halogen_interactions,
+            "waterbridge": waterbridge_interactions,
+            "pication": pication_interactions,
+            "saltbridge_ni": saltbridge_ni_interactions,
+            "saltbridge_pi": saltbridge_pi_interactions,
+            "metal": metal_interactions,
+        }
 
     def generate_barcode(self, interaction):
         """
@@ -62,6 +88,24 @@ class BarcodeGenerator:
 
         return waterid_barcode
 
+    def interacting_water_ids(self, waterbridge_interactions):
+        """Generates a list of all water ids that form water bridge interactions.
+
+        Args:
+            df_all (pandas dataframe): dataframe containing all interactions from plip analysis (typicaly df_all)
+            waterbridge_interactions (list): list of strings containing the names of all water bridge interactions
+
+        Returns:
+            list: list of all unique water ids that form water bridge interactions
+        """
+        interacting_waters = []
+        for waterbridge_interaction in waterbridge_interactions:
+            waterid_barcode = self.generate_waterids_barcode(waterbridge_interaction)
+            for waterid in waterid_barcode:
+                if waterid != 0:
+                    interacting_waters.append(waterid)
+        return list(set(interacting_waters))
+
 
 class BarcodePlotter:
     def __init__(self, df_all):
@@ -85,17 +129,33 @@ class BarcodePlotter:
         for i, (title, barcode) in enumerate(barcodes.items()):
             ax = axs[i]
             ax.set_axis_off()
-            ax.imshow(barcode.reshape(1, -1), cmap="binary", aspect="auto", interpolation="nearest", vmin=0, vmax=1)
+            ax.imshow(
+                barcode.reshape(1, -1),
+                cmap="binary",
+                aspect="auto",
+                interpolation="nearest",
+                vmin=0,
+                vmax=1,
+            )
 
             percent_occurrence = (barcode.sum() / len(barcode)) * 100
-            ax.text(1.05, 0.5, f"{percent_occurrence:.2f}%", transform=ax.transAxes, va="center", fontsize=8)
+            ax.text(
+                1.05,
+                0.5,
+                f"{percent_occurrence:.2f}%",
+                transform=ax.transAxes,
+                va="center",
+                fontsize=8,
+            )
             ax.set_title(title, fontweight="bold", fontsize=8)
 
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         plt.tight_layout()
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
-    def plot_waterbridge_piechart(self, waterbridge_barcodes, waterbridge_interactions, fig_type):
+    def plot_waterbridge_piechart(
+        self, waterbridge_barcodes, waterbridge_interactions, fig_type
+    ):
         if not waterbridge_barcodes:
             print("No Piecharts to plot.")
             return
@@ -105,7 +165,9 @@ class BarcodePlotter:
 
         for waterbridge_interaction in waterbridge_interactions:
             plt.clf()
-            waterid_barcode = self.barcode_gen.generate_waterids_barcode(waterbridge_interaction)
+            waterid_barcode = self.barcode_gen.generate_waterids_barcode(
+                waterbridge_interaction
+            )
             waters_count = {}
 
             for waterid in waterid_barcode:
@@ -117,12 +179,24 @@ class BarcodePlotter:
 
             threshold = 7
             total_values = sum(values)
-            small_ids = [id for id, value in waters_count.items() if (value / total_values) * 100 < threshold]
+            small_ids = [
+                id
+                for id, value in waters_count.items()
+                if (value / total_values) * 100 < threshold
+            ]
 
             if small_ids:
-                small_count = sum(count for id, count in waters_count.items() if id in small_ids)
-                values = [count if id not in small_ids else small_count for id, count in waters_count.items()]
-                labels = [f"ID {id}" if id not in small_ids else "" for id in waters_count.keys()]
+                small_count = sum(
+                    count for id, count in waters_count.items() if id in small_ids
+                )
+                values = [
+                    count if id not in small_ids else small_count
+                    for id, count in waters_count.items()
+                ]
+                labels = [
+                    f"ID {id}" if id not in small_ids else ""
+                    for id in waters_count.keys()
+                ]
 
             plt.pie(
                 values,
@@ -134,7 +208,9 @@ class BarcodePlotter:
             plt.axis("equal")
             plt.title(str(waterbridge_interaction), fontweight="bold")
             legend_labels = [f"ID {id}" for id in waters_count.keys()]
-            legend = plt.legend(legend_labels, loc="upper right", bbox_to_anchor=(1.2, 1))
+            legend = plt.legend(
+                legend_labels, loc="upper right", bbox_to_anchor=(1.2, 1)
+            )
             plt.setp(legend.get_texts(), fontsize="small")
             plt.text(
                 0.5,
@@ -145,7 +221,11 @@ class BarcodePlotter:
                 transform=plt.gcf().transFigure,
             )
             plt.subplots_adjust(top=0.99, bottom=0.01)
-            plt.savefig(f"Barcodes/Waterbridge_Piecharts/{waterbridge_interaction}.{fig_type}", bbox_inches="tight", dpi=300)
+            plt.savefig(
+                f"Barcodes/Waterbridge_Piecharts/{waterbridge_interaction}.{fig_type}",
+                bbox_inches="tight",
+                dpi=300,
+            )
 
     def plot_barcodes_grouped(self, interactions, interaction_type, fig_type):
         ligatoms_dict = {}
@@ -153,7 +233,13 @@ class BarcodePlotter:
             ligatom = interaction.split("_")
             ligatom.pop(0)
             ligatom.pop(-1)
-            if interaction_type in ["acceptor", "donor", "waterbridge", "saltbridge_ni", "saltbridge_pi"]:
+            if interaction_type in [
+                "acceptor",
+                "donor",
+                "waterbridge",
+                "saltbridge_ni",
+                "saltbridge_pi",
+            ]:
                 ligatom.pop(-1)
                 if interaction_type in ["saltbridge_ni", "saltbridge_pi"]:
                     ligatom.pop(-1)
@@ -178,4 +264,6 @@ class BarcodePlotter:
             grouped_array = grouped_array.astype(int)
             total_interactions[ligatom] = grouped_array
 
-        self.plot_barcodes(total_interactions, f"./Barcodes/{interaction_type}_interactions.{fig_type}")
+        self.plot_barcodes(
+            total_interactions, f"./Barcodes/{interaction_type}_interactions.{fig_type}"
+        )

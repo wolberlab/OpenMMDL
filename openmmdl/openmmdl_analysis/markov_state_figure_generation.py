@@ -23,7 +23,9 @@ class MarkovChainAnalysis:
         ]
         return min_transitions
 
-    def generate_transition_graph(self, total_frames, combined_dict, fig_type='png', font_size=36, size_node=200):
+    def generate_transition_graph(
+        self, total_frames, combined_dict, fig_type="png", font_size=36, size_node=200
+    ):
         """Generate Markov Chain plots based on transition probabilities.
 
         Args:
@@ -46,9 +48,15 @@ class MarkovChainAnalysis:
         part3_data = combined_dict["all"][part1_length + part2_length :]
 
         # Count the occurrences of each node in each part
-        part1_node_occurrences = {node: part1_data.count(node) for node in set(part1_data)}
-        part2_node_occurrences = {node: part2_data.count(node) for node in set(part2_data)}
-        part3_node_occurrences = {node: part3_data.count(node) for node in set(part3_data)}
+        part1_node_occurrences = {
+            node: part1_data.count(node) for node in set(part1_data)
+        }
+        part2_node_occurrences = {
+            node: part2_data.count(node) for node in set(part2_data)
+        }
+        part3_node_occurrences = {
+            node: part3_data.count(node) for node in set(part3_data)
+        }
 
         # Create the legend
         legend_labels = {
@@ -70,7 +78,9 @@ class MarkovChainAnalysis:
         node_occurrences = {
             node: combined_dict["all"].count(node) for node in set(combined_dict["all"])
         }
-        top_10_nodes = sorted(node_occurrences, key=node_occurrences.get, reverse=True)[:10]
+        top_10_nodes = sorted(node_occurrences, key=node_occurrences.get, reverse=True)[
+            :10
+        ]
 
         for min_transition_percent in self.min_transitions:
             min_prob = min_transition_percent / 100  # Convert percentage to probability
@@ -105,9 +115,14 @@ class MarkovChainAnalysis:
                     reverse_count = transitions.get(
                         reverse_transition, 0
                     )  # Use the correct count for the reverse transition
-                    reverse_probability = reverse_count / len(combined_dict["all"]) * 100
+                    reverse_probability = (
+                        reverse_count / len(combined_dict["all"]) * 100
+                    )
                     G.add_edge(
-                        next_state, current_state, weight=reverse_probability, reverse=True
+                        next_state,
+                        current_state,
+                        weight=reverse_probability,
+                        reverse=True,
                     )
 
             # Add self-loops to the graph with their probabilities
@@ -190,7 +205,9 @@ class MarkovChainAnalysis:
                         connectionstyle=connection_style,
                     )
                 elif weight >= min_transition_percent:
-                    edge_colors.append("black")  # Highlight significant transitions in red
+                    edge_colors.append(
+                        "black"
+                    )  # Highlight significant transitions in red
 
                     # Check if both nodes are present before adding labels
                     if G.has_node(u) and G.has_node(v):
@@ -213,7 +230,9 @@ class MarkovChainAnalysis:
                             G, pos, edge_labels={(u, v): edge_label}, font_size=26
                         )
                 else:
-                    edge_colors.append("grey")  # Use black for non-significant transitions
+                    edge_colors.append(
+                        "grey"
+                    )  # Use black for non-significant transitions
                     width = 0.5
 
                     # Check if both nodes are present before adding labels
