@@ -111,6 +111,7 @@ def configureFiles():
         session["forcefield"] = request.form.get("forcefield", "")
         session["ml_forcefield"] = request.form.get("ml_forcefield", "")
         session["waterModel"] = request.form.get("waterModel", "")
+        session["smallMoleculeForceField"] = request.form.get("smallMoleculeForceField", "")
         session["ligandMinimization"] = request.form.get("ligandMinimization", "")
         session["ligandSanitization"] = request.form.get("ligandSanitization", "")
         session["sdfFile"] = uploadedFiles["sdfFile"][0][1]
@@ -1170,6 +1171,7 @@ os.chdir(outputDir)"""
                 script.append("ligand = '%s'" % session["sdfFile"])
                 script.append('ligand_name = "UNK"')
                 script.append("minimization = %s" % session["ligandMinimization"])
+                script.append("smallMoleculeForceField = '%s'" % session["smallMoleculeForceField"])
                 script.append("sanitization = %s" % session["ligandSanitization"])
             forcefield = session["forcefield"]
             water = session["waterModel"]
@@ -1436,8 +1438,8 @@ water_selected = water_forcefield_selection(water=water,forcefield_selection=ff_
 model_water = water_model_selection(water=water,forcefield_selection=ff_selection(ff))
 print("Forcefield and Water Model Selected")
 if add_membrane == True:
-    transitional_forcefield = generate_transitional_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, rdkit_mol=ligand_prepared)
-forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, rdkit_mol=ligand_prepared)
+    transitional_forcefield = generate_transitional_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, rdkit_mol=ligand_prepared)
+forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, rdkit_mol=ligand_prepared)
 complex_topology, complex_positions = merge_protein_and_ligand(protein_pdb, omm_ligand)
 print("Complex topology has", complex_topology.getNumAtoms(), "atoms.")     """
             )
@@ -1450,16 +1452,16 @@ water_selected = water_forcefield_selection(water=water,forcefield_selection=ff_
 model_water = water_model_selection(water=water,forcefield_selection=ff_selection(ff))
 print("Forcefield and Water Model Selected")
 if water_selected != None:
-    forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, rdkit_mol=None) 
+    forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, rdkit_mol=None) 
 else:
     forcefield = app.ForceField(forcefield_selected)    
 if add_membrane == True:
-        transitional_forcefield = generate_transitional_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, rdkit_mol=None)     """
+        transitional_forcefield = generate_transitional_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, rdkit_mol=None)     """
             )
         if session["sdfFile"] == "":
             script.append(
                 """
-forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, rdkit_mol=None)        
+forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, rdkit_mol=None)        
 modeller = app.Modeller(protein_pdb.topology, protein_pdb.positions)
 if add_membrane == True:
     membrane_builder(ff, model_water, forcefield, transitional_forcefield, protein_pdb, modeller, membrane_lipid_type, membrane_padding, membrane_positive_ion, membrane_negative_ion, membrane_ionicstrength, protein)
