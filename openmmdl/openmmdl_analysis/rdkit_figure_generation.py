@@ -10,7 +10,15 @@ import MDAnalysis as mda
 
 
 class LigandImageGenerator:
-    def __init__(self, ligand_name, complex_pdb_file, ligand_no_h_pdb_file, smiles_file, output_svg_filename, fig_type="svg"):
+    def __init__(
+        self,
+        ligand_name,
+        complex_pdb_file,
+        ligand_no_h_pdb_file,
+        smiles_file,
+        output_svg_filename,
+        fig_type="svg",
+    ):
         """
         Initialize the LigandImageGenerator class.
 
@@ -48,7 +56,9 @@ class LigandImageGenerator:
             reference_mol = Chem.MolFromSmiles(reference_smiles)
 
             # Prepare ligand
-            prepared_ligand = AllChem.AssignBondOrdersFromTemplate(reference_mol, lig_rd)
+            prepared_ligand = AllChem.AssignBondOrdersFromTemplate(
+                reference_mol, lig_rd
+            )
             AllChem.Compute2DCoords(prepared_ligand)
 
             # Map atom indices between ligand_no_h and complex
@@ -66,12 +76,16 @@ class LigandImageGenerator:
 
             # Generate an SVG image of the ligand
             drawer = Draw.MolDraw2DSVG(5120, 3200)
-            drawer.drawOptions().addStereoAnnotation = True  # Add stereo information if available
+            drawer.drawOptions().addStereoAnnotation = (
+                True  # Add stereo information if available
+            )
             drawer.DrawMolecule(prepared_ligand)
 
             # Adjust font size in the SVG output using the FontSize method
             font_size = drawer.FontSize()
-            drawer.SetFontSize(font_size * 0.5)  # You can adjust the multiplier as needed
+            drawer.SetFontSize(
+                font_size * 0.5
+            )  # You can adjust the multiplier as needed
 
             drawer.FinishDrawing()
             svg = drawer.GetDrawingText().replace("svg:", "")
@@ -128,7 +142,7 @@ class InteractionProcessor:
         """Extracts the data from the split_data output of the interactions and categorizes it to its respective list.
 
         Args:
-            split_data (list): A list of interaction data items, where each item contains information about protein partner name, 
+            split_data (list): A list of interaction data items, where each item contains information about protein partner name,
             numeric codes and interaction type.
             starting_idx (list): Starting index of the ligand atom indices used for identifying the correct atom to highlight.
 
@@ -310,7 +324,9 @@ class InteractionProcessor:
             "metal": (1.0, 0.6, 0.0),
         }
 
-        interaction_dict = {int(key): interaction_dict[interaction_type] for key in keys}
+        interaction_dict = {
+            int(key): interaction_dict[interaction_type] for key in keys
+        }
         return interaction_dict
 
     def update_dict(self, target_dict, *source_dicts):
@@ -328,7 +344,9 @@ class InteractionProcessor:
 
 
 class ImageMerger:
-    def __init__(self, binding_mode, occurrence_percent, split_data, merged_image_paths):
+    def __init__(
+        self, binding_mode, occurrence_percent, split_data, merged_image_paths
+    ):
         self.binding_mode = binding_mode
         self.occurrence_percent = occurrence_percent
         self.split_data = split_data
@@ -350,13 +368,17 @@ class ImageMerger:
 
         # Plot lines on the same axis and collect them into a list
         lines = []
-        filtered_split_data = [entry for entry in self.split_data if "FRAME" not in entry]
+        filtered_split_data = [
+            entry for entry in self.split_data if "FRAME" not in entry
+        ]
         for i, data in enumerate(filtered_split_data):
             y = data_points[i]
             label = data.split()[-1]
             type = data.split()[-2]
             if label == "hydrophobic":
-                (line,) = ax.plot(x, y, label=data, color=(1.0, 1.0, 0.0), linewidth=5.0)
+                (line,) = ax.plot(
+                    x, y, label=data, color=(1.0, 1.0, 0.0), linewidth=5.0
+                )
             elif label == "hbond":
                 if type == "Acceptor":
                     (line,) = ax.plot(
@@ -367,15 +389,25 @@ class ImageMerger:
                         x, y, label=data, color=(0.3, 0.5, 1.0), linewidth=5.0
                     )
             elif label == "halogen":
-                (line,) = ax.plot(x, y, label=data, color=(1.0, 0.0, 0.9), linewidth=5.0)
+                (line,) = ax.plot(
+                    x, y, label=data, color=(1.0, 0.0, 0.9), linewidth=5.0
+                )
             elif label == "pistacking":
-                (line,) = ax.plot(x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0)
+                (line,) = ax.plot(
+                    x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0
+                )
             elif label == "pication":
-                (line,) = ax.plot(x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0)
+                (line,) = ax.plot(
+                    x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0
+                )
             elif label == "waterbridge":
-                (line,) = ax.plot(x, y, label=data, color=(0.0, 1.0, 0.9), linewidth=5.0)
+                (line,) = ax.plot(
+                    x, y, label=data, color=(0.0, 1.0, 0.9), linewidth=5.0
+                )
             elif label == "metal":
-                (line,) = ax.plot(x, y, label=data, color=(1.0, 0.6, 0.0), linewidth=5.0)
+                (line,) = ax.plot(
+                    x, y, label=data, color=(1.0, 0.6, 0.0), linewidth=5.0
+                )
             elif label == "saltbridge":
                 if type == "NI":
                     (line,) = ax.plot(
@@ -489,7 +521,10 @@ class FigureArranger:
         big_figure.save(self.output_path, "PNG")
 
         # Rename the merged image
-        os.rename(self.output_path, "Binding_Modes_Markov_States/" + os.path.basename(self.output_path))
+        os.rename(
+            self.output_path,
+            "Binding_Modes_Markov_States/" + os.path.basename(self.output_path),
+        )
 
         # Remove the individual image files
         for path in self.merged_image_paths:

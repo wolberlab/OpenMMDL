@@ -1,257 +1,144 @@
 import json
 import re
-import mdtraj as md
 import MDAnalysis as mda
 import pickle
 import nglview as nv
 import subprocess
 import os
 import shutil
-
 from openmmdl.openmmdl_analysis.barcode_generation import BarcodeGenerator
 
 
-def interacting_water_ids(df_all, waterbridge_interactions):
-    """Generates a list of all water ids that form water bridge interactions.
+class TrajectorySaver:
+    def __init__(self, pdb_md, ligname, special, nucleic):
+        """Initializes the TrajectorySaver with a mda.Universe object, ligand name, special residue name and if receptor is nucleic.
 
-    Args:
-        df_all (pandas dataframe): dataframe containing all interactions from plip analysis (typicaly df_all)
-        waterbridge_interactions (list): list of strings containing the names of all water bridge interactions
-
-    Returns:
-        list: list of all unique water ids that form water bridge interactions
-    """
-    barcode_gen = BarcodeGenerator(df_all)
-    interacting_waters = []
-    for waterbridge_interaction in waterbridge_interactions:
-        waterid_barcode = barcode_gen.generate_waterids_barcode(waterbridge_interaction)
-        for waterid in waterid_barcode:
-            if waterid != 0:
-                interacting_waters.append(waterid)
-    return list(set(interacting_waters))
-
-
-def save_interacting_waters_trajectory(
-    pdb_file_path,
-    dcd_file_path,
-    interacting_waters,
-    ligname,
-    special,
-    outputpath="./Visualization/",
-):
-    """Saves .pdb and .dcd files of the trajectory containing ligand, receptor and all interacting waters.
-
-    Args:
-        pdb_file_path (str): path to original pdb file
-        dcd_file_path (str): path to original dcd file
-        interacting_waters (list): list of all interacting water ids
-        ligname (str): name of the ligand in the pdb file
-        outputpath (str, optional): filepath to output new pdb and dcd files. Defaults to './Visualization/'.
-    """
-    u = mda.Universe(pdb_file_path, dcd_file_path)
-    water_atoms = u.select_atoms(
-        f"protein or nucleic or resname {ligname} or resname {special}"
-    )
-
-    for water in interacting_waters:
-        add_water_atoms = u.select_atoms(f"resname HOH and resid {water}")
-        water_atoms = water_atoms + add_water_atoms
-
-    water_atoms.write(f"{outputpath}interacting_waters.pdb")
-
-    with mda.Writer(f"{outputpath}interacting_waters.dcd", water_atoms.n_atoms) as W:
-        for ts in u.trajectory:
-            W.write(water_atoms)
-
-
-def cloud_json_generation(df_all):
-    """generates dict for visualization of interaction clouds. Later saved as .json file.
-
-    Args:
-        df_all (pandas dataframe): dataframe containing all interactions from plip analysis (typicaly df_all)
-
-    Returns:
-        dict: dict containing all interaction clouds
-    """
-    coord_pattern = re.compile(r"\(([\d.-]+), ([\d.-]+), ([\d.-]+)\)")
-    hydrophobe_coords = []
-    acceptor_ccords = []
-    donor_coords = []
-    waterbridge_coords = []
-    negative_ionizable_coords = []
-    positive_ionizable_coords = []
-    pistacking_coords = []
-    pication_coords = []
-    halogen_coords = []
-    metal_coords = []
-
-    for index, row in df_all.iterrows():
-        if row["LIGCOO"] != 0:
-            coord_match = coord_pattern.match(row["LIGCOO"])
-            if coord_match:
-                x, y, z = map(float, coord_match.groups())
-                x, y, z = round(x, 3), round(y, 3), round(z, 3)
-                interaction = row["INTERACTION"]
-                if interaction == "hbond":
-                    if row["PROTISDON"] == "False":
-                        interaction = "donor"
-                    else:
-                        interaction = "acceptor"
-                if interaction == "saltbridge":
-                    if row["PROTISPOS"] == "True":
-                        interaction = "negative_ionizable"
-                    else:
-                        interaction = "positive_ionizable"
-                if interaction == "hydrophobic":
-                    hydrophobe_coords.append([x, y, z])
-                if interaction == "acceptor":
-                    acceptor_ccords.append([x, y, z])
-                if interaction == "donor":
-                    donor_coords.append([x, y, z])
-                if interaction == "waterbridge":
-                    waterbridge_coords.append([x, y, z])
-                if interaction == "negative_ionizable":
-                    negative_ionizable_coords.append([x, y, z])
-                if interaction == "positive_ionizable":
-                    positive_ionizable_coords.append([x, y, z])
-                if interaction == "pistacking":
-                    pistacking_coords.append([x, y, z])
-                if interaction == "pication":
-                    pication_coords.append([x, y, z])
-                if interaction == "halogen":
-                    halogen_coords.append([x, y, z])
-
-    for index, row in df_all.iterrows():
-        if row["TARGETCOO"] != 0:
-            coord_match = coord_pattern.match(row["TARGETCOO"])
-            if coord_match:
-                x, y, z = map(float, coord_match.groups())
-                x, y, z = round(x, 3), round(y, 3), round(z, 3)
-                interaction = row["INTERACTION"]
-                if interaction == "metal":
-                    metal_coords.append([x, y, z])
-
-    clouds = {}
-    clouds["hydrophobic"] = {
-        "coordinates": hydrophobe_coords,
-        "color": [1.0, 1.0, 0.0],
-        "radius": 0.1,
-    }
-    clouds["acceptor"] = {
-        "coordinates": acceptor_ccords,
-        "color": [1.0, 0.0, 0.0],
-        "radius": 0.1,
-    }
-    clouds["donor"] = {
-        "coordinates": donor_coords,
-        "color": [0.0, 1.0, 0.0],
-        "radius": 0.1,
-    }
-    clouds["waterbridge"] = {
-        "coordinates": waterbridge_coords,
-        "color": [0.0, 1.0, 0.9],
-        "radius": 0.1,
-    }
-    clouds["negative_ionizable"] = {
-        "coordinates": negative_ionizable_coords,
-        "color": [0.0, 0.0, 1.0],
-        "radius": 0.1,
-    }
-    clouds["positive_ionizable"] = {
-        "coordinates": positive_ionizable_coords,
-        "color": [1.0, 0.0, 0.0],
-        "radius": 0.1,
-    }
-    clouds["pistacking"] = {
-        "coordinates": pistacking_coords,
-        "color": [0.0, 0.0, 1.0],
-        "radius": 0.1,
-    }
-    clouds["pication"] = {
-        "coordinates": pication_coords,
-        "color": [0.0, 0.0, 1.0],
-        "radius": 0.1,
-    }
-    clouds["halogen"] = {
-        "coordinates": halogen_coords,
-        "color": [1.0, 0.0, 0.9],
-        "radius": 0.1,
-    }
-    clouds["metal"] = {
-        "coordinates": metal_coords,
-        "color": [1.0, 0.6, 0.0],
-        "radius": 0.1,
-    }
-
-    return clouds
-
-
-def visualization(
-    ligname, receptor_type="protein or nucleic", height="1000px", width="1000px"
-):
-    """Generates visualization of the trajectory with the interacting waters and interaction clouds.
-
-    Args:
-        ligname (str): name of the ligand in the pdb file
-        receptor_type (str, optional): type of receptor. Defaults to 'protein or nucleic'.
-        height (str, optional): height of the visualization. Defaults to '1000px'.
-        width (str, optional): width of the visualization. Defaults to '1000px'.
-
-    Returns:
-        nglview widget: returns an nglview.widget object containing the visualization
-    """
-    with open("clouds.json") as f:
-        data = json.load(f)
-
-    sphere_buffers = []
-    for name, cloud in data.items():
-        sphere_buffer = {"position": [], "color": [], "radius": []}
-        for point in cloud["coordinates"]:
-            sphere_buffer["position"] += point
-            sphere_buffer["color"] += cloud["color"]
-            sphere_buffer["radius"] += [cloud["radius"]]
-        sphere_buffers.append(sphere_buffer)
-
-    pdb_structure = md.load(f"interacting_waters.pdb")
-    dcd_trajectory = md.load(f"interacting_waters.dcd", top=pdb_structure)
-    with open(f"interacting_waters.pkl", "rb") as f:
-        interacting_watersids = pickle.load(f)
-
-    view = nv.show_mdtraj(dcd_trajectory)
-    view.clear_representations()
-    view.add_cartoon(selection=receptor_type)
-
-    for water in interacting_watersids:
-        view.add_licorice(selection=f"water and {water}")
-    view.add_licorice(selection=ligname)
-
-    for sphere_buffer, name in zip(
-        sphere_buffers,
-        [
-            "hydrophobic",
-            "acceptor",
-            "donor",
-            "waterbridge",
-            "negative_ionizable",
-            "positive_ionizable",
-            "pistacking",
-            "pication",
-            "halogen",
-            "metal",
-        ],
-    ):
-        js = f"""
-        var params = {sphere_buffer};
-        var shape = new NGL.Shape('{name}');
-        var buffer = new NGL.SphereBuffer(params);
-        shape.addBuffer(buffer);
-        var shapeComp = this.stage.addComponentFromObject(shape);
-        shapeComp.addRepresentation("buffer");
+        Args:
+            pdb_md (mda.Universe): MDAnalysis Universe object containing the trajectory
+            ligname (str): name of the ligand in the pdb file
+            special (str): name of the special residue/ligand in the pdb file (e.g. HEM)
+            nucleic (bool): True if receptor is nucleic, False otherwise
         """
-        view._js(js)
-    view.layout.width = width
-    view.layout.height = height
-    return view
+        self.pdb_md = pdb_md
+        self.ligname = ligname
+        self.special = special
+        self.nucleic = nucleic
+
+    def save_interacting_waters_trajectory(self, interacting_waters, outputpath):
+        """Saves .pdb and .dcd files of the trajectory containing ligand, receptor and all interacting waters.
+
+        Args:
+            interacting_waters (list): list of all interacting water ids
+            outputpath (str, optional): filepath to output new pdb and dcd files. Defaults to './Visualization/'.
+        """
+        water_atoms = self.pdb_md.select_atoms(
+            f"protein or nucleic or resname {self.ligname} or resname {self.special}"
+        )
+
+        for water in interacting_waters:
+            add_water_atoms = self.pdb_md.select_atoms(f"resname HOH and resid {water}")
+            water_atoms = water_atoms + add_water_atoms
+
+        water_atoms.write(f"{outputpath}interacting_waters.pdb")
+
+        with mda.Writer(
+            f"{outputpath}interacting_waters.dcd", water_atoms.n_atoms
+        ) as W:
+            for ts in self.pdb_md.trajectory:
+                W.write(water_atoms)
+
+    def save_frame(self, frame, outpath, selection=False):
+        """Saves a single frame of the trajectory.
+
+        Args:
+            frame (int): Number of the frame to save
+            outpath (str): Path to save the frame to
+            selection (str, optional): MDAnalysis selection string. Defaults to False.
+        """
+        self.pdb_md.trajectory[frame]
+        if selection:
+            frame_atomgroup = self.pdb_md.atoms[selection]
+        else:
+            frame_atomgroup = self.pdb_md.atoms
+        frame_atomgroup.write(outpath)
+
+
+class Visualizer:
+    def __init__(self, md, cloud_path, ligname, special):
+        self.md = md
+        self.cloud = self.load_cloud(cloud_path)
+        self.ligname = ligname
+        self.special = special
+
+    def load_cloud(self, cloud_path):
+        with open(cloud_path, "r") as f:
+            data = json.load(f)
+        return data
+
+    def visualize(
+        self, receptor_type="protein or nucleic", height="1000px", width="1000px"
+    ):
+        """Generates visualization of the trajectory with the interacting waters and interaction clouds.
+
+        Args:
+            ligname (str): name of the ligand in the pdb file
+            receptor_type (str, optional): type of receptor. Defaults to 'protein or nucleic'.
+            height (str, optional): height of the visualization. Defaults to '1000px'.
+            width (str, optional): width of the visualization. Defaults to '1000px'.
+
+        Returns:
+            nglview widget: returns an nglview.widget object containing the visualization
+        """
+
+        sphere_buffers = []
+        for name, cloud in self.cloud.items():
+            sphere_buffer = {"position": [], "color": [], "radius": []}
+            for point in cloud["coordinates"]:
+                sphere_buffer["position"] += point
+                sphere_buffer["color"] += cloud["color"]
+                sphere_buffer["radius"] += [cloud["radius"]]
+            sphere_buffers.append(sphere_buffer)
+
+        with open(f"interacting_waters.pkl", "rb") as f:
+            interacting_watersids = pickle.load(f)
+
+        view = nv.show_mdanalysis(self.md)
+        view.clear_representations()
+        view.add_cartoon(selection=receptor_type)
+
+        for water in interacting_watersids:
+            view.add_licorice(selection=f"water and {water}")
+        view.add_licorice(selection=self.ligname)
+        if self.special:
+            view.add_licorice(selection=self.special)
+
+        for sphere_buffer, name in zip(
+            sphere_buffers,
+            [
+                "hydrophobic",
+                "acceptor",
+                "donor",
+                "waterbridge",
+                "negative_ionizable",
+                "positive_ionizable",
+                "pistacking",
+                "pication",
+                "halogen",
+                "metal",
+            ],
+        ):
+            js = f"""
+            var params = {sphere_buffer};
+            var shape = new NGL.Shape('{name}');
+            var buffer = new NGL.SphereBuffer(params);
+            shape.addBuffer(buffer);
+            var shapeComp = this.stage.addComponentFromObject(shape);
+            shapeComp.addRepresentation("buffer");
+            """
+            view._js(js)
+        view.layout.width = width
+        view.layout.height = height
+        return view
 
 
 def run_visualization():
