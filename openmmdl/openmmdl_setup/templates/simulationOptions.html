@@ -326,7 +326,7 @@
         <div class="form-group">
             {% if display_save_script %}
             <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('downloadScript')}}')"
-                title="Save the script.  To run the simulation, put the script in the directory containing the input files and execute it.">Save Script</button>
+                title="Save the script.  To run the simulation, put the script in the directory containing the input files and execute it.">Save Conf File</button>
             {% endif %}
 
             {% if 'cleanup' in session and session['cleanup'] == 'yes' %}
@@ -451,3 +451,4 @@ updateScriptSize();
 optionChanged();
 </script>
 {% endblock %}
+
