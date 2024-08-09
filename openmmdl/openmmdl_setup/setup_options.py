@@ -1,6 +1,6 @@
 
 
-class SimulationOptionsConfigurator:
+class SetupOptionsConfigurator:
     def __init__(self, session):
         self.session = session
 
@@ -66,3 +66,35 @@ class SimulationOptionsConfigurator:
         self.session["constraints"] = "hbonds"
         self.session["rmsd"] = "True"
         self.session["md_postprocessing"] = "True"
+
+    def configureDefaultAmberOptions(self):
+        """Select default options based on the file format and force field."""
+        # Ligand
+        self.session["nmLig"] = ""
+        self.session["spLig"] = ""
+        self.session["lig_ff"] = "gaff2"
+        self.session["charge_value"] = "0"
+        self.session["charge_method"] = "bcc"
+
+        # Receptor
+        self.session["prot_ff"] = "ff19SB"
+        self.session["dna_ff"] = "OL15"
+        self.session["rna_ff"] = "OL3"
+        self.session["carbo_ff"] = "GLYCAM_06j"
+
+        # AddWaterMembrane
+        self.session["addType"] = "addWater"
+        self.session["boxType"] = "cube"
+        self.session["dist"] = "10"
+
+        self.session["lipid_tp"] = "POPC"
+        self.session["other_lipid_tp_input"] = "POPC:TOPC"
+        self.session["lipid_ratio"] = "1:1"
+        self.session["lipid_ff"] = "lipid21"
+        self.session["dist2Border"] = "15"
+        self.session["padDist"] = "17"
+
+        self.session["water_ff"] = "opc"
+        self.session["pos_ion"] = "Na+"
+        self.session["neg_ion"] = "Cl-"
+        self.session["ionConc"] = "0.15"
