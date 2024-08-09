@@ -32,6 +32,9 @@ import traceback
 import webbrowser
 import zipfile
 
+from openmmdl.openmmdl_setup.setup_options import SimulationOptionsConfigurator
+from openmmdl.openmmdl_setup.configfile_creator import ConfigCreator
+
 
 if sys.version_info >= (3, 0):
     from io import StringIO
@@ -48,6 +51,8 @@ uploadedFiles = {}
 fixer = None
 scriptOutput = None
 simulationProcess = None
+
+
 
 
 def saveUploadedFiles():
@@ -1024,88 +1029,17 @@ def downloadPackage():
 
 def configureDefaultOptions():
     """Select default options based on the file format and force field."""
-    implicitWater = False
-    session["restart_checkpoint"] = "no"
-    session["mdtraj_output"] = "mdtraj_pdb_dcd"
-    session["mdtraj_removal"] = "False"
-    session["mda_output"] = "mda_pdb_dcd"
-    session["mda_selection"] = "mda_prot_lig_all"
-    session["openmmdl_analysis"] = "No"
-    session["analysis_selection"] = "analysis_all"
-    session["binding_mode"] = "40"
-    session["min_transition"] = "1"
-    session["rmsd_diff"] = "No"
-    session["pml_generation"] = "True"
-    session["stable_water"] = "Yes"
-    session["wc_distance"] = "1.0"
-    if session["fileType"] == "pdb" and session["waterModel"] == "implicit":
-        implicitWater = True
-    session["ensemble"] = "nvt" if implicitWater else "npt"
-    session["platform"] = "CUDA"
-    session["precision"] = "mixed"
-    session["cutoff"] = "2.0" if implicitWater else "1.0"
-    session["ewaldTol"] = "0.0005"
-    session["constraintTol"] = "0.000001"
-    session["hmr"] = True
-    session["hmrMass"] = "1.5"
-    session["dt"] = "0.002"
-    session["sim_length"] = "50"
-    session["equilibration"] = "equilibration"
-    session["temperature"] = "300"
-    session["friction"] = "1.0"
-    session["pressure"] = "1.0"
-    session["barostatInterval"] = "25"
-    session["nonbondedMethod"] = "CutoffNonPeriodic" if implicitWater else "PME"
-    session["writeDCD"] = True
-    session["dcdFilename"] = "trajectory.dcd"
-    session["dcdFrames"] = "1000"
-    session["pdbInterval_ns"] = "10"
-    session["writeData"] = True
-    session["dataFilename"] = "log.txt"
-    session["dataInterval"] = "1000"
-    session["dataFields"] = [
-        "step",
-        "speed",
-        "progress",
-        "potentialEnergy",
-        "temperature",
-    ]
-    session["writeCheckpoint"] = True
-    session["checkpointFilename"] = "checkpoint.chk"
-    session["checkpointInterval_ns"] = "0.02"
-    session["writeSimulationXml"] = False
-    session["systemXmlFilename"] = "system.xml"
-    session["integratorXmlFilename"] = "integrator.xml"
-    session["writeFinalState"] = False
-    session["finalStateFileType"] = "stateXML"
-    session["finalStateFilename"] = "final_state.xml"
-    session["constraints"] = "hbonds"
-    session["rmsd"] = "True"
-    session["md_postprocessing"] = "True"
+    
+    # Initialize the configurator with the session
+    simulation_configurator = SimulationOptionsConfigurator(session)
 
+    simulation_configurator.configure_default_options()
 
-def createScript(isInternal=False):
+def createScript():
     script = []
 
     # If we are creating this script for internal use to run a simulation directly, add extra code at the top
     # to set the working directory and redirect stdout to the pipe.
-
-    if isInternal:
-        script.append(
-            """
-import os
-import sys
-import time
-
-class PipeOutput(object):
-    def write(self, string):
-        output.send(string)
-
-sys.stdout = PipeOutput()
-sys.stderr = PipeOutput()
-os.chdir(outputDir)"""
-        )
-
     # Header
 
     script.append(
@@ -1198,6 +1132,9 @@ os.chdir(outputDir)"""
         script.append("prmtop = AmberPrmtopFile(prmtop_file)")
         script.append("inpcrd = AmberInpcrdFile(inpcrd_file)")
 
+    config_creator = ConfigCreator(session)
+    config_creator.add_forcefield_and_water_model_configuration(script)
+
     if fileType == "pdb":
         script.append(
             """\n############# Forcefield, Water and Membrane Model Selection ###################\n"""
@@ -1211,244 +1148,38 @@ os.chdir(outputDir)"""
     ################################## IF CLEANING WAS PERFORMED ##############################################
     ###########################################################################################################
     ###########################################################################################################
-    if fileType == "pdb":
-        if session["solvent"] == True:
-            if session["add_membrane"] == True:
-                script.append(
-                    """\n############# Membrane Settings ###################\n"""
-                )
-                script.append("add_membrane = %s" % session["add_membrane"])
-                script.append("membrane_lipid_type = '%s'" % session["lipidType"])
-                script.append("membrane_padding = %s" % session["membrane_padding"])
-                script.append(
-                    "membrane_ionicstrength = %s" % session["membrane_ionicstrength"]
-                )
-                script.append(
-                    "membrane_positive_ion = '%s'" % session["membrane_positive"]
-                )
-                script.append(
-                    "membrane_negative_ion = '%s'" % session["membrane_negative"]
-                )
-            elif session["add_membrane"] == False:
-                script.append(
-                    """\n############# Water Box Settings ###################\n"""
-                )
-                script.append("add_membrane = %s" % session["add_membrane"])
-                if session["water_padding"] == True:
-                    script.append('Water_Box = "Buffer"')
-                    script.append(
-                        "water_padding_distance = %s"
-                        % session["water_padding_distance"]
-                    )
-                    script.append("water_boxShape = '%s'" % session["water_boxShape"])
-                else:
-                    script.append('Water_Box = "Absolute"')
-                    script.append("water_box_x = %s" % session["box_x"])
-                    script.append("water_box_y = %s" % session["box_y"])
-                    script.append("water_box_z = %s" % session["box_z"])
-                script.append(
-                    "water_ionicstrength = %s" % session["water_ionicstrength"]
-                )
-                script.append("water_positive_ion = '%s'" % session["water_positive"])
-                script.append("water_negative_ion = '%s'" % session["water_negative"])
-        else:
-            if session["solvent"] == False:
-                script.append("Solvent = %s" % session["solvent"])
 
-    ################################## IF CLEANING WAS NOT PERFORMED ##########################################
-    ###########################################################################################################
-    ###########################################################################################################
+    
+    config_creator.add_solvent_configuration(script)
+    
 
     # System configuration
-    script.append("\n# System Configuration\n")
-    nonbondedMethod = session["nonbondedMethod"]
-    script.append("nonbondedMethod = app.%s" % nonbondedMethod)
-    if nonbondedMethod != "NoCutoff":
-        script.append("nonbondedCutoff = %s*unit.nanometers" % session["cutoff"])
-    if nonbondedMethod == "PME":
-        script.append("ewaldErrorTolerance = %s" % session["ewaldTol"])
-    hmrOptions = ", hydrogenMass=hydrogenMass" if session["hmr"] else ""
-    script.append("hmrOptions = '%s'" % hmrOptions)
-    constraints = session["constraints"]
-    constraintMethods = {
-        "none": "None",
-        "water": "None",
-        "hbonds": "HBonds",
-        "allbonds": "AllBonds",
-    }
-    if constraints != "none" and constraints != "water":
-        script.append("constraints = app.%s" % constraintMethods[constraints])
-    if constraints == "none":
-        script.append("constraints = %s" % constraintMethods[constraints])
-    script.append("rigidWater = %s" % ("False" if constraints == "none" else "True"))
-    if constraints != "none":
-        script.append("constraintTolerance = %s" % session["constraintTol"])
-    if session["hmr"]:
-        script.append("hydrogenMass = %s*unit.amu" % session["hmrMass"])
+    config_creator.add_system_configuration(script)
 
     # Integration options
 
-    script.append("\n# Integration Options\n")
-    script.append("step_time = %s" % session["dt"])
-    script.append("dt = %s*unit.picoseconds" % session["dt"])
-    script.append("temperature = %s*unit.kelvin" % session["temperature"])
-    script.append("friction = %s/unit.picosecond" % session["friction"])
-    ensemble = session["ensemble"]
-    if ensemble == "npt":
-        script.append("pressure = %s*unit.atmospheres" % session["pressure"])
-        script.append("barostatInterval = %s" % session["barostatInterval"])
+    config_creator.add_integration_configuration(script)
 
     # Simulation options
 
-    script.append("\n# Simulation Time and Steps Options\n")
-    script.append("sim_length = %s" % session["sim_length"])
-    steps = int(float(session["sim_length"])/float(session["dt"]) *1000)
-    script.append("steps = %s" % steps)
 
-    script.append("\n# Frames and Interval Options\n")
-    script.append("dcdFrames = %s" % session["dcdFrames"])
-    dcdinterval=int(steps / int(session["dcdFrames"]))
-    script.append("dcdInterval = %s" % dcdinterval)
-    script.append("pdbInterval_ns = %s" % session["pdbInterval_ns"])
-    pdbInterval=int(steps * (float(session["pdbInterval_ns"]) / float(session["sim_length"])))
-    script.append("pdbInterval = %s" % pdbInterval)
+    config_creator.add_simulation_time_and_steps_configuration(script)
 
-    script.append("\n# Restart and Equilibration Options\n")
-    if session["restart_checkpoint"] == "yes":
-        script.append("restart_step = %s" % session["restart_step"])
-        
-    if session["equilibration"] == "equilibration":
-        script.append("""equilibration_stages = [
-            {'EOM': 'minimize', 'n_steps': 10000, 'temperature': 300*unit.kelvin, 'ensemble': None, 'restraint_selection': 'protein and not type H', 'force_constant': 100*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-            {'EOM': 'MD_interpolate', 'n_steps': 100000, 'temperature': 100*unit.kelvin, 'temperature_end': 300*unit.kelvin, 'ensemble': 'NVT', 'restraint_selection': 'protein and not type H', 'force_constant': 100*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 10/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-            {'EOM': 'MD', 'n_steps': 100000, 'temperature': 300, 'ensemble': 'NPT', 'restraint_selection': 'protein and not type H', 'force_constant': 100*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 10/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-            {'EOM': 'MD', 'n_steps': 250000, 'temperature': 300*unit.kelvin, 'ensemble': 'NPT', 'restraint_selection': 'protein and not type H', 'force_constant': 10*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-            {'EOM': 'minimize', 'n_steps': 10000, 'temperature': 300*unit.kelvin, 'ensemble': None, 'restraint_selection': 'protein and backbone', 'force_constant': 10*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-            {'EOM': 'MD', 'n_steps': 100000, 'temperature': 300*unit.kelvin, 'ensemble': 'NPT', 'restraint_selection': 'protein and backbone', 'force_constant': 10*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-            {'EOM': 'MD', 'n_steps': 100000, 'temperature': 300*unit.kelvin, 'ensemble': 'NPT', 'restraint_selection': 'protein and backbone', 'force_constant': 1*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-            {'EOM': 'MD', 'n_steps': 100000, 'temperature': 300*unit.kelvin, 'ensemble': 'NPT', 'restraint_selection': 'protein and backbone', 'force_constant': 0.1*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-            {'EOM': 'MD', 'n_steps': 2500000, 'temperature': 300*unit.kelvin, 'ensemble': 'NPT', 'restraint_selection': None, 'force_constant': 0*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 2*unit.femtoseconds},
-            ]
-    """)
-    elif session["equilibration"] == "minimization":
-        script.append("""equilibration_stages = [
-            {'EOM': 'minimize', 'n_steps': 10000, 'temperature': 300*unit.kelvin, 'ensemble': None, 'restraint_selection': 'protein and not type H', 'force_constant': 100*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-            ]
-    """)
-    elif session["equilibration"] == "None":
-        script.append("equilibration_stages = None")
-        
-    script.append("save_box_vectors = False")
+    config_creator.add_equilibration_configuration(script)
+
+    config_creator.add_simulation_configuration(script)
+    
+    config_creator.add_checkpoint_configuration(script)
 
 
-    script.append("\n# Simulation Options\n")
+    config_creator.add_xml_serialization_configuration(script)
 
-    script.append("platform = Platform.getPlatformByName('%s')" % session["platform"])
-    if session["platform"] in ("CUDA", "OpenCL"):
-        script.append("platformProperties = {'Precision': '%s'}" % session["precision"])
-    if session["writeDCD"]:
-        if session["restart_checkpoint"] == "yes":
-            script.append(
-                "dcdReporter = DCDReporter('%s_%s', dcdInterval)"
-                % (session["restart_step"], session["dcdFilename"])
-            )
-        else:
-            script.append(
-                "dcdReporter = DCDReporter('%s', dcdInterval)"
-                % (session["dcdFilename"])
-            )
-    if session["writeData"]:
-        args = ", ".join("%s=True" % field for field in session["dataFields"])
-        if session["restart_checkpoint"] == "yes":
-            script.append(
-                "dataReporter = StateDataReporter('%s_%s', %s, totalSteps=steps,"
-                % (
-                    session["restart_step"],
-                    session["dataFilename"],
-                    session["dataInterval"],
-                )
-            )
-        else:
-            script.append(
-                "dataReporter = StateDataReporter('%s', %s, totalSteps=steps,"
-                % (session["dataFilename"], session["dataInterval"])
-            )
-        script.append("    %s, separator='\\t')" % args)
-        if isInternal:
-            # Create a second reporting sending to stdout so we can display it in the browser.
-            script.append(
-                "consoleReporter = StateDataReporter(sys.stdout, %s, totalSteps=steps, %s, separator='\\t')"
-                % (session["dataInterval"], args)
-            )
-    if session["writeCheckpoint"]:
-        checkpointInterval = int(1000 * float(session["checkpointInterval_ns"]) / float(session["dt"]))
-        checkpointInterval_10 = checkpointInterval * 10
-        checkpointInterval_100 = checkpointInterval * 100
-        script.append("\n# Checkpoint Options\n")
-        script.append( "checkpointInterval = %s" % checkpointInterval)
-        if session["restart_checkpoint"] == "yes":
-            script.append(
-                "checkpointReporter = CheckpointReporter('%s_%s', %s)"
-                % (session["restart_step"], session["checkpointFilename"], checkpointInterval)
-            )
-            script.append(
-                "checkpointReporter10 = CheckpointReporter('10x_%s__%s', %s)"
-                % (session["restart_step"], session["checkpointFilename"], checkpointInterval_10)
-            )
-            script.append(
-                "checkpointReporter100 = CheckpointReporter('100x_%s_%s', %s)"
-                % (session["restart_step"], session["checkpointFilename"], checkpointInterval_100)
-            )
-        else:
-            script.append(
-                "checkpointReporter = CheckpointReporter('%s', %s)"
-                % (session["checkpointFilename"], checkpointInterval)
-            )
-            script.append(
-                "checkpointReporter10 = CheckpointReporter('10x_%s', %s)"
-                % (session["checkpointFilename"], checkpointInterval_10)
-            )
-            script.append(
-                "checkpointReporter100 = CheckpointReporter('100x_%s', %s)"
-                % (session["checkpointFilename"], checkpointInterval_100)
-            )
+    config_creator.add_postprocessing_configuration(script)
 
-    # Output XML files for system and integrator
-
-    if session["writeSimulationXml"]:
-
-        def _xml_script_segment(to_serialize, target_file):
-            if target_file == "":
-                # if filename is blank, we cannot create the file
-                return []
-            return [
-                f'with open("{target_file}", mode="w") as file:',
-                f"    file.write(XmlSerializer.serialize({to_serialize}))",
-            ]
-
-        script.append("\n# Write XML serialized objects\n")
-        script.extend(_xml_script_segment("system", session["systemXmlFilename"]))
-        script.extend(
-            _xml_script_segment("integrator", session["integratorXmlFilename"])
-        )
-
-    # Postprocessing and Cleanup
-    script.append("\n# Cleaning and Post-Processing Options\n")
-    script.append("postprocessing = %s" % session["md_postprocessing"])
-    script.append("old_output = %s" % session["mdtraj_output"])
-    script.append("old_removal = %s" % session["mdtraj_removal"])
-    script.append("mda_output = %s" % session["mda_output"])
-    script.append("mda_selection = %s" % session["mda_selection"])
+    config_creator.add_openmmdl_analysis_configuration(script)
 
 
-    script.append("\n# OpenMMDL Analysis Options\n")
-    script.append("openmmdl_analysis = %s" % session["openmmdl_analysis"])
-    if session["openmmdl_analysis"] == "Yes":
-        script.append("analysis_selection = %s" % session["analysis_selection"])
-        script.append("binding_mode = %s" % session["binding_mode"])
-        script.append("min_transition = %s" % session["min_transition"])
-        script.append("rmsd_diff = %s" % session["rmsd_diff"])
-        script.append("pml_generation = %s" % session["pml_generation"])
+
 
 
     return "\n".join(script)
