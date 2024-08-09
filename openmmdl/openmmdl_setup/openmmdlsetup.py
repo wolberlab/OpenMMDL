@@ -1050,7 +1050,7 @@ def configureDefaultOptions():
     session["hmrMass"] = "1.5"
     session["dt"] = "0.002"
     session["sim_length"] = "50"
-    session["equilibration_length"] = "0.5"
+    session["equilibration"] = "equilibration"
     session["temperature"] = "300"
     session["friction"] = "1.0"
     session["pressure"] = "1.0"
@@ -1316,9 +1316,30 @@ os.chdir(outputDir)"""
     script.append("\n# Restart and Equilibration Options\n")
     if session["restart_checkpoint"] == "yes":
         script.append("restart_step = %s" % session["restart_step"])
-    script.append("equilibration_length = %s" % session["equilibration_length"])
-    equilibrationSteps = int((float(session["equilibration_length"])/float(session["dt"]) *1000))
-    script.append("equilibrationSteps = %s" % equilibrationSteps)
+        
+    if session["equilibration"] == "equilibration":
+        script.append("""equilibration_stages = [
+            {'EOM': 'minimize', 'n_steps': 10000, 'temperature': 300*unit.kelvin, 'ensemble': None, 'restraint_selection': 'protein and not type H', 'force_constant': 100*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
+            {'EOM': 'MD_interpolate', 'n_steps': 100000, 'temperature': 100*unit.kelvin, 'temperature_end': 300*unit.kelvin, 'ensemble': 'NVT', 'restraint_selection': 'protein and not type H', 'force_constant': 100*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 10/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
+            {'EOM': 'MD', 'n_steps': 100000, 'temperature': 300, 'ensemble': 'NPT', 'restraint_selection': 'protein and not type H', 'force_constant': 100*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 10/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
+            {'EOM': 'MD', 'n_steps': 250000, 'temperature': 300*unit.kelvin, 'ensemble': 'NPT', 'restraint_selection': 'protein and not type H', 'force_constant': 10*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
+            {'EOM': 'minimize', 'n_steps': 10000, 'temperature': 300*unit.kelvin, 'ensemble': None, 'restraint_selection': 'protein and backbone', 'force_constant': 10*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
+            {'EOM': 'MD', 'n_steps': 100000, 'temperature': 300*unit.kelvin, 'ensemble': 'NPT', 'restraint_selection': 'protein and backbone', 'force_constant': 10*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
+            {'EOM': 'MD', 'n_steps': 100000, 'temperature': 300*unit.kelvin, 'ensemble': 'NPT', 'restraint_selection': 'protein and backbone', 'force_constant': 1*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
+            {'EOM': 'MD', 'n_steps': 100000, 'temperature': 300*unit.kelvin, 'ensemble': 'NPT', 'restraint_selection': 'protein and backbone', 'force_constant': 0.1*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
+            {'EOM': 'MD', 'n_steps': 2500000, 'temperature': 300*unit.kelvin, 'ensemble': 'NPT', 'restraint_selection': None, 'force_constant': 0*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 2*unit.femtoseconds},
+            ]
+    """)
+    elif session["equilibration"] == "minimization":
+        script.append("""equilibration_stages = [
+            {'EOM': 'minimize', 'n_steps': 10000, 'temperature': 300*unit.kelvin, 'ensemble': None, 'restraint_selection': 'protein and not type H', 'force_constant': 100*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
+            ]
+    """)
+    elif session["equilibration"] == "None":
+        script.append("equilibration_stages = None")
+        
+    script.append("save_box_vectors = False")
+
 
     script.append("\n# Simulation Options\n")
 
