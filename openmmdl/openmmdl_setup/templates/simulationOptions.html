@@ -31,30 +31,33 @@
         </ul>
         <div class="tab-content">
             <div id="simulation" class="tab-pane fade in active">
-            <p/>
-            <div class="form-group">
-            <label for="sim_length">Simulation Length (ns)</label>
-            {{ textfield('sim_length', 'The total length of the simulation in ns.') }}
-            </div>
-            <div class="form-group">
-            <label for="equilibration_length">Equilibration Length (ns)</label>
-            {{ textfield('equilibration_length', 'The length of the equilibration in ns.') }}
-            </div>
-            <div class="form-group">
-            <label for="platform">Platform</label>
-            {{ choice('platform', 'Select the platform to use.  This must match the hardware you plan to run the simulation on.', [
-                ('Reference', 'Reference', 'The Reference platform is useful for testing, but not recommended for production simulations.'),
-                ('CPU', 'CPU', 'Run the simulation on a conventional CPU'),
-                ('CUDA', 'CUDA', 'Run the simulation on an NVIDIA GPU'),
-                ('OpenCL', 'OpenCL', 'The OpenCL platform on various kinds of hardware, including NVIDIA, AMD, and Intel GPUs')]) }}
-            </div>
-            <div class="form-group" id="precisionRow">
-            <label for="precision">Precision</label>
-            {{ choice('precision', 'Select the level of numerical precision to use.', [
-                ('single', 'Single', 'Most calculations are done in single precision.  This is the fastest option.'),
-                ('mixed', 'Mixed', 'Use a mix of single and double precision to give reasonably high performance, but better energy conservation than single precision.  This is recommended for constant energy simulations.'),
-                ('double', 'Double', 'All calculations are done in double precision.  This can be very slow.')]) }}
-            </div>
+                <p/>
+                <div class="form-group">
+                    <label for="sim_length">Simulation Length (ns)</label>
+                    {{ textfield('sim_length', 'The total length of the simulation in ns.') }}
+                </div>
+                <div class="form-group">
+                    <label for="equilibration">Equilibration/Minimization</label>
+                    {{ choice('equilibration', 'Select if minimization and equilibration protokolls should be executed before the production run.', [
+                        ('equilibration', 'Equilibration and Minimization', 'OpenMMDL will execute a full prepared minimization and equilibration protocoll for proteins.'),
+                        ('minimization', 'Minimization', 'OpenMMDL will only execute a minimization.'),
+                        ('None', 'None', 'No minimization or equilibration will be executed. Directly begins with production run') ])}}
+                </div>
+                <div class="form-group">
+                    <label for="platform">Platform</label>
+                    {{ choice('platform', 'Select the platform to use.  This must match the hardware you plan to run the simulation on.', [
+                        ('Reference', 'Reference', 'The Reference platform is useful for testing, but not recommended for production simulations.'),
+                        ('CPU', 'CPU', 'Run the simulation on a conventional CPU'),
+                        ('CUDA', 'CUDA', 'Run the simulation on an NVIDIA GPU'),
+                        ('OpenCL', 'OpenCL', 'The OpenCL platform on various kinds of hardware, including NVIDIA, AMD, and Intel GPUs')]) }}
+                </div>
+                <div class="form-group" id="precisionRow">
+                    <label for="precision">Precision</label>
+                    {{ choice('precision', 'Select the level of numerical precision to use.', [
+                        ('single', 'Single', 'Most calculations are done in single precision.  This is the fastest option.'),
+                        ('mixed', 'Mixed', 'Use a mix of single and double precision to give reasonably high performance, but better energy conservation than single precision.  This is recommended for constant energy simulations.'),
+                        ('double', 'Double', 'All calculations are done in double precision.  This can be very slow.')]) }}
+                </div>
             </div>
 
             <div id="output" class="tab-pane fade">
@@ -151,10 +154,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                <label for="restart_checkpoint">restart_checkpoint</label>
-                {{ choice('restart_checkpoint', 'Restart MD Simulation from checkpoint', [
-                    ('yes', 'yes', 'Restart from checkpoint'),
-                    ('no', 'no', 'Dont restart')]) }}
+                <label><input type="checkbox" name="restart_checkpoint" id="restart_checkpoint" oninput="optionChanged()" {{ 'checked' if session['restart_checkpoint'] else '' }}> Restart MD Simulation from checkpoint</label>
                 </div>
                 <div class="form-group" id="restart_step">
                 <label for="restart_step">Restart_step</label>
@@ -395,8 +395,8 @@ function optionChanged() {
     document.getElementById("wc_distance").hidden = (openmmdl_analysis != 'Yes' || stable_water != 'True');
     document.getElementById("binding_mode").hidden = (openmmdl_analysis != 'Yes');
     document.getElementById("min_transition").hidden = (openmmdl_analysis != 'Yes');
-    restart_checkpoint = document.getElementById("restart_checkpoint").value;
-    document.getElementById("restart_step").hidden = (restart_checkpoint != 'yes');
+    restart_checkpoint = document.getElementById("restart_checkpoint").checked;
+    document.getElementById("restart_step").hidden = !restart_checkpoint;
     nonbondedMethod = document.getElementById("nonbondedMethod").value;
     document.getElementById("cutoffRow").hidden = (nonbondedMethod == 'NoCutoff');
     document.getElementById("ewaldTolRow").hidden = (nonbondedMethod != 'PME');
@@ -451,4 +451,5 @@ updateScriptSize();
 optionChanged();
 </script>
 {% endblock %}
+
 
