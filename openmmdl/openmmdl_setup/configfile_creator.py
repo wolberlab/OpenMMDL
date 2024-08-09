@@ -1,8 +1,37 @@
 import datetime
+from openmmdl.openmmdl_setup.file_operator import LigandExtractor
 
 class ConfigCreator:
-    def __init__(self, session):
+    def __init__(self, session, uploadedFiles):
         self.session = session
+        self.uploadedFiles = uploadedFiles
+
+    def add_openmmdl_ascii_art_logo(self, script):
+        script.append(
+            """
+       ,-----.    .-------.     .-''-.  ,---.   .--.,---.    ,---.,---.    ,---. ______       .---.      
+     .'  .-,  '.  \  _(`)_ \  .'_ _   \ |    \  |  ||    \  /    ||    \  /    ||    _ `''.   | ,_|      
+    / ,-.|  \ _ \ | (_ o._)| / ( ` )   '|  ,  \ |  ||  ,  \/  ,  ||  ,  \/  ,  || _ | ) _  \,-./  )      
+   ;  \  '_ /  | :|  (_,_) /. (_ o _)  ||  |\_ \|  ||  |\_   /|  ||  |\_   /|  ||( ''_'  ) |\  '_ '`)    
+   |  _`,/ \ _/  ||   '-.-' |  (_,_)___||  _( )_\  ||  _( )_/ |  ||  _( )_/ |  || . (_) `. | > (_)  )    
+   : (  '\_/ \   ;|   |     '  \   .---.| (_ o _)  || (_ o _) |  || (_ o _) |  ||(_    ._) '(  .  .-'    
+    \ `"/  \  ) / |   |      \  `-'    /|  (_,_)\  ||  (_,_)  |  ||  (_,_)  |  ||  (_.\.' /  `-'`-'|___  
+     '. \_/``".'  /   )       \       / |  |    |  ||  |      |  ||  |      |  ||       .'    |        \ 
+       '-----'    `---'        `'-..-'  '--'    '--''--'      '--''--'      '--''-----'`      `--------`                                                                                                  
+            """
+        )
+
+
+    def add_ascii_config_art(self, script):
+        script.append(
+            """
+                            __   __        ___    __      ___         ___ 
+                           /  ` /  \ |\ | |__  | / _`    |__  | |    |__  
+                           \__, \__/ | \| |    | \__>    |    | |___ |___                                                                                                                              
+            """
+        )
+
+
 
     def add_checkpoint_configuration(self, script):
         if self.session["writeCheckpoint"]:
@@ -202,3 +231,55 @@ class ConfigCreator:
                 script.append("water = '%s'" % self.session["waterModel"])
             else:
                 script.append("water = %s" % self.session["waterModel"])
+
+    def add_amber_file_configuration(self, script):
+        if self.session["fileType"] == "amber":
+            script.append("""####### Add the Amber Files in the Folder with this Script ####### \n""")
+
+            # amber_files related variables
+            if self.session["has_files"] == "yes":
+                script.append('input_file_type = "amber"')
+                script.append("prmtop_file = '%s'" % self.uploadedFiles["prmtopFile"][0][1])
+                script.append('inpcrd_file = "%s"' % self.uploadedFiles["inpcrdFile"][0][1])
+
+                # ligand related variables
+                nmLigName = self.session["nmLigName"] if self.session["nmLig"] else None
+                spLigName = self.session["spLigName"] if self.session["spLig"] else None
+
+            elif self.session["has_files"] == "no":
+                script.append("prmtop_file = 'system.%s.prmtop'" % self.session["water_ff"])
+                script.append("inpcrd_file = 'system.%s.inpcrd' " % self.session["water_ff"])
+
+                # ligand related variables
+                if self.session["nmLig"]:
+                    nmLigFileName = self.uploadedFiles["nmLigFile"][0][1]
+                    nmLigName = LigandExtractor.extract_ligand_name(nmLigFileName)
+                else:
+                    nmLigFileName = None
+                    nmLigName = None
+
+                if self.session["spLig"]:
+                    spLigFileName = self.uploadedFiles["spLigFile"][0][1]
+                    spLigName = LigandExtractor.extract_ligand_name(spLigFileName)
+                else:
+                    spLigFileName = None
+                    spLigName = None
+
+            ## Feed prmtop_file and inpcrd_file to OpenMM Reader
+            script.append("prmtop = AmberPrmtopFile(prmtop_file)")
+            script.append("inpcrd = AmberInpcrdFile(inpcrd_file)")
+            
+    def add_pdb_input_files_configuration(self, script):
+        script.append("\n# Input Files")
+        if self.session["fileType"] == "pdb":
+            script.append("""############# Ligand and Protein Data ###################""")
+            if self.session["pdbType"] == "pdb":
+                script.append('input_file_type = "pdb"')
+                script.append('protein = "%s"' % self.uploadedFiles["file"][0][1])
+                if self.session["sdfFile"] != "":
+                    script.append("ligand = '%s'" % self.session["sdfFile"])
+                    script.append('ligand_name = "UNK"')
+                    script.append("minimization = %s" % self.session["ligandMinimization"])
+                    script.append("smallMoleculeForceField = '%s'" % self.session["smallMoleculeForceField"])
+                    script.append("sanitization = %s" % self.session["ligandSanitization"])
+            water = self.session["waterModel"]
