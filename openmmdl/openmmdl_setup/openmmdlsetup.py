@@ -34,6 +34,7 @@ import zipfile
 
 from openmmdl.openmmdl_setup.setup_options import SetupOptionsConfigurator
 from openmmdl.openmmdl_setup.configfile_creator import ConfigCreator
+from openmmdl.openmmdl_setup.amberscript_creator import AmberScriptGenerator
 
 
 if sys.version_info >= (3, 0):
@@ -286,201 +287,25 @@ def createAmberBashScript():
                                                                                                       
     """
     )
+    boxType = session.get("boxType")
 
     a_script.append("#!/bin/bash\n")
+    
+    amber_script = AmberScriptGenerator(session, uploadedFiles)
+    
+    
 
     # Receptor
-    a_script.append(
-        "################################## Receptor ######################################"
-    )
-    rcpType = session["rcpType"]
-    if rcpType == "protRcp":
-        protFile = uploadedFiles["protFile"][0][1]
-        protFile = protFile[:-4]
-        a_script.append(
-            "rcp_nm=%s # the file name of ligand without suffix `pdb`" % protFile
-        )
+    amber_script.add_receptor_type(a_script)
 
-        prot_ff = session["prot_ff"]
-        if prot_ff != "other_prot_ff":
-            a_script.append("rcp_ff=%s" % session["prot_ff"])
-        elif prot_ff == "other_prot_ff":
-            a_script.append(
-                "rcp_ff=%s  # See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`"
-                % session["other_prot_ff_input"]
-            )
-        a_script.append("\n")
 
-    elif rcpType == "dnaRcp":
-        dnaFile = uploadedFiles["dnaFile"][0][1]
-        dnaFile = dnaFile[:-4]
-        a_script.append(
-            "rcp_nm=%s # the file name of ligand without suffix `pdb`" % dnaFile
-        )
-
-        dna_ff = session["dna_ff"]
-        if dna_ff != "other_dna_ff":
-            a_script.append("rcp_ff=%s" % session["dna_ff"])
-        elif dna_ff == "other_dna_ff":
-            a_script.append(
-                "rcp_ff=%s  # See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`"
-                % session["other_dna_ff_input"]
-            )
-        a_script.append("\n")
-
-    elif rcpType == "rnaRcp":
-        rnaFile = uploadedFiles["rnaFile"][0][1]
-        rnaFile = rnaFile[:-4]
-        a_script.append(
-            "rcp_nm=%s # the file name of ligand without suffix `pdb`" % rnaFile
-        )
-
-        rna_ff = session["rna_ff"]
-        if rna_ff != "other_rna_ff":
-            a_script.append("rcp_ff=%s" % session["rna_ff"])
-        elif rna_ff == "other_rna_ff":
-            a_script.append(
-                "rcp_ff=%s  # See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`"
-                % session["other_rna_ff_input"]
-            )
-        a_script.append("\n")
-
-    elif rcpType == "carboRcp":
-        carboFile = uploadedFiles["carboFile"][0][1]
-        carboFile = carboFile[:-4]
-        a_script.append(
-            "rcp_nm=%s # the file name of ligand without suffix `pdb`" % carboFile
-        )
-
-        carbo_ff = session["carbo_ff"]
-        if carbo_ff != "other_carbo_ff":
-            a_script.append("rcp_ff=%s" % session["carbo_ff"])
-        elif carbo_ff == "other_carbo_ff":
-            a_script.append(
-                "rcp_ff=%s  # See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`"
-                % session["other_carbo_ff_input"]
-            )
-        a_script.append("\n")
-
-    a_script.append("## Clean the PDB file by pdb4amber")
-    a_script.append(("pdb4amber -i ${rcp_nm}.pdb -o ${rcp_nm}_amber.pdb"))
-    a_script.append(
-        """
-## `tleap` requires that all residues and atoms have appropriate types to ensure compatibility with the specified force field.
-## To avoid `tleap` failing, we delete non-essential atoms, such as hydrogens, but preserve important atoms like carbon and nitrogen within the caps residues.
-## Don' worry about the missing atoms as tleap has the capability to reconstruct them automatically. """
-    )
-    a_script.append(
-        """awk '! ($2 ~ "(CH3|HH31|HH32|HH33)" || $3 ~ "(CH3|HH31|HH32|HH33)" )' ${rcp_nm}_amber.pdb > ${rcp_nm}_amber_f.pdb """
-    )
-    a_script.append("grep -v '^CONECT' ${rcp_nm}_amber_f.pdb > ${rcp_nm}_cnt_rmv.pdb\n")
-
+    amber_script.add_clean_pdb_commands(a_script)
     # Ligand
-    if session["nmLig"] or session["spLig"]:
-        a_script.append(
-            "################################## Ligand ######################################"
-        )
-    if session["nmLig"]:
-        a_script.append("# Normal Ligand that is compatible with GAFF force field")
-        nmLigFile = uploadedFiles["nmLigFile"][0][1]
-        a_script.append(
-            "nmLigFile=%s # the file name of ligand without suffix `.pdb` or `.sdf`"
-            % nmLigFile[:-4]
-        )
-        # depending on the uploaded file format,convert it to pdb or sdf file.
-        if nmLigFile[-4:] == ".sdf":
-            a_script.append(
-                "obabel ${nmLigFile}.sdf -O ${nmLigFile}.pdb -p # convert to pdb file for tleap, -p: add hydrogens appropriate for pH7.4"
-            )
-        elif nmLigFile[-4:] == ".pdb":
-            a_script.append(
-                "obabel ${nmLigFile}.pdb -O ${nmLigFile}.sdf -p # convert to sdf file for openmmdl_analysis, -p: add hydrogens appropriate for pH7.4"
-            )
+    amber_script.add_ligand_commands(a_script)
 
-        a_script.append(
-            "charge_method=%s # refers to the charge method that antechamber will adopt"
-            % session["charge_method"]
-        )
-        a_script.append(
-            "charge_value=%s # Enter the net molecular charge of the ligand as integer (e.g. 1 or -2)"
-            % session["charge_value"]
-        )
-        a_script.append("lig_ff=%s # Ligand force field \n" % session["lig_ff"])
-
-        a_script.append("## Clean the PDB file by pdb4amber")
-        a_script.append(("pdb4amber -i ${nmLigFile}.pdb -o ${nmLigFile}_amber.pdb\n"))
-
-        a_script.append(
-            "## Generate a prepc file and an additional frcmod file by `antechamber`"
-        )
-        a_script.append(
-            "antechamber -fi pdb -fo prepc -i ${nmLigFile}_amber.pdb -o ${nmLigFile}.prepc -c ${charge_method} -at ${lig_ff} -nc ${charge_value} -pf y"
-        )
-        a_script.append(
-            "parmchk2 -f prepc -i ${nmLigFile}.prepc -o ${nmLigFile}.frcmod\n"
-        )
-        a_script.append("## Rename ligand pdb")
-        a_script.append(
-            "antechamber -i ${nmLigFile}.prepc -fi prepc -o rename_${nmLigFile}.pdb -fo pdb\n"
-        )
-
-    if session["spLig"]:
-        a_script.append("# Special Ligand that is incompatible with GAFF force field")
-        spLigFile = uploadedFiles["spLigFile"][0][1]
-        a_script.append(
-            "spLigFile=%s # the file name of ligand without suffix `.pdb`"
-            % spLigFile[:-4]
-        )
-        prepcFile = uploadedFiles["prepcFile"][0][1]
-        prepcFile = prepcFile[:-6]
-        a_script.append("prepc=%s # the file name without suffix `prepc`" % prepcFile)
-
-        frcmodFile = uploadedFiles["frcmodFile"][0][1]
-        frcmodFile = frcmodFile[:-7]
-        a_script.append(
-            "frcmod=%s # the file name without suffix `frcmod`\n" % frcmodFile
-        )
-
-        a_script.append("## Clean the PDB file by pdb4amber")
-        a_script.append(("pdb4amber -i ${spLigFile}.pdb -o ${spLigFile}_amber.pdb\n"))
-
-        # get the name of ligand in the pdb file: it is the fourth column of the first line
-        a_script.append("spLigName=$(awk 'NR==1 {print $4}' ${spLigFile}_amber.pdb)\n")
 
     # Combine all components to be modelled.
-    if session["nmLig"] or session["spLig"]:
-        a_script.append(
-            "######################  Combine All Components to Be Modelled ####################"
-        )
-        a_script.append("cat > tleap.combine.in <<EOF\n")
-        a_script.append("source ${rcp_ff}")
-        a_script.append("source leaprc.${lig_ff}")
-        ## load the prepc and frcmod file for either normal or special ligand
-        if session["nmLig"]:
-            a_script.append("\nloadamberprep ${nmLigFile}.prepc")
-            a_script.append("loadamberparams ${nmLigFile}.frcmod\n")
-        if session["spLig"]:
-            a_script.append("loadamberprep ${prepc}.prepc")
-            a_script.append("loadamberparams ${frcmod}.frcmod\n")
-        ## load both receptor and ligand pdb file
-        a_script.append("rcp = loadpdb ${rcp_nm}_cnt_rmv.pdb")
-        if session["nmLig"] and session["spLig"]:
-            a_script.append("nmLig = loadpdb rename_${nmLigFile}.pdb ")
-            a_script.append("spLig = loadpdb ${spLigFile}_amber.pdb ")
-            a_script.append("comp = combine{rcp nmLig spLig}")
-        elif session["nmLig"]:
-            a_script.append("nmLig = loadpdb rename_${nmLigFile}.pdb ")
-            a_script.append("comp = combine{rcp nmLig}")
-        elif session["spLig"]:
-            a_script.append("spLig = loadpdb ${spLigFile}_amber.pdb")
-            a_script.append("comp = combine {rcp spLig}")
-
-        a_script.append("savepdb comp comp.pdb")
-        a_script.append("\nquit")
-        a_script.append("\nEOF\n")
-        a_script.append("tleap -s -f tleap.combine.in > tleap.combine.out")
-        ## remove 'CONECT' line in the pdb file
-        a_script.append("grep -v '^CONECT' comp.pdb > comp_cnt_rmv.pdb\n")
+    amber_script.add_combine_components_commands(a_script)
 
     # Add Water/Membrane
     a_script.append(
@@ -488,104 +313,13 @@ def createAmberBashScript():
     )
 
     ## Box setting
+    amber_script.add_solvation_commands(a_script)
+    amber_script.add_membrane_commands(a_script)
     addType = session["addType"]
-    if addType == "addWater":
-        boxType = session["boxType"]
-        if boxType == "cube":
-            a_script.append(
-                "boxType=solvatebox # `solvatebox`, a command in tleap, creates a cubic box "
-            )
-            a_script.append(
-                "dist=%s # the minimum distance between any atom originally present in solute and the edge of the periodic box."
-                % session["dist"]
-            )
-        elif boxType == "octahedron":
-            a_script.append(
-                "boxType=solvateoct # `solvateoct`, a command in tleap, creates a truncated octahedron box."
-            )
-            a_script.append(
-                "dist=%s # the minimum distance between any atom originally present in solute and the edge of the periodic box"
-                % session["dist"]
-            )
-        elif boxType == "cap":
-            a_script.append(
-                "boxType=solvatecap # `solvatecap`, a command in tleap, creates a solvent cap around solute. In development!"
-            )
-            a_script.append("radius=%s # the radius of the sphere" % session["dist"])
-        elif boxType == "shell":
-            a_script.append(
-                "boxType=solvateshell # `solvatecap`, a command in tleap, adds a solent shell to solute, which reflect the contours of the original solute molecule. "
-            )
-            a_script.append(
-                "thickness=%s # the thickness of the shell" % session["dist"]
-            )
-    elif addType == "addMembrane":
-        lipid_tp = session["lipid_tp"]
-        if lipid_tp != "other_lipid_tp":
-            a_script.append("lipid_tp=%s" % session["lipid_tp"])
-            a_script.append("lipid_ratio=1")
-        elif lipid_tp == "other_lipid_tp":
-            a_script.append(
-                "lipid_tp=%s  # The command to check supported lipids: packmol-memgen --available_lipids"
-                % session["other_lipid_tp_input"]
-            )
-            a_script.append(
-                (
-                    "lipid_ratio=%s # Set to 1 if only one lipid required"
-                    % session["lipid_ratio"]
-                )
-            )
-
-        lipid_ff = session["lipid_ff"]
-        if lipid_ff != "other_lipid_ff":
-            a_script.append("lipid_ff=%s" % session["lipid_ff"])
-        elif lipid_ff == "other_lipid_ff":
-            a_script.append(
-                "lipid_ff=%s  # See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`"
-                % session["other_lipid_ff_input"]
-            )
-
-        a_script.append(
-            "dist2Border=%s  # The minimum distance between the maxmin values for x y and z to the box boundaries. Flag --dist"
-            % session["dist2Border"]
-        )
-        a_script.append(
-            "padDist=%s  # The width of the water layer over the membrane or protein in the z axis. Flag --dist_wat"
-            % session["padDist"]
-        )
 
     ## Water Setting
+    amber_script.add_water_ff_commands(a_script)
     water_ff = session["water_ff"]
-    if water_ff != "other_water_ff":
-        a_script.append("water_ff=%s" % session["water_ff"])
-        if addType == "addWater":
-            water_ff = session["water_ff"]
-            if water_ff == "tip3p":
-                a_script.append(
-                    "solvent=%sBOX  # set the water box" % session["water_ff"].upper()
-                )
-            elif water_ff == "fb3":
-                a_script.append("solvent=TIP3PFBOX # set the water box")
-            elif water_ff == "spce":
-                a_script.append("solvent=SPCBOX # set the water box")
-            elif water_ff == "tip4pew":
-                a_script.append("solvent=TIP4PEWBOX # set the water box")
-            elif water_ff == "fb4":
-                a_script.append("solvent=TIP4PBOX # set the water box")
-            elif water_ff == "opc":
-                a_script.append("solvent=OPCBOX # set the water box")
-            elif water_ff == "opc3":
-                a_script.append("solvent=OPC3BOX # set the water box")
-    elif water_ff == "other_water_ff":
-        a_script.append(
-            "water_ff=%s  # See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`"
-            % session["other_water_ff_input"]
-        )
-        if addType == "addWater":
-            a_script.append(
-                "solvent=%sBOX  # set the water box"
-                % session["other_water_ff_input"].upper()
-            )
 
     ## Ion Setting
     pos_ion = session["pos_ion"]
