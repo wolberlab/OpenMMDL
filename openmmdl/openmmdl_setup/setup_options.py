@@ -98,3 +98,23 @@ class SetupOptionsConfigurator:
         self.session["pos_ion"] = "Na+"
         self.session["neg_ion"] = "Cl-"
         self.session["ionConc"] = "0.15"
+
+
+class RequestSessionManager:
+    def __init__(self, form):
+        self.form = form
+
+    def setAmberOptions_update_session(self):
+        session["addType"] = self.form.get("addType", "")
+        session["boxType"] = self.form.get("boxType", "")
+        session["dist"] = self.form.get("dist", "")
+        session["lipid_tp"] = self.form.get("lipid_tp", "")
+        session["other_lipid_tp_input"] = self.form.get("other_lipid_tp_input", "")
+        session["lipid_ratio"] = self.form.get("lipid_ratio", "")
+        session["lipid_ff"] = self.form.get("lipid_ff", "")
+        session["dist2Border"] = self.form.get("dist2Border", "")
+        session["padDist"] = self.form.get("padDist", "")
+        session["water_ff"] = self.form.get("water_ff", "")
+        session["pos_ion"] = self.form.get("pos_ion", "")
+        session["neg_ion"] = self.form.get("neg_ion", "")
+        session["ionConc"] = self.form.get("ionConc", "")
