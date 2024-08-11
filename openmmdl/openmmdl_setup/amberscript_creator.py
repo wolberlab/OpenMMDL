@@ -6,6 +6,21 @@ class AmberScriptGenerator:
         self.uploadedFiles = uploadedFiles
 
 
+    def add_openmmdl_amber_logo(self, amber_script):
+        logo = """
+        #       ,-----.    .-------.     .-''-.  ,---.   .--.,---.    ,---.,---.    ,---. ______       .---.      
+        #     .'  .-,  '.  \  _(`)_ \  .'_ _   \ |    \  |  ||    \  /    ||    \  /    ||    _ `''.   | ,_|      
+        #    / ,-.|  \ _ \ | (_ o._)| / ( ` )   '|  ,  \ |  ||  ,  \/  ,  ||  ,  \/  ,  || _ | ) _  \,-./  )      
+        #   ;  \  '_ /  | :|  (_,_) /. (_ o _)  ||  |\_ \|  ||  |\_   /|  ||  |\_   /|  ||( ''_'  ) |\  '_ '`)    
+        #   |  _`,/ \ _/  ||   '-.-' |  (_,_)___||  _( )_\  ||  _( )_/ |  ||  _( )_/ |  || . (_) `. | > (_)  )    
+        #   : (  '\_/ \   ;|   |     '  \   .---.| (_ o _)  || (_ o _) |  || (_ o _) |  ||(_    ._) '(  .  .-'    
+        #    \ `"/  \  ) / |   |      \  `-'    /|  (_,_)\  ||  (_,_)  |  ||  (_,_)  |  ||  (_.\.' /  `-'`-'|___  
+        #     '. \_/``".'  /   )       \       / |  |    |  ||  |      |  ||  |      |  ||       .'    |        \ 
+        #       '-----'    `---'        `'-..-'  '--'    '--''--'      '--''--'      '--''-----'`      `--------` 
+                                                                                                      
+        """
+        amber_script.append(logo)
+
     def add_receptor_type(self, amber_script):
         amber_script.append("#!/bin/bash\n")
         amber_script.append("################################## Receptor ######################################\n")
@@ -219,3 +234,119 @@ class AmberScriptGenerator:
             amber_script.append(f"water_ff={self.session['other_water_ff_input']}  # See the supported force fields in the original file at `$AMBERHOME/dat/leap/cmd/`")
             if addType == "addWater":
                 amber_script.append(f"solvent={self.session['other_water_ff_input'].upper()}BOX  # set the water box")
+
+    def add_ion_commands(self, amber_script):
+        pos_ion = self.session.get("pos_ion")
+        if pos_ion != "other_pos_ion":
+            amber_script.append(f"pos_ion={pos_ion}")
+        elif pos_ion == "other_pos_ion":
+            amber_script.append(f"pos_ion={self.session['other_pos_ion_input']}  # In development!")
+        
+        neg_ion = self.session.get("neg_ion")
+        if neg_ion != "other_neg_ion":
+            amber_script.append(f"neg_ion={neg_ion}")
+        elif neg_ion == "other_neg_ion":
+            amber_script.append(f"neg_ion={self.session['other_neg_ion_input']}  # In development!")
+        
+        addType = self.session.get("addType")
+        if addType == "addWater":
+            amber_script.append("numIon=0 # `numIon` is the flag for `addions` in tleap. When set to 0, the system will be neutralized")
+        elif addType == "addMembrane":
+            amber_script.append(f"ionConc={self.session['ionConc']}")
+        
+        amber_script.append("\n")
+
+    def add_membrane_building_commands(self, amber_script):
+        addType = self.session.get("addType")
+        if addType == "addMembrane":
+            amber_script.append("## Build the membrane")
+            if not self.session["nmLig"] and not self.session["spLig"]:
+                amber_script.append(
+                    "packmol-memgen --pdb ${rcp_nm}_cnt_rmv.pdb --lipids ${lipid_tp} --ratio ${lipid_ratio} --preoriented --dist ${dist2Border} --dist_wat ${padDist} --salt --salt_c ${pos_ion} --saltcon ${ionConc} --nottrim --overwrite --notprotonate\n"
+                )
+                amber_script.append(
+                    "## Clean the complex pdb by `pdb4amber` for further `tleap` process"
+                )
+                amber_script.append(
+                    "pdb4amber -i bilayer_${rcp_nm}_cnt_rmv.pdb -o clean_bilayer_${rcp_nm}.pdb"
+                )
+                # Remove 'CONECT' line in the pdb file
+                amber_script.append(
+                    "grep -v '^CONECT' clean_bilayer_${rcp_nm}.pdb > clean_bilayer_${rcp_nm}_cnt_rmv.pdb"
+                )
+                amber_script.append("\n")
+            if self.session["nmLig"] or self.session["spLig"]:
+                amber_script.append(
+                    "packmol-memgen --pdb comp.pdb --lipids ${lipid_tp} --ratio ${lipid_ratio} --preoriented --dist ${dist2Border} --dist_wat ${padDist} --salt --salt_c ${pos_ion} --saltcon ${ionConc} --nottrim --overwrite --notprotonate\n"
+                )
+                amber_script.append(
+                    "## Clean the complex pdb by `pdb4amber` for further `tleap` process"
+                )
+                amber_script.append("pdb4amber -i bilayer_comp.pdb -o clean_bilayer_comp.pdb")
+                # Remove 'CONECT' line in the pdb file
+                amber_script.append(
+                    "grep -v '^CONECT' clean_bilayer_comp.pdb > clean_bilayer_comp_cnt_rmv.pdb"
+                )
+                amber_script.append("\n")
+                
+    def generate_tleap_commands(self, amber_script):
+        amber_script.append("cat > tleap.in <<EOF\n")
+        
+        # Source the force field
+        amber_script.append("source ${rcp_ff}")
+        amber_script.append("source leaprc.water.${water_ff}")
+        if self.session.get("nmLig") or self.session.get("spLig"):
+            amber_script.append("source leaprc.${lig_ff}")
+        if self.session.get("addType") == "addMembrane":
+            amber_script.append("source leaprc.${lipid_ff}")
+        
+        # Load the prepc and frcmod files
+        if self.session.get("nmLig"):
+            amber_script.append("\nloadamberprep ${nmLigFile}.prepc")
+            amber_script.append("loadamberparams ${nmLigFile}.frcmod\n")
+        if self.session.get("spLig"):
+            amber_script.append("loadamberprep ${prepc}.prepc")
+            amber_script.append("loadamberparams ${frcmod}.frcmod\n")
+        
+        # Load the complex pdb which contains all the components to be modeled
+        if self.session.get("addType") == "addWater":
+            if not self.session.get("nmLig") and not self.session.get("spLig"):
+                amber_script.append("\nsystem = loadpdb ${rcp_nm}_cnt_rmv.pdb\n")
+            else:
+                amber_script.append("system = loadpdb comp_cnt_rmv.pdb\n")
+        elif self.session.get("addType") == "addMembrane":
+            if not self.session.get("nmLig") and not self.session.get("spLig"):
+                amber_script.append("\nsystem = loadpdb clean_bilayer_${rcp_nm}_cnt_rmv.pdb\n")
+            if self.session.get("nmLig") or self.session.get("spLig"):
+                amber_script.append("system = loadpdb clean_bilayer_comp_cnt_rmv.pdb\n")
+        
+        # Add box commands based on the type of system
+        if self.session.get("addType") == "addWater":
+            boxType = self.session.get("boxType")
+            if boxType == "cube":
+                amber_script.append("solvatebox system ${solvent} ${dist} ")
+            elif boxType == "octahedron":
+                amber_script.append("solvateoct system ${solvent} ${dist}")
+            elif boxType == "cap":
+                amber_script.append("solvatecap system ${solvent} ${radius}")
+            elif boxType == "shell":
+                amber_script.append("solvateshell system ${solvent} ${thickness}")
+            amber_script.append("addions2 system ${neg_ion} ${numIon}")
+            amber_script.append("addions2 system ${pos_ion} ${numIon}")
+        elif self.session.get("addType") == "addMembrane":
+            amber_script.append('setBox system "vdw"')
+        
+        # Final TLEAP commands
+        amber_script.append("check system")
+        amber_script.append("charge system\n")
+        
+        # Save the PDB, prmtop, and inpcrd files
+        amber_script.append("savepdb system system.${water_ff}.pdb")
+        amber_script.append(
+            "saveamberparm system system.${water_ff}.prmtop system.${water_ff}.inpcrd"
+        )
+        
+        # Quit TLEAP and EOF
+        amber_script.append("\nquit")
+        amber_script.append("\nEOF")
+        amber_script.append("\ntleap -s -f tleap.in > tleap.out")
