@@ -1,18 +1,20 @@
 from flask import session, request
 
+
 class SetupOptionsConfigurator:
     """
     Configures and initializes default simulation options based on flask session data.
 
-    This class is responsible for setting up various simulation parameters such as 
-    ensemble types, platform, precision, cutoffs, force fields and other essential 
-    options. It primarily deals with setting default values for these parameters, 
+    This class is responsible for setting up various simulation parameters such as
+    ensemble types, platform, precision, cutoffs, force fields and other essential
+    options. It primarily deals with setting default values for these parameters,
     which can then be used throughout the simulation process.
-    
+
     Attributes:
-        session (flask.session): The session object used to store configuration data 
+        session (flask.session): The session object used to store configuration data
                                  for the simulation setup.
     """
+
     def __init__(self, session):
         """
         Initializes the SetupOptionsConfigurator with the provided session object.
@@ -26,7 +28,7 @@ class SetupOptionsConfigurator:
     def configure_default_options(self):
         """
         Sets default simulation options based on session data.
-        
+
         Updates parameters for ensemble type, platform, cutoff, tolerances,
         simulation length, and output files.
         """
@@ -44,10 +46,13 @@ class SetupOptionsConfigurator:
         self.session["pml_generation"] = "True"
         self.session["stable_water"] = "Yes"
         self.session["wc_distance"] = "1.0"
-        
-        if self.session["fileType"] == "pdb" and self.session["waterModel"] == "implicit":
+
+        if (
+            self.session["fileType"] == "pdb"
+            and self.session["waterModel"] == "implicit"
+        ):
             implicitWater = True
-        
+
         self.session["ensemble"] = "nvt" if implicitWater else "npt"
         self.session["platform"] = "CUDA"
         self.session["precision"] = "mixed"
@@ -63,7 +68,9 @@ class SetupOptionsConfigurator:
         self.session["friction"] = "1.0"
         self.session["pressure"] = "1.0"
         self.session["barostatInterval"] = "25"
-        self.session["nonbondedMethod"] = "CutoffNonPeriodic" if implicitWater else "PME"
+        self.session["nonbondedMethod"] = (
+            "CutoffNonPeriodic" if implicitWater else "PME"
+        )
         self.session["writeDCD"] = True
         self.session["dcdFilename"] = "trajectory.dcd"
         self.session["dcdFrames"] = "1000"
@@ -94,7 +101,7 @@ class SetupOptionsConfigurator:
     def configureDefaultAmberOptions(self):
         """
         Sets default options for ligand, receptor, and solvation in Amber.
-    
+
         Configures force fields, ion types, water model, and lipid properties.
         """
         # Ligand
@@ -126,19 +133,20 @@ class SetupOptionsConfigurator:
         self.session["pos_ion"] = "Na+"
         self.session["neg_ion"] = "Cl-"
         self.session["ionConc"] = "0.15"
-        
-        
+
+
 class RequestSessionManager:
     """
     Manages the configuration of session variables based on form data received in HTTP requests.
 
-    This class is responsible for setting up diverse options related to receptors, water, membranes, 
-    and other general simulation settings. The configurations are stored in the session object, 
+    This class is responsible for setting up diverse options related to receptors, water, membranes,
+    and other general simulation settings. The configurations are stored in the session object,
     which tracks the state of the simulation setup across different user interactions.
-    
+
     Attributes:
         form (werkzeug.datastructures.ImmutableMultiDict): The form data from an HTTP request.
     """
+
     def __init__(self, form):
         """
         Initializes the RequestSessionManager with form data.
@@ -179,7 +187,7 @@ class RequestSessionManager:
         session["pos_ion"] = self.form.get("pos_ion", "")
         session["neg_ion"] = self.form.get("neg_ion", "")
         session["ionConc"] = self.form.get("ionConc", "")
-        
+
     def addhydrogens_add_water_or_membrane_session(self):
         """
         Configures water or membrane settings based on form data.
@@ -206,7 +214,7 @@ class RequestSessionManager:
             session["water_ionicstrength"] = float(self.form["ionicstrength"])
             session["water_positive"] = self.form["positiveion"] + "+"
             session["water_negative"] = self.form["negativeion"] + "-"
-        
+
         elif "addMembrane" in self.form:
             session["solvent"] = True
             session["add_membrane"] = True
@@ -215,7 +223,7 @@ class RequestSessionManager:
             session["membrane_ionicstrength"] = float(self.form["ionicstrength"])
             session["membrane_positive"] = self.form["positiveion"] + "+"
             session["membrane_negative"] = self.form["negativeion"] + "-"
-            
+
     def simulationoptions_add_general_settings(self):
         """
         Adds general simulation settings from form data to the session.
@@ -230,13 +238,16 @@ class RequestSessionManager:
         session["hmr"] = "hmr" in self.form
         session["writeSimulationXml"] = "writeSimulationXml" in self.form
         session["writeFinalState"] = "writeFinalState" in self.form
-        
+
     def configureFiles_add_forcefield_ligand_settings(self):
-    """
-    Adds forcefield and ligand-related settings from form data to the session.
-    """
+        """
+        Adds forcefield and ligand-related settings from form data to the session.
+        """
         session["forcefield"] = self.form.get("forcefield", "")
         session["ml_forcefield"] = self.form.get("ml_forcefield", "")
         session["waterModel"] = self.form.get("waterModel", "")
-        session["smallMoleculeForceField"] = self.form.get("smallMoleculeForceField", "")
+        session["smallMoleculeForceField"] = self.form.get(
+            "smallMoleculeForceField", ""
+        )
         session["ligandMinimization"] = self.form.get("ligandMinimization", "")
+        session["ligandSanitization"] = self.form.get("ligandSanitization", "")
