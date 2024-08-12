@@ -59,6 +59,11 @@ class AmberScriptGenerator:
         """
         Determines the receptor type and appends corresponding Ambertools commands to the Amber bash script.
 
+        This method adds commands to the Amber bash script based on the type of receptor specified.
+        It handles various receptor types including protein, DNA, RNA, and carbohydrate, and sets up
+        the appropriate force field for each type. It also updates the receptor file names and force fields
+        based on the user's input and session settings.
+
         Args:
             amber_script (list): The list representing lines of the Amber bash script.
         """
@@ -133,6 +138,11 @@ class AmberScriptGenerator:
         """
         Appends commands to clean the PDB file using pdb4amber to the Amber bash script.
 
+        This method adds commands to clean up the receptor PDB file using `pdb4amber`, including:
+            - Generating an amber-compatible PDB file by removing unnecessary atoms.
+            - Ensuring that the PDB file is cleaned of `CONECT` records and non-essential atoms
+              to ensure compatibility with TLEAP and proper processing in the Amber simulation.
+
         Args:
             amber_script (list): The list representing lines of the Amber bash script.
         """
@@ -154,6 +164,10 @@ class AmberScriptGenerator:
     def add_ligand_commands(self, amber_script):
         """
         Appends commands related to ligand processing to the Amber bash script, handling both normal and special ligands.
+
+        This method adds commands for processing ligands in the Amber simulation setup. It handles:
+            - Normal ligands compatible with the GAFF force field by converting file formats and generating necessary parameter files.
+            - Special ligands that are incompatible with GAFF, including file cleaning and processing steps.
 
         Args:
             amber_script (list): The list representing lines of the Amber bash script.
@@ -244,6 +258,11 @@ class AmberScriptGenerator:
         """
         Appends commands to combine all components (receptor and ligands) into a single complex.
 
+        This method generates commands to combine various components (receptor and ligands) into a single
+        complex in the Amber simulation. It handles loading of the receptor and ligands (normal and/or special),
+        and combines them using TLEAP. The resulting complex is saved in PDB format and cleaned by removing
+        CONECT lines.
+
         Args:
             amber_script (list): The list representing lines of the Amber bash script.
         """
@@ -286,6 +305,10 @@ class AmberScriptGenerator:
         """
         Appends commands related to solvation settings, including box type and dimensions for the water box.
 
+        This method generates the necessary bash commands to set up the solvation box around the solute
+        in an Amber simulation. It supports various types of solvent boxes such as cubic, truncated octahedral,
+        spherical cap, and shell, and includes parameters for the box dimensions or shell thickness.
+
         Args:
             amber_script (list): The list representing lines of the Amber bash script.
         """
@@ -325,6 +348,10 @@ class AmberScriptGenerator:
         """
         Appends commands related to membrane settings, including lipid types and force fields.
 
+        This method generates bash commands required to configure the membrane system in an Amber simulation.
+        It specifies lipid types, lipid force fields, and related parameters such as lipid ratios and distances
+        for the membrane setup. Custom lipid types and force fields can also be specified.
+
         Args:
             amber_script (list): The list representing lines of the Amber bash script.
         """
@@ -360,6 +387,11 @@ class AmberScriptGenerator:
     def add_water_ff_commands(self, amber_script):
         """
         Appends commands related to water force field settings.
+
+        This method generates the bash commands needed to configure the water force
+        field (FF) in an Amber file preparation. Depending on the selected water model,
+        it sets up the appropriate solvent box. It also accommodates custom water force
+        fields specified by the user.
 
         Args:
             amber_script (list): The list representing lines of the Amber bash script.
@@ -399,6 +431,12 @@ class AmberScriptGenerator:
         """
         Appends commands related to ion settings, including positive and negative ions.
 
+        This method constructs the commands needed to set up ion types and their
+        concentrations in the Amber simulation script. It handles standard ions
+        (positive and negative) and allows for custom ion types. Additionally, it
+        configures ion concentration based on the system setup, whether it includes
+        water or a membrane.
+
         Args:
             amber_script (list): The list representing lines of the Amber bash script.
         """
@@ -431,6 +469,10 @@ class AmberScriptGenerator:
     def add_membrane_building_commands(self, amber_script):
         """
         Appends commands to build the membrane using packmol-memgen.
+
+        This method generates the necessary bash commands to build a membrane system in
+        an Amber simulation using the packmol-memgen tool. It configures the membrane
+        building process based on the session's ligand and system settings.
 
         Args:
             amber_script (list): The list representing lines of the Amber bash script.
@@ -472,6 +514,11 @@ class AmberScriptGenerator:
     def generate_tleap_commands(self, amber_script):
         """
         Appends commands to generate TLEAP input files and execute TLEAP for system preparation.
+
+        This method constructs the necessary TLEAP commands to prepare the system for simulation
+        in Amber. It sources the appropriate force fields, loads the relevant ligand and system files,
+        configures the box type, and saves the system's topology and coordinate files. The method
+        also accounts for different system setups such as water-only or membrane-included simulations.
 
         Args:
             amber_script (list): The list representing lines of the Amber bash script.
