@@ -32,9 +32,16 @@ import traceback
 import webbrowser
 import zipfile
 
-from openmmdl.openmmdl_setup.setup_options import SetupOptionsConfigurator, RequestSessionManager
-from openmmdl.openmmdl_setup.configfile_creator import ConfigCreator
-from openmmdl.openmmdl_setup.amberscript_creator import AmberScriptGenerator
+from openmmdl.openmmdl_setup.setup_options import (
+    SetupOptionsConfigurator,
+    RequestSessionManager,
+)
+from openmmdl.openmmdl_setup.configfile_creator import ConfigCreator, ConfigWriter
+from openmmdl.openmmdl_setup.amberscript_creator import (
+    AmberScriptGenerator,
+    AmberBashScriptWriter,
+)
+from openmmdl.openmmdl_setup.file_operator import FileUploader
 
 
 if sys.version_info >= (3, 0):
@@ -54,21 +61,11 @@ scriptOutput = None
 simulationProcess = None
 
 
-
-
-def saveUploadedFiles():
-    uploadedFiles.clear()
-    for key in request.files:
-        filelist = []
-        for file in request.files.getlist(key):
-            temp = tempfile.TemporaryFile()
-            shutil.copyfileobj(file, temp)
-            filelist.append((temp, secure_filename(file.filename)))
-        uploadedFiles[key] = filelist
-
-
 @app.route("/headerControls")
 def headerControls():
+    """
+    Handle requests related to header controls such as restarting or stopping the server.
+    """
     if "startOver" in request.args:
         return showSelectFileType()
     if "quit" in request.args:
@@ -81,11 +78,17 @@ def headerControls():
 
 @app.route("/")
 def showSelectFileType():
+    """
+    Render the page to select the file type PDB or Amber for the simulation setup.
+    """
     return render_template("selectFileType.html")
 
 
 @app.route("/selectFiles")
 def selectFiles():
+    """
+    Handle file type selection and configure files based on the selected type.
+    """
     session["fileType"] = request.args.get(
         "type", ""
     )  # get the value of `type` from the url
@@ -93,6 +96,9 @@ def selectFiles():
 
 
 def showConfigureFiles():
+    """
+    Render the appropriate configuration page based on the file type selected.
+    """
     try:
         fileType = session["fileType"]
         if fileType == "pdb":
@@ -105,23 +111,23 @@ def showConfigureFiles():
     return showSelectFileType()
 
 
-#################################################################################################
 @app.route("/configureFiles", methods=["POST"])
 def configureFiles():
+    """
+    Handles the configuration of files based on the file type and form data provided.
+    """
     fileType = session["fileType"]
     if fileType == "pdb":
         if "file" not in request.files or request.files["file"].filename == "":
             # They didn't select a file.  Send them back.
             return showConfigureFiles()
-        saveUploadedFiles()
-        session["forcefield"] = request.form.get("forcefield", "")
-        session["ml_forcefield"] = request.form.get("ml_forcefield", "")
-        session["waterModel"] = request.form.get("waterModel", "")
-        session["smallMoleculeForceField"] = request.form.get("smallMoleculeForceField", "")
-        session["ligandMinimization"] = request.form.get("ligandMinimization", "")
-        session["ligandSanitization"] = request.form.get("ligandSanitization", "")
+
+        FileUploader.save_uploaded_files(uploadedFiles, request)
+        configurefile_request_session = RequestSessionManager(request.form)
+        configurefile_request_session.configureFiles_add_forcefield_ligand_settings()
         session["sdfFile"] = uploadedFiles["sdfFile"][0][1]
-        configureDefaultOptions()
+        simulationoptions_session_manager = SetupOptionsConfigurator(session)
+        simulationoptions_session_manager.configure_default_options()
         file, name = uploadedFiles["file"][0]
         file.seek(0, 0)
         session["pdbType"] = _guessFileFormat(file, name)
@@ -154,57 +160,58 @@ def configureFiles():
                     return showConfigureFiles()
                 else:
                     session["spLigName"] = request.form.get("spLigName", "")
-            saveUploadedFiles()
+            FileUploader.save_uploaded_files(request)
         elif has_files == "no":
-            configureDefaultAmberOptions()
+            simulation_configurator = SetupOptionsConfigurator(session)
+            simulation_configurator.configureDefaultAmberOptions()
             return showAmberOptions()
 
-    configureDefaultOptions()
+    simulation_configurator = SetupOptionsConfigurator(session)
+    simulation_configurator.configure_default_options()
     return showSimulationOptions()
 
 
 @app.route("/showAmberOptions")
 def showAmberOptions():
+    """
+    Render the page for setting the Amber simulation options.
+    """
     return render_template("AmberOptions.html")
 
 
 @app.route("/setAmberOptions", methods=["POST"])
 def setAmberOptions():
+    """
+    Handles the setting of Amber options and file uploads.
+    """
     for key in request.form:
         session[key] = request.form[key]
     ######## Receptor ########
-    session["rcpType"] = request.form.get(
-        "rcpType", ""
-    )  # store the value of rcpType in session, e.g. protRcp, dnaRcp, rnaRcp, carboRcp
-    session["prot_ff"] = request.form.get("prot_ff", "")
-    session["other_prot_ff_input"] = request.form.get("other_prot_ff_input", "")
-    session["dna_ff"] = request.form.get("dna_ff", "")
-    session["other_dna_ff_input"] = request.form.get("other_dna_ff_input", "")
-    session["rna_ff"] = request.form.get("rna_ff", "")
-    session["other_rna_ff_input"] = request.form.get("other_rna_ff_input", "")
-    session["carbo_ff"] = request.form.get("carbo_ff", "")
-    session["other_carbo_ff_input"] = request.form.get("other_carbo_ff_input", "")
+    form = request.form
+    ######## Amber Receptor Sessions ########
+    amber_session_manager = RequestSessionManager(form)
+    amber_session_manager.setAmberOptions_rcp_session()
     # save uploaded pdb file for receptor
     rcpType = session["rcpType"]
     if rcpType == "protRcp":
         if "protFile" not in request.files or request.files["protFile"].filename == "":
             showAmberOptions()
-        saveUploadedFiles()
+        FileUploader.save_uploaded_files(request)
     elif rcpType == "dnaRcp":
         if "dnaFile" not in request.files or request.files["dnaFile"].filename == "":
             showAmberOptions()
-        saveUploadedFiles()
+        FileUploader.save_uploaded_files(request)
     elif rcpType == "rnaRcp":
         if "rnaFile" not in request.files or request.files["rnaFile"].filename == "":
             showAmberOptions()
-        saveUploadedFiles()
+        FileUploader.save_uploaded_files(request)
     elif rcpType == "carboRcp":
         if (
             "carboFile" not in request.files
             or request.files["carboFile"].filename == ""
         ):
             showAmberOptions()
-        saveUploadedFiles()
+        FileUploader.save_uploaded_files(request)
 
     ######## Ligand ########
     session["nmLig"] = (
@@ -219,7 +226,7 @@ def setAmberOptions():
             or request.files["nmLigFile"].filename == ""
         ):
             showAmberOptions()
-        saveUploadedFiles()
+        FileUploader.save_uploaded_files(request)
 
     ## for special ligand
     if session["spLig"]:
@@ -232,98 +239,44 @@ def setAmberOptions():
             or request.files["frcmodFile"].filename == ""
         ):
             showAmberOptions()
-        saveUploadedFiles()
+        FileUploader.save_uploaded_files(request)
 
     ######## Add Water/Membrane ########
-    form = request.form
-    session_manager = RequestSessionManager(form)
 
-    return createAmberBashScript()
+    amber_session_manager.setAmberOptions_water_membrane_session()
+    amber_script_creator = AmberBashScriptWriter(session, uploadedFiles)
+    return amber_script_creator.write_amber_script()
 
 
 @app.route("/downloadAmberBashScript")
 def downloadAmberBashScript():
-    response = make_response(createAmberBashScript())
+    """
+    Downloads the amber bash script.
+    """
+    amber_script_creator = AmberBashScriptWriter(session, uploadedFiles)
+    response = make_response(amber_script_creator.write_amber_script())
     response.headers["Content-Disposition"] = 'attachment; filename="run_ambertools.sh"'
     return response
-
-
-def configureDefaultAmberOptions():
-    """Select default options based on the file format and force field."""
-    
-    simulation_configurator = SetupOptionsConfigurator(session)
-    
-    simulation_configurator.configureDefaultAmberOptions()
-
-
-def createAmberBashScript():
-    a_script = []
-    
-    amber_script = AmberScriptGenerator(session, uploadedFiles)
-    amber_script.add_openmmdl_amber_logo(a_script)
-
-    # Receptor
-    amber_script.add_receptor_type(a_script)
-
-
-    amber_script.add_clean_pdb_commands(a_script)
-    # Ligand
-    amber_script.add_ligand_commands(a_script)
-
-
-    # Combine all components to be modelled.
-    amber_script.add_combine_components_commands(a_script)
-
-
-    ## Box setting
-    amber_script.add_solvation_commands(a_script)
-    amber_script.add_membrane_commands(a_script)
-
-    ## Water Setting
-    amber_script.add_water_ff_commands(a_script)
-
-    ## Ion Setting
-    amber_script.add_ion_commands(a_script)
-
-    ## Build the membrane
-    amber_script.add_membrane_building_commands(a_script)
-
-    # Generate the prmtop and frcmod file for the complex.
-    amber_script.generate_tleap_commands(a_script)
-
-
-    return "\n".join(a_script)
-
-
-def extractLigName(LigFileName):
-    """
-    Extract the ligand name from the pdb file as a string, which is the fourth column of the first line in the pdb file.
-    This string can be used for openmmdl_analysis in later function `createScript`.
-
-    Params:
-    -------
-    LigFile: the tuple that stores both the buffered file and its name, uploadedFiles['nmLigFile'][0][1]
-    """
-
-    if LigFileName[-4:] == ".sdf":
-        LigName = "UNL"
-    elif LigFileName[-4:] == ".pdb":
-        LigName = LigFileName[:-4]
-
-    return LigName
 
 
 ########################################################################################################################
 
 
 @app.route("/getCurrentStructure")
+##remove
 def getCurrentStructure():
+    """
+    Returns the current PDB structure from the PDBFixer instance.
+    """
     pdb = StringIO()
     PDBFile.writeFile(fixer.topology, fixer.positions, pdb)
     return pdb.getvalue()
 
 
 def showSelectChains():
+    """
+    Renders the page to select chains for further processing.
+    """
     chains = []
     hasHeterogen = False
     for chain in fixer.topology.chains():
@@ -346,6 +299,9 @@ def showSelectChains():
 
 @app.route("/selectChains", methods=["POST"])
 def selectChains():
+    """
+    Handles chain selection and update the PDBFixer instance.
+    """
     session["heterogens"] = request.form.get("heterogens", "")
     numChains = len(list(fixer.topology.chains()))
     request.form.getlist("include")
@@ -357,6 +313,9 @@ def selectChains():
 
 
 def showAddResidues():
+    """
+    Renders the page for adding missing residues to the structure.
+    """
     spans = []
     chains = list(fixer.topology.chains())
     fixer.findMissingResidues()
@@ -378,6 +337,9 @@ def showAddResidues():
 
 @app.route("/addResidues", methods=["POST"])
 def addResidues():
+    """
+    Handles the addition of residues to the structure.
+    """
     keys = [key for key in sorted(fixer.missingResidues)]
     for i, key in enumerate(keys):
         if str(i) not in request.form.getlist("add"):
@@ -386,6 +348,9 @@ def addResidues():
 
 
 def showConvertResidues():
+    """
+    Renders the page for converting non-standard residues to standard residues.
+    """
     fixer.findNonstandardResidues()
     if len(fixer.nonstandardResidues) == 0:
         return showAddHeavyAtoms()
@@ -405,6 +370,9 @@ def showConvertResidues():
 
 @app.route("/convertResidues", methods=["POST"])
 def convertResidues():
+    """
+    Handles the conversion of non-standard residues to standard residues.
+    """
     for i in range(len(fixer.nonstandardResidues)):
         if str(i) in request.form.getlist("convert"):
             fixer.nonstandardResidues[i] = (
@@ -416,6 +384,9 @@ def convertResidues():
 
 
 def showAddHeavyAtoms():
+    """
+    Renders the page for adding missing heavy atoms to the structure.
+    """
     if session["heterogens"] == "none":
         fixer.removeHeterogens(False)
     elif session["heterogens"] == "water":
@@ -440,14 +411,17 @@ def showAddHeavyAtoms():
 
 @app.route("/addHeavyAtoms", methods=["POST"])
 def addHeavyAtoms():
+    """
+    Handles the addition of heavy atoms and renders the page for adding missing hydrogens to the structure.
+    """
+    # Add missing heavy atoms to the structure
     fixer.addMissingAtoms()
-    return showAddHydrogens()
 
-
-def showAddHydrogens():
+    # Render the page for adding missing hydrogens
     unitCell = fixer.topology.getUnitCellDimensions()
     if unitCell is not None:
         unitCell = unitCell.value_in_unit(unit.nanometer)
+
     boundingBox = tuple(
         (
             max((pos[i] for pos in fixer.positions))
@@ -455,6 +429,7 @@ def showAddHydrogens():
         ).value_in_unit(unit.nanometer)
         for i in range(3)
     )
+
     return render_template(
         "addHydrogens.html", unitCell=unitCell, boundingBox=boundingBox
     )
@@ -462,39 +437,18 @@ def showAddHydrogens():
 
 @app.route("/addHydrogens", methods=["POST"])
 def addHydrogens():
+    """
+    Handles the addition of hydrogens and any additional water or membrane setup.
+    """
+    form = request.form
+    addhyderogen_session_manager = RequestSessionManager(form)
     session["solvent"] = False
     if "addHydrogens" in request.form:
         pH = float(request.form.get("ph", "7"))
         fixer.addMissingHydrogens(pH)
-    if "addWater" in request.form:
-        session["solvent"] = True
-        session["add_membrane"] = False
-        padding, boxSize, boxShape = None, None, None
-        if request.form["boxType"] == "geometry":
-            session["water_padding"] = True
-            session["water_padding_distance"] = float(request.form["geomPadding"])
-            session["water_boxShape"] = request.form["geometryDropdown"]
-        else:
-            session["water_padding"] = False
-            session["box_x"] = float(request.form["boxx"])
-            session["box_y"] = float(request.form["boxy"])
-            session["box_z"] = float(request.form["boxz"])
-            boxSize = (
-                float(request.form["boxx"]),
-                float(request.form["boxy"]),
-                float(request.form["boxz"]),
-            )
-        session["water_ionicstrength"] = float(request.form["ionicstrength"])
-        session["water_positive"] = request.form["positiveion"] + "+"
-        session["water_negative"] = request.form["negativeion"] + "-"
-    elif "addMembrane" in request.form:
-        session["solvent"] = True
-        session["add_membrane"] = True
-        session["lipidType"] = request.form["lipidType"]
-        session["membrane_padding"] = float(request.form["membranePadding"])
-        session["membrane_ionicstrength"] = float(request.form["ionicstrength"])
-        session["membrane_positive"] = request.form["positiveion"] + "+"
-        session["membrane_negative"] = request.form["negativeion"] + "-"
+
+    # Add session water or membrane from request
+    addhyderogen_session_manager.addhydrogens_add_water_or_membrane_session()
 
     # Save the new PDB file.
 
@@ -525,6 +479,9 @@ def addHydrogens():
 
 @app.route("/showSimulationOptions")
 def showSimulationOptions():
+    """
+    Renders the page for setting simulation options based on the file type.
+    """
     file_type = session.get("fileType", "")
 
     # render buttons based on the fileType
@@ -546,24 +503,24 @@ def showSimulationOptions():
 
 @app.route("/setSimulationOptions", methods=["POST"])
 def setSimulationOptions():
-    for key in request.form:
-        session[key] = request.form[key]
-    session["ligand"] = (
-        "ligand" in request.form
-    )  # store whether the ligand is present, so the retruned value can be 'True' or 'False'
-    session["writeDCD"] = "writeDCD" in request.form
-    session["writeData"] = "writeData" in request.form
-    session["writeCheckpoint"] = "writeCheckpoint" in request.form
-    session["dataFields"] = request.form.getlist("dataFields")
-    session["hmr"] = "hmr" in request.form
-    session["writeSimulationXml"] = "writeSimulationXml" in request.form
-    session["writeFinalState"] = "writeFinalState" in request.form
-    return createScript()
+    """
+    Handles setting simulation options and create a configuration script.
+    """
+    form = request.form
+    configwriter = ConfigWriter(session, uploadedFiles)
+    simulationoptions_session_manager = RequestSessionManager(form)
+    simulationoptions_session_manager.simulationoptions_add_general_settings()
+    return configwriter.create_config_script()
 
 
 @app.route("/downloadScript")
 def downloadScript():
-    response = make_response(createScript())
+    """
+    Provides the simulation configuration script for download.
+    """
+    configwriter = ConfigWriter(session, uploadedFiles)
+    configwriter.create_config_script()
+    response = make_response(configwriter.create_config_script())
     response.headers["Content-Disposition"] = (
         'attachment; filename="OpenMMDL_Simulation.conf"'
     )
@@ -572,6 +529,9 @@ def downloadScript():
 
 @app.route("/downloadStructuralfiles")
 def downloadStructuralfiles():
+    """
+    Provides the processed structural file for download.
+    """
     file, name = uploadedFiles["file"][0]
     file.seek(0, 0)
     response = make_response(file.read())
@@ -581,9 +541,16 @@ def downloadStructuralfiles():
 
 @app.route("/downloadPackage")
 def downloadPackage():
+    """
+    Provides a zip package containing the configuration script and all uploaded files.
+    """
     temp = tempfile.NamedTemporaryFile()
+    configwriter = ConfigWriter(session, uploadedFiles)
     with zipfile.ZipFile(temp, "w", zipfile.ZIP_DEFLATED) as zip:
-        zip.writestr("openmmdl_simulation/OpenMMDL_Simulation.py", createScript())
+        zip.writestr(
+            "openmmdl_simulation/OpenMMDL_Simulation.conf",
+            configwriter.create_config_script(),
+        )
         for key in uploadedFiles:
             for file, name in uploadedFiles[key]:
                 file.seek(0, 0)
@@ -594,56 +561,6 @@ def downloadPackage():
     )
 
 
-def configureDefaultOptions():
-    """Select default options based on the file format and force field."""
-    
-    # Initialize the configurator with the session
-    simulation_configurator = SetupOptionsConfigurator(session)
-
-    simulation_configurator.configure_default_options()
-
-def createScript():
-    script = []
-    config_creator = ConfigCreator(session, uploadedFiles)
-
-    # Input files
-    
-    config_creator.add_openmmdl_ascii_art_logo(script)
-    
-    config_creator.add_ascii_config_art(script)
-
-    config_creator.add_pdb_input_files_configuration(script)
-    
-    config_creator.add_amber_file_configuration(script)
-    
-    config_creator.add_forcefield_and_water_model_configuration(script)
-
-    config_creator.add_solvent_configuration(script)    
-
-    # System configuration
-    config_creator.add_system_configuration(script)
-
-    # Integration options
-    config_creator.add_integration_configuration(script)
-
-    # Simulation options
-    config_creator.add_simulation_time_and_steps_configuration(script)
-
-    config_creator.add_equilibration_configuration(script)
-
-    config_creator.add_simulation_configuration(script)
-    
-    config_creator.add_checkpoint_configuration(script)
-
-    config_creator.add_xml_serialization_configuration(script)
-
-    config_creator.add_postprocessing_configuration(script)
-
-    config_creator.add_openmmdl_analysis_configuration(script)
-
-    return "\n".join(script)
-
-    
 def main():
 
     def open_browser():
