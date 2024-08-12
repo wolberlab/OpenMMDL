@@ -1,7 +1,26 @@
 from flask import session, request
 
 class SetupOptionsConfigurator:
+    """
+    Configures and initializes default simulation options based on flask session data.
+
+    This class is responsible for setting up various simulation parameters such as 
+    ensemble types, platform, precision, cutoffs, force fields and other essential 
+    options. It primarily deals with setting default values for these parameters, 
+    which can then be used throughout the simulation process.
+    
+    Attributes:
+        session (flask.session): The session object used to store configuration data 
+                                 for the simulation setup.
+    """
     def __init__(self, session):
+        """
+        Initializes the SetupOptionsConfigurator with the provided session object.
+
+        Args:
+            session (flask.session): The session object to store simulation configuration data.
+        """
+
         self.session = session
 
     def configure_default_options(self):
@@ -110,7 +129,23 @@ class SetupOptionsConfigurator:
         
         
 class RequestSessionManager:
+    """
+    Manages the configuration of session variables based on form data received in HTTP requests.
+
+    This class is responsible for setting up diverse options related to receptors, water, membranes, 
+    and other general simulation settings. The configurations are stored in the session object, 
+    which tracks the state of the simulation setup across different user interactions.
+    
+    Attributes:
+        form (werkzeug.datastructures.ImmutableMultiDict): The form data from an HTTP request.
+    """
     def __init__(self, form):
+        """
+        Initializes the RequestSessionManager with form data.
+
+        Args:
+            form (werkzeug.datastructures.ImmutableMultiDict): The form data from an HTTP request.
+        """
         self.form = form
 
     def setAmberOptions_rcp_session(self):
@@ -195,3 +230,13 @@ class RequestSessionManager:
         session["hmr"] = "hmr" in self.form
         session["writeSimulationXml"] = "writeSimulationXml" in self.form
         session["writeFinalState"] = "writeFinalState" in self.form
+        
+    def configureFiles_add_forcefield_ligand_settings(self):
+    """
+    Adds forcefield and ligand-related settings from form data to the session.
+    """
+        session["forcefield"] = self.form.get("forcefield", "")
+        session["ml_forcefield"] = self.form.get("ml_forcefield", "")
+        session["waterModel"] = self.form.get("waterModel", "")
+        session["smallMoleculeForceField"] = self.form.get("smallMoleculeForceField", "")
+        session["ligandMinimization"] = self.form.get("ligandMinimization", "")
