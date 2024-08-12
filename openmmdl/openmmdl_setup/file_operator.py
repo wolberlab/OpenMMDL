@@ -1,5 +1,3 @@
-
-
 class LigandExtractor:
     @staticmethod
     def extract_ligand_name(lig_file_name):
