@@ -483,7 +483,9 @@ def showSimulationOptions():
     Renders the page for setting simulation options based on the file type.
     """
     file_type = session.get("fileType", "")
-
+    simulation_configurator = SetupOptionsConfigurator(session)
+    simulation_configurator.configure_default_options()
+    
     # render buttons based on the fileType
     if file_type == "pdb":
         return render_template(
