@@ -160,7 +160,7 @@ def configureFiles():
                     return showConfigureFiles()
                 else:
                     session["spLigName"] = request.form.get("spLigName", "")
-            FileUploader.save_uploaded_files(request)
+            FileUploader.save_uploaded_files(uploadedFiles, request)
         elif has_files == "no":
             simulation_configurator = SetupOptionsConfigurator(session)
             simulation_configurator.configureDefaultAmberOptions()
@@ -196,22 +196,22 @@ def setAmberOptions():
     if rcpType == "protRcp":
         if "protFile" not in request.files or request.files["protFile"].filename == "":
             showAmberOptions()
-        FileUploader.save_uploaded_files(request)
+        FileUploader.save_uploaded_files(uploadedFiles, request)
     elif rcpType == "dnaRcp":
         if "dnaFile" not in request.files or request.files["dnaFile"].filename == "":
             showAmberOptions()
-        FileUploader.save_uploaded_files(request)
+        FileUploader.save_uploaded_files(uploadedFiles, request)
     elif rcpType == "rnaRcp":
         if "rnaFile" not in request.files or request.files["rnaFile"].filename == "":
             showAmberOptions()
-        FileUploader.save_uploaded_files(request)
+        FileUploader.save_uploaded_files(uploadedFiles, request)
     elif rcpType == "carboRcp":
         if (
             "carboFile" not in request.files
             or request.files["carboFile"].filename == ""
         ):
             showAmberOptions()
-        FileUploader.save_uploaded_files(request)
+        FileUploader.save_uploaded_files(uploadedFiles, request)
 
     ######## Ligand ########
     session["nmLig"] = (
@@ -226,7 +226,7 @@ def setAmberOptions():
             or request.files["nmLigFile"].filename == ""
         ):
             showAmberOptions()
-        FileUploader.save_uploaded_files(request)
+        FileUploader.save_uploaded_files(uploadedFiles, request)
 
     ## for special ligand
     if session["spLig"]:
@@ -239,7 +239,7 @@ def setAmberOptions():
             or request.files["frcmodFile"].filename == ""
         ):
             showAmberOptions()
-        FileUploader.save_uploaded_files(request)
+        FileUploader.save_uploaded_files(uploadedFiles, request)
 
     ######## Add Water/Membrane ########
 
@@ -483,7 +483,9 @@ def showSimulationOptions():
     Renders the page for setting simulation options based on the file type.
     """
     file_type = session.get("fileType", "")
-
+    simulation_configurator = SetupOptionsConfigurator(session)
+    simulation_configurator.configure_default_options()
+    
     # render buttons based on the fileType
     if file_type == "pdb":
         return render_template(
