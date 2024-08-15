@@ -55,6 +55,7 @@ The second step involves choosing input files. Two options are available:
    :figwidth: 700px
    :align: center
 
+
 1. **Yes**, my files are already to simulate.
 When selected, users can choose the Prmtop and Inpcrd files via the file browser. Clicking "Continue" transitions to the 'Simulation Setup' page.
 
@@ -80,6 +81,7 @@ This page allows users to configure Amber settings and generate the Bash script 
    :figwidth: 700px
    :align: center
 
+
 The page consists of three tabs: Receptor, Ligand, and Add Water/Membrane.
 
 1. **Receptor**
@@ -87,7 +89,7 @@ The page consists of three tabs: Receptor, Ligand, and Add Water/Membrane.
 Depending on the macromolecule type (Protein, DNA, RNA, or Carbohydrate), users can select the receptor PDB file using the file browser and choose the appropriate force fields.
 
 .. figure:: /_static/images/tutorials/Amber_Path/receptor.png
-   :figwidth: 700px
+   :figwidth: 400px
    :align: center
 
 If needed, users can specify an 'Other Force Field' in the provided textbox. To do this, select 'other' from the drop-down menu of "Force Field," and the 'Other Force Field' textbox will appear. Users can input the force field name in the textbox.
@@ -96,6 +98,7 @@ If needed, users can specify an 'Other Force Field' in the provided textbox. To 
 .. figure:: /_static/images/tutorials/Amber_Path/receptor_otherFF.png
    :figwidth: 700px
    :align: center
+
 
 Note: Only force fields provided by AmberTools are supported. To check available force fields, navigate to `/home/user/miniconda3/envs/openmmdl/dat/leap/cmd`. Replace the path with the location of your OpenMMDL installation. 
 
@@ -114,6 +117,7 @@ It refers to the small molecule that is made up of C, N, O, S, P, H, F, Cl, Br a
 .. figure:: /_static/images/tutorials/Amber_Path/normalLigand.png
    :figwidth: 700px
    :align: center
+
 
 Upon selecting the 'Normal Ligand' option, the parameter settings for the ligand will be revealed. 
 
