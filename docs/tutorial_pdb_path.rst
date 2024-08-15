@@ -135,6 +135,7 @@ In the Water Box we also change the Ionic strenght to 0.15.
    :figwidth: 725px
    :align: center
 
+
 Now that we selected the following options we continue to the next page.
 
 Adjusting MD Simulation Options
@@ -146,6 +147,7 @@ The final page displays the MD simulation options.
    :figwidth: 725px
    :align: center
 
+
 We will simulate the protein for 10 ns.
 
 For this we go to the Simulation Tab and Change Simulation lenght (steps) to 250000.
@@ -155,6 +157,7 @@ If you want to have a longer or shorter simulation you can increase or reduce th
 .. figure:: /_static/images/tutorials/PDB_Path/Simulationoptions2.png
    :figwidth: 725px
    :align: center
+
 
 Now that we changed the amount of steps we select the Save Script button to save the script for the simulation.
 
