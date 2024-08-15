@@ -89,7 +89,7 @@ The page consists of three tabs: Receptor, Ligand, and Add Water/Membrane.
 Depending on the macromolecule type (Protein, DNA, RNA, or Carbohydrate), users can select the receptor PDB file using the file browser and choose the appropriate force fields.
 
 .. figure:: /_static/images/tutorials/Amber_Path/receptor.png
-   :figwidth: 400px
+   :figwidth: 350px
    :align: center
 
 If needed, users can specify an 'Other Force Field' in the provided textbox. To do this, select 'other' from the drop-down menu of "Force Field," and the 'Other Force Field' textbox will appear. Users can input the force field name in the textbox.
