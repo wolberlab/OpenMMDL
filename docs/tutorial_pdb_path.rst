@@ -18,7 +18,7 @@ To create a new folder we enter the following command lines:
 
 
 activating our openmmdl environment to start the OpenMMDL-Setup.
-To start the OpenMMDL-Setup we need to activate the openmmdl environment. to do this we have to enter the following command lines:
+To start the OpenMMDL-Setup we need to activate the openmmdl environment. To do this we have to enter the following command lines:
 
 .. code-block:: text
 
@@ -65,6 +65,7 @@ The page should look like the page below.
    :figwidth: 725px
    :align: center
 
+
 Now that we selected the PDB and SDF File we select continue and go to the next page.
 
 Selecting Chains
@@ -73,7 +74,7 @@ Selecting Chains
 The next page shows us the protein with all of the chains that are in the pdb file.
 
 
-.. figure:: /_static/images/tutorials/PDB_Path/Modifychains1.png
+.. figure:: /_static/images/tutorials/PDB_Path/Modifychains.png
    :figwidth: 725px
    :align: center
 
