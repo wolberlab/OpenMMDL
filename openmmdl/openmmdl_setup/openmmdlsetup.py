@@ -265,7 +265,9 @@ def downloadZipFile() -> Any:
     """
     if not os.path.exists("output_files.zip"):
         return "The zip file does not exist."
-    return send_file("output_files.zip", as_attachment=True, download_name="output_files.zip")
+    return send_file(
+        "output_files.zip", as_attachment=True, download_name="output_files.zip"
+    )
 
 
 @app.route("/submitSimulation")
