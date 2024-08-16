@@ -150,7 +150,7 @@ The final page displays the MD simulation options.
 
 We will simulate the protein for 10 ns.
 
-For this we go to the Simulation Tab and Change Simulation lenght to 10 ns.
+For this we change Simulation lenght to 10 ns.
 
 If you want to have a longer or shorter simulation you can increase or reduce the amount of steps.
 
