@@ -171,14 +171,14 @@ When this option is selected, users can further select the 'Box Type' from the d
 When this option is selected, users can further select the 'Lipid Type' and 'Lipid Force Field' from the drop-down list. 
 
 .. figure:: /_static/images/tutorials/Amber_Path/addMembrane.png
-   :figwidth: 700px
+   :figwidth: 350px
    :align: center
 
 
 If the listed lipid type does not match the desired one, click on the 'Other Type or Mixture' option. Then, input the lipid type in the pop-up textbox of 'Other Types or Mixture' and set the 'Lipid Ratio'. For instance, 'POPC:TOPC' in 'Other Types or Mixture' and '1:1' in the 'Lipid Ratio' means the membrane consists of 1 POPC and 1 TOPC. 
 
 .. figure:: /_static/images/tutorials/Amber_Path/addMembrane_other.png
-   :figwidth: 700px
+   :figwidth: 350px
    :align: center
 
 When selecting only one type of lipid, set the 'Lipid Ratio' to 1. 
@@ -192,7 +192,7 @@ In this tutorial, we will select the 'add Membrane and Water' option, and keep t
 It is a must for both 'Add water Box' and 'Add Membrane and Water' options. The Ions will be added to neutralize the model. The user can select the 'Water Force Field', 'Positive Ion' and 'Negative Ion' in the drop-down list, and then type the 'Ion Concentration (molar)' value in the textbox.
 
 .. figure:: /_static/images/tutorials/Amber_Path/water_ion_setting.png
-   :figwidth: 700px
+   :figwidth: 500px
    :align: center
 
 
