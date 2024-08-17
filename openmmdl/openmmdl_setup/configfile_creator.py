@@ -556,4 +556,3 @@ class ConfigWriter:
         self.config_creator.add_openmmdl_analysis_configuration(self.script)
 
         return "\n".join(self.script)
-
