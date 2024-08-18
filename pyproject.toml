@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "versioningit~=2.0"]
+requires = ["setuptools>=61.0", "versioningit"]
 build-backend = "setuptools.build_meta"
 
 # Self-descriptive entries which should always be present
