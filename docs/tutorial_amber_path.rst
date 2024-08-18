@@ -8,7 +8,7 @@ OpenMM enables users to perform molecular dynamics (MD) simulations using AMBER 
 
 In this tutorial, we will use the mu opioid receptor (PDB ID: 8EFO) as an illustrative example to provide a comprehensive, step-by-step guide on configuring and initiating an MD simulation using Amber files prepared by OpenMMDL-Setup.
 
-Starting OpenMMDL-Setup
+Starting OpenMMDL Setup
 ------------------------------
 We start the tutorial by creating an folder to store input files and facilitate the MD simulation.
 
@@ -202,7 +202,7 @@ Click 'Save Script' on the top of the right code block to download the generated
 
 Simulation Setup
 ------------------------------
-Configure simulation options across five tabs: System, Integrator, Simulation, Output, and MDAnalysis. Click 'Save Script' to download the generated Python script based on the configuration, saving it in the tutorial folder.
+Configure simulation options across six tabs: System, Output, Postprocessing, Analysis, Simulation and Integrator. Click 'Save Conf File' to download the generated configuration file script based on the selected settings, saving it in the tutorial folder.
 
 Run Bash Script
 ------------------------------
@@ -220,7 +220,7 @@ Once the `Prmtop` and `Inpcrd` files are generated, the user can run the MD simu
 
 .. code-block:: text
 
-    python3 OpenMMDL_Simulation.py
+    openmmdl_simulation -f amber_tutorial_simulation -t system.opc.prmtop -c system.opc.inpcrd -s OpenMMDL_Simulation.conf
 
 Or run the several MD recplicas via slurm.The `run_slurm.sh` is in tutorial folder `/openmmdl/openmmdl-simulation/tuturial_systems/amber_path/8efo_membrane`. Firstly copy it to the tutorial folder
 
