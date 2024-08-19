@@ -1,20 +1,28 @@
 import os
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+from typing import List, Dict, Union
 
 
 class BarcodeGenerator:
-    def __init__(self, df):
+    def __init__(self, df: pd.DataFrame):
         """
         Initializes the BarcodeGenerator with a dataframe.
 
         Args:
-            df (pandas dataframe): Dataframe containing all interactions from plip analysis (typically df_all)
+            df (pd.DataFrame): Dataframe containing all interactions from plip analysis (typically df_all).
         """
         self.df = df
         self.interactions = self.gather_interactions()
 
-    def gather_interactions(self):
+    def gather_interactions(self) -> Dict[str, pd.Index]:
+        """
+        Gathers columns related to different types of interactions.
+
+        Returns:
+            Dict[str, pd.Index]: Dictionary where keys are interaction types and values are columns corresponding to those interactions.
+        """
         hydrophobic_interactions = self.df.filter(regex="hydrophobic").columns
         acceptor_interactions = self.df.filter(regex="Acceptor_hbond").columns
         donor_interactions = self.df.filter(regex="Donor_hbond").columns
@@ -39,15 +47,15 @@ class BarcodeGenerator:
             "metal": metal_interactions,
         }
 
-    def generate_barcode(self, interaction):
+    def generate_barcode(self, interaction: str) -> np.ndarray:
         """
         Generates barcodes for a given interaction.
 
         Args:
-            interaction (str): Name of the interaction to generate a barcode for
+            interaction (str): Name of the interaction to generate a barcode for.
 
         Returns:
-            np.array: Binary array with 1 representing the interaction is present in the corresponding frame
+            np.ndarray: Binary array with 1 representing the interaction is present in the corresponding frame.
         """
         barcode = []
         unique_frames = self.df["FRAME"].unique()
@@ -61,20 +69,20 @@ class BarcodeGenerator:
 
         return np.array(barcode)
 
-    def generate_waterids_barcode(self, interaction):
+    def generate_waterids_barcode(self, interaction: str) -> List[Union[int, int]]:
         """
         Generates a barcode containing corresponding water ids for a given interaction.
 
         Args:
-            interaction (str): Name of the interaction to generate a barcode for
+            interaction (str): Name of the interaction to generate a barcode for.
 
         Returns:
-            list: List of water ids for the frames where the interaction is present, 0 if no interaction present
+            List[Union[int, int]]: List of water ids for the frames where the interaction is present, 0 if no interaction present.
         """
         water_id_list = []
         waterid_barcode = []
 
-        for index, row in self.df.iterrows():
+        for _, row in self.df.iterrows():
             if row[interaction] == 1:
                 water_id_list.append(int(float(row["WATER_IDX"])))
 
@@ -88,15 +96,15 @@ class BarcodeGenerator:
 
         return waterid_barcode
 
-    def interacting_water_ids(self, waterbridge_interactions):
-        """Generates a list of all water ids that form water bridge interactions.
+    def interacting_water_ids(self, waterbridge_interactions: List[str]) -> List[int]:
+        """
+        Generates a list of all water ids that form water bridge interactions.
 
         Args:
-            df_all (pandas dataframe): dataframe containing all interactions from plip analysis (typicaly df_all)
-            waterbridge_interactions (list): list of strings containing the names of all water bridge interactions
+            waterbridge_interactions (List[str]): List of strings containing the names of all water bridge interactions.
 
         Returns:
-            list: list of all unique water ids that form water bridge interactions
+            List[int]: List of all unique water ids that form water bridge interactions.
         """
         interacting_waters = []
         for waterbridge_interaction in waterbridge_interactions:
@@ -107,12 +115,34 @@ class BarcodeGenerator:
         return list(set(interacting_waters))
 
 
+class BarcodeGenerator:
+    def __init__(self, df: pd.DataFrame):
+        self.df = df
+
+    def generate_waterids_barcode(self, interaction: str) -> List[Union[int, int]]:
+        # Placeholder implementation
+        return []
+
+
 class BarcodePlotter:
-    def __init__(self, df_all):
+    def __init__(self, df_all: pd.DataFrame):
+        """
+        Initializes the BarcodePlotter with a dataframe and BarcodeGenerator instance.
+
+        Args:
+            df_all (pd.DataFrame): Dataframe containing all interactions from plip analysis.
+        """
         self.df_all = df_all
         self.barcode_gen = BarcodeGenerator(df_all)
 
-    def plot_barcodes(self, barcodes, save_path):
+    def plot_barcodes(self, barcodes: Dict[str, np.ndarray], save_path: str) -> None:
+        """
+        Plots barcodes and saves the figure to the specified path.
+
+        Args:
+            barcodes (Dict[str, np.ndarray]): Dictionary where keys are interaction names and values are binary barcode arrays.
+            save_path (str): Path to save the plotted figure.
+        """
         if not barcodes:
             print("No barcodes to plot.")
             return
@@ -154,8 +184,19 @@ class BarcodePlotter:
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
     def plot_waterbridge_piechart(
-        self, waterbridge_barcodes, waterbridge_interactions, fig_type
-    ):
+        self,
+        waterbridge_barcodes: Dict[str, np.ndarray],
+        waterbridge_interactions: List[str],
+        fig_type: str
+    ) -> None:
+        """
+        Plots pie charts for waterbridge interactions and saves them to files.
+
+        Args:
+            waterbridge_barcodes (Dict[str, np.ndarray]): Dictionary where keys are interaction names and values are binary barcode arrays.
+            waterbridge_interactions (List[str]): List of water bridge interaction names.
+            fig_type (str): File extension for the saved figures (e.g., 'png', 'pdf').
+        """
         if not waterbridge_barcodes:
             print("No Piecharts to plot.")
             return
@@ -201,7 +242,7 @@ class BarcodePlotter:
             plt.pie(
                 values,
                 labels=labels,
-                autopct=lambda pct: f"{pct:.1f}%\n({int(round(pct/100.0 * sum(values)))})",
+                autopct=lambda pct: f"{pct:.1f}%\n({int(round(pct / 100.0 * sum(values)))})",
                 shadow=False,
                 startangle=140,
             )
@@ -227,8 +268,18 @@ class BarcodePlotter:
                 dpi=300,
             )
 
-    def plot_barcodes_grouped(self, interactions, interaction_type, fig_type):
-        ligatoms_dict = {}
+    def plot_barcodes_grouped(
+        self, interactions: List[str], interaction_type: str, fig_type: str
+    ) -> None:
+        """
+        Plots grouped barcodes for interactions and saves the figure to a file.
+
+        Args:
+            interactions (List[str]): List of interaction names.
+            interaction_type (str): Type of interaction for grouping.
+            fig_type (str): File extension for the saved figure (e.g., 'png', 'pdf').
+        """
+        ligatoms_dict: Dict[str, List[str]] = {}
         for interaction in interactions:
             ligatom = interaction.split("_")
             ligatom.pop(0)
@@ -246,10 +297,10 @@ class BarcodePlotter:
             ligatom = "_".join(ligatom)
             ligatoms_dict.setdefault(ligatom, []).append(interaction)
 
-        total_interactions = {}
-        for ligatom in ligatoms_dict:
-            ligatom_interaction_barcodes = {}
-            for interaction in ligatoms_dict[ligatom]:
+        total_interactions: Dict[str, np.ndarray] = {}
+        for ligatom, interactions_list in ligatoms_dict.items():
+            ligatom_interaction_barcodes: Dict[str, np.ndarray] = {}
+            for interaction in interactions_list:
                 barcode = self.barcode_gen.generate_barcode(interaction)
                 ligatom_interaction_barcodes[interaction] = barcode
             os.makedirs(f"./Barcodes/{ligatom}", exist_ok=True)
