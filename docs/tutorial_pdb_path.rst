@@ -161,7 +161,13 @@ If you want to have a longer or shorter simulation you can increase or reduce th
 
 Now that we changed the amount of steps we select the Save All Files button to save the zip. file with all of the necessery files for the simulation.
 
-After you download the zip. file, you can unpack the zip. file.
+After you download the zip. file, you can unpack the zip. file. Your downloaded folder should contain the following files:
+
+
+.. figure:: /_static/images/tutorials/PDB_Path/PDBFixerPathFolder.png
+   :figwidth: 725px
+   :align: center
+
 
 Running Tutorial OpenMMDL-Simulation
 ------------------------------
