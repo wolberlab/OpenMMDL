@@ -6,27 +6,29 @@ from plip.basic import config
 from plip.structure.preparation import PDBComplex, PLInteraction
 from plip.exchange.report import BindingSiteReport
 from multiprocessing import Pool
-from typing import Optional, List, Dict, Tuple
+from functools import partial
+from typing import List, Dict, Tuple, Optional, Union
 
 config.KEEPMOD = True
 
+
 class InteractionAnalyzer:
     def __init__(
-        self,
-        pdb_md: mda.Universe,
-        dataframe: Optional[str],
-        num_processes: int,
-        lig_name: str,
-        special_ligand: Optional[str],
+        self, 
+        pdb_md: mda.Universe, 
+        dataframe: Optional[str], 
+        num_processes: int, 
+        lig_name: str, 
+        special_ligand: Optional[str], 
         peptide: Optional[str]
-    ):
+    ) -> None:
         self.pdb_md = pdb_md
         self.dataframe = dataframe
         self.num_processes = num_processes
         self.lig_name = lig_name
         self.special = special_ligand
         self.peptide = peptide
-        self.ineraction_list = self.process_trajectory()
+        self.interaction_list = self.process_trajectory()
 
     def characterize_complex(
         self, pdb_file: str, binding_site_id: str
@@ -38,7 +40,7 @@ class InteractionAnalyzer:
             binding_site_id (str): Identifier of the binding site.
 
         Returns:
-            Optional[PLInteraction]: Interaction object or None if the binding site is not found.
+            Optional[PLInteraction]: Interactions if found; otherwise, None.
         """
         pdb_complex = PDBComplex()
         pdb_complex.load_pdb(pdb_file)
@@ -48,28 +50,28 @@ class InteractionAnalyzer:
                 == binding_site_id
             ):
                 pdb_complex.characterize_complex(ligand)
-                return pdb_complex.interaction_sets.get(binding_site_id)
+                return pdb_complex.interaction_sets[binding_site_id]
+
         return None
 
     def retrieve_plip_interactions(
         self, pdb_file: str, lig_name: str
     ) -> Dict[str, Dict[str, List]]:
-        """Retrieves the interactions from PLIP.
+        """Retrieve interactions from PLIP.
 
         Args:
-            pdb_file (str): Path of the PDB file of the complex.
-            lig_name (str): Name of the ligand in the complex.
+            pdb_file (str): Path to the PDB file of the complex.
+            lig_name (str): Name of the ligand in the complex topology.
 
         Returns:
-            Dict[str, Dict[str, List]]: Dictionary of binding sites and their interactions.
+            Dict[str, Dict[str, List]]: Dictionary of binding sites and interactions.
         """
         protlig = PDBComplex()
         protlig.load_pdb(pdb_file)
         for ligand in protlig.ligands:
             if str(ligand.longname) == lig_name:
                 protlig.characterize_complex(ligand)
-        
-        sites = {}
+        sites: Dict[str, Dict[str, List]] = {}
         for key, site in sorted(protlig.interaction_sets.items()):
             binding_site = BindingSiteReport(site)
             keys = (
@@ -94,19 +96,18 @@ class InteractionAnalyzer:
     def retrieve_plip_interactions_peptide(
         self, pdb_file: str
     ) -> Dict[str, Dict[str, List]]:
-        """Retrieves the interactions from PLIP for a peptide.
+        """Retrieve interactions from PLIP for a peptide.
 
         Args:
-            pdb_file (str): Path of the PDB file of the complex.
+            pdb_file (str): Path to the PDB file of the complex.
 
         Returns:
-            Dict[str, Dict[str, List]]: Dictionary of binding sites and their interactions.
+            Dict[str, Dict[str, List]]: Dictionary of binding sites and interactions.
         """
         protlig = PDBComplex()
         protlig.load_pdb(pdb_file)
         protlig.characterize_complex(protlig.ligands[-1])
-        
-        sites = {}
+        sites: Dict[str, Dict[str, List]] = {}
         for key, site in sorted(protlig.interaction_sets.items()):
             binding_site = BindingSiteReport(site)
             keys = (
@@ -131,16 +132,16 @@ class InteractionAnalyzer:
     def create_df_from_binding_site(
         self, selected_site_interactions: Dict[str, List], interaction_type: str = "hbond"
     ) -> pd.DataFrame:
-        """Creates a DataFrame from a binding site and interaction type.
+        """Create a DataFrame from a binding site and interaction type.
 
         Args:
-            selected_site_interactions (Dict[str, List]): Pre-calculated interactions from PLIP.
-            interaction_type (str, optional): The interaction type of interest. Defaults to "hbond".
+            selected_site_interactions (Dict[str, List]): Precalculated interactions from PLIP for the selected site.
+            interaction_type (str, optional): Interaction type of interest (default is "hbond").
 
         Returns:
-            pd.DataFrame: DataFrame with information retrieved from PLIP.
+            pd.DataFrame: DataFrame with information from PLIP.
         """
-        valid_types = (
+        valid_types = [
             "hydrophobic",
             "hbond",
             "waterbridge",
@@ -149,7 +150,7 @@ class InteractionAnalyzer:
             "pication",
             "halogen",
             "metal",
-        )
+        ]
 
         if interaction_type not in valid_types:
             print(
@@ -166,11 +167,11 @@ class InteractionAnalyzer:
     def change_lig_to_residue(
         self, file_path: str, new_residue_name: str
     ) -> None:
-        """Reformats the topology file to change the ligand to a residue.
+        """Reformat the topology file to change the ligand to a residue.
 
         Args:
-            file_path (str): Filepath of the topology file.
-            new_residue_name (str): New residue name of the ligand.
+            file_path (str): Path to the topology file.
+            new_residue_name (str): New residue name.
         """
         with open(file_path, "r") as file:
             lines = file.readlines()
@@ -189,21 +190,64 @@ class InteractionAnalyzer:
                 else:
                     file.write(line)
 
-    def process_frame(self, frame: int) -> pd.DataFrame:
-        """Process a single frame of MD simulation.
+    def process_frame_special(self, frame: int) -> pd.DataFrame:
+        """Process a single frame of MD simulation for special ligands.
 
         Args:
-            frame (int): The number of the frame that will be processed.
+            frame (int): Frame number to be processed.
 
         Returns:
-            pd.DataFrame: DataFrame containing the interaction data for the processed frame.
+            pd.DataFrame: DataFrame containing interaction data for the processed frame.
         """
         atoms_selected = self.pdb_md.select_atoms(
             f"protein or nucleic or resname {self.lig_name} or (resname HOH and around 10 resname {self.lig_name}) or resname {self.special}"
         )
         for num in self.pdb_md.trajectory[(frame):(frame + 1)]:
             atoms_selected.write(f"processing_frame_{frame}.pdb")
+        interaction_list = pd.DataFrame()
+        interactions_by_site = self.retrieve_plip_interactions(
+            f"processing_frame_{frame}.pdb", self.lig_name
+        )
+        index_of_selected_site = -1
+        selected_site = list(interactions_by_site.keys())[index_of_selected_site]
 
+        interaction_types = [
+            "hydrophobic",
+            "hbond",
+            "waterbridge",
+            "saltbridge",
+            "pistacking",
+            "pication",
+            "halogen",
+            "metal",
+        ]
+
+        for interaction_type in interaction_types:
+            tmp_interaction = self.create_df_from_binding_site(
+                interactions_by_site[selected_site],
+                interaction_type=interaction_type,
+            )
+            tmp_interaction["frame"] = frame
+            tmp_interaction["interaction_type"] = interaction_type
+            interaction_list = pd.concat([interaction_list, tmp_interaction])
+        
+        os.remove(f"processing_frame_{frame}.pdb")
+        return interaction_list
+
+    def process_frame(self, frame: int) -> pd.DataFrame:
+        """Process a single frame of MD simulation.
+
+        Args:
+            frame (int): Frame number to be processed.
+
+        Returns:
+            pd.DataFrame: DataFrame containing interaction data for the processed frame.
+        """
+        atoms_selected = self.pdb_md.select_atoms(
+            f"protein or nucleic or resname {self.lig_name} or (resname HOH and around 10 resname {self.lig_name}) or resname {self.special}"
+        )
+        for num in self.pdb_md.trajectory[(frame):(frame + 1)]:
+            atoms_selected.write(f"processing_frame_{frame}.pdb")
         interaction_list = pd.DataFrame()
         if self.peptide is None:
             interactions_by_site = self.retrieve_plip_interactions(
@@ -228,90 +272,98 @@ class InteractionAnalyzer:
                     interactions_by_site[selected_site],
                     interaction_type=interaction_type,
                 )
-                tmp_interaction["FRAME"] = int(frame)
-                tmp_interaction["INTERACTION"] = interaction_type
+                tmp_interaction["frame"] = frame
+                tmp_interaction["interaction_type"] = interaction_type
                 interaction_list = pd.concat([interaction_list, tmp_interaction])
-
-            if os.path.exists(f"processing_frame_{frame}.pdb"):
-                os.remove(f"processing_frame_{frame}.pdb")
-
-            if self.special is not None:
-                combi_lig_special = mda.Universe("ligand_special.pdb")
-                complex = mda.Universe("complex.pdb")
-                complex_all = complex.select_atoms("all")
-                result = self.process_frame_special(frame)
-                results_df = pd.concat(result, ignore_index=True)
-                results_df = results_df[results_df["LOCATION"] == "protein.sidechain"]
-                results_df["RESTYPE"] = results_df["RESTYPE"].replace(
-                    ["HIS", "SER", "CYS"], self.lig_name
+        else:
+            interactions_by_site = self.retrieve_plip_interactions_peptide(
+                f"processing_frame_{frame}.pdb"
+            )
+            selected_site = list(interactions_by_site.keys())[0]
+            interaction_types = [
+                "hydrophobic",
+                "hbond",
+                "waterbridge",
+                "saltbridge",
+                "pistacking",
+                "pication",
+                "halogen",
+                "metal",
+            ]
+            for interaction_type in interaction_types:
+                tmp_interaction = self.create_df_from_binding_site(
+                    interactions_by_site[selected_site],
+                    interaction_type=interaction_type,
                 )
-                results_df["LOCATION"] = results_df["LOCATION"].replace(
-                    "protein.sidechain", "ligand"
-                )
-                updated_target_idx = []
-
-                for index, row in results_df.iterrows():
-                    ligand_special_int_nr = int(row["TARGET_IDX"])
-                    ligand_special_int_nr_atom = combi_lig_special.select_atoms(
-                        f"id {ligand_special_int_nr}"
-                    )
-                    for atom in ligand_special_int_nr_atom:
-                        atom_name = atom.name
-                        if atom_name in ["N", "C", "O", "S"]:
-                            atom_name = f"{atom_name}1"
-                        else:
-                            base_name, atom_number = atom_name[:-1], int(atom_name[-1])
-                            new_atom_number = atom_number + 1
-                            atom_name = f"{base_name}{new_atom_number}"
-                        for complex_atom in complex_all:
-                            complex_atom_name = complex_atom.name
-                            if complex_atom_name == atom_name:
-                                updated_target_idx.append(row["TARGET_IDX"])
-                                break
-
-                results_df["TARGET_IDX"] = updated_target_idx
-                results_df = results_df[
-                    (results_df["INTERACTION"] == "hbond") & (results_df["TARGET_IDX"].notna())
-                ]
-                interaction_list = pd.concat([interaction_list, results_df])
-
+                tmp_interaction["frame"] = frame
+                tmp_interaction["interaction_type"] = interaction_type
+                interaction_list = pd.concat([interaction_list, tmp_interaction])
+        
+        os.remove(f"processing_frame_{frame}.pdb")
         return interaction_list
 
-    def process_trajectory(self) -> pd.DataFrame:
-        """Process the entire trajectory of the MD simulation.
-
-        Returns:
-            pd.DataFrame: DataFrame containing interaction data across all frames.
-        """
-        total_frames = len(self.pdb_md.trajectory)
-        frame_range = range(total_frames)
-        with Pool(processes=self.num_processes) as pool:
-            results = list(tqdm(pool.imap(self.process_frame, frame_range), total_frames))
-        
-        all_interactions = pd.concat(results, ignore_index=True)
-        return all_interactions
-
-    def process_frame_special(self, frame: int) -> List[pd.DataFrame]:
-        """Placeholder method for processing special frame interactions.
+    def process_frame_wrapper(self, frame: int) -> pd.DataFrame:
+        """Wrapper function to handle processing of a frame, including special cases.
 
         Args:
-            frame (int): The number of the frame to process.
+            frame (int): Frame number to be processed.
 
         Returns:
-            List[pd.DataFrame]: List of DataFrames with interaction data.
+            pd.DataFrame: DataFrame containing interaction data for the processed frame.
         """
-        # Implement specific frame processing for special cases if needed.
-        return []
+        if self.special:
+            return self.process_frame_special(frame)
+        return self.process_frame(frame)
 
-# Example of usage:
-# pdb_md = mda.Universe('your_pdb_file.pdb')
-# analyzer = InteractionAnalyzer(
-#     pdb_md=pdb_md,
-#     dataframe='your_dataframe.csv',
-#     num_processes=4,
-#     lig_name='LIG',
-#     special_ligand='SPL',
-#     peptide='PEP'
-# )
-# df = analyzer.ineraction_list
-# print(df)
+    def fill_missing_frames(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Fill in missing frames in the DataFrame with NaNs.
+
+        Args:
+            df (pd.DataFrame): Original DataFrame with potentially missing frames.
+
+        Returns:
+            pd.DataFrame: DataFrame with missing frames filled.
+        """
+        all_frames = set(range(len(self.pdb_md.trajectory)))
+        existing_frames = set(df["frame"].unique())
+        missing_frames = all_frames - existing_frames
+        missing_data = []
+
+        for frame in missing_frames:
+            for interaction_type in df["interaction_type"].unique():
+                missing_data.append({
+                    "frame": frame,
+                    "interaction_type": interaction_type,
+                    # Add other necessary columns with NaNs or empty values as appropriate
+                })
+
+        missing_df = pd.DataFrame(missing_data)
+        filled_df = pd.concat([df, missing_df], ignore_index=True)
+        return filled_df
+
+    def process_trajectory(self) -> pd.DataFrame:
+        """Main method for processing the trajectory.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing all interaction data for the trajectory.
+        """
+        pool = Pool(processes=self.num_processes)
+        with tqdm(total=len(self.pdb_md.trajectory)) as pbar:
+            interaction_list = pd.concat(
+                list(
+                    tqdm(
+                        pool.imap(self.process_frame_wrapper, range(len(self.pdb_md.trajectory))),
+                        total=len(self.pdb_md.trajectory),
+                    )
+                )
+            )
+        pool.close()
+        pool.join()
+
+        if self.dataframe:
+            interaction_list.to_csv(self.dataframe)
+        
+        # Ensure all frames are represented in the final DataFrame
+        interaction_list = self.fill_missing_frames(interaction_list)
+        
+        return interaction_list
