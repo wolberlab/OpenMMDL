@@ -12,13 +12,13 @@ import MDAnalysis as mda
 class LigandImageGenerator:
     def __init__(
         self,
-        ligand_name,
-        complex_pdb_file,
-        ligand_no_h_pdb_file,
-        smiles_file,
-        output_svg_filename,
-        fig_type="svg",
-    ):
+        ligand_name: str,
+        complex_pdb_file: str,
+        ligand_no_h_pdb_file: str,
+        smiles_file: str,
+        output_svg_filename: str,
+        fig_type: str = "svg",
+    ) -> None:
         """
         Initialize the LigandImageGenerator class.
 
@@ -30,14 +30,14 @@ class LigandImageGenerator:
             output_svg_filename (str): Name of the output SVG file.
             fig_type (str): Type of the output figure. Can be "svg" or "png".
         """
-        self.ligand_name = ligand_name
-        self.complex_pdb_file = complex_pdb_file
-        self.ligand_no_h_pdb_file = ligand_no_h_pdb_file
-        self.smiles_file = smiles_file
-        self.output_svg_filename = output_svg_filename
-        self.fig_type = fig_type
+        self.ligand_name: str = ligand_name
+        self.complex_pdb_file: str = complex_pdb_file
+        self.ligand_no_h_pdb_file: str = ligand_no_h_pdb_file
+        self.smiles_file: str = smiles_file
+        self.output_svg_filename: str = output_svg_filename
+        self.fig_type: str = fig_type
 
-    def generate_image(self):
+    def generate_image(self) -> None:
         """Generates an SVG image (or PNG) of the ligand."""
         try:
             # Load complex and ligand structures
@@ -47,31 +47,31 @@ class LigandImageGenerator:
             complex_lig = complex.select_atoms(f"resname {self.ligand_name}")
 
             # Load ligand from PDB file
-            mol = Chem.MolFromPDBFile(self.ligand_no_h_pdb_file)
-            lig_rd = mol
+            mol: Chem.Mol = Chem.MolFromPDBFile(self.ligand_no_h_pdb_file)
+            lig_rd: Chem.Mol = mol
 
             # Load reference SMILES
             with open(self.smiles_file, "r") as file:
-                reference_smiles = file.read().strip()
-            reference_mol = Chem.MolFromSmiles(reference_smiles)
+                reference_smiles: str = file.read().strip()
+            reference_mol: Chem.Mol = Chem.MolFromSmiles(reference_smiles)
 
             # Prepare ligand
-            prepared_ligand = AllChem.AssignBondOrdersFromTemplate(
+            prepared_ligand: Chem.Mol = AllChem.AssignBondOrdersFromTemplate(
                 reference_mol, lig_rd
             )
             AllChem.Compute2DCoords(prepared_ligand)
 
             # Map atom indices between ligand_no_h and complex
             for atom in prepared_ligand.GetAtoms():
-                atom_index = atom.GetIdx()
+                atom_index: int = atom.GetIdx()
                 for lig_atom in lig_noh:
-                    lig_index = lig_atom.index
+                    lig_index: int = lig_atom.index
                     if atom_index == lig_index:
-                        lig_atom_name = lig_atom.name
+                        lig_atom_name: str = lig_atom.name
                         for comp_lig in complex_lig:
-                            comp_lig_name = comp_lig.name
+                            comp_lig_name: str = comp_lig.name
                             if lig_atom_name == comp_lig_name:
-                                num = int(comp_lig.id)
+                                num: int = int(comp_lig.id)
                                 atom.SetAtomMapNum(num)
 
             # Generate an SVG image of the ligand
@@ -82,13 +82,13 @@ class LigandImageGenerator:
             drawer.DrawMolecule(prepared_ligand)
 
             # Adjust font size in the SVG output using the FontSize method
-            font_size = drawer.FontSize()
+            font_size: float = drawer.FontSize()
             drawer.SetFontSize(
                 font_size * 0.5
             )  # You can adjust the multiplier as needed
 
             drawer.FinishDrawing()
-            svg = drawer.GetDrawingText().replace("svg:", "")
+            svg: str = drawer.GetDrawingText().replace("svg:", "")
 
             # Save the SVG image to the specified output file
             with open(self.output_svg_filename, "w") as f:
@@ -96,7 +96,7 @@ class LigandImageGenerator:
 
             # Convert to PNG if requested
             if self.fig_type == "png":
-                png_filename = self.output_svg_filename.replace(".svg", ".png")
+                png_filename: str = self.output_svg_filename.replace(".svg", ".png")
                 cairosvg.svg2png(url=self.output_svg_filename, write_to=png_filename)
                 print(f"PNG image saved as: {png_filename}")
 
@@ -104,8 +104,11 @@ class LigandImageGenerator:
             print(f"Error: {e}")
 
 
+import MDAnalysis as mda
+from typing import List, Dict, Tuple
+
 class InteractionProcessor:
-    def __init__(self, complex_pdb_file, ligand_no_h_pdb_file):
+    def __init__(self, complex_pdb_file: str, ligand_no_h_pdb_file: str):
         """
         Initialize the InteractionProcessor class.
 
@@ -119,14 +122,14 @@ class InteractionProcessor:
         self.ligand_no_h = mda.Universe(ligand_no_h_pdb_file)
         self.lig_noh = self.ligand_no_h.select_atoms("all")
 
-    def split_interaction_data(self, data):
+    def split_interaction_data(self, data: List[str]) -> List[str]:
         """Splits the input data into multiple parts.
 
         Args:
-            data (list): A list of ResNr and ResType, Atom indices, interaction type that needs to be split.
+            data (List[str]): A list of ResNr and ResType, Atom indices, interaction type that needs to be split.
 
         Returns:
-            list: A new list of the interaction data that consists of three parts.
+            List[str]: A new list of the interaction data that consists of three parts.
         """
         split_data = []
         for item in data:
@@ -138,28 +141,31 @@ class InteractionProcessor:
             split_data.append(split_value)
         return split_data
 
-    def highlight_numbers(self, split_data, starting_idx):
+    def highlight_numbers(self, split_data: List[str], starting_idx: List[int]) -> Tuple[
+        List[int], List[int], List[int], List[int], List[int], List[int], List[int], List[int], List[int], List[int], List[int]
+    ]:
         """Extracts the data from the split_data output of the interactions and categorizes it to its respective list.
 
         Args:
-            split_data (list): A list of interaction data items, where each item contains information about protein partner name,
+            split_data (List[str]): A list of interaction data items, where each item contains information about protein partner name,
             numeric codes and interaction type.
-            starting_idx (list): Starting index of the ligand atom indices used for identifying the correct atom to highlight.
+            starting_idx (List[int]): Starting index of the ligand atom indices used for identifying the correct atom to highlight.
 
         Returns:
-            tuple: A tuple that contains list of all of the highlighted atoms of all of the interactions.
+            Tuple[List[int], List[int], List[int], List[int], List[int], List[int], List[int], List[int], List[int], List[int], List[int]]:
+            A tuple that contains list of all of the highlighted atoms of all of the interactions.
         """
-        highlighted_hbond_acceptor = []
-        highlighted_hbond_donor = []
-        highlighted_hydrophobic = []
-        highlighted_hbond_both = []
-        highlighted_waterbridge = []
-        highlighted_pistacking = []
-        highlighted_halogen = []
-        highlighted_ni = []
-        highlighted_pi = []
-        highlighted_pication = []
-        highlighted_metal = []
+        highlighted_hbond_acceptor: List[int] = []
+        highlighted_hbond_donor: List[int] = []
+        highlighted_hydrophobic: List[int] = []
+        highlighted_hbond_both: List[int] = []
+        highlighted_waterbridge: List[int] = []
+        highlighted_pistacking: List[int] = []
+        highlighted_halogen: List[int] = []
+        highlighted_ni: List[int] = []
+        highlighted_pi: List[int] = []
+        highlighted_pication: List[int] = []
+        highlighted_metal: List[int] = []
 
         for item in split_data:
             parts = item.split()
@@ -167,119 +173,83 @@ class InteractionProcessor:
             numeric_codes = parts[1:-1]
             interaction_type = parts[-1]
 
-            if interaction_type == "hbond":
-                parts = item.split()
-                protein_partner_name = parts[0]
-                numeric_codes = parts[1:-2]
-                type = parts[-2]
-                interaction_type = parts[-1]
-                for code in numeric_codes:
-                    atom_index = int(code)
-                    complex_id = self.complex.select_atoms(f"id {atom_index}")
-                    for atom in complex_id:
-                        atom_name = atom.name
-                    for lig_atom in self.lig_noh:
-                        if lig_atom.name == atom_name:
-                            lig_real_index = lig_atom.id
+            for code in numeric_codes:
+                atom_index = int(code)
+                complex_id = self.complex.select_atoms(f"id {atom_index}")
+                atom_name = complex_id[0].name if len(complex_id) > 0 else None
+
+                if atom_name is None:
+                    continue
+
+                lig_atom = self.lig_noh.select_atoms(f"name {atom_name}")
+                lig_real_index = lig_atom[0].id - 1 if len(lig_atom) > 0 else None
+
+                if lig_real_index is None:
+                    continue
+
+                if interaction_type == "hbond":
+                    type = parts[-2]
                     if type == "Donor":
-                        highlighted_hbond_donor.append(lig_real_index - 1)
+                        highlighted_hbond_donor.append(lig_real_index)
                     elif type == "Acceptor":
-                        highlighted_hbond_acceptor.append(lig_real_index - 1)
+                        highlighted_hbond_acceptor.append(lig_real_index)
 
-            elif interaction_type == "hydrophobic":
-                for code in numeric_codes:
-                    atom_index = int(code)
-                    complex_id = self.complex.select_atoms(f"id {atom_index}")
-                    for atom in complex_id:
-                        atom_name = atom.name
-                    for lig_atom in self.lig_noh:
-                        if lig_atom.name == atom_name:
-                            lig_real_index = lig_atom.id
-                    highlighted_hydrophobic.append(lig_real_index - 1)
+                elif interaction_type == "hydrophobic":
+                    highlighted_hydrophobic.append(lig_real_index)
 
-            elif interaction_type == "waterbridge":
-                for code in numeric_codes:
-                    atom_index = int(code)
-                    complex_id = self.complex.select_atoms(f"id {atom_index}")
-                    for atom in complex_id:
-                        atom_name = atom.name
-                    for lig_atom in self.lig_noh:
-                        if lig_atom.name == atom_name:
-                            lig_real_index = lig_atom.id
-                    highlighted_waterbridge.append(lig_real_index - 1)
+                elif interaction_type == "waterbridge":
+                    highlighted_waterbridge.append(lig_real_index)
 
-            elif interaction_type == "pistacking":
-                split_codes = numeric_codes[0].split(",")
-                for code in split_codes:
-                    atom_index = int(code)
-                    complex_id = self.complex.select_atoms(f"id {atom_index}")
-                    for atom in complex_id:
-                        atom_name = atom.name
-                    for lig_atom in self.lig_noh:
-                        if lig_atom.name == atom_name:
-                            lig_real_index = lig_atom.id
-                    highlighted_pistacking.append(lig_real_index - 1)
-
-            elif interaction_type == "halogen":
-                numeric_codes = parts[1:-2]
-                for code in numeric_codes:
-                    atom_index = int(code)
-                    complex_id = self.complex.select_atoms(f"id {atom_index}")
-                    for atom in complex_id:
-                        atom_name = atom.name
-                    for lig_atom in self.lig_noh:
-                        if lig_atom.name == atom_name:
-                            lig_real_index = lig_atom.id
-                    highlighted_halogen.append(lig_real_index - 1)
-
-            elif interaction_type == "saltbridge":
-                numeric_codes = parts[1:-3]
-                saltbridge_type = parts[-2]
-                if saltbridge_type == "NI":
+                elif interaction_type == "pistacking":
                     split_codes = numeric_codes[0].split(",")
                     for code in split_codes:
                         atom_index = int(code)
                         complex_id = self.complex.select_atoms(f"id {atom_index}")
-                        for atom in complex_id:
-                            atom_name = atom.name
-                        for lig_atom in self.lig_noh:
-                            if lig_atom.name == atom_name:
-                                lig_real_index = lig_atom.id
-                        highlighted_ni.append(lig_real_index - 1)
-                elif saltbridge_type == "PI":
-                    for code in numeric_codes:
-                        atom_index = int(code)
-                        complex_id = self.complex.select_atoms(f"id {atom_index}")
-                        for atom in complex_id:
-                            atom_name = atom.name
-                        for lig_atom in self.lig_noh:
-                            if lig_atom.name == atom_name:
-                                lig_real_index = lig_atom.id
-                        highlighted_pi.append(lig_real_index - 1)
+                        atom_name = complex_id[0].name if len(complex_id) > 0 else None
+                        if atom_name is None:
+                            continue
+                        lig_atom = self.lig_noh.select_atoms(f"name {atom_name}")
+                        lig_real_index = lig_atom[0].id - 1 if len(lig_atom) > 0 else None
+                        if lig_real_index is not None:
+                            highlighted_pistacking.append(lig_real_index)
 
-            elif interaction_type == "pication":
-                numeric_codes = parts[1:-2]
-                for code in numeric_codes:
-                    atom_index = int(code)
-                    complex_id = self.complex.select_atoms(f"id {atom_index}")
-                    for atom in complex_id:
-                        atom_name = atom.name
-                    for lig_atom in self.lig_noh:
-                        if lig_atom.name == atom_name:
-                            lig_real_index = lig_atom.id
-                    highlighted_pication.append(lig_real_index - 1)
+                elif interaction_type == "halogen":
+                    highlighted_halogen.append(lig_real_index)
 
-            elif interaction_type == "metal":
-                ligidx = parts[1]
-                atom_index = int(ligidx)
-                complex_id = self.complex.select_atoms(f"id {atom_index}")
-                for atom in complex_id:
-                    atom_name = atom.name
-                for lig_atom in self.lig_noh:
-                    if lig_atom.name == atom_name:
-                        lig_real_index = lig_atom.id
-                highlighted_metal.append(lig_real_index - 1)
+                elif interaction_type == "saltbridge":
+                    saltbridge_type = parts[-2]
+                    if saltbridge_type == "NI":
+                        split_codes = numeric_codes[0].split(",")
+                        for code in split_codes:
+                            atom_index = int(code)
+                            complex_id = self.complex.select_atoms(f"id {atom_index}")
+                            atom_name = complex_id[0].name if len(complex_id) > 0 else None
+                            if atom_name is None:
+                                continue
+                            lig_atom = self.lig_noh.select_atoms(f"name {atom_name}")
+                            lig_real_index = lig_atom[0].id - 1 if len(lig_atom) > 0 else None
+                            if lig_real_index is not None:
+                                highlighted_ni.append(lig_real_index)
 
+                    elif saltbridge_type == "PI":
+                        for code in numeric_codes:
+                            atom_index = int(code)
+                            complex_id = self.complex.select_atoms(f"id {atom_index}")
+                            atom_name = complex_id[0].name if len(complex_id) > 0 else None
+                            if atom_name is None:
+                                continue
+                            lig_atom = self.lig_noh.select_atoms(f"name {atom_name}")
+                            lig_real_index = lig_atom[0].id - 1 if len(lig_atom) > 0 else None
+                            if lig_real_index is not None:
+                                highlighted_pi.append(lig_real_index)
+
+                elif interaction_type == "pication":
+                    highlighted_pication.append(lig_real_index)
+
+                elif interaction_type == "metal":
+                    highlighted_metal.append(lig_real_index)
+
+        # Identify common indices between hbond_donor and hbond_acceptor
         for value in highlighted_hbond_donor[:]:
             if value in highlighted_hbond_acceptor:
                 highlighted_hbond_donor.remove(value)
@@ -300,15 +270,15 @@ class InteractionProcessor:
             highlighted_metal,
         )
 
-    def generate_interaction_dict(self, interaction_type, keys):
+    def generate_interaction_dict(self, interaction_type: str, keys: List[int]) -> Dict[int, Tuple[float, float, float]]:
         """Generates a dictionary of interaction RGB color model based on the provided interaction type.
 
         Args:
             interaction_type (str): The type of the interaction, for example 'hydrophobic'.
-            keys (list): List of the highlighted atoms that display an interaction.
+            keys (List[int]): List of the highlighted atoms that display an interaction.
 
         Returns:
-            dict: A dictionary with the interaction types are associated with their respective RGB color codes.
+            Dict[int, Tuple[float, float, float]]: A dictionary with the interaction types associated with their respective RGB color codes.
         """
         interaction_dict = {
             "hbond_acceptor": (1.0, 0.6, 0.6),
@@ -324,35 +294,52 @@ class InteractionProcessor:
             "metal": (1.0, 0.6, 0.0),
         }
 
-        interaction_dict = {
+        if interaction_type not in interaction_dict:
+            raise ValueError(f"Unknown interaction type: {interaction_type}")
+
+        return {
             int(key): interaction_dict[interaction_type] for key in keys
         }
-        return interaction_dict
 
-    def update_dict(self, target_dict, *source_dicts):
+    def update_dict(self, target_dict: Dict[int, Tuple[float, float, float]], *source_dicts: Dict[int, Tuple[float, float, float]]):
         """Updates the dictionary with the keys and values from other dictionaries.
 
         Args:
-            target_dict (dict): The dictionary that needs to be updated with new keys and values.
-            source_dicts (dict): One or multiple dictionaries that are used to update the target dictionary with new keys and values.
+            target_dict (Dict[int, Tuple[float, float, float]]): The dictionary that needs to be updated with new keys and values.
+            source_dicts (Dict[int, Tuple[float, float, float]]): One or more dictionaries with keys and values to be merged into the target dictionary.
         """
         for source_dict in source_dicts:
             for key, value in source_dict.items():
-                int_key = int(key)
-                if int_key not in target_dict:
-                    target_dict[int_key] = value
+                if key in target_dict:
+                    # Combine the RGB values (optional approach; adjust as needed)
+                    existing_value = target_dict[key]
+                    target_dict[key] = tuple(
+                        min(1.0, max(0.0, (existing_value[i] + value[i]) / 2))
+                        for i in range(3)
+                    )
+                else:
+                    target_dict[key] = value
 
+
+from typing import List, Optional
+from PIL import Image
+import pylab
+import os
 
 class ImageMerger:
     def __init__(
-        self, binding_mode, occurrence_percent, split_data, merged_image_paths
-    ):
+        self, 
+        binding_mode: str, 
+        occurrence_percent: float, 
+        split_data: List[str], 
+        merged_image_paths: List[str]
+    ) -> None:
         self.binding_mode = binding_mode
         self.occurrence_percent = occurrence_percent
         self.split_data = split_data
         self.merged_image_paths = merged_image_paths
 
-    def create_and_merge_images(self):
+    def create_and_merge_images(self) -> List[str]:
         """Create and merge images to generate a legend for binding modes.
 
         Returns:
@@ -374,17 +361,17 @@ class ImageMerger:
         for i, data in enumerate(filtered_split_data):
             y = data_points[i]
             label = data.split()[-1]
-            type = data.split()[-2]
+            type_ = data.split()[-2]  # Renamed 'type' to 'type_' to avoid conflict with the built-in type() function
             if label == "hydrophobic":
                 (line,) = ax.plot(
                     x, y, label=data, color=(1.0, 1.0, 0.0), linewidth=5.0
                 )
             elif label == "hbond":
-                if type == "Acceptor":
+                if type_ == "Acceptor":
                     (line,) = ax.plot(
                         x, y, label=data, color=(1.0, 0.6, 0.6), linewidth=5.0
                     )
-                elif type == "Donor":
+                elif type_ == "Donor":
                     (line,) = ax.plot(
                         x, y, label=data, color=(0.3, 0.5, 1.0), linewidth=5.0
                     )
@@ -409,11 +396,11 @@ class ImageMerger:
                     x, y, label=data, color=(1.0, 0.6, 0.0), linewidth=5.0
                 )
             elif label == "saltbridge":
-                if type == "NI":
+                if type_ == "NI":
                     (line,) = ax.plot(
                         x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0
                     )
-                elif type == "PI":
+                elif type_ == "PI":
                     (line,) = ax.plot(
                         x, y, label=data, color=(1.0, 0.0, 0.0), linewidth=5.0
                     )
@@ -476,11 +463,11 @@ class ImageMerger:
 
 
 class FigureArranger:
-    def __init__(self, merged_image_paths, output_path):
+    def __init__(self, merged_image_paths: List[str], output_path: str) -> None:
         self.merged_image_paths = merged_image_paths
         self.output_path = output_path
 
-    def arranged_figure_generation(self):
+    def arranged_figure_generation(self) -> None:
         """Generate an arranged figure by arranging merged images in rows and columns."""
         # Open the list of images
         merged_images = [Image.open(path) for path in self.merged_image_paths]
