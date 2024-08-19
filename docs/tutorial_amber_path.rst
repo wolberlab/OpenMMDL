@@ -106,7 +106,7 @@ Users can select one type of macromolecule from the options listed above at a ti
 
 In this tutorial, we will select the protein option, navigate to the folder 'openmmdl_amber_tutorial', and select'8EFO_protein.pdb',and select 'ff19SB' as the receptor force field. 
 
-When you have uploaded the files, the receptor page should look the following:
+When you have uploaded the files, the receptor page should look the following way:
 
 
 .. figure:: /_static/images/tutorials/Amber_Path/AmberOptionSelected.png
