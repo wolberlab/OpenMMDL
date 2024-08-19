@@ -106,6 +106,14 @@ Users can select one type of macromolecule from the options listed above at a ti
 
 In this tutorial, we will select the protein option, navigate to the folder 'openmmdl_amber_tutorial', and select'8EFO_protein.pdb',and select 'ff19SB' as the receptor force field. 
 
+When you have uploaded the files, the receptor page should look the following:
+
+
+.. figure:: /_static/images/tutorials/Amber_Path/AmberOptionSelected.png
+   :figwidth: 700px
+   :align: center
+
+
 2. **Ligand**
    
 Depends on the type of ligand the user intends to simulate, two options are available:
@@ -139,6 +147,14 @@ The `obabel` tool will be utilized to convert the ligand file format between PDB
 Warning: When the file format is pdb, the prefix of the filename should be the same as the ligand name in the PDB file. For instance, the ligand name in the PDB file is '8QY', and the filename should be '8QY.pdb'.
 
 In this tutorial, we will select the ligand '8QY.pdb', set the charge value to 1, select the 'GAFF2' force field, and choose the 'bcc' charge method.
+
+When you have uploaded the mentioned files and selected the options, your page should look like this:
+
+
+.. figure:: /_static/images/tutorials/Amber_Path/AmberOptionReceptor.png
+   :figwidth: 700px
+   :align: center
+
 
 2.2 **Special Ligand**. 
 
@@ -177,7 +193,7 @@ When this option is selected, users can further select the 'Lipid Type' and 'Lip
 
 If the listed lipid type does not match the desired one, click on the 'Other Type or Mixture' option. Then, input the lipid type in the pop-up textbox of 'Other Types or Mixture' and set the 'Lipid Ratio'. For instance, 'POPC:TOPC' in 'Other Types or Mixture' and '1:1' in the 'Lipid Ratio' means the membrane consists of 1 POPC and 1 TOPC. 
 
-.. figure:: /_static/images/tutorials/Amber_Path/addMembrane_other.png
+.. figure:: /_static/images/tutorials/Amber_Path/addMembraneMixtures.png
    :figwidth: 350px
    :align: center
 
