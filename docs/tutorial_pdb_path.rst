@@ -17,14 +17,14 @@ To create a new folder we enter the following command lines:
     mkdir openmmdl_pdb_tutorial
 
 
-activating our openmmdl environment to start the OpenMMDL-Setup.
-To start the OpenMMDL-Setup we need to activate the openmmdl environment. to do this we have to enter the following command lines:
+activating our openmmdl environment to start the OpenMMDL Setup.
+To start the OpenMMDL-Setup we need to activate the openmmdl environment. To do this we have to enter the following command lines:
 
 .. code-block:: text
 
     conda activate openmmdl
 
-Now that we have activated the openmmdl environment we can start OpenMMDL-Setup. To do this you need to type the following:
+Now that we have activated the openmmdl environment we can start OpenMMDL Setup. To do this you need to type the following:
 
 .. code-block:: text
 
@@ -34,7 +34,7 @@ Now that we have activated the openmmdl environment we can start OpenMMDL-Setup.
 Selecting Input Files
 ------------------------------
 
-This will open the OpenMMDL-Setup, which you can use for the creation of the input files for OpenMMDL-Simulation.
+This will open the OpenMMDL Setup, which you can use for the creation of the input files for OpenMMDL-Simulation.
 
 
 
@@ -65,6 +65,7 @@ The page should look like the page below.
    :figwidth: 725px
    :align: center
 
+
 Now that we selected the PDB and SDF File we select continue and go to the next page.
 
 Selecting Chains
@@ -73,7 +74,7 @@ Selecting Chains
 The next page shows us the protein with all of the chains that are in the pdb file.
 
 
-.. figure:: /_static/images/tutorials/PDB_Path/Modifychains1.png
+.. figure:: /_static/images/tutorials/PDB_Path/Modifychains.png
    :figwidth: 725px
    :align: center
 
@@ -134,6 +135,7 @@ In the Water Box we also change the Ionic strenght to 0.15.
    :figwidth: 725px
    :align: center
 
+
 Now that we selected the following options we continue to the next page.
 
 Adjusting MD Simulation Options
@@ -145,9 +147,10 @@ The final page displays the MD simulation options.
    :figwidth: 725px
    :align: center
 
+
 We will simulate the protein for 10 ns.
 
-For this we go to the Simulation Tab and Change Simulation lenght (steps) to 250000.
+For this we change Simulation lenght to 10 ns.
 
 If you want to have a longer or shorter simulation you can increase or reduce the amount of steps.
 
@@ -155,14 +158,21 @@ If you want to have a longer or shorter simulation you can increase or reduce th
    :figwidth: 725px
    :align: center
 
-Now that we changed the amount of steps we select the Save Script button to save the script for the simulation.
 
-Select the Save Processed PDF File to save the PDB File that will be the input for the MD simulation.
+Now that we changed the amount of steps we select the Save All Files button to save the zip. file with all of the necessery files for the simulation.
+
+After you download the zip. file, you can unpack the zip. file. Your downloaded folder should contain the following files:
+
+
+.. figure:: /_static/images/tutorials/PDB_Path/PDBFixerPathFolder.png
+   :figwidth: 725px
+   :align: center
+
 
 Running Tutorial OpenMMDL-Simulation
 ------------------------------
 
-Create a separate folder and copy the Simulation script, Processed PDB File and the Ligand SDF File into the folder.
+Create a separate folder and copy the Configuration file, Processed PDB File and the Ligand SDF File into the folder.
 
 The SDF File should be the same that was used as an input for the Openmm-Setup.
 
@@ -184,11 +194,11 @@ For this enter the following command
 
 .. code-block:: text
 
-    openmmdl-simulation -f tutorial_simulation -s OpenMMDL_Simulation.py -t 5wyz-processed_openMMDL.pdb -l 5VF.sdf
+    openmmdl_simulation -f tutorial_simulation -s OpenMMDL_Simulation.conf -t 5wyz-processed_openMMDL.pdb -l 5VF.sdf
 
 By entering the command we create a folder called tutorial_simulation, where the Output of the MD simulation will appear.
 
-As the Input for the MD simulation we used the -t to select 5wyz-processed_openMMDL.pdb as the topology file for the simulation, -l to select the ligand 5VF.sdf and -s to specify the OpenMMDL_Simulation.py script that will run the MD simulation.
+As the Input for the MD simulation we used the -t to select 5wyz-processed_openMMDL.pdb as the topology file for the simulation, -l to select the ligand 5VF.sdf and -s to specify the OpenMMDL_Simulation.conf file that will run the MD simulation.
 
 .. figure:: /_static/images/tutorials/PDB_Path/Outputfiles1.png
    :figwidth: 725px

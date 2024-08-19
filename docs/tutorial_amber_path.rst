@@ -8,7 +8,7 @@ OpenMM enables users to perform molecular dynamics (MD) simulations using AMBER 
 
 In this tutorial, we will use the mu opioid receptor (PDB ID: 8EFO) as an illustrative example to provide a comprehensive, step-by-step guide on configuring and initiating an MD simulation using Amber files prepared by OpenMMDL-Setup.
 
-Starting OpenMMDL-Setup
+Starting OpenMMDL Setup
 ------------------------------
 We start the tutorial by creating an folder to store input files and facilitate the MD simulation.
 
@@ -55,6 +55,7 @@ The second step involves choosing input files. Two options are available:
    :figwidth: 700px
    :align: center
 
+
 1. **Yes**, my files are already to simulate.
 When selected, users can choose the Prmtop and Inpcrd files via the file browser. Clicking "Continue" transitions to the 'Simulation Setup' page.
 
@@ -80,6 +81,7 @@ This page allows users to configure Amber settings and generate the Bash script 
    :figwidth: 700px
    :align: center
 
+
 The page consists of three tabs: Receptor, Ligand, and Add Water/Membrane.
 
 1. **Receptor**
@@ -87,7 +89,7 @@ The page consists of three tabs: Receptor, Ligand, and Add Water/Membrane.
 Depending on the macromolecule type (Protein, DNA, RNA, or Carbohydrate), users can select the receptor PDB file using the file browser and choose the appropriate force fields.
 
 .. figure:: /_static/images/tutorials/Amber_Path/receptor.png
-   :figwidth: 700px
+   :figwidth: 350px
    :align: center
 
 If needed, users can specify an 'Other Force Field' in the provided textbox. To do this, select 'other' from the drop-down menu of "Force Field," and the 'Other Force Field' textbox will appear. Users can input the force field name in the textbox.
@@ -97,11 +99,20 @@ If needed, users can specify an 'Other Force Field' in the provided textbox. To 
    :figwidth: 700px
    :align: center
 
+
 Note: Only force fields provided by AmberTools are supported. To check available force fields, navigate to `/home/user/miniconda3/envs/openmmdl/dat/leap/cmd`. Replace the path with the location of your OpenMMDL installation. 
 
 Users can select one type of macromolecule from the options listed above at a time. 
 
 In this tutorial, we will select the protein option, navigate to the folder 'openmmdl_amber_tutorial', and select'8EFO_protein.pdb',and select 'ff19SB' as the receptor force field. 
+
+When you have uploaded the files, the receptor page should look the following way:
+
+
+.. figure:: /_static/images/tutorials/Amber_Path/AmberOptionSelected.png
+   :figwidth: 700px
+   :align: center
+
 
 2. **Ligand**
    
@@ -114,6 +125,7 @@ It refers to the small molecule that is made up of C, N, O, S, P, H, F, Cl, Br a
 .. figure:: /_static/images/tutorials/Amber_Path/normalLigand.png
    :figwidth: 700px
    :align: center
+
 
 Upon selecting the 'Normal Ligand' option, the parameter settings for the ligand will be revealed. 
 
@@ -135,6 +147,14 @@ The `obabel` tool will be utilized to convert the ligand file format between PDB
 Warning: When the file format is pdb, the prefix of the filename should be the same as the ligand name in the PDB file. For instance, the ligand name in the PDB file is '8QY', and the filename should be '8QY.pdb'.
 
 In this tutorial, we will select the ligand '8QY.pdb', set the charge value to 1, select the 'GAFF2' force field, and choose the 'bcc' charge method.
+
+When you have uploaded the mentioned files and selected the options, your page should look like this:
+
+
+.. figure:: /_static/images/tutorials/Amber_Path/AmberOptionReceptor.png
+   :figwidth: 700px
+   :align: center
+
 
 2.2 **Special Ligand**. 
 
@@ -167,14 +187,14 @@ When this option is selected, users can further select the 'Box Type' from the d
 When this option is selected, users can further select the 'Lipid Type' and 'Lipid Force Field' from the drop-down list. 
 
 .. figure:: /_static/images/tutorials/Amber_Path/addMembrane.png
-   :figwidth: 700px
+   :figwidth: 350px
    :align: center
 
 
 If the listed lipid type does not match the desired one, click on the 'Other Type or Mixture' option. Then, input the lipid type in the pop-up textbox of 'Other Types or Mixture' and set the 'Lipid Ratio'. For instance, 'POPC:TOPC' in 'Other Types or Mixture' and '1:1' in the 'Lipid Ratio' means the membrane consists of 1 POPC and 1 TOPC. 
 
-.. figure:: /_static/images/tutorials/Amber_Path/addMembrane_other.png
-   :figwidth: 700px
+.. figure:: /_static/images/tutorials/Amber_Path/addMembraneMixtures.png
+   :figwidth: 350px
    :align: center
 
 When selecting only one type of lipid, set the 'Lipid Ratio' to 1. 
@@ -188,7 +208,7 @@ In this tutorial, we will select the 'add Membrane and Water' option, and keep t
 It is a must for both 'Add water Box' and 'Add Membrane and Water' options. The Ions will be added to neutralize the model. The user can select the 'Water Force Field', 'Positive Ion' and 'Negative Ion' in the drop-down list, and then type the 'Ion Concentration (molar)' value in the textbox.
 
 .. figure:: /_static/images/tutorials/Amber_Path/water_ion_setting.png
-   :figwidth: 700px
+   :figwidth: 500px
    :align: center
 
 
@@ -198,7 +218,7 @@ Click 'Save Script' on the top of the right code block to download the generated
 
 Simulation Setup
 ------------------------------
-Configure simulation options across five tabs: System, Integrator, Simulation, Output, and MDAnalysis. Click 'Save Script' to download the generated Python script based on the configuration, saving it in the tutorial folder.
+Configure simulation options across six tabs: System, Output, Postprocessing, Analysis, Simulation and Integrator. Click 'Save Conf File' to download the generated configuration file script based on the selected settings, saving it in the tutorial folder.
 
 Run Bash Script
 ------------------------------
@@ -216,7 +236,7 @@ Once the `Prmtop` and `Inpcrd` files are generated, the user can run the MD simu
 
 .. code-block:: text
 
-    python3 OpenMMDL_Simulation.py
+    openmmdl_simulation -f amber_tutorial_simulation -t system.opc.prmtop -c system.opc.inpcrd -s OpenMMDL_Simulation.conf
 
 Or run the several MD recplicas via slurm.The `run_slurm.sh` is in tutorial folder `/openmmdl/openmmdl-simulation/tuturial_systems/amber_path/8efo_membrane`. Firstly copy it to the tutorial folder
 
