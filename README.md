@@ -17,7 +17,13 @@ protein-ligand complexes
 
 http://openmmdl.readthedocs.io/
 
-## Install
+## Installation via conda-forge
+
+**OpenMMDL** is implemented in conda-forge and can be installed for linux-based system with the following command line
+
+    conda install -c conda-forge openmmdl
+
+## Installation via repository
 
 #### Clone this repository
 
