@@ -14,13 +14,13 @@ config.KEEPMOD = True
 
 class InteractionAnalyzer:
     def __init__(
-        self, 
-        pdb_md: mda.Universe, 
-        dataframe: Optional[str], 
-        num_processes: int, 
-        lig_name: str, 
-        special_ligand: Optional[str], 
-        peptide: Optional[str]
+        self,
+        pdb_md: mda.Universe,
+        dataframe: Optional[str],
+        num_processes: int,
+        lig_name: str,
+        special_ligand: Optional[str],
+        peptide: Optional[str],
     ) -> None:
         self.pdb_md = pdb_md
         self.dataframe = dataframe
@@ -130,7 +130,9 @@ class InteractionAnalyzer:
         return sites
 
     def create_df_from_binding_site(
-        self, selected_site_interactions: Dict[str, List], interaction_type: str = "hbond"
+        self,
+        selected_site_interactions: Dict[str, List],
+        interaction_type: str = "hbond",
     ) -> pd.DataFrame:
         """Create a DataFrame from a binding site and interaction type.
 
@@ -164,9 +166,7 @@ class InteractionAnalyzer:
         )
         return df
 
-    def change_lig_to_residue(
-        self, file_path: str, new_residue_name: str
-    ) -> None:
+    def change_lig_to_residue(self, file_path: str, new_residue_name: str) -> None:
         """Reformat the topology file to change the ligand to a residue.
 
         Args:
@@ -202,7 +202,7 @@ class InteractionAnalyzer:
         atoms_selected = self.pdb_md.select_atoms(
             f"protein or nucleic or resname {self.lig_name} or (resname HOH and around 10 resname {self.lig_name}) or resname {self.special}"
         )
-        for num in self.pdb_md.trajectory[(frame):(frame + 1)]:
+        for num in self.pdb_md.trajectory[(frame) : (frame + 1)]:
             atoms_selected.write(f"processing_frame_{frame}.pdb")
         interaction_list = pd.DataFrame()
         interactions_by_site = self.retrieve_plip_interactions(
@@ -230,7 +230,7 @@ class InteractionAnalyzer:
             tmp_interaction["frame"] = frame
             tmp_interaction["interaction_type"] = interaction_type
             interaction_list = pd.concat([interaction_list, tmp_interaction])
-        
+
         os.remove(f"processing_frame_{frame}.pdb")
         return interaction_list
 
@@ -246,7 +246,7 @@ class InteractionAnalyzer:
         atoms_selected = self.pdb_md.select_atoms(
             f"protein or nucleic or resname {self.lig_name} or (resname HOH and around 10 resname {self.lig_name}) or resname {self.special}"
         )
-        for num in self.pdb_md.trajectory[(frame):(frame + 1)]:
+        for num in self.pdb_md.trajectory[(frame) : (frame + 1)]:
             atoms_selected.write(f"processing_frame_{frame}.pdb")
         interaction_list = pd.DataFrame()
         if self.peptide is None:
@@ -298,7 +298,7 @@ class InteractionAnalyzer:
                 tmp_interaction["frame"] = frame
                 tmp_interaction["interaction_type"] = interaction_type
                 interaction_list = pd.concat([interaction_list, tmp_interaction])
-        
+
         os.remove(f"processing_frame_{frame}.pdb")
         return interaction_list
 
@@ -331,11 +331,13 @@ class InteractionAnalyzer:
 
         for frame in missing_frames:
             for interaction_type in df["interaction_type"].unique():
-                missing_data.append({
-                    "frame": frame,
-                    "interaction_type": interaction_type,
-                    # Add other necessary columns with NaNs or empty values as appropriate
-                })
+                missing_data.append(
+                    {
+                        "frame": frame,
+                        "interaction_type": interaction_type,
+                        # Add other necessary columns with NaNs or empty values as appropriate
+                    }
+                )
 
         missing_df = pd.DataFrame(missing_data)
         filled_df = pd.concat([df, missing_df], ignore_index=True)
@@ -352,7 +354,10 @@ class InteractionAnalyzer:
             interaction_list = pd.concat(
                 list(
                     tqdm(
-                        pool.imap(self.process_frame_wrapper, range(len(self.pdb_md.trajectory))),
+                        pool.imap(
+                            self.process_frame_wrapper,
+                            range(len(self.pdb_md.trajectory)),
+                        ),
                         total=len(self.pdb_md.trajectory),
                     )
                 )
@@ -362,8 +367,8 @@ class InteractionAnalyzer:
 
         if self.dataframe:
             interaction_list.to_csv(self.dataframe)
-        
+
         # Ensure all frames are represented in the final DataFrame
         interaction_list = self.fill_missing_frames(interaction_list)
-        
+
         return interaction_list

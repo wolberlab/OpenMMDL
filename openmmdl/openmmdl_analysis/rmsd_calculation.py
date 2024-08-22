@@ -27,7 +27,9 @@ class RMSDAnalyzer:
     def __init__(self, prot_lig_top_file: str, prot_lig_traj_file: str) -> None:
         self.prot_lig_top_file: str = prot_lig_top_file
         self.prot_lig_traj_file: str = prot_lig_traj_file
-        self.universe: mda.Universe = mda.Universe(prot_lig_top_file, prot_lig_traj_file)
+        self.universe: mda.Universe = mda.Universe(
+            prot_lig_top_file, prot_lig_traj_file
+        )
 
     def rmsd_for_atomgroups(
         self, fig_type: str, selection1: str, selection2: Optional[List[str]] = None

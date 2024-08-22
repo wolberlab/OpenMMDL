@@ -8,6 +8,7 @@ from io import StringIO
 from Bio.PDB import PDBParser, Structure
 from typing import Tuple, Dict, List, Optional
 
+
 class StableWaters:
     def __init__(self, trajectory: str, topology: str, water_eps: float) -> None:
         self.trajectory = trajectory
@@ -49,9 +50,7 @@ class StableWaters:
                 stable_coords = []
 
                 for atom_index, coords in frame_coords.items():
-                    prev_coords = prev_frame_coords.get(
-                        atom_index, coords
-                    )
+                    prev_coords = prev_frame_coords.get(atom_index, coords)
 
                     distance = np.linalg.norm(np.array(coords) - np.array(prev_coords))
 
@@ -85,7 +84,11 @@ class StableWaters:
         return stable_waters, total_frames
 
     def perform_clustering_and_writing(
-        self, stable_waters: pd.DataFrame, cluster_eps: float, total_frames: int, output_directory: str
+        self,
+        stable_waters: pd.DataFrame,
+        cluster_eps: float,
+        total_frames: int,
+        output_directory: str,
     ) -> None:
         """
         Perform DBSCAN clustering on the stable water coordinates, and write the clusters and their representatives to PDB files.
@@ -121,7 +124,10 @@ class StableWaters:
             )
 
     def write_pdb_clusters_and_representatives(
-        self, clustered_waters: pd.DataFrame, min_samples: int, output_sub_directory: str
+        self,
+        clustered_waters: pd.DataFrame,
+        min_samples: int,
+        output_sub_directory: str,
     ) -> None:
         """
         Writes the clusters and their representatives to PDB files.
@@ -136,9 +142,7 @@ class StableWaters:
         print("minsamples:")
         print(min_samples)
         os.makedirs(output_sub_directory, exist_ok=True)
-        with pd.option_context(
-            "display.max_rows", None
-        ):
+        with pd.option_context("display.max_rows", None):
             for label, cluster in clustered_waters.groupby("Cluster_Label"):
                 pdb_lines = []
                 for _, row in cluster.iterrows():
@@ -210,7 +214,10 @@ class StableWaters:
         return structure
 
     def find_interacting_residues(
-        self, structure: Structure, representative_waters: pd.DataFrame, distance_threshold: float
+        self,
+        structure: Structure,
+        representative_waters: pd.DataFrame,
+        distance_threshold: float,
     ) -> Dict[int, List[Tuple[str, int]]]:
         """Maps waters (e.g. the representative waters) to interacting residues of a different PDB structure input.
         Args:

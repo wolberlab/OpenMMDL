@@ -9,6 +9,7 @@ from rdkit.Chem import Mol
 from openbabel import pybel
 import mdtraj as md
 
+
 class Preprocessing:
     def __init__(self):
         pass
@@ -31,9 +32,31 @@ class Preprocessing:
         ref_top_df, _ = traj_reference.topology.to_dataframe()
 
         protein_residues = [
-            "ALA", "ARG", "ASN", "ASP", "CYS", "GLN", "GLU", "GLY", "HIS", "ILE",
-            "LEU", "LYS", "MET", "PHE", "PRO", "SER", "THR", "TRP", "TYR", "VAL",
-            "ACE", "NME", "HIE", "HID", "HIP"
+            "ALA",
+            "ARG",
+            "ASN",
+            "ASP",
+            "CYS",
+            "GLN",
+            "GLU",
+            "GLY",
+            "HIS",
+            "ILE",
+            "LEU",
+            "LYS",
+            "MET",
+            "PHE",
+            "PRO",
+            "SER",
+            "THR",
+            "TRP",
+            "TYR",
+            "VAL",
+            "ACE",
+            "NME",
+            "HIE",
+            "HID",
+            "HIP",
         ]
 
         for chain_id in ref_top_df["chainID"].unique():
@@ -41,10 +64,13 @@ class Preprocessing:
                 ref_top_df[
                     (ref_top_df["chainID"] == chain_id)
                     & ref_top_df["resName"].isin(protein_residues)
-                ]["resSeq"].values - 1
+                ]["resSeq"].values
+                - 1
             )
 
-            mask = (input_top_df["chainID"] == chain_id) & input_top_df["resName"].isin(protein_residues)
+            mask = (input_top_df["chainID"] == chain_id) & input_top_df["resName"].isin(
+                protein_residues
+            )
             input_top_df.loc[mask, "resSeq"] = ref_residue_indices + 1
 
         new_top = md.Topology.from_dataframe(input_top_df)
@@ -113,7 +139,9 @@ class Preprocessing:
         ligand_atoms = u.select_atoms(f"resname {target_resname}")
 
         if len(ligand_atoms) == 0:
-            print(f"No ligand with residue name '{target_resname}' found in the PDB file.")
+            print(
+                f"No ligand with residue name '{target_resname}' found in the PDB file."
+            )
             return
 
         ligand_universe = mda.Merge(ligand_atoms)
@@ -149,7 +177,9 @@ class Preprocessing:
                 if residue_name == lig_name:
                     element_match = re.match(r"([A-Z]+)", atom_name)
                     element = element_match.group(1) if element_match else atom_name
-                    lig_residue_elements[element] = lig_residue_elements.get(element, 0) + 1
+                    lig_residue_elements[element] = (
+                        lig_residue_elements.get(element, 0) + 1
+                    )
                     new_atom_name = f"{element}{lig_residue_elements[element]}"
                     line = line[:12] + f"{new_atom_name:4}" + line[16:]
 

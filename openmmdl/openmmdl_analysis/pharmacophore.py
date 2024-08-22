@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 from typing import Dict, List, Optional, Union
 
+
 class PharmacophoreGenerator:
     def __init__(self, df_all: pd.DataFrame, ligand_name: str):
         self.df_all = df_all
@@ -12,7 +13,9 @@ class PharmacophoreGenerator:
         self.coord_pattern = re.compile(r"\(([\d.-]+), ([\d.-]+), ([\d.-]+)\)")
         self.clouds = self._generate_clouds()
 
-    def _generate_clouds(self) -> Dict[str, Dict[str, Union[List[List[float]], List[float], float]]]:
+    def _generate_clouds(
+        self,
+    ) -> Dict[str, Dict[str, Union[List[List[float]], List[float], float]]]:
         interaction_coords = {
             "hydrophobic": [],
             "acceptor": [],
@@ -57,7 +60,9 @@ class PharmacophoreGenerator:
 
         return self._format_clouds(interaction_coords)
 
-    def _format_clouds(self, interaction_coords: Dict[str, List[List[float]]]) -> Dict[str, Dict[str, Union[List[List[float]], List[float], float]]]:
+    def _format_clouds(
+        self, interaction_coords: Dict[str, List[List[float]]]
+    ) -> Dict[str, Dict[str, Union[List[List[float]], List[float], float]]]:
         color_mapping = {
             "hydrophobic": [1.0, 1.0, 0.0],
             "acceptor": [1.0, 0.0, 0.0],
@@ -79,10 +84,14 @@ class PharmacophoreGenerator:
             for interaction, coords in interaction_coords.items()
         }
 
-    def to_dict(self) -> Dict[str, Dict[str, Union[List[List[float]], List[float], float]]]:
+    def to_dict(
+        self,
+    ) -> Dict[str, Dict[str, Union[List[List[float]], List[float], float]]]:
         return self.clouds
 
-    def generate_pharmacophore_centers(self, interactions: List[str]) -> Dict[str, List[float]]:
+    def generate_pharmacophore_centers(
+        self, interactions: List[str]
+    ) -> Dict[str, List[float]]:
         """Generates pharmacophore points for interactions that are points such as hydrophobic and ionic interactions.
 
         Args:
@@ -113,7 +122,9 @@ class PharmacophoreGenerator:
                 pharmacophore[interaction] = [center_x, center_y, center_z]
         return pharmacophore
 
-    def generate_pharmacophore_vectors(self, interactions: List[str]) -> Dict[str, List[List[float]]]:
+    def generate_pharmacophore_vectors(
+        self, interactions: List[str]
+    ) -> Dict[str, List[List[float]]]:
         """Generates pharmacophore points for interactions that are vectors such as hydrogen bond donors or acceptors.
 
         Args:
@@ -332,7 +343,7 @@ class PharmacophoreGenerator:
         self,
         dict_bindingmode: Dict[str, Dict[str, List[List[float]]]],
         outname: str,
-        id_num: int = 0
+        id_num: int = 0,
     ) -> None:
         """Generates pharmacophore from a binding mode and writes it to a .pml file.
 
@@ -366,10 +377,12 @@ class PharmacophoreGenerator:
 
         for interaction, coords in dict_bindingmode.items():
             # Get feature type
-            feature_type = next((ft for it, ft in feature_types.items() if it in interaction), None)
+            feature_type = next(
+                (ft for it, ft in feature_types.items() if it in interaction), None
+            )
             if feature_type is None:
                 continue
-            
+
             # Generate vector features
             if feature_type in ["HBA", "HBD"]:
                 if feature_type == "HBA":
@@ -479,7 +492,9 @@ class PharmacophoreGenerator:
             xml_declaration=True,
         )
 
-     def generate_pharmacophore_centers_all_points(self, interactions: List[str]) -> Dict[str, List[List[float]]]:
+    def generate_pharmacophore_centers_all_points(
+        self, interactions: List[str]
+    ) -> Dict[str, List[List[float]]]:
         """Generates pharmacophore points for all interactions to generate point cloud.
 
         Args:

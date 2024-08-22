@@ -187,7 +187,7 @@ class BarcodePlotter:
         self,
         waterbridge_barcodes: Dict[str, np.ndarray],
         waterbridge_interactions: List[str],
-        fig_type: str
+        fig_type: str,
     ) -> None:
         """
         Plots pie charts for waterbridge interactions and saves them to files.

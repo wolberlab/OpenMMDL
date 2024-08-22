@@ -11,7 +11,9 @@ from openmmdl.openmmdl_analysis.barcode_generation import BarcodeGenerator
 
 
 class TrajectorySaver:
-    def __init__(self, pdb_md: mda.Universe, ligname: str, special: str, nucleic: bool) -> None:
+    def __init__(
+        self, pdb_md: mda.Universe, ligname: str, special: str, nucleic: bool
+    ) -> None:
         """Initializes the TrajectorySaver with an mda.Universe object, ligand name, special residue name, and receptor type.
 
         Args:
@@ -25,7 +27,9 @@ class TrajectorySaver:
         self.special = special
         self.nucleic = nucleic
 
-    def save_interacting_waters_trajectory(self, interacting_waters: List[int], outputpath: str = './Visualization/') -> None:
+    def save_interacting_waters_trajectory(
+        self, interacting_waters: List[int], outputpath: str = "./Visualization/"
+    ) -> None:
         """Saves .pdb and .dcd files of the trajectory containing ligand, receptor, and all interacting waters.
 
         Args:
@@ -48,7 +52,9 @@ class TrajectorySaver:
             for ts in self.pdb_md.trajectory:
                 W.write(water_atoms)
 
-    def save_frame(self, frame: int, outpath: str, selection: Optional[str] = None) -> None:
+    def save_frame(
+        self, frame: int, outpath: str, selection: Optional[str] = None
+    ) -> None:
         """Saves a single frame of the trajectory.
 
         Args:
@@ -65,13 +71,21 @@ class TrajectorySaver:
 
 
 class Visualizer:
-    def __init__(self, md: mda.Universe, cloud_path: str, ligname: str, special: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        md: mda.Universe,
+        cloud_path: str,
+        ligname: str,
+        special: Optional[str] = None,
+    ) -> None:
         self.md = md
         self.cloud = self.load_cloud(cloud_path)
         self.ligname = ligname
         self.special = special
 
-    def load_cloud(self, cloud_path: str) -> Dict[str, Dict[str, Union[List[float], List[int]]]]:
+    def load_cloud(
+        self, cloud_path: str
+    ) -> Dict[str, Dict[str, Union[List[float], List[int]]]]:
         """Loads interaction cloud data from a JSON file.
 
         Args:
@@ -85,7 +99,10 @@ class Visualizer:
         return data
 
     def visualize(
-        self, receptor_type: str = "protein or nucleic", height: str = "1000px", width: str = "1000px"
+        self,
+        receptor_type: str = "protein or nucleic",
+        height: str = "1000px",
+        width: str = "1000px",
     ) -> nv.NGLWidget:
         """Generates visualization of the trajectory with the interacting waters and interaction clouds.
 

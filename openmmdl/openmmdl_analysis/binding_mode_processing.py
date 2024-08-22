@@ -10,16 +10,16 @@ from numba import jit
 from typing import Dict, List, Union, Optional, Tuple
 
 
-class BindingModeProcessor:
+class BindingModeProcesser:
     def __init__(
         self,
-        pdb_md: 'MDAnalysis.Universe',  # Placeholder for the actual type
+        pdb_md,
         ligand: str,
         peptide: Optional[str],
         special: str,
         ligand_rings: List[List[int]],
         interaction_list: pd.DataFrame,
-        threshold: float
+        threshold: float,
     ) -> None:
         self.pdb_md = pdb_md
         self.ligand = ligand
@@ -65,11 +65,11 @@ class BindingModeProcessor:
                     ring_found = False
                     for ligand_ring in self.ligand_rings:
                         if ligcarbonidx in ligand_ring:
-                            numbers_as_strings = [
-                                str(idx) for idx in ligand_ring
-                            ]
+                            numbers_as_strings = [str(idx) for idx in ligand_ring]
                             name_with_numbers = "_".join(numbers_as_strings)
-                            col_name = f"{prot_partner}_{name_with_numbers}_{interaction}"
+                            col_name = (
+                                f"{prot_partner}_{name_with_numbers}_{interaction}"
+                            )
                             ring_found = True
                             break
                     if not ring_found:
@@ -109,7 +109,9 @@ class BindingModeProcessor:
                         type_ = "NI"
                     else:
                         type_ = "PI"
-                    col_name = f"{prot_partner}_{ligidx}_{lig_group}_{type_}_{interaction}"
+                    col_name = (
+                        f"{prot_partner}_{ligidx}_{lig_group}_{type_}_{interaction}"
+                    )
                 elif interaction == "metal":
                     special_ligand = row["RESTYPE_LIG"]
                     ligcarbonidx = int(row["TARGET_IDX"])
@@ -140,7 +142,9 @@ class BindingModeProcessor:
                     col_name = f"{prot_partner}_{peptide_partner}_{type_}_{interaction}"
                 elif interaction == "halogen":
                     halogen = row["DONORTYPE"]
-                    col_name = f"{prot_partner}_{peptide_partner}_{halogen}_{interaction}"
+                    col_name = (
+                        f"{prot_partner}_{peptide_partner}_{halogen}_{interaction}"
+                    )
                 elif interaction == "waterbridge":
                     if row["PROTISDON"]:
                         type_ = "Acceptor"
@@ -161,7 +165,9 @@ class BindingModeProcessor:
                         type_ = "NI"
                     else:
                         type_ = "PI"
-                    col_name = f"{prot_partner}_{ligidx}_{lig_group}_{type_}_{interaction}"
+                    col_name = (
+                        f"{prot_partner}_{ligidx}_{lig_group}_{type_}_{interaction}"
+                    )
                 elif interaction == "metal":
                     special_ligand = row["RESTYPE_LIG"]
                     ligcarbonidx = f"{row['RESNR_LIG']}{row['RESTYPE_LIG']}"
@@ -179,7 +185,9 @@ class BindingModeProcessor:
         print("\033[1minteraction partners generated\033[0m")
         return unique_columns_rings_grouped
 
-    def remove_duplicate_values(self, data: Dict[int, Dict[int, str]]) -> Dict[int, Dict[int, str]]:
+    def remove_duplicate_values(
+        self, data: Dict[int, Dict[int, str]]
+    ) -> Dict[int, Dict[int, str]]:
         """Remove the duplicate values from sub-dictionaries within the input dictionary.
 
         Args:
@@ -204,7 +212,9 @@ class BindingModeProcessor:
 
         return unique_data
 
-    def combine_subdict_values(self, data: Dict[int, Dict[int, str]]) -> Dict[str, List[str]]:
+    def combine_subdict_values(
+        self, data: Dict[int, Dict[int, str]]
+    ) -> Dict[str, List[str]]:
         """Combines the values from the individual sub-dictionaries into a single list.
 
         Args:
@@ -219,9 +229,7 @@ class BindingModeProcessor:
 
         return combined_data
 
-    def filtering_values(
-        self, threshold: float, df: pd.DataFrame
-    ) -> List[str]:
+    def filtering_values(self, threshold: float, df: pd.DataFrame) -> List[str]:
         """Filter and append values (interactions) to a DataFrame based on occurrence counts.
 
         Args:
@@ -266,7 +274,9 @@ class BindingModeProcessor:
 
         return unique_data
 
-  def df_iteration_numbering(self, df: pd.DataFrame, unique_data: Dict[str, str]) -> None:
+    def df_iteration_numbering(
+        self, df: pd.DataFrame, unique_data: Dict[str, str]
+    ) -> None:
         """Loop through the DataFrame and assign the values 1 and 0 to the rows, depending if the corresponding interaction from unique data is present.
 
         Args:
@@ -487,8 +497,8 @@ class BindingModeProcessor:
                 elif row["INTERACTION"] == "waterbridge":
                     for col in unique_data.values():
                         if "waterbridge" in col:
-                            prot_partner, ligcarbonidx, _type, interaction = (
-                                col.split("_")
+                            prot_partner, ligcarbonidx, _type, interaction = col.split(
+                                "_"
                             )
                             condition = (
                                 (row["Prot_partner"] == prot_partner)
@@ -548,18 +558,17 @@ class BindingModeProcessor:
                             )
                             df.at[index, col] = 1 if condition else 0
 
-   from typing import Dict
-import pandas as pd
+    def update_values(
+        self, df: pd.DataFrame, new: pd.DataFrame, unique_data: Dict[str, str]
+    ) -> None:
+        """Update the values in the input DataFrame based upon the frame values and a reference DataFrame.
 
-def update_values(self, df: pd.DataFrame, new: pd.DataFrame, unique_data: Dict[str, str]) -> None:
-    """Update the values in the input DataFrame based upon the frame values and a reference DataFrame.
-
-    Args:
+        Args:
         df (pandas.DataFrame): Input DataFrame that will be updated.
         new (pandas.DataFrame): The reference DataFrame containing values that are used to update the input DataFrame.
         unique_data (Dict[str, str]): A dictionary containing keys that represent the specific unique column names that need to be updated in the input DataFrame.
-    """
-    for idx, row in df.iterrows():
-        frame_value = row["FRAME"]
-        values_to_update = new.loc[frame_value, list(unique_data.values())]
-        df.loc[idx, list(unique_data.values())] = values_to_update
+        """
+        for idx, row in df.iterrows():
+            frame_value = row["FRAME"]
+            values_to_update = new.loc[frame_value, list(unique_data.values())]
+            df.loc[idx, list(unique_data.values())] = values_to_update

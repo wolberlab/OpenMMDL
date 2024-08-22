@@ -7,7 +7,8 @@ import cairosvg
 import pylab
 import os
 import MDAnalysis as mda
-
+from typing import List, Dict, Tuple
+from typing import List, Optional
 
 class LigandImageGenerator:
     def __init__(
@@ -104,8 +105,8 @@ class LigandImageGenerator:
             print(f"Error: {e}")
 
 
-import MDAnalysis as mda
-from typing import List, Dict, Tuple
+
+
 
 class InteractionProcessor:
     def __init__(self, complex_pdb_file: str, ligand_no_h_pdb_file: str):
@@ -141,8 +142,20 @@ class InteractionProcessor:
             split_data.append(split_value)
         return split_data
 
-    def highlight_numbers(self, split_data: List[str], starting_idx: List[int]) -> Tuple[
-        List[int], List[int], List[int], List[int], List[int], List[int], List[int], List[int], List[int], List[int], List[int]
+    def highlight_numbers(
+        self, split_data: List[str], starting_idx: List[int]
+    ) -> Tuple[
+        List[int],
+        List[int],
+        List[int],
+        List[int],
+        List[int],
+        List[int],
+        List[int],
+        List[int],
+        List[int],
+        List[int],
+        List[int],
     ]:
         """Extracts the data from the split_data output of the interactions and categorizes it to its respective list.
 
@@ -209,7 +222,9 @@ class InteractionProcessor:
                         if atom_name is None:
                             continue
                         lig_atom = self.lig_noh.select_atoms(f"name {atom_name}")
-                        lig_real_index = lig_atom[0].id - 1 if len(lig_atom) > 0 else None
+                        lig_real_index = (
+                            lig_atom[0].id - 1 if len(lig_atom) > 0 else None
+                        )
                         if lig_real_index is not None:
                             highlighted_pistacking.append(lig_real_index)
 
@@ -223,11 +238,15 @@ class InteractionProcessor:
                         for code in split_codes:
                             atom_index = int(code)
                             complex_id = self.complex.select_atoms(f"id {atom_index}")
-                            atom_name = complex_id[0].name if len(complex_id) > 0 else None
+                            atom_name = (
+                                complex_id[0].name if len(complex_id) > 0 else None
+                            )
                             if atom_name is None:
                                 continue
                             lig_atom = self.lig_noh.select_atoms(f"name {atom_name}")
-                            lig_real_index = lig_atom[0].id - 1 if len(lig_atom) > 0 else None
+                            lig_real_index = (
+                                lig_atom[0].id - 1 if len(lig_atom) > 0 else None
+                            )
                             if lig_real_index is not None:
                                 highlighted_ni.append(lig_real_index)
 
@@ -235,11 +254,15 @@ class InteractionProcessor:
                         for code in numeric_codes:
                             atom_index = int(code)
                             complex_id = self.complex.select_atoms(f"id {atom_index}")
-                            atom_name = complex_id[0].name if len(complex_id) > 0 else None
+                            atom_name = (
+                                complex_id[0].name if len(complex_id) > 0 else None
+                            )
                             if atom_name is None:
                                 continue
                             lig_atom = self.lig_noh.select_atoms(f"name {atom_name}")
-                            lig_real_index = lig_atom[0].id - 1 if len(lig_atom) > 0 else None
+                            lig_real_index = (
+                                lig_atom[0].id - 1 if len(lig_atom) > 0 else None
+                            )
                             if lig_real_index is not None:
                                 highlighted_pi.append(lig_real_index)
 
@@ -270,7 +293,9 @@ class InteractionProcessor:
             highlighted_metal,
         )
 
-    def generate_interaction_dict(self, interaction_type: str, keys: List[int]) -> Dict[int, Tuple[float, float, float]]:
+    def generate_interaction_dict(
+        self, interaction_type: str, keys: List[int]
+    ) -> Dict[int, Tuple[float, float, float]]:
         """Generates a dictionary of interaction RGB color model based on the provided interaction type.
 
         Args:
@@ -297,11 +322,13 @@ class InteractionProcessor:
         if interaction_type not in interaction_dict:
             raise ValueError(f"Unknown interaction type: {interaction_type}")
 
-        return {
-            int(key): interaction_dict[interaction_type] for key in keys
-        }
+        return {int(key): interaction_dict[interaction_type] for key in keys}
 
-    def update_dict(self, target_dict: Dict[int, Tuple[float, float, float]], *source_dicts: Dict[int, Tuple[float, float, float]]):
+    def update_dict(
+        self,
+        target_dict: Dict[int, Tuple[float, float, float]],
+        *source_dicts: Dict[int, Tuple[float, float, float]],
+    ):
         """Updates the dictionary with the keys and values from other dictionaries.
 
         Args:
@@ -321,18 +348,13 @@ class InteractionProcessor:
                     target_dict[key] = value
 
 
-from typing import List, Optional
-from PIL import Image
-import pylab
-import os
-
 class ImageMerger:
     def __init__(
-        self, 
-        binding_mode: str, 
-        occurrence_percent: float, 
-        split_data: List[str], 
-        merged_image_paths: List[str]
+        self,
+        binding_mode: str,
+        occurrence_percent: float,
+        split_data: List[str],
+        merged_image_paths: List[str],
     ) -> None:
         self.binding_mode = binding_mode
         self.occurrence_percent = occurrence_percent
@@ -361,7 +383,9 @@ class ImageMerger:
         for i, data in enumerate(filtered_split_data):
             y = data_points[i]
             label = data.split()[-1]
-            type_ = data.split()[-2]  # Renamed 'type' to 'type_' to avoid conflict with the built-in type() function
+            type_ = data.split()[
+                -2
+            ]  # Renamed 'type' to 'type_' to avoid conflict with the built-in type() function
             if label == "hydrophobic":
                 (line,) = ax.plot(
                     x, y, label=data, color=(1.0, 1.0, 0.0), linewidth=5.0
