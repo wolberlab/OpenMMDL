@@ -351,7 +351,7 @@ class ConfigCreator:
         script.append("\n# Simulation Configuration\n")
 
         script.append(
-            "platform = '%s'" % self.session["platform"]
+            "platform = %s" % self.session["platform"]
         )
         if self.session["platform"] in ("CUDA", "OpenCL"):
             script.append(
@@ -360,11 +360,11 @@ class ConfigCreator:
         if self.session["writeDCD"]:
             if self.session["restart_checkpoint"] and self.session["restart_step"] != "":
                 script.append(
-                    "dcd_name = '%s_%s'"
+                    "dcd_name = %s_%s"
                     % (self.session["restart_step"], self.session["dcdFilename"])
                 )
             else:
-                script.append("dcd_name = '%s'"
+                script.append("dcd_name = %s"
                     % (self.session["dcdFilename"])
                 )
         if self.session["writeData"]:
