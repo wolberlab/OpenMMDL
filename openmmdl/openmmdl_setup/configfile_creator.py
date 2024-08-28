@@ -74,16 +74,16 @@ class ConfigCreator:
                 """############# Ligand and Protein Data ###################"""
             )
             if self.session["pdbType"] == "pdb":
-                script.append('input_file_type = "pdb"')
-                script.append('protein = "%s"' % self.uploadedFiles["file"][0][1])
+                script.append('input_file_type = pdb')
+                script.append('protein = %s' % self.uploadedFiles["file"][0][1])
                 if self.session["sdfFile"] != "":
-                    script.append("ligand = '%s'" % self.session["sdfFile"])
-                    script.append('ligand_name = "UNK"')
+                    script.append("ligand = %s" % self.session["sdfFile"])
+                    script.append('ligand_name = UNK')
                     script.append(
                         "minimization = %s" % self.session["ligandMinimization"]
                     )
                     script.append(
-                        "smallMoleculeForceField = '%s'"
+                        "smallMoleculeForceField = %s"
                         % self.session["smallMoleculeForceField"]
                     )
                     script.append(
@@ -107,12 +107,12 @@ class ConfigCreator:
 
             # amber_files related variables
             if self.session["has_files"] == "yes":
-                script.append('input_file_type = "amber"')
+                script.append('input_file_type = amber')
                 script.append(
-                    "prmtop_file = '%s'" % self.uploadedFiles["prmtopFile"][0][1]
+                    "prmtop_file = %s" % self.uploadedFiles["prmtopFile"][0][1]
                 )
                 script.append(
-                    'inpcrd_file = "%s"' % self.uploadedFiles["inpcrdFile"][0][1]
+                    'inpcrd_file = %s' % self.uploadedFiles["inpcrdFile"][0][1]
                 )
 
                 # ligand related variables
@@ -121,10 +121,10 @@ class ConfigCreator:
 
             elif self.session["has_files"] == "no":
                 script.append(
-                    "prmtop_file = 'system.%s.prmtop'" % self.session["water_ff"]
+                    "prmtop_file = system.%s.prmtop" % self.session["water_ff"]
                 )
                 script.append(
-                    "inpcrd_file = 'system.%s.inpcrd' " % self.session["water_ff"]
+                    "inpcrd_file = system.%s.inpcrd " % self.session["water_ff"]
                 )
 
                 # ligand related variables
@@ -158,9 +158,9 @@ class ConfigCreator:
             script.append(
                 """\n############# Forcefield, Water and Membrane Model Selection ###################\n"""
             )
-            script.append("forcefield = '%s'" % self.session["forcefield"])
+            script.append("forcefield = %s" % self.session["forcefield"])
             if self.session["waterModel"] != "None":
-                script.append("water = '%s'" % self.session["waterModel"])
+                script.append("water = %s" % self.session["waterModel"])
             else:
                 script.append("water = %s" % self.session["waterModel"])
 
@@ -181,7 +181,7 @@ class ConfigCreator:
                     )
                     script.append("add_membrane = %s" % self.session["add_membrane"])
                     script.append(
-                        "membrane_lipid_type = '%s'" % self.session["lipidType"]
+                        "membrane_lipid_type = %s" % self.session["lipidType"]
                     )
                     script.append(
                         "membrane_padding = %s" % self.session["membrane_padding"]
@@ -191,11 +191,11 @@ class ConfigCreator:
                         % self.session["membrane_ionicstrength"]
                     )
                     script.append(
-                        "membrane_positive_ion = '%s'"
+                        "membrane_positive_ion = %s"
                         % self.session["membrane_positive"]
                     )
                     script.append(
-                        "membrane_negative_ion = '%s'"
+                        "membrane_negative_ion = %s"
                         % self.session["membrane_negative"]
                     )
                 else:
@@ -204,16 +204,16 @@ class ConfigCreator:
                     )
                     script.append("add_membrane = %s" % self.session["add_membrane"])
                     if self.session["water_padding"]:
-                        script.append('Water_Box = "Buffer"')
+                        script.append('Water_Box = Buffer')
                         script.append(
                             "water_padding_distance = %s"
                             % self.session["water_padding_distance"]
                         )
                         script.append(
-                            "water_boxShape = '%s'" % self.session["water_boxShape"]
+                            "water_boxShape = %s" % self.session["water_boxShape"]
                         )
                     else:
-                        script.append('Water_Box = "Absolute"')
+                        script.append('Water_Box = Absolute')
                         script.append("water_box_x = %s" % self.session["box_x"])
                         script.append("water_box_y = %s" % self.session["box_y"])
                         script.append("water_box_z = %s" % self.session["box_z"])
@@ -221,10 +221,10 @@ class ConfigCreator:
                         "water_ionicstrength = %s" % self.session["water_ionicstrength"]
                     )
                     script.append(
-                        "water_positive_ion = '%s'" % self.session["water_positive"]
+                        "water_positive_ion = %s" % self.session["water_positive"]
                     )
                     script.append(
-                        "water_negative_ion = '%s'" % self.session["water_negative"]
+                        "water_negative_ion = %s" % self.session["water_negative"]
                     )
             else:
                 script.append("Solvent = %s" % self.session["solvent"])
@@ -332,33 +332,13 @@ class ConfigCreator:
         Args:
             script (list): A list of strings representing the configuration script being built.
         """
-        equilibration_type = self.session["equilibration"]
+        preparation_type = self.session["equilibration"]
         script.append("\n# Equilibration & Minimization Configuration\n")
 
-        if equilibration_type == "equilibration":
-            script.append(
-                """equilibration_stages = [
-                {'EOM': 'minimize', 'n_steps': 10000, 'temperature': 300*unit.kelvin, 'ensemble': None, 'restraint_selection': 'protein and not type H', 'force_constant': 100*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-                {'EOM': 'MD_interpolate', 'n_steps': 100000, 'temperature': 100*unit.kelvin, 'temperature_end': 300*unit.kelvin, 'ensemble': 'NVT', 'restraint_selection': 'protein and not type H', 'force_constant': 100*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 10/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-                {'EOM': 'MD', 'n_steps': 100000, 'temperature': 300, 'ensemble': 'NPT', 'restraint_selection': 'protein and not type H', 'force_constant': 100*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 10/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-                {'EOM': 'MD', 'n_steps': 250000, 'temperature': 300*unit.kelvin, 'ensemble': 'NPT', 'restraint_selection': 'protein and not type H', 'force_constant': 10*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-                {'EOM': 'minimize', 'n_steps': 10000, 'temperature': 300*unit.kelvin, 'ensemble': None, 'restraint_selection': 'protein and backbone', 'force_constant': 10*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-                {'EOM': 'MD', 'n_steps': 100000, 'temperature': 300*unit.kelvin, 'ensemble': 'NPT', 'restraint_selection': 'protein and backbone', 'force_constant': 10*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-                {'EOM': 'MD', 'n_steps': 100000, 'temperature': 300*unit.kelvin, 'ensemble': 'NPT', 'restraint_selection': 'protein and backbone', 'force_constant': 1*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-                {'EOM': 'MD', 'n_steps': 100000, 'temperature': 300*unit.kelvin, 'ensemble': 'NPT', 'restraint_selection': 'protein and backbone', 'force_constant': 0.1*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-                {'EOM': 'MD', 'n_steps': 2500000, 'temperature': 300*unit.kelvin, 'ensemble': 'NPT', 'restraint_selection': None, 'force_constant': 0*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 2*unit.femtoseconds},
-                ]
-            """
-            )
-        elif equilibration_type == "minimization":
-            script.append(
-                """equilibration_stages = [
-                {'EOM': 'minimize', 'n_steps': 10000, 'temperature': 300*unit.kelvin, 'ensemble': None, 'restraint_selection': 'protein and not type H', 'force_constant': 100*unit.kilocalories_per_mole/unit.angstrom**2, 'collision_rate': 2/unit.picoseconds, 'timestep': 1*unit.femtoseconds},
-                ]
-            """
-            )
-        elif equilibration_type == "None":
-            script.append("equilibration_stages = None")
+        if preparation_type == "equilibration":
+            script.append("preparation_type = equilibration")
+        elif preparation_type == "minimization":
+            script.append("preparation_type = minimization")
 
     def add_simulation_configuration(self, script):
         """
@@ -371,21 +351,20 @@ class ConfigCreator:
         script.append("\n# Simulation Configuration\n")
 
         script.append(
-            "platform = Platform.getPlatformByName('%s')" % self.session["platform"]
+            "platform = %s" % self.session["platform"]
         )
         if self.session["platform"] in ("CUDA", "OpenCL"):
             script.append(
                 "platformProperties = {'Precision': '%s'}" % self.session["precision"]
             )
         if self.session["writeDCD"]:
-            if self.session["restart_step"] == "":
+            if self.session["restart_checkpoint"] and self.session["restart_step"] != "":
                 script.append(
-                    "dcdReporter = DCDReporter('%s_%s', dcdInterval)"
+                    "dcd_name = %s_%s"
                     % (self.session["restart_step"], self.session["dcdFilename"])
                 )
             else:
-                script.append(
-                    "dcdReporter = DCDReporter('%s', dcdInterval)"
+                script.append("dcd_name = %s"
                     % (self.session["dcdFilename"])
                 )
         if self.session["writeData"]:

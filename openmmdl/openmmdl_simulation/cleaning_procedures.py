@@ -122,10 +122,9 @@ class PostMDProcessor:
 
         # Move input files
         if ligands:
-            for lig in ligands:
-                FileManager.copy_file(lig, "Input_Files")
-                FileManager.copy_file(lig, "Final_Output/All_Atoms")
-                FileManager.copy_file(lig, "Final_Output/Prot_Lig")
+            FileManager.copy_file(ligands, "Input_Files")
+            FileManager.copy_file(ligands, "Final_Output/All_Atoms")
+            FileManager.copy_file(ligands, "Final_Output/Prot_Lig")
 
         FileManager.copy_file(protein_name, "Input_Files")
         if prmtop:

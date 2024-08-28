@@ -188,3 +188,90 @@ class MDAnalysisConversion:
                     filename=f"prot_lig_traj.xtc",
                 )
                 alignment_prot_lig_gro.run()
+
+
+class MDPostProcessingHandler:
+    def __init__(self, config_parser):
+        """
+        Initialize the MDPostProcessingHandler with the necessary parameters.
+
+        Parameters:
+        - config_parser (ConfigParser): The configuration parser instance.
+        - session (dict): The session dictionary containing post-processing configuration.
+        - protein (str): The protein identifier.
+        - nmLigName (str, optional): Name of the normal ligand (optional).
+        - spLigName (str, optional): Name of the special ligand (optional).
+        """
+        self.config_parser = config_parser
+        self.postprocessing = config_parser.postprocessing
+        self.input_filetype = config_parser.input_file_type
+        self.protein = config_parser.protein
+        self.prmtop_file = config_parser.prmtop_file
+        self.old_output = config_parser.old_output
+        self.ligand = config_parser.ligand
+        self.ligand_name = config_parser.nmLig
+        self.special_ligname = config_parser.spLigName
+        self.mda_output = config_parser.mda_output
+        self.mda_selection = config_parser.mda_selection
+
+    def process(self):
+        """
+        Perform the MD post-processing based on the configuration.
+        """
+        if self.postprocessing == "True":
+            print("yy")
+            self._handle_mdtraj_conversion()
+            self._handle_mdanalysis_conversion()
+
+    def _handle_mdtraj_conversion(self):
+        """
+        Handle the MDTraj conversion process based on the file type.
+        """
+        if self.input_filetype == "pdb":
+            print("do it")
+            converter = MdtrajConverter(f'Equilibration_{self.protein}', self.old_output)
+            converter.mdtraj_conversion()
+        elif self.input_file_type == "amber":
+            converter = MdtrajConverter(self.prmtop_file, self.old_output)
+            converter.mdtraj_conversion()
+
+    def _handle_mdanalysis_conversion(self):
+        """
+        Handle the MDAnalysis conversion process based on the file type and session parameters.
+        """
+        if self.input_filetype == "pdb":
+            print("dup dup do it")
+            self._perform_mdanalysis_conversion(
+                'centered_old_coordinates_top.pdb',
+                'centered_old_coordinates.dcd',
+                ligand_name='UNK' if self.ligand else None
+            )
+        elif self.input_filetype == "amber":
+            ligand_name = self.ligand_name
+            special_ligname = self.special_ligname
+            self._perform_mdanalysis_conversion(
+                'centered_old_coordinates_top.pdb',
+                'centered_old_coordinates.dcd',
+                ligand_name=ligand_name,
+                special_ligname=special_ligname
+            )
+
+    def _perform_mdanalysis_conversion(self, pdb_file, dcd_file, ligand_name=None, special_ligname=None):
+        """
+        Perform the MDAnalysis conversion.
+
+        Args:
+        - pdb_file (str): The PDB file for the post-MDtraj processing.
+        - dcd_file (str): The DCD file for the post-MDtraj processing.
+        - ligand_name (str, optional): The ligand name in the PDB file.
+        - special_ligname (str, optional): The special residue name in the PDB file.
+        """
+        converter = MDAnalysisConversion(
+            pdb_file,
+            dcd_file,
+            self.mda_output,
+            self.mda_selection,
+            ligand_name=ligand_name,
+            special_ligname=special_ligname,
+        )
+        converter.mdanalysis_conversion()
