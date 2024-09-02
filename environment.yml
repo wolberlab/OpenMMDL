@@ -4,7 +4,6 @@ channels:
   - conda-forge  # Add the conda-forge channel here
 
 dependencies:
-  - python=3.10
   - pip
   - setuptools>=61.0
   - versioningit~=2.0
