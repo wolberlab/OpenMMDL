@@ -66,6 +66,8 @@ openmmdl = [
     "py.typed"
 ]
 
+[tool.setuptools.dynamic]
+version = { attr = "openmmdl._version.__version__" }
 
 [tool.versioningit.format]
 distance = "{base_version}+{distance}.{vcs}{rev}"
