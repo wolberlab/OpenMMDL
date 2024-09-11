@@ -66,21 +66,8 @@ openmmdl = [
     "py.typed"
 ]
 
-
-[tool.versioningit.format]
-distance = "{base_version}+{distance}.{vcs}{rev}"
-dirty = "{base_version}+{distance}.{vcs}{rev}.dirty"
-distance-dirty = "{base_version}+{distance}.{vcs}{rev}.dirty"
-
-[tool.versioningit.vcs]
-# The method key:
-method = "git"  # <- The method name
-# Parameters to pass to the method:
-match = ["*"]
-default-tag = "1.0.0"
-
-[tool.versioningit.write]
-file = "openmmdl/_version.py"
+[tool.setuptools.dynamic]
+version = { attr = "openmmdl._version.__version__" }
 
 [project.scripts]
 openmmdl_setup = "openmmdl.openmmdl_setup.openmmdlsetup:main"
