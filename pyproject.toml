@@ -66,8 +66,6 @@ openmmdl = [
     "py.typed"
 ]
 
-[tool.versioningit]
-default-version = "0.0.1"
 
 [tool.versioningit.format]
 distance = "{base_version}+{distance}.{vcs}{rev}"
