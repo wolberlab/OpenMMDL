@@ -1,38 +1,116 @@
 from flask import session, request
+from typing import Any, Dict, Optional
+from werkzeug.datastructures import ImmutableMultiDict
+from typing import TypedDict, List, Union
+
+
+class SessionDict(TypedDict, total=False):
+    restart_checkpoint: bool
+    mdtraj_output: str
+    mdtraj_removal: str
+    mda_output: str
+    mda_selection: str
+    openmmdl_analysis: str
+    analysis_selection: str
+    binding_mode: str
+    min_transition: str
+    rmsd_diff: str
+    pml_generation: str
+    stable_water: str
+    wc_distance: str
+    fileType: str
+    waterModel: str
+    ensemble: str
+    platform: str
+    precision: str
+    cutoff: str
+    ewaldTol: str
+    constraintTol: str
+    hmr: bool
+    hmrMass: str
+    dt: str
+    sim_length: str
+    equilibration: str
+    temperature: str
+    friction: str
+    pressure: str
+    barostatInterval: str
+    nonbondedMethod: str
+    writeDCD: bool
+    dcdFilename: str
+    dcdFrames: str
+    pdbInterval_ns: str
+    writeData: bool
+    dataFilename: str
+    dataInterval: str
+    dataFields: List[str]
+    writeCheckpoint: bool
+    checkpointFilename: str
+    checkpointInterval_ns: str
+    writeSimulationXml: bool
+    systemXmlFilename: str
+    integratorXmlFilename: str
+    writeFinalState: bool
+    finalStateFileType: str
+    finalStateFilename: str
+    constraints: str
+    rmsd: str
+    md_postprocessing: str
+    nmLig: str
+    spLig: str
+    lig_ff: str
+    charge_value: str
+    charge_method: str
+    prot_ff: str
+    dna_ff: str
+    rna_ff: str
+    carbo_ff: str
+    addType: str
+    boxType: str
+    dist: str
+    lipid_tp: str
+    other_lipid_tp_input: str
+    lipid_ratio: str
+    lipid_ff: str
+    dist2Border: str
+    padDist: str
+    water_ff: str
+    pos_ion: str
+    neg_ion: str
+    ionConc: str
 
 
 class SetupOptionsConfigurator:
     """
-    Configures and initializes default simulation options based on flask session data.
+    Configures and initializes default simulation options based on Flask session data.
 
     This class is responsible for setting up various simulation parameters such as
-    ensemble types, platform, precision, cutoffs, force fields and other essential
+    ensemble types, platform, precision, cutoffs, force fields, and other essential
     options. It primarily deals with setting default values for these parameters,
     which can then be used throughout the simulation process.
 
     Attributes:
-        session (flask.session): The session object used to store configuration data
-                                 for the simulation setup.
+        session (SessionDict): The session object used to store configuration data
+                               for the simulation setup.
     """
 
-    def __init__(self, session):
+    def __init__(self, session: SessionDict) -> None:
         """
         Initializes the SetupOptionsConfigurator with the provided session object.
 
         Args:
-            session (flask.session): The session object to store simulation configuration data.
+            session (SessionDict): The session object to store simulation configuration data.
         """
+        self.session: SessionDict = session
 
-        self.session = session
-
-    def configure_default_options(self):
+    def configure_default_options(self) -> None:
         """
         Sets default simulation options based on session data.
 
         Updates parameters for ensemble type, platform, cutoff, tolerances,
         simulation length, and output files.
         """
-        implicitWater = False
+        implicitWater: bool = False
         self.session["restart_checkpoint"] = False
         self.session["mdtraj_output"] = "mdtraj_pdb_dcd"
         self.session["mdtraj_removal"] = "False"
@@ -98,7 +176,7 @@ class SetupOptionsConfigurator:
         self.session["rmsd"] = "True"
         self.session["md_postprocessing"] = "True"
 
-    def configureDefaultAmberOptions(self):
+    def configureDefaultAmberOptions(self) -> None:
         """
         Sets default options for ligand, receptor, and solvation in Amber.
 
@@ -135,6 +213,9 @@ class SetupOptionsConfigurator:
         self.session["ionConc"] = "0.15"
 
 
+
+
+
 class RequestSessionManager:
     """
     Manages the configuration of session variables based on form data received in HTTP requests.
@@ -144,19 +225,19 @@ class RequestSessionManager:
     which tracks the state of the simulation setup across different user interactions.
 
     Attributes:
-        form (werkzeug.datastructures.ImmutableMultiDict): The form data from an HTTP request.
+        form (ImmutableMultiDict[str, str]): The form data from an HTTP request.
     """
 
-    def __init__(self, form):
+    def __init__(self, form: ImmutableMultiDict[str, str]) -> None:
         """
         Initializes the RequestSessionManager with form data.
 
         Args:
-            form (werkzeug.datastructures.ImmutableMultiDict): The form data from an HTTP request.
+            form (ImmutableMultiDict[str, str]): The form data from an HTTP request.
         """
-        self.form = form
+        self.form: ImmutableMultiDict[str, str] = form
 
-    def setAmberOptions_rcp_session(self):
+    def setAmberOptions_rcp_session(self) -> None:
         """
         Sets receptor-related Amber options from form data.
         """
@@ -170,7 +251,7 @@ class RequestSessionManager:
         session["carbo_ff"] = self.form.get("carbo_ff", "")
         session["other_carbo_ff_input"] = self.form.get("other_carbo_ff_input", "")
 
-    def setAmberOptions_water_membrane_session(self):
+    def setAmberOptions_water_membrane_session(self) -> None:
         """
         Sets water and membrane-related Amber options from form data.
         """
@@ -188,43 +269,46 @@ class RequestSessionManager:
         session["neg_ion"] = self.form.get("neg_ion", "")
         session["ionConc"] = self.form.get("ionConc", "")
 
-    def addhydrogens_add_water_or_membrane_session(self):
+    def addhydrogens_add_water_or_membrane_session(self) -> None:
         """
         Configures water or membrane settings based on form data.
         """
         if "addWater" in self.form:
             session["solvent"] = True
             session["add_membrane"] = False
-            padding, boxSize, boxShape = None, None, None
 
             if self.form["boxType"] == "geometry":
                 session["water_padding"] = True
-                session["water_padding_distance"] = float(self.form["geomPadding"])
+                session["water_padding_distance"] = self._parse_float(
+                    self.form.get("geomPadding")
+                )
                 session["water_boxShape"] = self.form["geometryDropdown"]
             else:
                 session["water_padding"] = False
-                session["box_x"] = float(self.form["boxx"])
-                session["box_y"] = float(self.form["boxy"])
-                session["box_z"] = float(self.form["boxz"])
-                boxSize = (
-                    float(self.form["boxx"]),
-                    float(self.form["boxy"]),
-                    float(self.form["boxz"]),
-                )
-            session["water_ionicstrength"] = float(self.form["ionicstrength"])
-            session["water_positive"] = self.form["positiveion"] + "+"
-            session["water_negative"] = self.form["negativeion"] + "-"
+                session["box_x"] = self._parse_float(self.form.get("boxx"))
+                session["box_y"] = self._parse_float(self.form.get("boxy"))
+                session["box_z"] = self._parse_float(self.form.get("boxz"))
+
+            session["water_ionicstrength"] = self._parse_float(
+                self.form.get("ionicstrength")
+            )
+            session["water_positive"] = self.form.get("positiveion", "") + "+"
+            session["water_negative"] = self.form.get("negativeion", "") + "-"
 
         elif "addMembrane" in self.form:
             session["solvent"] = True
             session["add_membrane"] = True
             session["lipidType"] = self.form["lipidType"]
-            session["membrane_padding"] = float(self.form["membranePadding"])
-            session["membrane_ionicstrength"] = float(self.form["ionicstrength"])
-            session["membrane_positive"] = self.form["positiveion"] + "+"
-            session["membrane_negative"] = self.form["negativeion"] + "-"
+            session["membrane_padding"] = self._parse_float(
+                self.form.get("membranePadding")
+            )
+            session["membrane_ionicstrength"] = self._parse_float(
+                self.form.get("ionicstrength")
+            )
+            session["membrane_positive"] = self.form.get("positiveion", "") + "+"
+            session["membrane_negative"] = self.form.get("negativeion", "") + "-"
 
-    def simulationoptions_add_general_settings(self):
+    def simulationoptions_add_general_settings(self) -> None:
         """
         Adds general simulation settings from form data to the session.
         """
@@ -239,7 +323,7 @@ class RequestSessionManager:
         session["writeSimulationXml"] = "writeSimulationXml" in self.form
         session["writeFinalState"] = "writeFinalState" in self.form
 
-    def configureFiles_add_forcefield_ligand_settings(self):
+    def configureFiles_add_forcefield_ligand_settings(self) -> None:
         """
         Adds forcefield and ligand-related settings from form data to the session.
         """
@@ -251,3 +335,18 @@ class RequestSessionManager:
         )
         session["ligandMinimization"] = self.form.get("ligandMinimization", "")
         session["ligandSanitization"] = self.form.get("ligandSanitization", "")
+
+    def _parse_float(self, value: Optional[str]) -> Optional[float]:
+        """
+        Safely parses a string to a float, returning None if parsing fails.
+
+        Args:
+            value (Optional[str]): The string value to parse.
+
+        Returns:
+            Optional[float]: The parsed float, or None if parsing fails.
+        """
+        try:
+            return float(value) if value is not None else None
+        except (ValueError, TypeError):
+            return None

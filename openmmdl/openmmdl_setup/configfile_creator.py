@@ -1,5 +1,6 @@
 import datetime
 from openmmdl.openmmdl_setup.file_operator import LigandExtractor
+from typing import List, Dict, Optional, Tuple
 
 
 class ConfigCreator:
@@ -8,27 +9,29 @@ class ConfigCreator:
     configuration script based on the session parameters and uploaded files.
 
     Attributes:
-        session (dict): A dictionary containing user-defined session parameters.
-        uploadedFiles (dict): A dictionary containing information about the files uploaded by the user.
+        session (Dict[str, any]): A dictionary containing user-defined session parameters.
+        uploadedFiles (Dict[str, List[Tuple[str, str]]]): A dictionary containing information about the files uploaded by the user.
     """
 
-    def __init__(self, session, uploadedFiles):
+    def __init__(
+        self, session: Dict[str, any], uploadedFiles: Dict[str, List[Tuple[str, str]]]
+    ):
         """
         Initializes the ConfigCreator with session parameters and uploaded files from OpenMMDL Setup.
 
         Args:
-            session (dict): A dictionary containing user-defined session parameters.
-            uploadedFiles (dict): A dictionary containing information about the files uploaded by the user during the usage of OpenMMDL Setup.
+            session (Dict[str, any]): A dictionary containing user-defined session parameters.
+            uploadedFiles (Dict[str, List[Tuple[str, str]]]): A dictionary containing information about the files uploaded by the user during the usage of OpenMMDL Setup.
         """
         self.session = session
         self.uploadedFiles = uploadedFiles
 
-    def add_openmmdl_ascii_art_logo(self, script):
+    def add_openmmdl_ascii_art_logo(self, script: List[str]) -> None:
         """
         Adds the OpenMMDL logo to the configuration file.
 
         Args:
-            script (list): A list of strings representing the configuration file being built.
+            script (List[str]): A list of strings representing the configuration file being built.
         """
         script.append(
             """
@@ -44,12 +47,12 @@ class ConfigCreator:
             """
         )
 
-    def add_ascii_config_art(self, script):
+    def add_ascii_config_art(self, script: List[str]) -> None:
         """
         Adds a Config File ASCII art header for the configuration file.
 
         Args:
-            script (list): A list of strings representing the configuration script being built.
+            script (List[str]): A list of strings representing the configuration script being built.
         """
         script.append(
             """
@@ -59,14 +62,14 @@ class ConfigCreator:
             """
         )
 
-    def add_pdb_input_files_configuration(self, script):
+    def add_pdb_input_files_configuration(self, script: List[str]) -> None:
         """
         Adds configuration settings for PDB input files, including protein and ligand data.
         Handles both protein-only and protein-ligand systems, setting up the necessary variables
         for simulation input.
 
         Args:
-            script (list): A list of strings representing the configuration script being built.
+            script (List[str]): A list of strings representing the configuration script being built.
         """
         script.append("\n# Input Files")
         if self.session["fileType"] == "pdb":
@@ -91,14 +94,14 @@ class ConfigCreator:
                     )
             water = self.session["waterModel"]
 
-    def add_amber_file_configuration(self, script):
+    def add_amber_file_configuration(self, script: List[str]) -> None:
         """
         Adds configuration settings for Amber input files, including topology and coordinate files.
         This method handles both scenarios where Amber files are pre-existing or need to be generated.
         It also extracts ligand names if ligands are present.
 
         Args:
-            script (list): A list of strings representing the configuration script being built.
+            script (List[str]): A list of strings representing the configuration script being built.
         """
         if self.session["fileType"] == "amber":
             script.append(
@@ -146,13 +149,13 @@ class ConfigCreator:
             script.append("prmtop = AmberPrmtopFile(prmtop_file)")
             script.append("inpcrd = AmberInpcrdFile(inpcrd_file)")
 
-    def add_forcefield_and_water_model_configuration(self, script):
+    def add_forcefield_and_water_model_configuration(self, script: List[str]) -> None:
         """
         Adds forcefield and water model configuration settings to the script based on the file type.
         This includes selecting the appropriate forcefield and water model if applicable.
 
         Args:
-            script (list): A list of strings representing the configuration script being built.
+            script (List[str]): A list of strings representing the configuration script being built.
         """
         if self.session["fileType"] == "pdb":
             script.append(
@@ -164,14 +167,14 @@ class ConfigCreator:
             else:
                 script.append("water = %s" % self.session["waterModel"])
 
-    def add_solvent_configuration(self, script):
+    def add_solvent_configuration(self, script: List[str]) -> None:
         """
         Adds solvent or membrane configuration settings to the script, depending on whether
         a membrane or water box is being used, including parameters like padding, ionic strength,
         and ion types.
 
         Args:
-            script (list): A list of strings representing the configuration script being built.
+            script (List[str]): A list of strings representing the configuration script being built.
         """
         if self.session["fileType"] == "pdb":
             if self.session["solvent"]:
@@ -229,13 +232,13 @@ class ConfigCreator:
             else:
                 script.append("Solvent = %s" % self.session["solvent"])
 
-    def add_system_configuration(self, script):
+    def add_system_configuration(self, script: List[str]) -> None:
         """
         Adds system configuration settings to the script, including nonbonded method, cutoff distances,
         ewald error tolerance, hydrogen mass repartitioning (HMR), and constraints settings.
 
         Args:
-            script (list): A list of strings representing the configuration script being built.
+            script (List[str]): A list of strings representing the configuration script being built.
         """
         script.append("\n# System Configuration\n")
         nonbondedMethod = self.session["nonbondedMethod"]
@@ -276,13 +279,13 @@ class ConfigCreator:
         if self.session["hmr"]:
             script.append("hydrogenMass = %s*unit.amu" % self.session["hmrMass"])
 
-    def add_integration_configuration(self, script):
+    def add_integration_configuration(self, script: List[str]) -> None:
         """
         Adds the integration configuration to the script, specifying time step, temperature,
         friction, and pressure (for NPT ensemble).
 
         Args:
-            script (list): A list of strings representing the configuration script being built.
+            script (List[str]): A list of strings representing the configuration script being built.
         """
         script.append("\n# Integration Configuration\n")
         script.append("step_time = %s" % self.session["dt"])
@@ -295,13 +298,13 @@ class ConfigCreator:
             script.append("pressure = %s*unit.atmospheres" % self.session["pressure"])
             script.append("barostatInterval = %s" % self.session["barostatInterval"])
 
-    def add_simulation_time_and_steps_configuration(self, script):
+    def add_simulation_time_and_steps_configuration(self, script: List[str]) -> None:
         """
         Adds the simulation time and step configuration to the script, including
         the total simulation length, number of steps, and intervals for frames and PDB output.
 
         Args:
-            script (list): A list of strings representing the configuration script being built.
+            script (List[str]): A list of strings representing the configuration script being built.
         """
         script.append("\n# Simulation Time and Steps Configuration\n")
         script.append("sim_length = %s" % self.session["sim_length"])
@@ -324,13 +327,13 @@ class ConfigCreator:
         )
         script.append("pdbInterval = %s" % pdbInterval)
 
-    def add_equilibration_configuration(self, script):
+    def add_equilibration_configuration(self, script: List[str]) -> None:
         """
         Adds equilibration or minimization configuration to the script. It defines different
         equilibration stages based on the selected method (equilibration, minimization, or none).
 
         Args:
-            script (list): A list of strings representing the configuration script being built.
+            script (List[str]): A list of strings representing the configuration script being built.
         """
         preparation_type = self.session["equilibration"]
         script.append("\n# Equilibration & Minimization Configuration\n")
@@ -340,13 +343,13 @@ class ConfigCreator:
         elif preparation_type == "minimization":
             script.append("preparation_type = minimization")
 
-    def add_simulation_configuration(self, script):
+    def add_simulation_configuration(self, script: List[str]) -> None:
         """
         Adds the simulation configuration to the script, including platform settings,
         precision, and file outputs like DCD and data reporters.
 
         Args:
-            script (list): A list of strings representing the configuration script being built.
+            script (List[str]): A list of strings representing the configuration script being built.
         """
         script.append("\n# Simulation Configuration\n")
 
@@ -385,12 +388,12 @@ class ConfigCreator:
                 )
             script.append("    %s, separator='\\t')" % args)
 
-    def add_checkpoint_configuration(self, script):
+    def add_checkpoint_configuration(self, script: List[str]) -> None:
         """
         Adds checkpoint and restart configuration settings to the script.
 
         Args:
-            script (list): A list of strings representing the configuration script being built.
+            script (List[str]): A list of strings representing the configuration script being built.
         """
         if self.session["writeCheckpoint"]:
             checkpointInterval = int(
@@ -406,12 +409,12 @@ class ConfigCreator:
             if self.session["restart_checkpoint"]:
                 script.append("restart_step = %s" % self.session["restart_step"])
 
-    def add_xml_serialization_configuration(self, script):
+    def add_xml_serialization_configuration(self, script: List[str]) -> None:
         """
         Adds XML serialization settings for the system and integrator objects.
 
         Args:
-            script (list): A list of strings representing the configuration script being built.
+            script (List[str]): A list of strings representing the configuration script being built.
         """
         if self.session["writeSimulationXml"]:
             script.append("\n# Write XML Serialized Objects\n")
@@ -420,13 +423,13 @@ class ConfigCreator:
                 "xmlintegrator_filename = %s" % self.session["integratorXmlFilename"]
             )
 
-    def add_postprocessing_configuration(self, script):
+    def add_postprocessing_configuration(self, script: List[str]) -> None:
         """
         Adds post-processing configuration, including settings for MD post-processing,
         with MDTraj and MDAnalysis outputs.
 
         Args:
-            script (list): A list of strings representing the configuration script being built.
+            script (List[str]): A list of strings representing the configuration script being built.
         """
         script.append("\n# Post-Processing Configuration\n")
         script.append("postprocessing = %s" % self.session["md_postprocessing"])
@@ -435,13 +438,13 @@ class ConfigCreator:
         script.append("mda_output = %s" % self.session["mda_output"])
         script.append("mda_selection = %s" % self.session["mda_selection"])
 
-    def add_openmmdl_analysis_configuration(self, script):
+    def add_openmmdl_analysis_configuration(self, script: List[str]) -> None:
         """
         Adds OpenMMDL Analysis configuration to the script, including various analysis settings
         if OpenMMDL Analysis is enabled.
 
         Args:
-            script (list): A list of strings representing the configuration script being built.
+            script (List[str]): A list of strings representing the configuration script being built.
         """
         script.append("\n# OpenMMDL Analysis Configuration\n")
         script.append("openmmdl_analysis = %s" % self.session["openmmdl_analysis"])
@@ -468,18 +471,18 @@ class ConfigWriter:
                                         configuration sections to the script.
     """
 
-    def __init__(self, session, uploaded_files):
+    def __init__(self, session: Dict[str, any], uploaded_files: Dict[str, List[Tuple[str, str]]]) -> None:
         """
         Initializes the ConfigWriter with a session and uploaded files.
 
         Args:
-            session (dict): A dictionary containing the session settings and parameters.
-            uploaded_files (dict): A dictionary containing the uploaded file paths and names.
+            session (Dict[str, any]): A dictionary containing the session settings and parameters.
+            uploaded_files (Dict[str, List[Tuple[str, str]]]): A dictionary containing the uploaded file paths and names.
         """
-        self.script = []
+        self.script: List[str] = []
         self.config_creator = ConfigCreator(session, uploaded_files)
 
-    def create_config_script(self):
+    def create_config_script(self) -> str:
         """
         Generates the complete configuration script by sequentially adding various configuration
         sections. The method integrates several configurations such as PDB input files, Amber input
