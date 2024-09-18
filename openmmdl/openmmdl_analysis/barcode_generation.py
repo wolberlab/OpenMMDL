@@ -82,7 +82,7 @@ class BarcodeGenerator:
         water_id_list = []
         waterid_barcode = []
 
-        for _, row in self.df.iterrows():
+        for index, row in self.df.iterrows():
             if row[interaction] == 1:
                 water_id_list.append(int(float(row["WATER_IDX"])))
 
@@ -296,11 +296,11 @@ class BarcodePlotter:
                     ligatom.pop(-1)
             ligatom = "_".join(ligatom)
             ligatoms_dict.setdefault(ligatom, []).append(interaction)
-
-        total_interactions: Dict[str, np.ndarray] = {}
-        for ligatom, interactions_list in ligatoms_dict.items():
-            ligatom_interaction_barcodes: Dict[str, np.ndarray] = {}
-            for interaction in interactions_list:
+        
+        total_interactions = {}
+        for ligatom in ligatoms_dict:
+            ligatom_interaction_barcodes = {}
+            for interaction in ligatoms_dict[ligatom]:
                 barcode = self.barcode_gen.generate_barcode(interaction)
                 ligatom_interaction_barcodes[interaction] = barcode
             os.makedirs(f"./Barcodes/{ligatom}", exist_ok=True)
