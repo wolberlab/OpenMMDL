@@ -27,6 +27,7 @@ dependencies:
   - nglview=3.0.6
   - numba>=0.59.1
   - jupyter
+  - mdonatello
   # Add any additional runtime dependencies from pyproject.toml here
   # - package_name=version
 
