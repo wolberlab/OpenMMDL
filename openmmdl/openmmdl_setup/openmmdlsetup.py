@@ -31,6 +31,7 @@ import time
 import traceback
 import webbrowser
 import zipfile
+from typing import Optional, Dict, Any, Tuple, List, Union
 
 from openmmdl.openmmdl_setup.setup_options import (
     SetupOptionsConfigurator,
@@ -43,7 +44,6 @@ from openmmdl.openmmdl_setup.amberscript_creator import (
 )
 from openmmdl.openmmdl_setup.file_operator import FileUploader
 
-
 if sys.version_info >= (3, 0):
     from io import StringIO
 else:
@@ -55,14 +55,15 @@ app.config.from_object(__name__)
 app.config.update({"SECRET_KEY": "development key"})
 app.jinja_env.globals["mm"] = mm
 
-uploadedFiles = {}
-fixer = None
-scriptOutput = None
-simulationProcess = None
+# Typing for global variables
+uploadedFiles: Dict[str, List[Tuple[tempfile.NamedTemporaryFile, str]]] = {}
+fixer: Optional[PDBFixer] = None
+scriptOutput: Optional[str] = None
+simulationProcess: Optional[Process] = None
 
 
 @app.route("/headerControls")
-def headerControls():
+def headerControls() -> str:
     """
     Handle requests related to header controls such as restarting or stopping the server.
     """
@@ -73,11 +74,11 @@ def headerControls():
         if func is None:
             raise RuntimeError("Not running with the Werkzeug Server")
         func()
-        return "OpenMM Setup has stopped running.  You can close this window."
+        return "OpenMM Setup has stopped running. You can close this window."
 
 
 @app.route("/")
-def showSelectFileType():
+def showSelectFileType() -> str:
     """
     Render the page to select the file type PDB or Amber for the simulation setup.
     """
@@ -85,7 +86,7 @@ def showSelectFileType():
 
 
 @app.route("/selectFiles")
-def selectFiles():
+def selectFiles() -> str:
     """
     Handle file type selection and configure files based on the selected type.
     """
@@ -95,7 +96,7 @@ def selectFiles():
     return showConfigureFiles()
 
 
-def showConfigureFiles():
+def showConfigureFiles() -> str:
     """
     Render the appropriate configuration page based on the file type selected.
     """
@@ -112,14 +113,14 @@ def showConfigureFiles():
 
 
 @app.route("/configureFiles", methods=["POST"])
-def configureFiles():
+def configureFiles() -> str:
     """
     Handles the configuration of files based on the file type and form data provided.
     """
     fileType = session["fileType"]
     if fileType == "pdb":
         if "file" not in request.files or request.files["file"].filename == "":
-            # They didn't select a file.  Send them back.
+            # They didn't select a file. Send them back.
             return showConfigureFiles()
 
         FileUploader.save_uploaded_files(uploadedFiles, request)
@@ -145,7 +146,7 @@ def configureFiles():
                 or "inpcrdFile" not in request.files
                 or request.files["inpcrdFile"].filename == ""
             ):
-                # if the user doesn't select prmtop or incprd file.  Send them back.
+                # if the user doesn't select prmtop or incprd file. Send them back.
                 return showConfigureFiles()
             session["nmLig"] = "nmLig" in request.form
             session["spLig"] = "spLig" in request.form
@@ -172,7 +173,7 @@ def configureFiles():
 
 
 @app.route("/showAmberOptions")
-def showAmberOptions():
+def showAmberOptions() -> str:
     """
     Render the page for setting the Amber simulation options.
     """
@@ -180,7 +181,7 @@ def showAmberOptions():
 
 
 @app.route("/setAmberOptions", methods=["POST"])
-def setAmberOptions():
+def setAmberOptions() -> str:
     """
     Handles the setting of Amber options and file uploads.
     """
@@ -249,18 +250,14 @@ def setAmberOptions():
 
 
 @app.route("/downloadAmberBashScript")
-def downloadAmberBashScript():
+def downloadAmberBashScript() -> Any:
     """
-    Downloads the amber bash script.
+    Downloads the amber bash script if it exists.
     """
-    amber_script_creator = AmberBashScriptWriter(session, uploadedFiles)
-    response = make_response(amber_script_creator.write_amber_script())
-    response.headers["Content-Disposition"] = 'attachment; filename="run_ambertools.sh"'
-    return response
-
-
-########################################################################################################################
-
+    filename = "amber.bash"
+    if os.path.exists(filename):
+        return send_file(filename, as_attachment=True, download_name=filename)
+    return "The amber.bash script does not exist."
 
 @app.route("/getCurrentStructure")
 ##remove
