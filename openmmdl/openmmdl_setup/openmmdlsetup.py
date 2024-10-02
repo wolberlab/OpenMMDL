@@ -90,7 +90,9 @@ def selectFiles() -> str:
     """
     Handle file type selection and configure files based on the selected type.
     """
-    session["fileType"] = request.args.get("type", "")
+    session["fileType"] = request.args.get(
+        "type", ""
+    )  # get the value of `type` from the url
     return showConfigureFiles()
 
 
@@ -257,65 +259,318 @@ def downloadAmberBashScript() -> Any:
         return send_file(filename, as_attachment=True, download_name=filename)
     return "The amber.bash script does not exist."
 
+@app.route("/getCurrentStructure")
+##remove
+def getCurrentStructure():
+    """
+    Returns the current PDB structure from the PDBFixer instance.
+    """
+    pdb = StringIO()
+    PDBFile.writeFile(fixer.topology, fixer.positions, pdb)
+    return pdb.getvalue()
 
-@app.route("/downloadZipFile")
-def downloadZipFile() -> Any:
+
+def showSelectChains():
     """
-    Downloads the zip file containing the necessary simulation files.
+    Renders the page to select chains for further processing.
     """
-    if not os.path.exists("output_files.zip"):
-        return "The zip file does not exist."
-    return send_file(
-        "output_files.zip", as_attachment=True, download_name="output_files.zip"
+    chains = []
+    hasHeterogen = False
+    for chain in fixer.topology.chains():
+        residues = list(r.name for r in chain.residues())
+        if any(r in proteinResidues for r in residues):
+            content = "Protein"
+        elif any(r in rnaResidues for r in residues):
+            content = "RNA"
+        elif any(r in dnaResidues for r in residues):
+            content = "DNA"
+        else:
+            content = ", ".join(set(residues))
+            hasHeterogen = True
+        chains.append((chain.id, len(residues), content))
+    if len(chains) < 2 and not hasHeterogen:
+        session["heterogens"] = "all"
+        return showAddResidues()
+    return render_template("selectChains.html", chains=chains)
+
+
+@app.route("/selectChains", methods=["POST"])
+def selectChains():
+    """
+    Handles chain selection and update the PDBFixer instance.
+    """
+    session["heterogens"] = request.form.get("heterogens", "")
+    numChains = len(list(fixer.topology.chains()))
+    request.form.getlist("include")
+    deleteIndices = [
+        i for i in range(numChains) if str(i) not in request.form.getlist("include")
+    ]
+    fixer.removeChains(deleteIndices)
+    return showAddResidues()
+
+
+def showAddResidues():
+    """
+    Renders the page for adding missing residues to the structure.
+    """
+    spans = []
+    chains = list(fixer.topology.chains())
+    fixer.findMissingResidues()
+    if len(fixer.missingResidues) == 0:
+        return showConvertResidues()
+    for i, key in enumerate(sorted(fixer.missingResidues)):
+        residues = fixer.missingResidues[key]
+        chain = chains[key[0]]
+        chainResidues = list(chain.residues())
+        if key[1] < len(chainResidues):
+            offset = int(chainResidues[key[1]].id) - len(residues) - 1
+        else:
+            offset = int(chainResidues[-1].id)
+        spans.append(
+            (chain.id, offset + 1, offset + len(residues), ", ".join(residues))
+        )
+    return render_template("addResidues.html", spans=spans)
+
+
+@app.route("/addResidues", methods=["POST"])
+def addResidues():
+    """
+    Handles the addition of residues to the structure.
+    """
+    keys = [key for key in sorted(fixer.missingResidues)]
+    for i, key in enumerate(keys):
+        if str(i) not in request.form.getlist("add"):
+            del fixer.missingResidues[key]
+    return showConvertResidues()
+
+
+def showConvertResidues():
+    """
+    Renders the page for converting non-standard residues to standard residues.
+    """
+    fixer.findNonstandardResidues()
+    if len(fixer.nonstandardResidues) == 0:
+        return showAddHeavyAtoms()
+    residues = []
+    nucleotides = ["DA", "DC", "DG", "DT", "A", "C", "G", "T"]
+    for i in range(len(fixer.nonstandardResidues)):
+        residue, replaceWith = fixer.nonstandardResidues[i]
+        if replaceWith in proteinResidues:
+            replacements = proteinResidues
+        else:
+            replacements = nucleotides
+        residues.append(
+            (residue.chain.id, residue.name, residue.id, replacements, replaceWith)
+        )
+    return render_template("convertResidues.html", residues=residues)
+
+
+@app.route("/convertResidues", methods=["POST"])
+def convertResidues():
+    """
+    Handles the conversion of non-standard residues to standard residues.
+    """
+    for i in range(len(fixer.nonstandardResidues)):
+        if str(i) in request.form.getlist("convert"):
+            fixer.nonstandardResidues[i] = (
+                fixer.nonstandardResidues[i][0],
+                request.form["residue" + str(i)],
+            )
+    fixer.replaceNonstandardResidues()
+    return showAddHeavyAtoms()
+
+
+def showAddHeavyAtoms():
+    """
+    Renders the page for adding missing heavy atoms to the structure.
+    """
+    if session["heterogens"] == "none":
+        fixer.removeHeterogens(False)
+    elif session["heterogens"] == "water":
+        fixer.removeHeterogens(True)
+    fixer.findMissingAtoms()
+    allResidues = list(
+        set(fixer.missingAtoms.keys()).union(fixer.missingTerminals.keys())
+    )
+    allResidues.sort(key=lambda x: x.index)
+    if len(allResidues) == 0:
+        return addHeavyAtoms()
+    residues = []
+    for residue in allResidues:
+        atoms = []
+        if residue in fixer.missingAtoms:
+            atoms.extend(atom.name for atom in fixer.missingAtoms[residue])
+        if residue in fixer.missingTerminals:
+            atoms.extend(atom for atom in fixer.missingTerminals[residue])
+        residues.append((residue.chain.id, residue.name, residue.id, ", ".join(atoms)))
+    return render_template("addHeavyAtoms.html", residues=residues)
+
+
+@app.route("/addHeavyAtoms", methods=["POST"])
+def addHeavyAtoms():
+    """
+    Handles the addition of heavy atoms and renders the page for adding missing hydrogens to the structure.
+    """
+    # Add missing heavy atoms to the structure
+    fixer.addMissingAtoms()
+
+    # Render the page for adding missing hydrogens
+    unitCell = fixer.topology.getUnitCellDimensions()
+    if unitCell is not None:
+        unitCell = unitCell.value_in_unit(unit.nanometer)
+
+    boundingBox = tuple(
+        (
+            max((pos[i] for pos in fixer.positions))
+            - min((pos[i] for pos in fixer.positions))
+        ).value_in_unit(unit.nanometer)
+        for i in range(3)
+    )
+
+    return render_template(
+        "addHydrogens.html", unitCell=unitCell, boundingBox=boundingBox
     )
 
 
-@app.route("/submitSimulation")
-def submitSimulation() -> str:
+@app.route("/addHydrogens", methods=["POST"])
+def addHydrogens():
     """
-    Starts the simulation process based on the configured options.
+    Handles the addition of hydrogens and any additional water or membrane setup.
     """
-    if simulationProcess:
-        simulationProcess.terminate()
+    form = request.form
+    addhyderogen_session_manager = RequestSessionManager(form)
+    session["solvent"] = False
+    if "addHydrogens" in request.form:
+        pH = float(request.form.get("ph", "7"))
+        fixer.addMissingHydrogens(pH)
 
-    # Wait for the termination
-    time.sleep(1)
+    # Add session water or membrane from request
+    addhyderogen_session_manager.addhydrogens_add_water_or_membrane_session()
 
-    # Create the simulation process
-    pipe_parent, pipe_child = Pipe()
-    global simulationProcess
-    simulationProcess = Process(target=run_simulation, args=(pipe_child,))
-    simulationProcess.start()
+    # Save the new PDB file.
 
-    # Wait for the process to finish and get the results
-    results = pipe_parent.recv()
-    if "success" in results:
-        return "Simulation complete."
-    return "Simulation failed."
+    uploadedFiles["originalFile"] = uploadedFiles["file"]
+    pdb = StringIO()
+    if session["pdbType"] == "pdb":
+        try:
+            PDBFile.writeFile(fixer.topology, fixer.positions, pdb, True)
+        except:
+            # This can happen if the ids are too large to fit in the allowed space.
+            pdb = StringIO()
+            PDBFile.writeFile(fixer.topology, fixer.positions, pdb, False)
+    else:
+        PDBxFile.writeFile(fixer.topology, fixer.positions, pdb, True)
+    temp = tempfile.TemporaryFile()
+    temp.write(pdb.getvalue().encode("utf-8"))
+    name = uploadedFiles["file"][0][1]
+    dotIndex = name.rfind(".")
+    if dotIndex == -1:
+        prefix = name
+        suffix = ""
+    else:
+        prefix = name[:dotIndex]
+        suffix = name[dotIndex:]
+    uploadedFiles["file"] = [(temp, prefix + "-processed_openMMDL" + suffix)]
+    return showSimulationOptions()
 
 
-def run_simulation(pipe_child) -> None:
+@app.route("/showSimulationOptions")
+def showSimulationOptions():
     """
-    Function to run the simulation process.
+    Renders the page for setting simulation options based on the file type.
     """
-    try:
-        # Run the actual simulation logic here
-        # ...
-        pipe_child.send({"success": True})
-    except Exception as e:
-        pipe_child.send({"error": str(e)})
+    file_type = session.get("fileType", "")
+    simulation_configurator = SetupOptionsConfigurator(session)
+    simulation_configurator.configure_default_options()
+    
+    # render buttons based on the fileType
+    if file_type == "pdb":
+        return render_template(
+            "simulationOptions.html",
+            display_save_script=True,
+            display_processed_pdb=True,
+            display_save_all_files=True,
+        )
+    elif file_type == "amber":
+        return render_template(
+            "simulationOptions.html",
+            display_save_script=True,
+            display_processed_pdb=False,
+            display_save_all_files=False,
+        )
 
 
-@app.route("/stopSimulation")
-def stopSimulation() -> str:
+@app.route("/setSimulationOptions", methods=["POST"])
+def setSimulationOptions():
     """
-    Stops the ongoing simulation if it's running.
+    Handles setting simulation options and create a configuration script.
     """
-    if simulationProcess:
-        simulationProcess.terminate()
-        return "Simulation stopped."
-    return "No simulation is currently running."
+    form = request.form
+    configwriter = ConfigWriter(session, uploadedFiles)
+    simulationoptions_session_manager = RequestSessionManager(form)
+    simulationoptions_session_manager.simulationoptions_add_general_settings()
+    return configwriter.create_config_script()
+
+
+@app.route("/downloadScript")
+def downloadScript():
+    """
+    Provides the simulation configuration script for download.
+    """
+    configwriter = ConfigWriter(session, uploadedFiles)
+    configwriter.create_config_script()
+    response = make_response(configwriter.create_config_script())
+    response.headers["Content-Disposition"] = (
+        'attachment; filename="OpenMMDL_Simulation.conf"'
+    )
+    return response
+
+
+@app.route("/downloadStructuralfiles")
+def downloadStructuralfiles():
+    """
+    Provides the processed structural file for download.
+    """
+    file, name = uploadedFiles["file"][0]
+    file.seek(0, 0)
+    response = make_response(file.read())
+    response.headers["Content-Disposition"] = 'attachment; filename="%s"' % name
+    return response
+
+
+@app.route("/downloadPackage")
+def downloadPackage():
+    """
+    Provides a zip package containing the configuration script and all uploaded files.
+    """
+    temp = tempfile.NamedTemporaryFile()
+    configwriter = ConfigWriter(session, uploadedFiles)
+    with zipfile.ZipFile(temp, "w", zipfile.ZIP_DEFLATED) as zip:
+        zip.writestr(
+            "openmmdl_simulation/OpenMMDL_Simulation.conf",
+            configwriter.create_config_script(),
+        )
+        for key in uploadedFiles:
+            for file, name in uploadedFiles[key]:
+                file.seek(0, 0)
+                zip.writestr("openmmdl_simulation/%s" % name, file.read())
+    temp.seek(0, 0)
+    return send_file(
+        temp, "application/zip", True, "openmmdl_simulation.zip", max_age=0
+    )
+
+
+def main():
+
+    def open_browser():
+        # Give the server a moment to start before opening the browser.
+        time.sleep(1)
+        url = "http://127.0.0.1:5000"
+        webbrowser.open(url)
+
+    threading.Thread(target=open_browser).start()
+    app.run(debug=False)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    main()
