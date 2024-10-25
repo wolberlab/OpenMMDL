@@ -50,7 +50,7 @@ class RMSDAnalyzer:
             self.universe, ref, select=selection1, groupselections=selection2
         )
         rmsd_analysis.run()
-        columns = [selection1] + selection2 if selection2 else [selection1]
+        columns = [selection1, *selection2] if selection2 else [selection1]
         rmsd_df = pd.DataFrame(np.round(rmsd_analysis.rmsd[:, 2:], 2), columns=columns)
         rmsd_df.index.name = "frame"
 
@@ -123,7 +123,7 @@ class RMSDAnalyzer:
             img1, ax=ax, orientation="horizontal", fraction=0.1, label="RMSD (Å)"
         )
 
-        plt.savefig(f"./RMSD/RMSD_between_the_frames.{fig_type}")
+        plt.savefig(f"{output_directory}/RMSD_between_the_frames.{fig_type}")
         return pairwise_rmsd_prot, pairwise_rmsd_lig
 
     def calc_rmsd_2frames(self, ref: np.ndarray, frame: np.ndarray) -> float:
@@ -152,25 +152,24 @@ class RMSDAnalyzer:
         return distances
 
     def calculate_representative_frame(
-        self, bmode_frames: List[int], DM: np.ndarray
+        self, binding_mode_frames: List[int], distance_matrix: np.ndarray
     ) -> int:
         """Calculates the most representative frame for a binding mode. This is based upon the average RMSD of a frame to all other frames in the binding mode.
 
         Args:
-            bmode_frames (list): List of frames belonging to a binding mode.
-            DM (np.array): Distance matrix of trajectory.
+            binding_mode_frames (list): List of frames belonging to a binding mode.
+            distance_matrix (np.array): Distance matrix of trajectory.
 
         Returns:
             int: Number of the most representative frame.
         """
-        frames: List[int] = bmode_frames
         mean_rmsd_per_frame: dict = {}
-        for frame_i in frames:
+        for frame_i in binding_mode_frames:
             mean_rmsd_per_frame[frame_i] = 0
-            for frame_j in frames:
+            for frame_j in binding_mode_frames:
                 if frame_j != frame_i:
-                    mean_rmsd_per_frame[frame_i] += DM[frame_i - 1, frame_j - 1]
-            mean_rmsd_per_frame[frame_i] /= len(frames)
+                    mean_rmsd_per_frame[frame_i] += distance_matrix[frame_i - 1, frame_j - 1]
+            mean_rmsd_per_frame[frame_i] /= len(binding_mode_frames)
 
         repre: int = min(mean_rmsd_per_frame, key=mean_rmsd_per_frame.get)
 
