@@ -14,7 +14,7 @@ class TrajectorySaver:
     def __init__(
         self, pdb_md: mda.Universe, ligname: str, special: str, nucleic: bool
     ) -> None:
-        """Initializes the TrajectorySaver with an mda.Universe object, ligand name, special residue name, and receptor type.
+        """Initializes the TrajectorySaver with an mda.Universe object, ligand name, special residue name and receptor type.
 
         Args:
             pdb_md (mda.Universe): MDAnalysis Universe object containing the trajectory.
@@ -30,7 +30,7 @@ class TrajectorySaver:
     def save_interacting_waters_trajectory(
         self, interacting_waters: List[int], outputpath: str = "./Visualization/"
     ) -> None:
-        """Saves .pdb and .dcd files of the trajectory containing ligand, receptor, and all interacting waters.
+        """Saves .pdb and .dcd files of the trajectory containing ligand, receptor and all interacting waters.
 
         Args:
             interacting_waters (List[int]): List of all interacting water IDs.
@@ -103,7 +103,7 @@ class Visualizer:
         receptor_type: str = "protein or nucleic",
         height: str = "1000px",
         width: str = "1000px",
-    ) -> nv.NGLWidget:
+    ):
         """Generates visualization of the trajectory with the interacting waters and interaction clouds.
 
         Args:
@@ -112,7 +112,7 @@ class Visualizer:
             width (str, optional): Width of the visualization. Defaults to '1000px'.
 
         Returns:
-            nv.NGLWidget: Returns an nglview.widget object containing the visualization.
+            nglview widget: Returns an nglview.widget object containing the visualization.
         """
 
         sphere_buffers = []
