@@ -1,13 +1,13 @@
 import MDAnalysis as mda
+import mdtraj as md
 import os
 import re
 from typing import List, Optional
 import rdkit
 from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem import Mol
+from rdkit.Chem import AllChem, Mol
 from openbabel import pybel
-import mdtraj as md
+
 
 
 class Preprocessing:
@@ -25,12 +25,16 @@ class Preprocessing:
             reference_pdb (str): Path to the reference PDB file representing the molecular dynamics trajectory used as a reference.
             output_pdb (str): Path to the output PDB file where the renumbered trajectory will be saved.
         """
+
+        # Load trajectories
         traj_input = md.load(input_pdb)
         traj_reference = md.load(reference_pdb)
 
+        # Get the topology DataFrames
         input_top_df, _ = traj_input.topology.to_dataframe()
         ref_top_df, _ = traj_reference.topology.to_dataframe()
 
+        # List of common protein residue names including additional residues
         protein_residues = [
             "ALA",
             "ARG",
@@ -59,7 +63,9 @@ class Preprocessing:
             "HIP",
         ]
 
+        # Iterate over each chain in the reference topology
         for chain_id in ref_top_df["chainID"].unique():
+            # Extract residue indices from the reference topology for the current chain
             ref_residue_indices = (
                 ref_top_df[
                     (ref_top_df["chainID"] == chain_id)
@@ -68,14 +74,20 @@ class Preprocessing:
                 - 1
             )
 
+            # Update residue indices in the input topology DataFrame for the current chain
             mask = (input_top_df["chainID"] == chain_id) & input_top_df["resName"].isin(
                 protein_residues
             )
             input_top_df.loc[mask, "resSeq"] = ref_residue_indices + 1
 
+        # Create a new topology from the modified DataFrame
         new_top = md.Topology.from_dataframe(input_top_df)
+
+        # Update the topology in the input trajectory
         new_traj = traj_input.slice(range(traj_input.n_frames))
         new_traj.topology = new_top
+
+        # Save the renumbered trajectory to a new PDB file
         new_traj.save(output_pdb)
 
     def increase_ring_indices(self, ring: List[int], lig_index: int) -> List[int]:
@@ -93,14 +105,18 @@ class Preprocessing:
 
     def convert_ligand_to_smiles(self, input_sdf: str, output_smi: str) -> None:
         """
-        Converts ligand structures from an SDF file to SMILES format.
+        Converts ligand structures from an SDF file to SMILES :) format.
 
         Args:
             input_sdf (str): Path to the SDF file with the ligand that will be converted.
             output_smi (str): Path to the output SMILES file.
         """
+        # Create a molecule supplier from an SDF file
         mol_supplier = Chem.SDMolSupplier(input_sdf)
+
+        # Open the output SMILES file for writing
         with open(output_smi, "w") as output_file:
+            # Iterate through molecules and convert each to SMILES
             for mol in mol_supplier:
                 if mol is not None:
                     smiles = Chem.MolToSmiles(mol)
@@ -110,18 +126,22 @@ class Preprocessing:
 
     def process_pdb_file(self, input_pdb_filename: str) -> None:
         """
-        Process a PDB file to make it compatible with the openmmdl_analysis package.
+        Process a PDB file to make it compatible with OpenMMDL Analysis.
 
         Args:
             input_pdb_filename (str): Path to the input PDB file.
         """
+        # Load the PDB file
         u = mda.Universe(input_pdb_filename)
+        # Iterate through the topology to modify residue names
         for atom in u.atoms:
             resname = atom.resname
+            # Check if the residue name is one of the specified water names
             if resname in ["SPC", "TIP3", "TIP4", "WAT", "T3P", "T4P", "T5P"]:
                 atom.residue.resname = "HOH"
             elif resname == "*":
                 atom.residue.resname = "UNK"
+        # Save the modified topology to a new PDB file
         u.atoms.write(input_pdb_filename)
 
     def extract_and_save_ligand_as_sdf(
@@ -135,7 +155,10 @@ class Preprocessing:
             output_filename (str): Name of the output SDF file.
             target_resname (str): Residue name of the ligand in the original PDB file.
         """
+        # Load the PDB file using MDAnalysis
         u = mda.Universe(input_pdb_filename)
+
+        # Find the ligand by its residue name
         ligand_atoms = u.select_atoms(f"resname {target_resname}")
 
         if len(ligand_atoms) == 0:
@@ -144,11 +167,14 @@ class Preprocessing:
             )
             return
 
+        # Create a new Universe with only the ligand
         ligand_universe = mda.Merge(ligand_atoms)
         ligand_universe.atoms.write("lig.pdb")
 
+        # use openbabel to convert pdb to sdf
         mol = next(pybel.readfile("pdb", "lig.pdb"))
         mol.write("sdf", output_filename, overwrite=True)
+        # remove the temporary pdb file
         os.remove("lig.pdb")
 
     def renumber_atoms_in_residues(
@@ -162,6 +188,7 @@ class Preprocessing:
             output_pdb_file (str): Path to the output PDB file.
             lig_name (str): Name of the ligand in the input PDB file.
         """
+        # Read the input PDB file
         with open(input_pdb_file, "r") as f:
             pdb_lines = f.readlines()
 
@@ -170,21 +197,33 @@ class Preprocessing:
 
         for line in pdb_lines:
             if line.startswith("ATOM"):
+                # Extract information from the ATOM line
                 atom_serial = int(line[6:11])
                 atom_name = line[12:16].strip()
                 residue_name = line[17:20].strip()
 
+                # Check if the residue is residue_name
                 if residue_name == lig_name:
+                    
+                    # Extract the element from the atom name (assuming it starts with a capital letter)
                     element_match = re.match(r"([A-Z]+)", atom_name)
                     element = element_match.group(1) if element_match else atom_name
+                    
+                    # Increment the count for the current element in the current residue_name residue
                     lig_residue_elements[element] = (
                         lig_residue_elements.get(element, 0) + 1
                     )
+
+                    # Update the atom name based on the element count
                     new_atom_name = f"{element}{lig_residue_elements[element]}"
+
+                    # Replace the old atom name with the new one
                     line = line[:12] + f"{new_atom_name:4}" + line[16:]
 
+            # Append the line to the new PDB lines
             new_pdb_lines.append(line)
 
+        # Write the modified PDB lines to the output file
         with open(output_pdb_file, "w") as f:
             f.writelines(new_pdb_lines)
 
@@ -201,7 +240,10 @@ class Preprocessing:
         lines = data.split("\n")
         for i, line in enumerate(lines):
             if " LIG  X" in line:
+                # Extract the last column which contains the atom type (O/N/H)
                 atom_type = line[12:13].strip()
+
+                # Replace 'X' with the correct atom type
                 lines[i] = line.replace(" LIG  X", f" LIG  {atom_type}")
         return "\n".join(lines)
 
