@@ -115,22 +115,13 @@ class BarcodeGenerator:
         return list(set(interacting_waters))
 
 
-class BarcodeGenerator:
-    def __init__(self, df: pd.DataFrame):
-        self.df = df
-
-    def generate_waterids_barcode(self, interaction: str) -> List[Union[int, int]]:
-        # Placeholder implementation
-        return []
-
-
 class BarcodePlotter:
     def __init__(self, df_all: pd.DataFrame):
         """
         Initializes the BarcodePlotter with a dataframe and BarcodeGenerator instance.
 
         Args:
-            df_all (pd.DataFrame): Dataframe containing all interactions from plip analysis.
+            df_all (pd.DataFrame): Dataframe containing all interactions from PLIP analysis.
         """
         self.df_all = df_all
         self.barcode_gen = BarcodeGenerator(df_all)
@@ -195,7 +186,7 @@ class BarcodePlotter:
         Args:
             waterbridge_barcodes (Dict[str, np.ndarray]): Dictionary where keys are interaction names and values are binary barcode arrays.
             waterbridge_interactions (List[str]): List of water bridge interaction names.
-            fig_type (str): File extension for the saved figures (e.g., 'png', 'pdf').
+            fig_type (str): File extension for the saved figures (e.g., 'png', 'svg').
         """
         if not waterbridge_barcodes:
             print("No Piecharts to plot.")
