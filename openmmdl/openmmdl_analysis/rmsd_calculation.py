@@ -7,10 +7,11 @@ import os
 import MDAnalysis as mda
 from MDAnalysis.analysis import rms, diffusionmap
 from MDAnalysis.analysis.distances import dist
+from typing import Optional, List, Tuple, Union
 
 
 @jit(nopython=True, parallel=True, nogil=True)
-def calc_rmsd_2frames_jit(ref, frame):
+def calc_rmsd_2frames_jit(ref: np.ndarray, frame: np.ndarray) -> float:
     dist = np.zeros(len(frame))
     for atom in range(len(frame)):
         dist[atom] = (
@@ -23,12 +24,16 @@ def calc_rmsd_2frames_jit(ref, frame):
 
 
 class RMSDAnalyzer:
-    def __init__(self, prot_lig_top_file, prot_lig_traj_file):
-        self.prot_lig_top_file = prot_lig_top_file
-        self.prot_lig_traj_file = prot_lig_traj_file
-        self.universe = mda.Universe(prot_lig_top_file, prot_lig_traj_file)
+    def __init__(self, prot_lig_top_file: str, prot_lig_traj_file: str) -> None:
+        self.prot_lig_top_file: str = prot_lig_top_file
+        self.prot_lig_traj_file: str = prot_lig_traj_file
+        self.universe: mda.Universe = mda.Universe(
+            prot_lig_top_file, prot_lig_traj_file
+        )
 
-    def rmsd_for_atomgroups(self, fig_type, selection1, selection2=None):
+    def rmsd_for_atomgroups(
+        self, fig_type: str, selection1: str, selection2: Optional[List[str]] = None
+    ) -> pd.DataFrame:
         """Calculate the RMSD for selected atom groups, and save the csv file and plot.
 
         Args:
@@ -54,16 +59,18 @@ class RMSDAnalyzer:
         os.makedirs(output_directory, exist_ok=True)
 
         # Save the RMSD values to a CSV file in the created directory
-        rmsd_df.to_csv("./RMSD/RMSD_over_time.csv", sep=" ")
+        rmsd_df.to_csv(f"{output_directory}/RMSD_over_time.csv", sep=" ")
 
         # Plot and save the RMSD over time as a PNG file
         rmsd_df.plot(title="RMSD of protein and ligand")
         plt.ylabel("RMSD (Å)")
-        plt.savefig(f"./RMSD/RMSD_over_time.{fig_type}")
+        plt.savefig(f"{output_directory}/RMSD_over_time.{fig_type}")
 
         return rmsd_df
 
-    def rmsd_dist_frames(self, fig_type, lig, nucleic=False):
+    def rmsd_dist_frames(
+        self, fig_type: str, lig: str, nucleic: bool = False
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Calculate the RMSD between all frames in a matrix.
 
         Args:
@@ -76,24 +83,24 @@ class RMSDAnalyzer:
             np.array: pairwise_rmsd_lig. Numpy array of RMSD values for ligand structures.
         """
         if nucleic:
-            pairwise_rmsd_prot = (
+            pairwise_rmsd_prot: np.ndarray = (
                 diffusionmap.DistanceMatrix(self.universe, select="nucleic")
                 .run()
                 .dist_matrix
             )
         else:
-            pairwise_rmsd_prot = (
+            pairwise_rmsd_prot: np.ndarray = (
                 diffusionmap.DistanceMatrix(self.universe, select="protein")
                 .run()
                 .dist_matrix
             )
-        pairwise_rmsd_lig = (
+        pairwise_rmsd_lig: np.ndarray = (
             diffusionmap.DistanceMatrix(self.universe, f"resname {lig}")
             .run()
             .dist_matrix
         )
 
-        max_dist = max(np.amax(pairwise_rmsd_lig), np.amax(pairwise_rmsd_prot))
+        max_dist: float = max(np.amax(pairwise_rmsd_lig), np.amax(pairwise_rmsd_prot))
 
         fig, ax = plt.subplots(1, 2)
         fig.suptitle("RMSD between the frames")
@@ -116,17 +123,17 @@ class RMSDAnalyzer:
             img1, ax=ax, orientation="horizontal", fraction=0.1, label="RMSD (Å)"
         )
 
-        plt.savefig(f"./RMSD/RMSD_between_the_frames.{fig_type}")
+        plt.savefig(f"{output_directory}/RMSD_between_the_frames.{fig_type}")
         return pairwise_rmsd_prot, pairwise_rmsd_lig
 
-    def calc_rmsd_2frames(self, ref, frame):
+    def calc_rmsd_2frames(self, ref: np.ndarray, frame: np.ndarray) -> float:
         """
         RMSD calculation between a reference and a frame.
         """
         return calc_rmsd_2frames_jit(ref, frame)
 
-    def calculate_distance_matrix(self, selection):
-        distances = np.zeros(
+    def calculate_distance_matrix(self, selection: str) -> np.ndarray:
+        distances: np.ndarray = np.zeros(
             (len(self.universe.trajectory), len(self.universe.trajectory))
         )
         # calculate distance matrix
@@ -135,44 +142,35 @@ class RMSDAnalyzer:
             desc="\033[1mCalculating distance matrix:\033[0m",
         ):
             self.universe.trajectory[i]
-            frame_i = self.universe.select_atoms(selection).positions
-            # distances[i] = md.rmsd(traj_aligned, traj_aligned, frame=i)
+            frame_i: np.ndarray = self.universe.select_atoms(selection).positions
             for j in range(i + 1, len(self.universe.trajectory)):
                 self.universe.trajectory[j]
-                frame_j = self.universe.select_atoms(selection).positions
-                rmsd = self.calc_rmsd_2frames(frame_i, frame_j)
+                frame_j: np.ndarray = self.universe.select_atoms(selection).positions
+                rmsd: float = self.calc_rmsd_2frames(frame_i, frame_j)
                 distances[i][j] = rmsd
                 distances[j][i] = rmsd
         return distances
 
-    def calculate_representative_frame(self, bmode_frames, DM):
-        """Calculates the most representative frame for a bindingmode. This is based uppon the averagwe RMSD of a frame to all other frames in the binding mode.
+    def calculate_representative_frame(
+        self, binding_mode_frames: List[int], distance_matrix: np.ndarray
+    ) -> int:
+        """Calculates the most representative frame for a binding mode. This is based upon the average RMSD of a frame to all other frames in the binding mode.
 
         Args:
-            bmode_frame_list (list): List of frames belonging to a binding mode.
-            DM (np.array): Distance matrix of trajectory.
+            binding_mode_frames (list): List of frames belonging to a binding mode.
+            distance_matrix (np.array): Distance matrix of trajectory.
 
         Returns:
             int: Number of the most representative frame.
         """
-        frames = bmode_frames
-        mean_rmsd_per_frame = {}
-        # first loop  : first frame
-        for frame_i in frames:
+        mean_rmsd_per_frame: dict = {}
+        for frame_i in binding_mode_frames:
             mean_rmsd_per_frame[frame_i] = 0
-            # we will add the rmsd between theses 2 frames and then calcul the
-            # mean
-            for frame_j in frames:
-                # We don't want to calcul the same frame.
-                if not frame_j == frame_i:
-                    # we add to the corresponding value in the list of all rmsd
-                    # the RMSD betwween frame_i and frame_j
-                    mean_rmsd_per_frame[frame_i] += DM[frame_i - 1, frame_j - 1]
-            # mean calculation
-            mean_rmsd_per_frame[frame_i] /= len(frames)
+            for frame_j in binding_mode_frames:
+                if frame_j != frame_i:
+                    mean_rmsd_per_frame[frame_i] += distance_matrix[frame_i - 1, frame_j - 1]
+            mean_rmsd_per_frame[frame_i] /= len(binding_mode_frames)
 
-            # Representative frame = frame with lower RMSD between all other
-            # frame of the cluster
-            repre = min(mean_rmsd_per_frame, key=mean_rmsd_per_frame.get)
+        repre: int = min(mean_rmsd_per_frame, key=mean_rmsd_per_frame.get)
 
         return repre

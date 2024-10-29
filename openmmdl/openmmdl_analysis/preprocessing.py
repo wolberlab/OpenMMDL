@@ -1,28 +1,31 @@
 import MDAnalysis as mda
-import subprocess
+import mdtraj as md
 import os
 import re
+from typing import List, Optional
 import rdkit
-import mdtraj as md
 from rdkit import Chem
-from rdkit.Chem import Draw
-from rdkit.Chem import AllChem
-from rdkit.Chem.Draw import rdMolDraw2D
+from rdkit.Chem import AllChem, Mol
 from openbabel import pybel
+
 
 
 class Preprocessing:
     def __init__(self):
         pass
 
-    def renumber_protein_residues(self, input_pdb, reference_pdb, output_pdb):
-        """Renumber protein residues in a molecular dynamics trajectory based on a reference structure.
+    def renumber_protein_residues(
+        self, input_pdb: str, reference_pdb: str, output_pdb: str
+    ) -> None:
+        """
+        Renumber protein residues in a molecular dynamics trajectory based on a reference structure.
 
         Args:
             input_pdb (str): Path to the input PDB file representing the molecular dynamics trajectory to be renumbered.
             reference_pdb (str): Path to the reference PDB file representing the molecular dynamics trajectory used as a reference.
-            output_pdb (str): Path to the output PDB file where the renumbered trajectory will be saved..
+            output_pdb (str): Path to the output PDB file where the renumbered trajectory will be saved.
         """
+
         # Load trajectories
         traj_input = md.load(input_pdb)
         traj_reference = md.load(reference_pdb)
@@ -87,24 +90,26 @@ class Preprocessing:
         # Save the renumbered trajectory to a new PDB file
         new_traj.save(output_pdb)
 
-    def increase_ring_indices(self, ring, lig_index):
-        """Increases the atom indices in a ring of the ligand obtained from the ligand to fit the atom indices present in the protein-ligand complex.
+    def increase_ring_indices(self, ring: List[int], lig_index: int) -> List[int]:
+        """
+        Increases the atom indices in a ring of the ligand obtained from the ligand to fit the atom indices present in the protein-ligand complex.
 
         Args:
-            ring (str): A list of atom indices belonging to a ring that need to be modified.
-            lig_index (int): An integer that is the first number of the ligand atom indices obtained from the protein-ligand, which is used to modify the ring indices
+            ring (List[int]): A list of atom indices belonging to a ring that need to be modified.
+            lig_index (int): An integer that is the first number of the ligand atom indices obtained from the protein-ligand, which is used to modify the ring indices.
 
         Returns:
-            list:  A new list with modified atom indicies.
+            List[int]: A new list with modified atom indices.
         """
         return [atom_idx + lig_index for atom_idx in ring]
 
-    def convert_ligand_to_smiles(self, input_sdf, output_smi):
-        """Converts ligand structures from an SDF file to SMILES :) format
+    def convert_ligand_to_smiles(self, input_sdf: str, output_smi: str) -> None:
+        """
+        Converts ligand structures from an SDF file to SMILES :) format.
 
         Args:
-            input_sdf (str): Path to the SDF file with the ligand that wll be converted.
-            output_smi (str): Path to the output SMILES files.
+            input_sdf (str): Path to the SDF file with the ligand that will be converted.
+            output_smi (str): Path to the output SMILES file.
         """
         # Create a molecule supplier from an SDF file
         mol_supplier = Chem.SDMolSupplier(input_sdf)
@@ -113,43 +118,42 @@ class Preprocessing:
         with open(output_smi, "w") as output_file:
             # Iterate through molecules and convert each to SMILES
             for mol in mol_supplier:
-                if mol is not None:  # Make sure the molecule was successfully read
+                if mol is not None:
                     smiles = Chem.MolToSmiles(mol)
                     output_file.write(smiles + "\n")
                 else:
-                    print("nono")
+                    print("Molecule could not be read.")
 
-    def process_pdb_file(self, input_pdb_filename):
-        """Process a PDB file to make it compatible with the openmmdl_analysis package.
+    def process_pdb_file(self, input_pdb_filename: str) -> None:
+        """
+        Process a PDB file to make it compatible with OpenMMDL Analysis.
 
         Args:
-            input_pdb_filename (str): path to the input PDB file
+            input_pdb_filename (str): Path to the input PDB file.
         """
         # Load the PDB file
         u = mda.Universe(input_pdb_filename)
-
         # Iterate through the topology to modify residue names
         for atom in u.atoms:
             resname = atom.resname
-
             # Check if the residue name is one of the specified water names
             if resname in ["SPC", "TIP3", "TIP4", "WAT", "T3P", "T4P", "T5P"]:
                 atom.residue.resname = "HOH"
             elif resname == "*":
                 atom.residue.resname = "UNK"
-
         # Save the modified topology to a new PDB file
         u.atoms.write(input_pdb_filename)
 
     def extract_and_save_ligand_as_sdf(
-        self, input_pdb_filename, output_filename, target_resname
-    ):
-        """Extract and save the ligand from the receptor ligand complex PDB file into a new PDB file by itself.
+        self, input_pdb_filename: str, output_filename: str, target_resname: str
+    ) -> None:
+        """
+        Extract and save the ligand from the receptor-ligand complex PDB file into a new SDF file.
 
         Args:
-            input_pdb_filename (str): name of the input PDB file
-            output_pdb_filename (str): name of the output SDF file
-            target_resname (str): resname of the ligand in the original PDB file
+            input_pdb_filename (str): Name of the input PDB file.
+            output_filename (str): Name of the output SDF file.
+            target_resname (str): Residue name of the ligand in the original PDB file.
         """
         # Load the PDB file using MDAnalysis
         u = mda.Universe(input_pdb_filename)
@@ -165,8 +169,6 @@ class Preprocessing:
 
         # Create a new Universe with only the ligand
         ligand_universe = mda.Merge(ligand_atoms)
-
-        # Save the ligand Universe as a PDB file
         ligand_universe.atoms.write("lig.pdb")
 
         # use openbabel to convert pdb to sdf
@@ -175,8 +177,11 @@ class Preprocessing:
         # remove the temporary pdb file
         os.remove("lig.pdb")
 
-    def renumber_atoms_in_residues(self, input_pdb_file, output_pdb_file, lig_name):
-        """Renumer the atoms of the ligand in the topology PDB file.
+    def renumber_atoms_in_residues(
+        self, input_pdb_file: str, output_pdb_file: str, lig_name: str
+    ) -> None:
+        """
+        Renumber the atoms of the ligand in the topology PDB file.
 
         Args:
             input_pdb_file (str): Path to the initial PDB file.
@@ -199,13 +204,11 @@ class Preprocessing:
 
                 # Check if the residue is residue_name
                 if residue_name == lig_name:
+                    
                     # Extract the element from the atom name (assuming it starts with a capital letter)
                     element_match = re.match(r"([A-Z]+)", atom_name)
-                    if element_match:
-                        element = element_match.group(1)
-                    else:
-                        element = atom_name
-
+                    element = element_match.group(1) if element_match else atom_name
+                    
                     # Increment the count for the current element in the current residue_name residue
                     lig_residue_elements[element] = (
                         lig_residue_elements.get(element, 0) + 1
@@ -224,8 +227,9 @@ class Preprocessing:
         with open(output_pdb_file, "w") as f:
             f.writelines(new_pdb_lines)
 
-    def replace_atom_type(self, data):
-        """Replace wrong ligand atom types in the topology PDB file.
+    def replace_atom_type(self, data: str) -> str:
+        """
+        Replace incorrect ligand atom types in the topology PDB file.
 
         Args:
             data (str): Text of the initial PDB file.
@@ -238,16 +242,18 @@ class Preprocessing:
             if " LIG  X" in line:
                 # Extract the last column which contains the atom type (O/N/H)
                 atom_type = line[12:13].strip()
+
                 # Replace 'X' with the correct atom type
                 lines[i] = line.replace(" LIG  X", f" LIG  {atom_type}")
         return "\n".join(lines)
 
-    def process_pdb(self, input_file, output_file):
-        """Wrapper function to process a PDB file.
+    def process_pdb(self, input_file: str, output_file: str) -> None:
+        """
+        Wrapper function to process a PDB file.
 
         Args:
             input_file (str): Path to the input PDB file.
-            output_file (str): Path of the output PDB file.
+            output_file (str): Path to the output PDB file.
         """
         with open(input_file, "r") as f:
             pdb_data = f.read()

@@ -373,7 +373,7 @@ def main():
     interaction_analysis = InteractionAnalyzer(
         pdb_md, dataframe, cpu_count, ligand, special_ligand, peptide
     )
-    interaction_list = interaction_analysis.ineraction_list
+    interaction_list = interaction_analysis.interaction_list
     interaction_list.to_csv("missing_frames_filled.csv")
     interaction_list = interaction_list.reset_index(drop=True)
 
