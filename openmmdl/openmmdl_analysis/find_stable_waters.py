@@ -24,13 +24,18 @@ class StableWaters:
         Returns:
             Tuple[pd.DataFrame, int]: DataFrame containing stable water coordinates and total number of frames.
         """
+        # Get the total number of frames for the progress bar
         total_frames = len(self.u.trajectory)
+        
+        # Create an empty DataFrame to store stable water coordinates
         stable_waters = pd.DataFrame(
             columns=["Frame", "Residue", "Oxygen_X", "Oxygen_Y", "Oxygen_Z"]
         )
 
+        # Initialize variables for the previous frame's data
         prev_frame_coords = {}
 
+        # Iterate through frames with tqdm for the progress bar
         for ts in tqdm(
             self.u.trajectory,
             total=total_frames,
@@ -39,6 +44,7 @@ class StableWaters:
             frame_num = ts.frame
             frame_coords = {}
 
+            # Iterate through oxygen atoms of the specified water type
             for atom in self.u.select_atoms("resname HOH and name O"):
                 frame_coords[atom.index] = (
                     atom.position[0],
@@ -46,19 +52,26 @@ class StableWaters:
                     atom.position[2],
                 )
 
+            # Check if it's not the first frame
             if frame_num > 0:
                 stable_coords = []
 
+                # Iterate through the oxygen atoms in the current frame
                 for atom_index, coords in frame_coords.items():
-                    prev_coords = prev_frame_coords.get(atom_index, coords)
+                    prev_coords = prev_frame_coords.get(
+                        atom_index, coords
+                    )  # Get previous coordinates or use current if not found
 
+                    # Calculate the distance between current and previous coordinates
                     distance = np.linalg.norm(np.array(coords) - np.array(prev_coords))
 
+                    # If the distance is less than 1 Angstrom, consider it a stable water
                     if distance < 1:
                         stable_coords.append(
                             (frame_num, atom_index, coords[0], coords[1], coords[2])
                         )
 
+                # Append stable water coordinates to the stable_waters DataFrame
                 if stable_coords:
                     stable_waters = pd.concat(
                         [
@@ -76,6 +89,7 @@ class StableWaters:
                         ]
                     )
 
+            # Update the previous frame's coordinates
             prev_frame_coords = frame_coords
 
         stable_waters.to_csv(
@@ -95,12 +109,16 @@ class StableWaters:
 
         Args:
             stable_waters (pd.DataFrame): DataFrame containing stable water coordinates.
-            cluster_eps (float): DBSCAN clustering epsilon parameter.
+            cluster_eps (float): DBSCAN clustering epsilon parameter. This is in Angstrom in this case
+                                 and defines which Water distances should be within one cluster.
             total_frames (int): Total number of frames.
             output_directory (str): Directory where output files will be saved.
         """
+        
+        # Feature extraction: XYZ coordinates
         X = stable_waters[["Oxygen_X", "Oxygen_Y", "Oxygen_Z"]]
 
+        # List of percentages to iterate over
         percentage_values = [25, 50, 75, 90, 99]
 
         for percent in percentage_values:
@@ -152,6 +170,7 @@ class StableWaters:
                     pdb_lines.append(pdb_line)
                     atom_counter += 1
 
+                # Write the current cluster to a new PDB file
                 output_filename = os.path.join(
                     output_sub_directory, f"cluster_{label}.pdb"
                 )
@@ -161,6 +180,7 @@ class StableWaters:
 
                 pdb_file_counter += 1
 
+            # Write representative water molecules to a PDB file
             representative_waters = clustered_waters.groupby("Cluster_Label").mean()
             representative_waters.reset_index(inplace=True)
             representative_filename = os.path.join(
@@ -177,11 +197,15 @@ class StableWaters:
         Args:
             output_directory (str, optional): Directory where output files will be saved. Default is "./stableWaters".
         """
+        # Load the PDB and DCD files
         output_directory += "_clusterEps_"
         strEps = str(self.water_eps).replace(".", "")
         output_directory += strEps
         os.makedirs(output_directory, exist_ok=True)
+        
+        # Create a stable waters list by calling the process_trajectory_and_cluster function
         stable_waters, total_frames = self.trace_waters(output_directory)
+        # Now call perform_clustering_and_writing with the returned values
         self.perform_clustering_and_writing(
             stable_waters, self.water_eps, total_frames, output_directory
         )
@@ -205,9 +229,11 @@ class StableWaters:
                 )
             ]
 
+        # Convert the list of lines to a string buffer
         pdb_string = "".join(lines)
         pdb_buffer = StringIO(pdb_string)
 
+        # Now parse the filtered lines
         parser = PDBParser(QUIET=True)
         structure = parser.get_structure("protein", pdb_buffer)
 
@@ -219,7 +245,8 @@ class StableWaters:
         representative_waters: pd.DataFrame,
         distance_threshold: float,
     ) -> Dict[int, List[Tuple[str, int]]]:
-        """Maps waters (e.g. the representative waters) to interacting residues of a different PDB structure input.
+        """Maps waters (e.g. the representative waters) to interacting residues of a different PDB structure input. 
+           Use "filter_and_parse_pdb" to get the input for this function.
         Args:
             structure (Structure): Biopython PDB structure object.
             representative_waters (pd.DataFrame): DataFrame containing representative water coordinates.
@@ -232,6 +259,7 @@ class StableWaters:
 
         for model in structure:
             for chain in model:
+                # Check if the residue is a protein residue (not a heteroatom or water molecule)
                 for residue in chain:
                     if (
                         residue.id[0] == " "
@@ -252,7 +280,7 @@ class StableWaters:
 
                             distance = np.linalg.norm(wat_coords - residue_coords)
                             if distance < distance_threshold:
-                                key = wat_index
+                                key = wat_index # Assuming wat_index is the number of the water cluster
                                 if key not in interacting_residues:
                                     interacting_residues[key] = []
                                 interacting_residues[key].append(
@@ -306,9 +334,11 @@ class StableWaters:
         strEps = str(cluster_eps).replace(".", "")
         output_directory += strEps
 
+        # Iterate over subdirectories
         for subdirectory in os.listdir(output_directory):
             subdirectory_path = os.path.join(output_directory, subdirectory)
             if os.path.isdir(subdirectory_path):
+                # Perform operations within each subdirectory
                 representative_waters = self.read_pdb_as_dataframe(
                     os.path.join(subdirectory_path, representative_waters_file)
                 )
@@ -320,6 +350,7 @@ class StableWaters:
                     interacting_residues.items(),
                     columns=["Cluster_Number", "Interacting_Residues"],
                 )
+                # Save result to each subdirectory
                 result_df.to_csv(
                     os.path.join(subdirectory_path, "interacting_residues.csv"),
                     index=False,
