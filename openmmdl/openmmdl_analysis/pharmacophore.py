@@ -216,7 +216,7 @@ class PharmacophoreGenerator:
             feature_type = feature_types[interaction]
             if interaction in ["Acceptor_hbond", "Donor_hbond"]:
                 pharm = self.generate_pharmacophore_vectors(
-                    self.df_all.filter(regex=interaction).columns.tolist()
+                    self.df_all.filter(regex=interaction).columns
                 )
                 for feature_name, position in pharm.items():
                     feature_id_counter += 1
@@ -273,7 +273,7 @@ class PharmacophoreGenerator:
                         )
             elif interaction in ["hydrophobic", "PI_saltbridge", "NI_saltbridge"]:
                 pharm = self.generate_pharmacophore_centers(
-                    self.df_all.filter(regex=interaction).columns.tolist()
+                    self.df_all.filter(regex=interaction).columns
                 )
                 for feature_name, position in pharm.items():
                     feature_id_counter += 1
@@ -298,7 +298,7 @@ class PharmacophoreGenerator:
                     )
             elif interaction == "pistacking":
                 pharm = self.generate_pharmacophore_vectors(
-                    self.df_all.filter(regex=interaction).columns.tolist()
+                    self.df_all.filter(regex=interaction).columns
                 )
                 feature_id_counter += 1
                 lig_loc = position[0]
@@ -375,22 +375,21 @@ class PharmacophoreGenerator:
             pharmacophoreType="LIGAND_SCOUT",
         )
 
-        for interaction, coords in dict_bindingmode.items():
-            # Get feature type
-            feature_type = next(
-                (ft for it, ft in feature_types.items() if it in interaction), None
-            )
-            if feature_type is None:
-                continue
+        for interaction in dict_bindingmode.keys():
+            # get feature type
+            for interactiontype in feature_types.keys():
+                if interactiontype in interaction:
+                    feature_type = feature_types[interactiontype]
+                    break
 
             # Generate vector features
             if feature_type in ["HBA", "HBD"]:
                 if feature_type == "HBA":
-                    orig_loc = coords["PROTCOO"][0]
-                    targ_loc = coords["LIGCOO"][0]
+                    orig_loc = dict_bindingmode[interaction]["PROTCOO"][0]
+                    targ_loc = dict_bindingmode[interaction]["LIGCOO"][0]
                 elif feature_type == "HBD":
-                    orig_loc = coords["LIGCOO"][0]
-                    targ_loc = coords["PROTCOO"][0]
+                    orig_loc = dict_bindingmode[interaction]["LIGCOO"][0]
+                    targ_loc = dict_bindingmode[interaction]["PROTCOO"][0]
                 feature_id_counter += 1
                 points_to_lig = "true" if feature_type == "HBA" else "false"
                 hasSyntheticProjectedPoint = "false"
@@ -404,7 +403,7 @@ class PharmacophoreGenerator:
                     optional="false",
                     disabled="false",
                     weight="1.0",
-                    coreCompound=self.ligand_name,
+                    coreCompound=self.complex_name,
                     id=f"feature{str(feature_id_counter)}",
                 )
                 origin = ET.SubElement(
@@ -425,7 +424,7 @@ class PharmacophoreGenerator:
                 )
             # Generate point features
             elif feature_type in ["H", "PI", "NI"]:
-                position = coords["LIGCOO"][0]
+                position = dict_bindingmode[interaction]["LIGCOO"][0]
                 feature_id_counter += 1
                 point = ET.SubElement(
                     pharmacophore,
@@ -435,7 +434,7 @@ class PharmacophoreGenerator:
                     optional="false",
                     disabled="false",
                     weight="1.0",
-                    coreCompound=self.ligand_name,
+                    coreCompound=self.complex_name,
                     id=f"feature{str(feature_id_counter)}",
                 )
                 position = ET.SubElement(
@@ -449,8 +448,8 @@ class PharmacophoreGenerator:
             # Generate plane features
             elif feature_type == "AR":
                 feature_id_counter += 1
-                lig_loc = coords["LIGCOO"][0]
-                prot_loc = coords["PROTCOO"][0]
+                lig_loc = dict_bindingmode[interaction]["LIGCOO"][0]
+                prot_loc = dict_bindingmode[interaction]["PROTCOO"][0]
 
                 # Normalize vector of plane
                 vector = np.array(lig_loc) - np.array(prot_loc)
@@ -465,7 +464,7 @@ class PharmacophoreGenerator:
                     optional="false",
                     disabled="false",
                     weight="1.0",
-                    coreCompound=self.ligand_name,
+                    coreCompound=self.complex_name,
                     id=f"feature{str(feature_id_counter)}",
                 )
                 position = ET.SubElement(
@@ -526,25 +525,25 @@ class PharmacophoreGenerator:
         """
         cloud_dict = {}
         cloud_dict["H"] = self.generate_pharmacophore_centers_all_points(
-            self.df_all.filter(regex="hydrophobic").columns.tolist()
+            self.df_all.filter(regex="hydrophobic").columns
         )
         cloud_dict["HBA"] = self.generate_pharmacophore_centers_all_points(
-            self.df_all.filter(regex="Acceptor_hbond").columns.tolist()
+            self.df_all.filter(regex="Acceptor_hbond").columns
         )
         cloud_dict["HBD"] = self.generate_pharmacophore_centers_all_points(
-            self.df_all.filter(regex="Donor_hbond").columns.tolist()
+            self.df_all.filter(regex="Donor_hbond").columns
         )
         cloud_dict["AR"] = self.generate_pharmacophore_centers_all_points(
-            self.df_all.filter(regex="pistacking").columns.tolist()
+            self.df_all.filter(regex="pistacking").columns
         )
         cloud_dict["PI"] = self.generate_pharmacophore_centers_all_points(
-            self.df_all.filter(regex="PI_saltbridge").columns.tolist()
+            self.df_all.filter(regex="PI_saltbridge").columns
         )
         cloud_dict["NI"] = self.generate_pharmacophore_centers_all_points(
-            self.df_all.filter(regex="NI_saltbridge").columns.tolist()
+            self.df_all.filter(regex="NI_saltbridge").columns
         )
         cloud_dict["M"] = self.generate_pharmacophore_centers_all_points(
-            self.df_all.filter(regex="metal").columns.tolist()
+            self.df_all.filter(regex="metal").columns
         )
 
         pharmacophore = ET.Element(
@@ -554,9 +553,9 @@ class PharmacophoreGenerator:
             pharmacophoreType="LIGAND_SCOUT",
         )
         feature_id_counter = 0
-        for feature_type, interactions in cloud_dict.items():
-            for interaction, points in interactions.items():
-                if len(points) > 1:
+        for feature_type in cloud_dict.keys():
+            for interaction in cloud_dict[feature_type].keys():
+                if len(cloud_dict[feature_type][interaction]) > 1:
                     feature_cloud = ET.SubElement(
                         pharmacophore,
                         "featureCloud",
@@ -570,12 +569,12 @@ class PharmacophoreGenerator:
                     position = ET.SubElement(
                         feature_cloud,
                         "position",
-                        x3=str(points[0][0]),
-                        y3=str(points[0][1]),
-                        z3=str(points[0][2]),
+                        x3=str(cloud_dict[feature_type][interaction][0][0]),
+                        y3=str(cloud_dict[feature_type][interaction][0][1]),
+                        z3=str(cloud_dict[feature_type][interaction][0][2]),
                     )
-                    for additional_point in points[1:]:
-                        additional_point_element = ET.SubElement(
+                    for additional_point in cloud_dict[feature_type][interaction][1:]:
+                        additional_point = ET.SubElement(
                             feature_cloud,
                             "additionalPoint",
                             x3=str(round(additional_point[0], 2)),
