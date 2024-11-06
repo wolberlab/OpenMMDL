@@ -186,93 +186,119 @@ class InteractionProcessor:
             numeric_codes = parts[1:-1]
             interaction_type = parts[-1]
 
-            for code in numeric_codes:
-                atom_index = int(code)
-                complex_id = self.complex.select_atoms(f"id {atom_index}")
-                atom_name = complex_id[0].name if len(complex_id) > 0 else None
-
-                if atom_name is None:
-                    continue
-
-                lig_atom = self.lig_noh.select_atoms(f"name {atom_name}")
-                lig_real_index = lig_atom[0].id - 1 if len(lig_atom) > 0 else None
-
-                if lig_real_index is None:
-                    continue
-
-                if interaction_type == "hbond":
-                    type = parts[-2]
+            if interaction_type == "hbond":
+                parts = item.split()
+                protein_partner_name = parts[0]
+                numeric_codes = parts[1:-2]
+                type = parts[-2]
+                interaction_type = parts[-1]
+                for code in numeric_codes:
+                    atom_index = int(code)
+                    complex_id = self.complex.select_atoms(f"id {atom_index}")
+                    for atom in complex_id:
+                        atom_name = atom.name
+                    for lig_atom in self.lig_noh:
+                        if lig_atom.name == atom_name:
+                            lig_real_index = lig_atom.id
                     if type == "Donor":
-                        highlighted_hbond_donor.append(lig_real_index)
+                        highlighted_hbond_donor.append(lig_real_index - 1)
                     elif type == "Acceptor":
-                        highlighted_hbond_acceptor.append(lig_real_index)
+                        highlighted_hbond_acceptor.append(lig_real_index - 1)
 
-                elif interaction_type == "hydrophobic":
-                    highlighted_hydrophobic.append(lig_real_index)
+            elif interaction_type == "hydrophobic":
+                for code in numeric_codes:
+                    atom_index = int(code)
+                    complex_id = self.complex.select_atoms(f"id {atom_index}")
+                    for atom in complex_id:
+                        atom_name = atom.name
+                    for lig_atom in self.lig_noh:
+                        if lig_atom.name == atom_name:
+                            lig_real_index = lig_atom.id
+                    highlighted_hydrophobic.append(lig_real_index - 1)
 
-                elif interaction_type == "waterbridge":
-                    highlighted_waterbridge.append(lig_real_index)
+            elif interaction_type == "waterbridge":
+                for code in numeric_codes:
+                    atom_index = int(code)
+                    complex_id = self.complex.select_atoms(f"id {atom_index}")
+                    for atom in complex_id:
+                        atom_name = atom.name
+                    for lig_atom in self.lig_noh:
+                        if lig_atom.name == atom_name:
+                            lig_real_index = lig_atom.id
+                    highlighted_waterbridge.append(lig_real_index - 1)
 
-                elif interaction_type == "pistacking":
+            elif interaction_type == "pistacking":
+                split_codes = numeric_codes[0].split(",")
+                for code in split_codes:
+                    atom_index = int(code)
+                    complex_id = self.complex.select_atoms(f"id {atom_index}")
+                    for atom in complex_id:
+                        atom_name = atom.name
+                    for lig_atom in self.lig_noh:
+                        if lig_atom.name == atom_name:
+                            lig_real_index = lig_atom.id
+                    highlighted_pistacking.append(lig_real_index - 1)
+
+            elif interaction_type == "halogen":
+                numeric_codes = parts[1:-2]
+                for code in numeric_codes:
+                    atom_index = int(code)
+                    complex_id = self.complex.select_atoms(f"id {atom_index}")
+                    for atom in complex_id:
+                        atom_name = atom.name
+                    for lig_atom in self.lig_noh:
+                        if lig_atom.name == atom_name:
+                            lig_real_index = lig_atom.id
+                    highlighted_halogen.append(lig_real_index - 1)
+
+            elif interaction_type == "saltbridge":
+                numeric_codes = parts[1:-3]
+                saltbridge_type = parts[-2]
+                if saltbridge_type == "NI":
                     split_codes = numeric_codes[0].split(",")
                     for code in split_codes:
                         atom_index = int(code)
                         complex_id = self.complex.select_atoms(f"id {atom_index}")
-                        atom_name = complex_id[0].name if len(complex_id) > 0 else None
-                        if atom_name is None:
-                            continue
-                        lig_atom = self.lig_noh.select_atoms(f"name {atom_name}")
-                        lig_real_index = (
-                            lig_atom[0].id - 1 if len(lig_atom) > 0 else None
-                        )
-                        if lig_real_index is not None:
-                            highlighted_pistacking.append(lig_real_index)
+                        for atom in complex_id:
+                            atom_name = atom.name
+                        for lig_atom in self.lig_noh:
+                            if lig_atom.name == atom_name:
+                                lig_real_index = lig_atom.id
+                        highlighted_ni.append(lig_real_index - 1)
+                elif saltbridge_type == "PI":
+                    for code in numeric_codes:
+                        atom_index = int(code)
+                        complex_id = self.complex.select_atoms(f"id {atom_index}")
+                        for atom in complex_id:
+                            atom_name = atom.name
+                        for lig_atom in self.lig_noh:
+                            if lig_atom.name == atom_name:
+                                lig_real_index = lig_atom.id
+                        highlighted_pi.append(lig_real_index - 1)
 
-                elif interaction_type == "halogen":
-                    highlighted_halogen.append(lig_real_index)
+            elif interaction_type == "pication":
+                numeric_codes = parts[1:-2]
+                for code in numeric_codes:
+                    atom_index = int(code)
+                    complex_id = self.complex.select_atoms(f"id {atom_index}")
+                    for atom in complex_id:
+                        atom_name = atom.name
+                    for lig_atom in self.lig_noh:
+                        if lig_atom.name == atom_name:
+                            lig_real_index = lig_atom.id
+                    highlighted_pication.append(lig_real_index - 1)
 
-                elif interaction_type == "saltbridge":
-                    saltbridge_type = parts[-2]
-                    if saltbridge_type == "NI":
-                        split_codes = numeric_codes[0].split(",")
-                        for code in split_codes:
-                            atom_index = int(code)
-                            complex_id = self.complex.select_atoms(f"id {atom_index}")
-                            atom_name = (
-                                complex_id[0].name if len(complex_id) > 0 else None
-                            )
-                            if atom_name is None:
-                                continue
-                            lig_atom = self.lig_noh.select_atoms(f"name {atom_name}")
-                            lig_real_index = (
-                                lig_atom[0].id - 1 if len(lig_atom) > 0 else None
-                            )
-                            if lig_real_index is not None:
-                                highlighted_ni.append(lig_real_index)
+            elif interaction_type == "metal":
+                ligidx = parts[1]
+                atom_index = int(ligidx)
+                complex_id = self.complex.select_atoms(f"id {atom_index}")
+                for atom in complex_id:
+                    atom_name = atom.name
+                for lig_atom in self.lig_noh:
+                    if lig_atom.name == atom_name:
+                        lig_real_index = lig_atom.id
+                highlighted_metal.append(lig_real_index - 1)
 
-                    elif saltbridge_type == "PI":
-                        for code in numeric_codes:
-                            atom_index = int(code)
-                            complex_id = self.complex.select_atoms(f"id {atom_index}")
-                            atom_name = (
-                                complex_id[0].name if len(complex_id) > 0 else None
-                            )
-                            if atom_name is None:
-                                continue
-                            lig_atom = self.lig_noh.select_atoms(f"name {atom_name}")
-                            lig_real_index = (
-                                lig_atom[0].id - 1 if len(lig_atom) > 0 else None
-                            )
-                            if lig_real_index is not None:
-                                highlighted_pi.append(lig_real_index)
-
-                elif interaction_type == "pication":
-                    highlighted_pication.append(lig_real_index)
-
-                elif interaction_type == "metal":
-                    highlighted_metal.append(lig_real_index)
-
-        # Identify common indices between hbond_donor and hbond_acceptor
         for value in highlighted_hbond_donor[:]:
             if value in highlighted_hbond_acceptor:
                 highlighted_hbond_donor.remove(value)
@@ -337,15 +363,9 @@ class InteractionProcessor:
         """
         for source_dict in source_dicts:
             for key, value in source_dict.items():
-                if key in target_dict:
-                    # Combine the RGB values (optional approach; adjust as needed)
-                    existing_value = target_dict[key]
-                    target_dict[key] = tuple(
-                        min(1.0, max(0.0, (existing_value[i] + value[i]) / 2))
-                        for i in range(3)
-                    )
-                else:
-                    target_dict[key] = value
+                int_key = int(key)
+                if int_key not in target_dict:
+                    target_dict[int_key] = value
 
 
 class ImageMerger:
@@ -385,7 +405,7 @@ class ImageMerger:
             label = data.split()[-1]
             type_ = data.split()[
                 -2
-            ]  # Renamed 'type' to 'type_' to avoid conflict with the built-in type() function
+            ]
             if label == "hydrophobic":
                 (line,) = ax.plot(
                     x, y, label=data, color=(1.0, 1.0, 0.0), linewidth=5.0
