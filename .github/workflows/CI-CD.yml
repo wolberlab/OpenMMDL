@@ -43,7 +43,7 @@ jobs:
 
       - name: Run black formatter
         run: |
-          black -l 99 .
+          black -l 99 --exclude '\.ipynb$' .
 
       - name: Install pytest and run tests
         run: |
