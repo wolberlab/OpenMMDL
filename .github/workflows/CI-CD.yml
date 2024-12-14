@@ -48,4 +48,4 @@ jobs:
       - name: Install pytest and run tests
         run: |
           pip install pytest pytest-cov
-          pytest -vv --cov=openmmdl --cov-branch --cov-report=xml --cov-report=html --color=yes openmmdl/tests/
+          coverage run -m pytest -vv --cov=openmmdl --cov-branch --cov-report=xml --cov-report=html --color=yes openmmdl/tests/
