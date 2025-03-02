@@ -25,6 +25,28 @@ http://openmmdl.readthedocs.io/
 
     conda install -c conda-forge openmmdl
 
+## Installation via docker
+
+**OpenMMDL** is mainly supported for Linux distribution systems, thus for Windows and MacOS the installation with docker may be preferred,
+due to docker creating an image with ubuntu:22.04
+
+For this first clone this repository
+
+    cd ~
+    git clone https://github.com/wolberlab/OpenMMDL
+
+change the path to the OpenMMDL folder and build the docker image from there
+
+    cd OpenMMDL
+    docker build -t openmmdl_env .
+
+This will build the OpenMMDL image with docker. Now that it is build you can access it through an interactive terminal
+
+    docker run -it --name openmmdl_test openmmdl_env
+
+From there you can access all the OpenMMDL entry points. Currently due to OpenMMDL Setup using flask it can be difficult
+to access it through the docker image.
+
 ## Installation via repository
 
 #### Clone this repository
