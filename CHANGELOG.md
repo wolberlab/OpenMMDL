@@ -19,13 +19,13 @@ The rules for this file:
 ## [Unreleased]
 
 ### Authors
-<!-- GitHub usernames of contributors to this release -->
+talagayev
 
 ### Added
 <!-- New added features -->
 
 ### Fixed
-<!-- Bug fixes -->
+- Fixed the sanitization implementation in OpenMMDL Setup (2025-04-09)
 
 ### Changed
 <!-- Changes in existing functionality -->
