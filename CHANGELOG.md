@@ -19,10 +19,10 @@ The rules for this file:
 ## [Unreleased]
 
 ### Authors
-talagayev
+talagayev, NDoering99
 
 ### Added
-<!-- New added features -->
+- Addition of citation page in documentation (2025-04-10)
 
 ### Fixed
 - Fixed the sanitization implementation in OpenMMDL Setup (2025-04-09)
