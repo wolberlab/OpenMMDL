@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "versioningit~=2.0"]
+requires = ["setuptools>=61.0", "versioningit"]
 build-backend = "setuptools.build_meta"
 
 # Self-descriptive entries which should always be present
@@ -18,7 +18,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 # Declare any run-time dependencies that should be installed with the package.
 dependencies = [
 
@@ -66,23 +66,8 @@ openmmdl = [
     "py.typed"
 ]
 
-[tool.versioningit]
-default-version = "0.0.1"
-
-[tool.versioningit.format]
-distance = "{base_version}+{distance}.{vcs}{rev}"
-dirty = "{base_version}+{distance}.{vcs}{rev}.dirty"
-distance-dirty = "{base_version}+{distance}.{vcs}{rev}.dirty"
-
-[tool.versioningit.vcs]
-# The method key:
-method = "git"  # <- The method name
-# Parameters to pass to the method:
-match = ["*"]
-default-tag = "1.0.0"
-
-[tool.versioningit.write]
-file = "openmmdl/_version.py"
+[tool.setuptools.dynamic]
+version = { attr = "openmmdl._version.__version__" }
 
 [project.scripts]
 openmmdl_setup = "openmmdl.openmmdl_setup.openmmdlsetup:main"

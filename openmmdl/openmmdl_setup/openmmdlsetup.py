@@ -1139,6 +1139,7 @@ os.chdir(outputDir)"""
     script.append(
         "from openmmdl.openmmdl_simulation.scripts.cleaning_procedures import cleanup, create_directory_if_not_exists, copy_file, organize_files, post_md_file_movement \n"
     )
+    
 
     script.append("import simtk.openmm.app as app")
     script.append(
@@ -1147,6 +1148,7 @@ os.chdir(outputDir)"""
     script.append(
         "from simtk.openmm import unit, Platform, MonteCarloBarostat, LangevinMiddleIntegrator"
     )
+    script.append("from openmm.openmm import XmlSerializer")
     script.append("from simtk.openmm import Vec3")
     script.append("import simtk.openmm as mm")
     script.append("import pdbfixer")
