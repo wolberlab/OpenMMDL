@@ -22,6 +22,8 @@ The rules for this file:
 talagayev, NDoering99
 
 ### Added
+- Addition of SMIRNOFF small molecule force field (2025-04-10, Issue #76)
+- Addition of PyMOL support for visualization (2025-04-10)
 - Added Dockerfile for image creation  (2025-04-10)
 - Addition of citation page in documentation (2025-04-10)
 
