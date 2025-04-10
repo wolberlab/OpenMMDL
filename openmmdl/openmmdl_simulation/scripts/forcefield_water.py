@@ -121,7 +121,7 @@ def water_model_selection(water, forcefield_selection):
     return water_model
 
 
-def generate_forcefield(protein_ff, solvent_ff, add_membrane, smallMoleculeForceField, rdkit_mol=None):
+def generate_forcefield(protein_ff, solvent_ff, add_membrane, smallMoleculeForceField=None, rdkit_mol=None):
     """
     Generate an OpenMM Forcefield object and register a small molecule.
 
@@ -164,7 +164,7 @@ def generate_forcefield(protein_ff, solvent_ff, add_membrane, smallMoleculeForce
 
 
 def generate_transitional_forcefield(
-    protein_ff, solvent_ff, add_membrane, smallMoleculeForceField, rdkit_mol=None
+    protein_ff, solvent_ff, add_membrane, smallMoleculeForceField=None, rdkit_mol=None
 ):
     """
     Generate an OpenMM transitional forcefield object with TIP3P water model for membrane building and register a small molecule.
