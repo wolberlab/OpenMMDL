@@ -101,6 +101,7 @@ forcefield = generate_forcefield(
     solvent_ff=water_selected,
     add_membrane=add_membrane,
     rdkit_mol=ligand_prepared,
+    smallMoleculeForceField="gaff"
 )
 complex_topology, complex_positions = merge_protein_and_ligand(protein_pdb, omm_ligand)
 modeller = app.Modeller(complex_topology, complex_positions)
