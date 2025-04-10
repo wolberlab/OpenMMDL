@@ -1,12 +1,13 @@
 Release Notes
 ====================
 
-## Release 1.1.0 of OpenMMDL
+Release 1.1.0
+------------------------------
 
 This is a minor release.
 This release focuses on fixing issues and addition of additional functions.
 
-### Major features & changes
+**Major features & changes**
 See the [CHANGELOG](https://github.com/wolberlab/OpenMMDL/blob/openmmdl-1.0.1/CHANGELOG.md) for more details.
 
 * Addition of PyMOL support for the visualization.
