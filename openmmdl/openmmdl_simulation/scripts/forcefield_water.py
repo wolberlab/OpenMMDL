@@ -129,6 +129,7 @@ def generate_forcefield(protein_ff, solvent_ff, add_membrane, smallMoleculeForce
         protein_ff (str): Input of selected forcefield XML File.
         solvent_ff (str): Input of selected water model forcefield XML File.
         add_membrane (bool): Selection if the system should be built with a membrane.
+        smallMoleculeForceField (str): Name of the force field applied to the small molecule.
         rdkit_mol (rdkit.Chem.rdchem.Mol): Small molecule to register in the force field.
 
     Returns:
@@ -173,6 +174,7 @@ def generate_transitional_forcefield(
         protein_ff (str): Name of the force field in XML format.
         solvent_ff (str): Name of the water model force field in XML format.
         add_membrane (bool): Selection if the system should be built with a membrane.
+        smallMoleculeForceField (str): Name of the force field applied to the small molecule.
         rdkit_mol (rdkit.Chem.rdchem.Mol): Small molecule to register in the force field.
 
     Returns:
