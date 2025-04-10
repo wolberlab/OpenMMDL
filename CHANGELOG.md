@@ -30,7 +30,7 @@ talagayev, NDoering99
 - Fixed the sanitization implementation in OpenMMDL Setup (2025-04-09)
 
 ### Changed
-<!-- Changes in existing functionality -->
+- Changed to the use of RDKitConverter for Ligand recognition without -l flag in openmmdl_analysis (2025-04-10)
 
 ### Deprecated
 <!-- Soon-to-be removed features -->
