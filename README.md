@@ -1,23 +1,31 @@
 OpenMMDL @ Molecular Design Lab
 ==============================
-[//]: # (Badges)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![CI-CD](https://github.com/wolberlab/OpenMMDL/actions/workflows/CI-CD.yml/badge.svg)](https://github.com/wolberlab/OpenMMDL/actions/workflows/CI-CD.yml)
-[![codecov](https://codecov.io/gh/talagayev/OpenMMDL/graph/badge.svg?token=950HZ93CKS)](https://codecov.io/gh/talagayev/OpenMMDL)
-[![Documentation Status](https://readthedocs.org/projects/openmmdl/badge/?version=latest)](https://openmmdl.readthedocs.io)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![CodeQL](https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml/badge.svg)](https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml)
-[![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3100/)
-
 
 <img src="https://github.com/wolberlab/OpenMMDL/blob/main/openmmdl/openmmdl_setup/static/OpenMMDL_logo_2.png" height="250">
 
-Interface to **OpenMM** for easy setup of molecular dynamic simulations of
-protein-ligand complexes
+[//]: # (Badges)
+
+| **Release**        | [![Last release tag][badge_release]][url_latest_release] ![GitHub commits since latest release (by date) for a branch][badge_commits_since]|
+| :----------------- | :------- |
+| **Availability**   | [![Condaforge][badge_conda_forge]][url_conda_forge]|
+| **Workflows**      | ![CI_CD][badge_ci_cd] ![CodeQL][badge_codeql]|
+| **Documentation**  | [![docs][badge_docs]][url_docs] [![codecov][badge_codecov]][url_codecov]|
+| **Dependencies**   | [![rdkit][badge_rdkit]][url_rdkit] [![mdanalysis][badge_mda]][url_mda] [![Code style: black][badge_black]][url_black]|
+| **License**        | [![License: GPL v2][badge_license]][url_license]|
+
+
+Interface for easy setup and analysis of molecular dynamic (MD) simulations of
+protein-ligand complexes with **OpenMM**
 
 http://openmmdl.readthedocs.io/
 
-## Install
+## Installation via conda-forge
+
+**OpenMMDL** is implemented in conda-forge and can be installed for linux-based system with the following command line
+
+    conda install -c conda-forge openmmdl
+
+## Installation via repository
 
 #### Clone this repository
 
@@ -109,8 +117,9 @@ Start the analysis with the following Inputs:
 
 -d = trajectory file of the simulation (in .dcd format)
 
-#### Optional:
 -n = Ligand name (3 letter code in PDB)
+
+#### Optional:
 
 -l = Ligand in SDF format
 
@@ -137,6 +146,8 @@ Start the analysis with the following Inputs:
 -w = stable-water-analysis. Defines if the analysis of stable water molecules should be performed. The default is False (accepted values: True/False)
 
 --watereps = the EPS of the clustering part during the water analysis. will only result in something if "-w True" is added. Accepts float (in Angstrom).
+
+--figure = File type for the figures, default is png. Can be changed to all file types supported by matplotlib.
 
 #### Command line example with default values
 
@@ -170,3 +181,27 @@ The Setup script is a modified version of [openmm-setup](https://github.com/open
  
 This Project is based on the 
 [Computational Molecular Science Python Cookiecutter](https://github.com/molssi/cookiecutter-cms) version 1.1.
+
+
+[badge_release]: https://img.shields.io/github/release-pre/wolberlab/openmmdl.svg
+[badge_commits_since]: https://img.shields.io/github/commits-since/wolberlab/openmmdl/latest
+[badge_ci_cd]: https://github.com/wolberlab/OpenMMDL/actions/workflows/CI-CD.yml/badge.svg
+[badge_codeql]: https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml/badge.svg
+[badge_docs]: https://readthedocs.org/projects/openmmdl/badge/?version=latest
+[badge_codecov]: https://codecov.io/gh/talagayev/OpenMMDL/graph/badge.svg?token=950HZ93CKS
+[badge_conda_forge]: https://img.shields.io/conda/vn/conda-forge/openmmdl.svg
+[badge_rdkit]: https://img.shields.io/badge/Powered%20by-RDKit-3838ff.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAFVBMVEXc3NwUFP8UPP9kZP+MjP+0tP////9ZXZotAAAAAXRSTlMAQObYZgAAAAFiS0dEBmFmuH0AAAAHdElNRQfmAwsPGi+MyC9RAAAAQElEQVQI12NgQABGQUEBMENISUkRLKBsbGwEEhIyBgJFsICLC0iIUdnExcUZwnANQWfApKCK4doRBsKtQFgKAQC5Ww1JEHSEkAAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyMi0wMy0xMVQxNToyNjo0NyswMDowMDzr2J4AAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjItMDMtMTFUMTU6MjY6NDcrMDA6MDBNtmAiAAAAAElFTkSuQmCC
+[badge_mda]: https://img.shields.io/badge/powered%20by-MDAnalysis-orange.svg?logoWidth=16&logo=data:image/x-icon;base64,AAABAAEAEBAAAAEAIAAoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJD+XwCY/fEAkf3uAJf97wGT/a+HfHaoiIWE7n9/f+6Hh4fvgICAjwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACT/yYAlP//AJ///wCg//8JjvOchXly1oaGhv+Ghob/j4+P/39/f3IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJH8aQCY/8wAkv2kfY+elJ6al/yVlZX7iIiI8H9/f7h/f38UAAAAAAAAAAAAAAAAAAAAAAAAAAB/f38egYF/noqAebF8gYaagnx3oFpUUtZpaWr/WFhY8zo6OmT///8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgICAn46Ojv+Hh4b/jouJ/4iGhfcAAADnAAAA/wAAAP8AAADIAAAAAwCj/zIAnf2VAJD/PAAAAAAAAAAAAAAAAICAgNGHh4f/gICA/4SEhP+Xl5f/AwMD/wAAAP8AAAD/AAAA/wAAAB8Aov9/ALr//wCS/Z0AAAAAAAAAAAAAAACBgYGOjo6O/4mJif+Pj4//iYmJ/wAAAOAAAAD+AAAA/wAAAP8AAABhAP7+FgCi/38Axf4fAAAAAAAAAAAAAAAAiIiID4GBgYKCgoKogoB+fYSEgZhgYGDZXl5e/m9vb/9ISEjpEBAQxw8AAFQAAAAAAAAANQAAADcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjo6Mb5iYmP+cnJz/jY2N95CQkO4pKSn/AAAA7gAAAP0AAAD7AAAAhgAAAAEAAAAAAAAAAACL/gsAkv2uAJX/QQAAAAB9fX3egoKC/4CAgP+NjY3/c3Nz+wAAAP8AAAD/AAAA/wAAAPUAAAAcAAAAAAAAAAAAnP4NAJL9rgCR/0YAAAAAfX19w4ODg/98fHz/i4uL/4qKivwAAAD/AAAA/wAAAP8AAAD1AAAAGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALGxsVyqqqr/mpqa/6mpqf9KSUn/AAAA5QAAAPkAAAD5AAAAhQAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADkUFBSuZ2dn/3V1df8uLi7bAAAATgBGfyQAAAA2AAAAMwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB0AAADoAAAA/wAAAP8AAAD/AAAAWgC3/2AAnv3eAJ/+dgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA9AAAA/wAAAP8AAAD/AAAA/wAKDzEAnP3WAKn//wCS/OgAf/8MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIQAAANwAAADtAAAA7QAAAMAAABUMAJn9gwCe/e0Aj/2LAP//AQAAAAAAAAAA
+[badge_black]: https://img.shields.io/badge/code%20style-black-000000.svg
+[badge_license]: https://img.shields.io/badge/License-MIT-blue.svg
+
+[url_latest_release]: https://github.com/wolberlab/openmmdl/releases
+[url_ci_cd]: https://github.com/wolberlab/OpenMMDL/actions/workflows/CI-CD.yml
+[url_codeql]: https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml
+[url_docs]: https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml
+[url_codecov]: https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml
+[url_conda_forge]: https://anaconda.org/conda-forge/openmmdl
+[url_rdkit]: https://www.rdkit.org/
+[url_mda]: https://www.mdanalysis.org
+[url_black]: https://github.com/psf/black
+[url_license]: https://opensource.org/licenses/MIT

@@ -126,7 +126,7 @@ def test_plot_bacodes_grouped(tmp_path):
     fig_type = 'png'
     
     working_directory = os.getcwd()
-    plot_bacodes_grouped(interactions, df_all, interaction_type, fig_type)
+    plot_barcodes_grouped(interactions, df_all, interaction_type, fig_type)
     # Check if the output files were created
     assert os.path.exists(os.path.join(working_directory, "Barcodes", "atom2", f"atom2_{interaction_type}_barcodes.png"))
     assert os.path.exists(os.path.join(working_directory, "Barcodes", "atom4", f"atom4_{interaction_type}_barcodes.png"))
