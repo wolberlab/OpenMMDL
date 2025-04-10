@@ -8,7 +8,7 @@ from simtk.openmm import unit
 from simtk.openmm import Vec3
 
 
-def prepare_ligand(ligand_file, minimize_molecule=True):
+def prepare_ligand(ligand_file, sanitization=False, minimize_molecule=True):
     """Reads an SDF File into RDKit, adds hydrogens to the structure, minimizes it if selected, and creates an openforcefield Molecule object. Inspired by @teachopencadd T019.
 
     Args:
@@ -21,14 +21,22 @@ def prepare_ligand(ligand_file, minimize_molecule=True):
     # Reading of SDF File, converting to rdkit.
     file_name = ligand_file.lower()
     if file_name.endswith(".sdf"):
-        rdkit_mol = Chem.SDMolSupplier(ligand_file, sanitize=False)
+        if sanitization == True:
+            rdkit_mol = Chem.SDMolSupplier(ligand_file, sanitize=True)
+        else:
+            rdkit_mol = Chem.SDMolSupplier(ligand_file, sanitize=False)
         for mol in rdkit_mol:
             rdkit_mol = mol
     elif file_name.endswith(".mol") and not file_name.endswith(".mol2"):
-        print(ligand_file)
-        rdkit_mol = Chem.rdmolfiles.MolFromMolFile(ligand_file, sanitize=False)
+        if sanitization == True:
+            rdkit_mol = Chem.rdmolfiles.MolFromMolFile(ligand_file, sanitize=True)
+        else:
+            rdkit_mol = Chem.rdmolfiles.MolFromMolFile(ligand_file, sanitize=False)
     elif file_name.endswith(".mol2"):
-        rdkit_mol = Chem.rdmolfiles.MolFromMol2File(ligand_file, sanitize=False)
+        if sanitization == True:
+            rdkit_mol = Chem.rdmolfiles.MolFromMol2File(ligand_file, sanitize=True)
+        else:
+            rdkit_mol = Chem.rdmolfiles.MolFromMol2File(ligand_file, sanitize=False)
     # Adding of hydrogens and assigning chiral tags from the structure.
     print("Adding hydrogens")
     rdkitmolh = Chem.AddHs(rdkit_mol, addCoords=True)

@@ -189,6 +189,9 @@ Then edit the notebook to include the output of your analysis.
 ## Copyright
 Copyright (c) 2022, Valerij Talagayev, Yu Chen,  Niklas Piet Doering & Leon Obendorf (Wolber lab)
 
+### Citation
+If you use OpenMMDL in your research, please cite the following [paper](https://doi.org/10.1021/acs.jcim.4c02158).
+
 #### Acknowledgments
 
 The Script is based upon the OpenMM Toolkit [OpenMM](https://github.com/openmm)
