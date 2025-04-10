@@ -3,7 +3,6 @@ openmmdl_simulation.py
 Perform Simulations of Protein-ligand complexes with OpenMM
 """
 
-import argparse
 import sys
 import warnings
 
@@ -205,7 +204,7 @@ def main():
         help="Set the Eps for clustering, this defines how big clusters can be spatially in Angstrom",
         default=1.0,
     )
-    
+
     parser.add_argument(
         "--figure",
         dest="figure_type",
@@ -390,7 +389,9 @@ def main():
             selection2=["protein", f"chainID {peptide}"],
         )
         if frame_rmsd != "No":
-            RMSD_dist_frames(f"{topology}", f"{trajectory}", fig_type, lig=f"chainID {peptide}")
+            RMSD_dist_frames(
+                f"{topology}", f"{trajectory}", fig_type, lig=f"chainID {peptide}"
+            )
             print("\033[1mRMSD calculated\033[0m")
     else:
         rmsd_for_atomgroups(
@@ -530,9 +531,9 @@ def main():
 
         # Check if the fingerprint has been encountered before
         if fingerprint in treshold_fingerprint_dict:
-            grouped_frames_treshold.at[
-                index, "Binding_fingerprint_treshold"
-            ] = treshold_fingerprint_dict[fingerprint]
+            grouped_frames_treshold.at[index, "Binding_fingerprint_treshold"] = (
+                treshold_fingerprint_dict[fingerprint]
+            )
         else:
             # Assign a new label if the fingerprint is new
             label = f"Binding_Mode_{label_counter}"
@@ -716,7 +717,11 @@ def main():
                 merged_image_paths, "all_binding_modes_arranged.png"
             )
             generate_ligand_image(
-                ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", f"ligand_numbering.svg"
+                ligand,
+                "complex.pdb",
+                "lig_no_h.pdb",
+                "lig.smi",
+                f"ligand_numbering.svg",
             )
             if fig_type == "png":
                 cairosvg.svg2png(
@@ -872,7 +877,9 @@ def main():
     for interaction_type, interaction_data in interaction_types.items():
         plot_barcodes_grouped(interaction_data, df_all, interaction_type, fig_type)
 
-    plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions, fig_type)
+    plot_waterbridge_piechart(
+        df_all, waterbridge_barcodes, waterbridge_interactions, fig_type
+    )
     print("\033[1mBarcodes generated\033[0m")
 
     interacting_water_id_list = interacting_water_ids(df_all, waterbridge_interactions)
