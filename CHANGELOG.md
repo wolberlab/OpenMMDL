@@ -22,6 +22,7 @@ The rules for this file:
 talagayev, NDoering99
 
 ### Added
+- Added Dockerfile for image creation  (2025-04-10)
 - Addition of citation page in documentation (2025-04-10)
 
 ### Fixed

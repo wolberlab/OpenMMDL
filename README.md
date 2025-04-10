@@ -7,7 +7,7 @@ OpenMMDL @ Molecular Design Lab
 
 | **Release**        | [![Last release tag][badge_release]][url_latest_release] ![GitHub commits since latest release (by date) for a branch][badge_commits_since]|
 | :----------------- | :------- |
-| **Availability**   | [![Condaforge][badge_conda_forge]][url_conda_forge]|
+| **Availability**   | [![Condaforge][badge_conda_forge]][url_conda_forge] ![Docker][badge_docker]|
 | **Workflows**      | ![CI_CD][badge_ci_cd] ![CodeQL][badge_codeql]|
 | **Documentation**  | [![docs][badge_docs]][url_docs] [![codecov][badge_codecov]][url_codecov]|
 | **Dependencies**   | [![rdkit][badge_rdkit]][url_rdkit] [![mdanalysis][badge_mda]][url_mda] [![Code style: black][badge_black]][url_black]|
@@ -24,6 +24,28 @@ http://openmmdl.readthedocs.io/
 **OpenMMDL** is implemented in conda-forge and can be installed for linux-based system with the following command line
 
     conda install -c conda-forge openmmdl
+
+## Installation via docker
+
+**OpenMMDL** is mainly supported for Linux distribution systems, thus for Windows and MacOS the installation with docker may be preferred,
+due to docker creating an image with ubuntu:22.04
+
+For this first clone this repository
+
+    cd ~
+    git clone https://github.com/wolberlab/OpenMMDL
+
+change the path to the OpenMMDL folder and build the docker image from there
+
+    cd OpenMMDL
+    docker build -t openmmdl_env .
+
+This will build the OpenMMDL image with docker. Now that it is build you can access it through an interactive terminal
+
+    docker run -it --name openmmdl_test openmmdl_env
+
+From there you can access all the OpenMMDL entry points. Currently due to OpenMMDL Setup using flask it can be difficult
+to access it through the docker image.
 
 ## Installation via repository
 
@@ -197,6 +219,7 @@ This Project is based on the
 [badge_mda]: https://img.shields.io/badge/powered%20by-MDAnalysis-orange.svg?logoWidth=16&logo=data:image/x-icon;base64,AAABAAEAEBAAAAEAIAAoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJD+XwCY/fEAkf3uAJf97wGT/a+HfHaoiIWE7n9/f+6Hh4fvgICAjwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACT/yYAlP//AJ///wCg//8JjvOchXly1oaGhv+Ghob/j4+P/39/f3IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJH8aQCY/8wAkv2kfY+elJ6al/yVlZX7iIiI8H9/f7h/f38UAAAAAAAAAAAAAAAAAAAAAAAAAAB/f38egYF/noqAebF8gYaagnx3oFpUUtZpaWr/WFhY8zo6OmT///8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgICAn46Ojv+Hh4b/jouJ/4iGhfcAAADnAAAA/wAAAP8AAADIAAAAAwCj/zIAnf2VAJD/PAAAAAAAAAAAAAAAAICAgNGHh4f/gICA/4SEhP+Xl5f/AwMD/wAAAP8AAAD/AAAA/wAAAB8Aov9/ALr//wCS/Z0AAAAAAAAAAAAAAACBgYGOjo6O/4mJif+Pj4//iYmJ/wAAAOAAAAD+AAAA/wAAAP8AAABhAP7+FgCi/38Axf4fAAAAAAAAAAAAAAAAiIiID4GBgYKCgoKogoB+fYSEgZhgYGDZXl5e/m9vb/9ISEjpEBAQxw8AAFQAAAAAAAAANQAAADcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjo6Mb5iYmP+cnJz/jY2N95CQkO4pKSn/AAAA7gAAAP0AAAD7AAAAhgAAAAEAAAAAAAAAAACL/gsAkv2uAJX/QQAAAAB9fX3egoKC/4CAgP+NjY3/c3Nz+wAAAP8AAAD/AAAA/wAAAPUAAAAcAAAAAAAAAAAAnP4NAJL9rgCR/0YAAAAAfX19w4ODg/98fHz/i4uL/4qKivwAAAD/AAAA/wAAAP8AAAD1AAAAGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALGxsVyqqqr/mpqa/6mpqf9KSUn/AAAA5QAAAPkAAAD5AAAAhQAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADkUFBSuZ2dn/3V1df8uLi7bAAAATgBGfyQAAAA2AAAAMwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB0AAADoAAAA/wAAAP8AAAD/AAAAWgC3/2AAnv3eAJ/+dgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA9AAAA/wAAAP8AAAD/AAAA/wAKDzEAnP3WAKn//wCS/OgAf/8MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIQAAANwAAADtAAAA7QAAAMAAABUMAJn9gwCe/e0Aj/2LAP//AQAAAAAAAAAA
 [badge_black]: https://img.shields.io/badge/code%20style-black-000000.svg
 [badge_license]: https://img.shields.io/badge/License-MIT-blue.svg
+[badge_docker]: https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff
 
 [url_latest_release]: https://github.com/wolberlab/openmmdl/releases
 [url_ci_cd]: https://github.com/wolberlab/OpenMMDL/actions/workflows/CI-CD.yml
