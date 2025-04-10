@@ -28,7 +28,7 @@ The rules for this file:
 <!-- Bug fixes -->
 
 ### Changed
-<!-- Changes in existing functionality -->
+- Changed to the use of RDKitConverter for Ligand recognition without -l flag in openmmdl_analysis (2025-04-10)
 
 ### Deprecated
 <!-- Soon-to-be removed features -->
