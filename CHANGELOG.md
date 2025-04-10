@@ -19,10 +19,10 @@ The rules for this file:
 ## [Unreleased]
 
 ### Authors
-<!-- GitHub usernames of contributors to this release -->
+talagayev
 
 ### Added
-<!-- New added features -->
+- Added Dockerfile for image creation  (2025-04-10)
 
 ### Fixed
 <!-- Bug fixes -->
