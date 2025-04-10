@@ -25,6 +25,7 @@ talagayev, NDoering99
 - Addition of citation page in documentation (2025-04-10)
 
 ### Fixed
+- Fixed the XMLSerializer error appearing during simulation (2025-04-10, Issue #122)
 - Fixed the sanitization implementation in OpenMMDL Setup (2025-04-09)
 
 ### Changed
