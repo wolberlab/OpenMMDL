@@ -24,6 +24,7 @@ dependencies:
   - flask>=2.2.2
   - cairosvg
   - nglview
+  - mdonatello
   - numba>=0.59.1
   - jupyter
   # Add any additional runtime dependencies from pyproject.toml here
