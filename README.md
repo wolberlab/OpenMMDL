@@ -12,7 +12,7 @@ OpenMMDL @ Molecular Design Lab
 
 <img src="https://github.com/wolberlab/OpenMMDL/blob/main/openmmdl/openmmdl_setup/static/OpenMMDL_logo_2.png" height="250">
 
-Interface to **OpenMM** for easy setup of molecular dynamic simulations of
+Interface to **OpenMM** for easy setup of molecular dynamic simulations of1
 protein-ligand complexes
 
 http://openmmdl.readthedocs.io/
