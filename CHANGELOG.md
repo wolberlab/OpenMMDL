@@ -22,6 +22,7 @@ The rules for this file:
 talagayev, NDoering99
 
 ### Added
+- Addition of MDontallo Visualization (2025-04-11)
 - Addition of SMIRNOFF small molecule force field (2025-04-10, Issue #76)
 - Addition of PyMOL support for visualization (2025-04-10)
 - Added Dockerfile for image creation  (2025-04-10)
