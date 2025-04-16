@@ -30,7 +30,7 @@ jobs:
 
       - name: Install package and its entry points
         run: |
-          pip install .
+          pip install . --exclude '\.ipynb$'
 
       - name: Install linter and formatter
         run: |
