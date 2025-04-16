@@ -2,6 +2,7 @@ name: openmmdl  # Name of the Conda environment
 
 channels:
   - conda-forge  # Add the conda-forge channel here
+  - nodefaults
 
 dependencies:
   - pip
