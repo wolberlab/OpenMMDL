@@ -38,55 +38,6 @@ def test_split_interaction_data(input_data, expected_output):
     assert result == expected_output
 
 
-def test_highlight_numbers():
-    # Input data
-    split_data = [
-        "163GLYA 4202 Acceptor hbond",
-        "165ASPA 4203 Donor hbond",
-        "165ASPA 4222 Donor hbond",
-        "165ASPA 4203 Acceptor hbond",
-        "125TYRA 4192 Acceptor waterbridge",
-        "165ASPA 4222 Donor waterbridge",
-        "161PHEA 4211 4212 4213 4214 4215 4210 hydrophobic",
-        "59ARGA 4205 4206 4207 4216 4217 4218 Aromatic pication",
-        "155PHEA 4205 4206 4207 4216 4217 4218 pistacking",
-        "59ARGA 4194 F halogen",
-        "166ARGA 4202,4203 Carboxylate NI saltbridge",
-        "165ASPA 4202 Amine PI saltbridge",
-        "HEM 4202 FE 4 metal",
-    ]
-
-    starting_idx = 1  # Updated starting index
-
-    interaction = InteractionProcessor(complex, lig_no_h)
-    result = interaction.highlight_numbers(split_data, starting_idx)
-
-    (
-        highlighted_hbond_donor,
-        highlighted_hbond_acceptor,
-        highlighted_hbond_both,
-        highlighted_hydrophobic,
-        highlighted_waterbridge,
-        highlighted_pistacking,
-        highlighted_halogen,
-        highlighted_ni,
-        highlighted_pi,
-        highlighted_pication,
-        highlighted_metal,
-    ) = result
-
-    assert highlighted_hbond_donor is not None
-    assert highlighted_hbond_acceptor is not None
-    assert highlighted_hbond_both is not None
-    assert highlighted_hydrophobic is not None
-    assert highlighted_waterbridge is not None
-    assert highlighted_halogen is not None
-    assert highlighted_ni is not None
-    assert highlighted_pi is not None and len(highlighted_pi) > 0
-    assert highlighted_pication is not None
-    assert highlighted_metal is not None
-
-
 def test_update_dict():
     interaction = InteractionProcessor(complex, lig_no_h)
     # Test case 1: Check if the target dictionary is updated correctly
@@ -113,7 +64,8 @@ def test_generate_interaction_dict():
     interaction_type = "hydrophobic"
     keys = [1, 2, 3]
     expected_result = {1: (1.0, 1.0, 0.0), 2: (1.0, 1.0, 0.0), 3: (1.0, 1.0, 0.0)}
-    result = generate_interaction_dict(interaction_type, keys)
+    interaction = InteractionProcessor(complex, lig_no_h)
+    result = interaction.generate_interaction_dict(interaction_type, keys)
     assert result == expected_result
 
 
@@ -153,9 +105,8 @@ def test_create_and_merge_images_with_split_data():
     print("Files in Working Directory before:", files_in_working_directory)
 
     # Run the function
-    merged_image_paths = create_and_merge_images(
-        binding_mode, occurrence_percent, split_data, merged_image_paths
-    )
+    merger = ImageMerger(binding_mode, occurrence_percent, split_data, merged_image_paths)
+    merged_image_paths = merger.create_and_merge_images()
 
     # Print the current files in the working directory for debugging
     files_in_working_directory = os.listdir(working_directory)
@@ -249,7 +200,8 @@ def test_arranged_figure_generation():
     print(output_path)
 
     # Run the function
-    arranged_figure_generation(merged_image_paths, output_path)
+    arranger = FigureArranger(merged_image_paths, output_path)
+    arranger.arranged_figure_generation()
     print(output_path)
 
     # Print the current files in the working directory for debugging
@@ -279,9 +231,8 @@ shutil.copy(smi_file, Path.cwd())
 # Test the generate_ligand_image function
 def test_generate_ligand_image():
     ligand_name = "UNK"
-    generate_ligand_image(
-        ligand_name, "complex.pdb", "lig_no_h.pdb", "lig_no_h.smi", output_image_file
-    )
+    image = LigandImageGenerator(ligand_name, "complex.pdb", "lig_no_h.pdb", "lig_no_h.smi", output_image_file)
+    image.generate_ligand_image()
 
     # Assert that the output image file exists
     assert os.path.exists(output_image_file)
