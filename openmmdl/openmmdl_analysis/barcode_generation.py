@@ -149,7 +149,9 @@ class BarcodePlotter:
             )
             ax.set_title(title, fontweight="bold", fontsize=8)
 
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        save_dir = os.path.dirname(save_path)
+        if save_dir:
+            os.makedirs(save_dir, exist_ok=True)
         plt.tight_layout()
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
