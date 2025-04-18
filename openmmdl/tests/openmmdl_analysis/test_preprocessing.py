@@ -96,7 +96,8 @@ def test_process_pdb_file():
     shutil.copy(str(input_pdb_filename), ".")
 
     # Process the provided PDB file
-    Preprocessing.process_pdb_file(input_pdb_filename)
+    prep = Preprocessing()
+    prep.process_pdb_file(input_pdb_filename)
 
     # Read the modified output PDB file
     with open(input_pdb_filename, "r") as f:
@@ -148,7 +149,8 @@ ATOM     32  C15 UNK A 454      39.627  47.605  40.833  1.00  0.00      A    C
 ATOM     33  N3  UNK A 454      38.981  47.235  41.740  1.00  0.00      A    N"""
     )
 
-    Preprocessing.renumber_atoms_in_residues(str(input_pdb_filename), str(output_pdb_filename), "UNK")
+    prep = Preprocessing()
+    prep.renumber_atoms_in_residues(str(input_pdb_filename), str(output_pdb_filename), "UNK")
     assert output_pdb_filename.exists()
 
 
