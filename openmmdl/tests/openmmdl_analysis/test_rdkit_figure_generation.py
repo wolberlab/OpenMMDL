@@ -31,8 +31,10 @@ shutil.copy(str(complex), ".")
         (["125TYRA_4192_Acceptor_waterbridge"], ["125TYRA 4192 Acceptor waterbridge"]),
     ],
 )
+
 def test_split_interaction_data(input_data, expected_output):
-    result = split_interaction_data(input_data)
+    interaction = InteractionProcessor(complex, lig_no_h)
+    result = interaction.split_interaction_data(input_data)
     assert result == expected_output
 
 
