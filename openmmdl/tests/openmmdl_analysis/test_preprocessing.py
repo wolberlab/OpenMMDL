@@ -191,7 +191,8 @@ def test_extract_and_save_ligand_as_sdf():
     output_filename = "ligand_changed.sdf"
     target_resname = ligand_resname
 
-    Preprocessing.extract_and_save_ligand_as_sdf(input_pdb_filename, output_filename, target_resname)
+    prep = Preprocessing()
+    prep.extract_and_save_ligand_as_sdf(input_pdb_filename, output_filename, target_resname)
 
     assert output_filename is not None
     os.remove("ligand_changed.sdf")
