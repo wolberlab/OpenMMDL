@@ -169,7 +169,8 @@ def test_process_pdb(sample_pdb_info):
     print("Temp Data:")
     print(temp_filename)
     output_filename = "output_pdb_test.pdb"
-    Preprocessing.process_pdb(temp_filename, output_filename)
+    prep = Preprocessing()
+    prep.process_pdb(temp_filename, output_filename)
 
     with open(output_filename, "r") as f:
         modified_data = f.read()
@@ -207,19 +208,21 @@ def test_increase_ring_indices():
     # Test case 1: Check if ring indices are correctly increased
     ring = [1, 2, 3]
     lig_index = 10
-    result = Preprocessing.increase_ring_indices(ring=ring, lig_index=lig_index)
+    prep = Preprocessing()
+    result = prep.increase_ring_indices(ring=ring, lig_index=lig_index)
     assert result == [11, 12, 13]
 
     # Test case 2: Check with a different lig_index
     ring = [3, 4, 5]
     lig_index = 20
-    result = Preprocessing.increase_ring_indices(ring=ring, lig_index=lig_index)
+    result = prep.increase_ring_indices(ring=ring, lig_index=lig_index)
     assert result == [23, 24, 25]
 
 
 def test_convert_ligand_to_smiles():
     # Convert the ligand structure to SMILES in the same directory as the input SDF file
-    Preprocessing.convert_ligand_to_smiles(TEST_LIGAND_FILE, TEST_OUTPUT_FILE)
+    prep = Preprocessing()
+    prep.convert_ligand_to_smiles(TEST_LIGAND_FILE, TEST_OUTPUT_FILE)
 
     # Verify that the output SMILES file was created in the same directory as the input file
     assert os.path.exists(TEST_OUTPUT_FILE)
