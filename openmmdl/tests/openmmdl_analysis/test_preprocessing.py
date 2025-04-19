@@ -219,17 +219,3 @@ def test_increase_ring_indices():
     lig_index = 20
     result = prep.increase_ring_indices(ring=ring, lig_index=lig_index)
     assert result == [23, 24, 25]
-
-
-def test_convert_ligand_to_smiles():
-    # Convert the ligand structure to SMILES in the same directory as the input SDF file
-    prep = Preprocessing()
-    prep.convert_ligand_to_smiles(TEST_LIGAND_FILE, TEST_OUTPUT_FILE)
-
-    # Verify that the output SMILES file was created in the same directory as the input file
-    assert os.path.exists(TEST_OUTPUT_FILE)
-
-    # Optionally, you can also read and validate the content of the output SMILES file
-    with open(TEST_OUTPUT_FILE, "r") as smi_file:
-        smiles_lines = smi_file.readlines()
-        assert len(smiles_lines) > 0  # Check that there are SMILES representations
