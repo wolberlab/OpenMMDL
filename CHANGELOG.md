@@ -22,6 +22,7 @@ The rules for this file:
 talagayev, NDoering99
 
 ### Added
+- Changed to the use of RDKitConverter for Ligand recognition without -l flag in openmmdl_analysis (2025-04-10)
 - Addition of MDontallo Visualization (2025-04-11)
 - Addition of SMIRNOFF small molecule force field (2025-04-10, Issue #76)
 - Addition of PyMOL support for visualization (2025-04-10)
