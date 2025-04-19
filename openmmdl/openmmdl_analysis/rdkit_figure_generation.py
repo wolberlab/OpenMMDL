@@ -15,7 +15,6 @@ class LigandImageGenerator:
         ligand_name,
         complex_pdb_file,
         ligand_no_h_pdb_file,
-        smiles_file,
         output_svg_filename,
         fig_type="svg",
     ):
@@ -26,14 +25,12 @@ class LigandImageGenerator:
             ligand_name (str): Name of the ligand in the protein-ligand complex topology.
             complex_pdb_file (str): Path to the protein-ligand complex PDB file.
             ligand_no_h_pdb_file (str): Path to the ligand PDB file without hydrogens.
-            smiles_file (str): Path to the SMILES file with the reference ligand.
             output_svg_filename (str): Name of the output SVG file.
             fig_type (str): Type of the output figure. Can be "svg" or "png".
         """
         self.ligand_name = ligand_name
         self.complex_pdb_file = complex_pdb_file
         self.ligand_no_h_pdb_file = ligand_no_h_pdb_file
-        self.smiles_file = smiles_file
         self.output_svg_filename = output_svg_filename
         self.fig_type = fig_type
 
@@ -46,19 +43,10 @@ class LigandImageGenerator:
             lig_noh = ligand_no_h.select_atoms("all")
             complex_lig = complex.select_atoms(f"resname {self.ligand_name}")
 
-            # Load ligand from PDB file
-            mol = Chem.MolFromPDBFile(self.ligand_no_h_pdb_file)
-            lig_rd = mol
-
-            # Load reference SMILES
-            with open(self.smiles_file, "r") as file:
-                reference_smiles = file.read().strip()
-            reference_mol = Chem.MolFromSmiles(reference_smiles)
-
-            # Prepare ligand
-            prepared_ligand = AllChem.AssignBondOrdersFromTemplate(
-                reference_mol, lig_rd
-            )
+            # Application of RDKit Converter to obtain rdkit mol of ligand
+            lig_atoms = complex_lig.convert_to("RDKIT")
+            prepared_ligand = Chem.RemoveAllHs(lig_atoms)
+            
             AllChem.Compute2DCoords(prepared_ligand)
 
             # Map atom indices between ligand_no_h and complex
