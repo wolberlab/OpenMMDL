@@ -231,7 +231,7 @@ shutil.copy(smi_file, Path.cwd())
 # Test the generate_ligand_image function
 def test_generate_ligand_image():
     ligand_name = "UNK"
-    image = LigandImageGenerator(ligand_name, "complex.pdb", "lig_no_h.pdb", "lig_no_h.smi", output_image_file)
+    image = LigandImageGenerator(ligand_name, "complex.pdb", "lig_no_h.pdb", output_image_file)
     image.generate_image()
 
     # Assert that the output image file exists

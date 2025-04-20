@@ -257,8 +257,8 @@ def main():
     print("\033[1mFiles are preprocessed\033[0m")
 
     if ligand_sdf == None:
-        preprocessor.extract_and_save_ligand_as_sdf(topology, "./lig.sdf", ligand)
-        ligand_sdf = "./lig.sdf"
+        preprocessor.extract_and_save_ligand_as_sdf(topology, "./ligand_prepared.sdf", ligand)
+        ligand_sdf = "./ligand_prepared.sdf"
 
     if not pdb_md:
         pdb_md = mda.Universe(topology, trajectory)
@@ -325,7 +325,6 @@ def main():
             ligand_rings.append(current_ring)
         print("\033[1mLigand ring data gathered\033[0m")
 
-        preprocessor.convert_ligand_to_smiles(ligand_sdf, output_smi="lig.smi")
     if peptide != None:
         ligand_rings = None
 
@@ -501,14 +500,10 @@ def main():
                 binding_site[binding_mode] = values
                 occurrence_count = top_10_nodes_with_occurrences[binding_mode]
                 occurrence_percent = 100 * occurrence_count / total_frames
-                with open("lig.smi", "r") as file:
-                    reference_smiles = (
-                        file.read().strip()
-                    )  # Read the SMILES from the file and remove any leading/trailing whitespace
-                reference_mol = Chem.MolFromSmiles(reference_smiles)
-                prepared_ligand = AllChem.AssignBondOrdersFromTemplate(
-                    reference_mol, lig_rd
-                )
+                # Convert ligand to RDKit with Converter
+                lig_atoms = complex_lig.convert_to("RDKIT")
+                # Remove Hydrogens and get 2D representation
+                prepared_ligand = Chem.RemoveAllHs(lig_atoms)
                 # Generate 2D coordinates for the molecule
                 AllChem.Compute2DCoords(prepared_ligand)
                 split_data = interaction_processor.split_interaction_data(values)
@@ -641,7 +636,6 @@ def main():
                 ligand,
                 "complex.pdb",
                 "lig_no_h.pdb",
-                "lig.smi",
                 f"ligand_numbering.svg",
                 fig_type,
             )
