@@ -399,12 +399,12 @@ class ImageMerger:
             elif label == "saltbridge":
                 if type == "NI":
                     (line,) = ax.plot(
-                        x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0
-                    )
+                        x, y, label=data, color=(0.0, 0.5, 1.0), linewidth=5.0
+                    ) # orange color
                 elif type == "PI":
                     (line,) = ax.plot(
-                        x, y, label=data, color=(1.0, 0.0, 0.0), linewidth=5.0
-                    )
+                        x, y, label=data, color=(0.3, 0.9, 0.8), linewidth=5.0
+                    ) # turquoise color
             else:
                 (line,) = ax.plot(x, y, label=data)
             lines.append(line)
