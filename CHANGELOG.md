@@ -31,6 +31,7 @@ talagayev, NDoering99
 
 ### Fixed
 - Fixed error cases, where ligand name was not specified (2025-04-22)
+- Fixed wrong color of the positive and negative ionizable interactions (2025-04-21, PR #137)
 - Fixed the XMLSerializer error appearing during simulation (2025-04-10, Issue #122)
 - Fixed the sanitization implementation in OpenMMDL Setup (2025-04-09)
 
