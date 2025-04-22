@@ -30,6 +30,7 @@ talagayev, NDoering99
 - Addition of citation page in documentation (2025-04-10)
 
 ### Fixed
+- Fixed error cases, where ligand name was not specified (2025-04-22)
 - Fixed the XMLSerializer error appearing during simulation (2025-04-10, Issue #122)
 - Fixed the sanitization implementation in OpenMMDL Setup (2025-04-09)
 
