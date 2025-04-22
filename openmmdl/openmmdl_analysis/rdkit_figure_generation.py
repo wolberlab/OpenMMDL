@@ -299,17 +299,17 @@ class InteractionProcessor:
             dict: A dictionary with the interaction types are associated with their respective RGB color codes.
         """
         interaction_dict = {
-            "hbond_acceptor": (1.0, 0.6, 0.6),
-            "hbond_both": (0.6, 0.0, 0.5),
-            "hbond_donor": (0.3, 0.5, 1.0),
-            "hydrophobic": (1.0, 1.0, 0.0),
-            "waterbridge": (0.0, 1.0, 0.9),
-            "pistacking": (0.0, 0.0, 1.0),
-            "halogen": (1.0, 0.0, 0.9),
-            "ni": (0.0, 0.0, 1.0),
-            "pi": (1.0, 0.0, 0.0),
-            "pication": (0.0, 0.0, 1.0),
-            "metal": (1.0, 0.6, 0.0),
+            "hbond_acceptor": (1.0, 0.6, 0.6),    # light red / pink
+            "hbond_both": (0.6, 0.0, 0.5),        # dark magenta / purple
+            "hbond_donor": (0.3, 0.5, 1.0),       # light blue
+            "hydrophobic": (1.0, 1.0, 0.0),       # yellow
+            "waterbridge": (0.0, 1.0, 0.9),       # cyan / aqua
+            "pistacking": (0.0, 0.0, 1.0),        # blue
+            "halogen": (1.0, 0.0, 0.9),           # magenta / hot pink
+            "ni": (1.0, 0.6, 0.0),                # orange
+            "pi": (0.3, 0.9, 0.8),                # turquoise / teal
+            "pication": (0.0, 0.0, 1.0),          # blue
+            "metal": (1.0, 0.6, 0.0),             # orange
         }
 
         interaction_dict = {
@@ -366,45 +366,45 @@ class ImageMerger:
             if label == "hydrophobic":
                 (line,) = ax.plot(
                     x, y, label=data, color=(1.0, 1.0, 0.0), linewidth=5.0
-                )
+                ) # yellow
             elif label == "hbond":
                 if type == "Acceptor":
                     (line,) = ax.plot(
                         x, y, label=data, color=(1.0, 0.6, 0.6), linewidth=5.0
-                    )
+                    ) # light red / pink
                 elif type == "Donor":
                     (line,) = ax.plot(
                         x, y, label=data, color=(0.3, 0.5, 1.0), linewidth=5.0
-                    )
+                    ) # light blue
             elif label == "halogen":
                 (line,) = ax.plot(
                     x, y, label=data, color=(1.0, 0.0, 0.9), linewidth=5.0
-                )
+                ) # magenta / hot pink
             elif label == "pistacking":
                 (line,) = ax.plot(
                     x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0
-                )
+                ) # blue
             elif label == "pication":
                 (line,) = ax.plot(
                     x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0
-                )
+                ) # blue
             elif label == "waterbridge":
                 (line,) = ax.plot(
                     x, y, label=data, color=(0.0, 1.0, 0.9), linewidth=5.0
-                )
+                ) # cyan / aqua
             elif label == "metal":
                 (line,) = ax.plot(
                     x, y, label=data, color=(1.0, 0.6, 0.0), linewidth=5.0
-                )
+                ) # orange
             elif label == "saltbridge":
                 if type == "NI":
                     (line,) = ax.plot(
-                        x, y, label=data, color=(0.0, 0.5, 1.0), linewidth=5.0
-                    ) # orange color
+                        x, y, label=data, color=(1.0, 0.6, 0.0), linewidth=5.0
+                    ) # orange
                 elif type == "PI":
                     (line,) = ax.plot(
                         x, y, label=data, color=(0.3, 0.9, 0.8), linewidth=5.0
-                    ) # turquoise color
+                    ) # turquoise / teal
             else:
                 (line,) = ax.plot(x, y, label=data)
             lines.append(line)
