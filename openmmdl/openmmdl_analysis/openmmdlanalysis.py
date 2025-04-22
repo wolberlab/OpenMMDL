@@ -85,7 +85,7 @@ def main():
         dest="ligand_name",
         help="Ligand Name (3 Letter Code in PDB)",
         default=None,
-        required=True
+        required=True,
     )
     parser.add_argument(
         "-l", dest="ligand_sdf", help="Ligand in SDF Format", default=None
@@ -197,7 +197,9 @@ def main():
     ):
         print("Trajectory is missing, try the absolute path")
     if args.ligand_name == None:
-        print("Ligand name is missing. Add the name of your ligand from your topology file")
+        print(
+            "Ligand name is missing. Add the name of your ligand from your topology file"
+        )
     # set variables for analysis and preprocess input files
     topology = args.topology
     trajectory = args.trajectory
