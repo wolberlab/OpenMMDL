@@ -81,13 +81,14 @@ def main():
         "-d", dest="trajectory", help="Trajectory File in DCD Format", required=True
     )
     parser.add_argument(
-        "-l", dest="ligand_sdf", help="Ligand in SDF Format", default=None
-    )
-    parser.add_argument(
         "-n",
         dest="ligand_name",
         help="Ligand Name (3 Letter Code in PDB)",
         default=None,
+        required=True
+    )
+    parser.add_argument(
+        "-l", dest="ligand_sdf", help="Ligand in SDF Format", default=None
     )
     parser.add_argument(
         "-b",
@@ -195,7 +196,8 @@ def main():
         and input_formats[6] not in args.trajectory
     ):
         print("Trajectory is missing, try the absolute path")
-
+    if args.ligand_name == None:
+        print("Ligand name is missing. Add the name of your ligand from your topology file")
     # set variables for analysis and preprocess input files
     topology = args.topology
     trajectory = args.trajectory
