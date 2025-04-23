@@ -27,6 +27,7 @@ from rdkit.Chem import AllChem, Draw
 from rdkit.Chem.Draw import rdMolDraw2D
 from plip.basic import config
 from MDAnalysis.analysis import rms
+from MDAnalysis.coordinates.DCD import DCDWriter
 from tqdm import tqdm
 
 
@@ -103,6 +104,12 @@ def main():
         default=None,
     )
     parser.add_argument(
+        "-f",
+        dest="frames",
+        help="final frame of the analysis (if you want to analyze only a certain part of the trajectory)",
+        default=None,
+    )
+    parser.add_argument(
         "-m",
         dest="min_transition",
         help="Minimal Transition percentage for Markov State Model",
@@ -162,14 +169,12 @@ def main():
         help="Calculate the representative frame for each binding mode. Defaults to False",
         default=False,
     )
-
     parser.add_argument(
         "--watereps",
         dest="water_eps",
         help="Set the Eps for clustering, this defines how big clusters can be spatially in Angstrom",
         default=1.0,
     )
-
     parser.add_argument(
         "--figure",
         dest="figure_type",
@@ -267,6 +272,14 @@ def main():
 
     if not pdb_md:
         pdb_md = mda.Universe(topology, trajectory)
+
+    if frames != None:
+        print(f"\033[1mWriting out the first {frames} out for the analysis\033[0m")
+        ag = pdb_md.select_atoms("all")
+        with DCDWriter(f"{frames}.dcd", ag.n_atoms) as w:
+            for ts in pdb_md.trajectory[: int(frames) + 1]:
+                w.write(ag)
+        pdb_md = mda.Universe(topology, f"{frames}.dcd")
 
     trajsaver = TrajectorySaver(pdb_md, ligand, special_ligand, receptor_nucleic)
 
@@ -815,6 +828,8 @@ def main():
             topology, "representative_waters.pdb", water_eps
         )
 
+    if frames != None:
+        os.remove(f"{frames}.dcd")
 
 if __name__ == "__main__":
     main()
