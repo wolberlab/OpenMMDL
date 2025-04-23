@@ -7,7 +7,7 @@ from openmmdl.openmmdl_analysis.trajectory_saving import TrajectorySaver
 
 test_data_directory = Path("openmmdl/tests/data/in")
 pdb_file = test_data_directory / "interacting_waters.pdb"
-dcd_file = test_data_directory / "interacting_waters.dc"
+dcd_file = test_data_directory / "interacting_waters.dcd"
 
 def test_init():
     pdb_md = mda.Universe(pdb_file, dcd_file)
