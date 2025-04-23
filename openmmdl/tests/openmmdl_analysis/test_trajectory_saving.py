@@ -12,7 +12,7 @@ dcd_file = test_data_directory / "interacting_waters.dcd"
 def test_init():
     pdb_md = mda.Universe(pdb_file, dcd_file)
     saver = TrajectorySaver(pdb_md, "LIG", "HEM", nucleic=False)
-    assert saver.pdb_md == mock_universe
+    assert saver.pdb_md == pdb_md
     assert saver.ligname == "LIG"
     assert saver.special == "HEM"
     assert saver.nucleic is False
