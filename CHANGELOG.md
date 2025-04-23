@@ -22,18 +22,18 @@ The rules for this file:
 talagayev, NDoering99
 
 ### Added
-- Changed to the use of RDKitConverter for Ligand recognition without -l flag in openmmdl_analysis (2025-04-10)
-- Addition of MDontallo Visualization (2025-04-11)
-- Addition of SMIRNOFF small molecule force field (2025-04-10, Issue #76)
-- Addition of PyMOL support for visualization (2025-04-10)
-- Added Dockerfile for image creation  (2025-04-10)
+- Changed to the use of `RDKitConverter` for Ligand recognition without `-l` flag in `OpenMMDL Analysis` (2025-04-10)
+- Addition of `MDontallo` Visualization (2025-04-11)
+- Addition of `SMIRNOFF` small molecule force field (2025-04-10, Issue #76)
+- Addition of `PyMOL` support for visualization (2025-04-10)
+- Added `Dockerfile` for image creation  (2025-04-10)
 - Addition of citation page in documentation (2025-04-10)
 
 ### Fixed
-- Fixed error cases, where ligand name was not specified (2025-04-22, Issue #138, PR #139)
+- Fixed error cases, where `ligand name` was not specified (2025-04-22, Issue #138, PR #139)
 - Fixed wrong color of the positive and negative ionizable interactions (2025-04-21, PR #137)
-- Fixed the XMLSerializer error appearing during simulation (2025-04-10, Issue #122)
-- Fixed the sanitization implementation in OpenMMDL Setup (2025-04-09)
+- Fixed the `XMLSerializer` error appearing during simulation (2025-04-10, Issue #122)
+- Fixed the `sanitization` implementation in OpenMMDL Setup (2025-04-09)
 
 ### Changed
 - The class `TrajectorySaver` was moved to `trajectory_saving.py` (2025-04-24)
