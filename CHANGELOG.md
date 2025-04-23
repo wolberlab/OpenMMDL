@@ -36,7 +36,7 @@ talagayev, NDoering99
 - Fixed the sanitization implementation in OpenMMDL Setup (2025-04-09)
 
 ### Changed
-<!-- Changes in existing functionality -->
+- The class `TrajectorySaver` was moved to `trajectory_saving.py` (2025-04-24)
 
 ### Deprecated
 <!-- Soon-to-be removed features -->
