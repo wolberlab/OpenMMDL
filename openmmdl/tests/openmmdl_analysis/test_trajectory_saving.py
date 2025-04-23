@@ -37,3 +37,16 @@ def test_save_interacting_waters_trajectory(tmp_path):
 
     assert pdb_out.stat().st_size > 0, "PDB file is empty."
     assert dcd_out.stat().st_size > 0, "DCD file is empty."
+
+def test_save_frame(tmp_path):
+    pdb_md = mda.Universe(pdb_file, dcd_file)
+    saver = TrajectorySaver(pdb_md, "UNK", None, nucleic=False)
+
+    outpath = tmp_path / "frame.pdb"
+
+    # Save the 5th frame (index 4)
+    saver.save_frame(4, str(outpath))
+
+    # Assertions
+    assert outpath.exists(), "Frame PDB file was not created."
+    assert outpath.stat().st_size > 0, "Frame PDB file is empty."
