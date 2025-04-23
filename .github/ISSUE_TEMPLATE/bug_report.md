@@ -6,7 +6,7 @@ about: Create a report to tell about a bug or problem you encountered
 
 ## Bug Behavior ##
 
-<!-- A description of what happens. (Code to reproduce the behavior can be added below). -->
+<!-- A description of what happens. (Code to reproduce the behavior can be added below). Please check that your bug is consistently reproducable -->
 
 ## Additional Information ##
 
