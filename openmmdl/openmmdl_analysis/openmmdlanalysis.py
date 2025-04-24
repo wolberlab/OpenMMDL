@@ -1,8 +1,3 @@
-"""
-openmmdl_simulation.py
-Perform Simulations of Protein-ligand complexes with OpenMM
-"""
-
 import argparse
 import sys
 import warnings
@@ -66,7 +61,7 @@ def main():
             r"   '. \_/``'.'  /   )       \       / |  |    |  ||  |      |  ||  |      |  ||       .'    |        \ ",
             r"     '-----'    `---'        `'-..-'  '--'    '--''--'      '--''--'      '--''-----'`      `--------` ",
             r"              Prepare and Perform OpenMM Protein-Ligand MD Simulations                                 ",
-            r"                                     Alpha Version                                                     ",
+            r"                                     Version 1.1.0                                                     ",
         ]
     )
     print(logo)
