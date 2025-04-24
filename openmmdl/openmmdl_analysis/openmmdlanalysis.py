@@ -47,7 +47,7 @@ from openmmdl.openmmdl_analysis.barcode_generation import (
     BarcodeGenerator,
     BarcodePlotter,
 )
-from openmmdl.openmmdl_analysis.visualization_functions import TrajectorySaver
+from openmmdl.openmmdl_analysis.trajectory_saving import TrajectorySaver
 from openmmdl.openmmdl_analysis.pharmacophore import PharmacophoreGenerator
 from openmmdl.openmmdl_analysis.find_stable_waters import StableWaters
 
