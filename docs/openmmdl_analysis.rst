@@ -32,6 +32,7 @@ Optional:
     -l = Ligand in SDF format
     -b = binding mode threshold. Is used to remove interactions under the defined procentual occurence from the binding mode generation. The default is 40% (accepted values: 0-100)
     -df = Dataframe (use if the interactions were already calculated, default name would be "interactions_gathered.csv")
+    -f = final frame of the analysis (if you want to analyze only a certain part of the trajectory). The default will be the full simulation trajectory analysis.
     -m = minimal transition threshold. Is used for the display of the binding mode transitions in the Markov state chains network figure. The default value is 1
     -c = CPU count, specify how many CPUs should be used, default is half of the CPU count.
     -p = Generate .pml files for pharmacophore visualization. The default is False (accepted values: True/False)

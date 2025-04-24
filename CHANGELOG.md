@@ -22,7 +22,7 @@ The rules for this file:
 talagayev, NDoering99
 
 ### Added
-- Changed to the use of `RDKitConverter` for Ligand recognition without `-l` flag in `OpenMMDL Analysis` (2025-04-10)
+- Addition of option to select final frame in OpenMMDL Analysis (2025-04-23, Issue #136, PR #140)
 - Addition of `MDontallo` Visualization (2025-04-11)
 - Addition of `SMIRNOFF` small molecule force field (2025-04-10, Issue #76)
 - Addition of `PyMOL` support for visualization (2025-04-10)
@@ -37,6 +37,8 @@ talagayev, NDoering99
 
 ### Changed
 - The class `TrajectorySaver` was moved to `trajectory_saving.py` (2025-04-24, Issue #141, PR #142)
+- Changed to the use of `RDKitConverter` for Ligand recognition
+  without `-l` flag in `OpenMMDL Analysis` (2025-04-10)
 
 ### Deprecated
 <!-- Soon-to-be removed features -->
