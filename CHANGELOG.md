@@ -22,7 +22,7 @@ The rules for this file:
 talagayev, NDoering99
 
 ### Added
-- Addition of option to select final frame in OpenMMDL Analysis (2025-04-23)
+- Addition of option to select final frame in OpenMMDL Analysis (2025-04-23, Issue #136, PR #140)
 - Addition of `MDontallo` Visualization (2025-04-11)
 - Addition of `SMIRNOFF` small molecule force field (2025-04-10, Issue #76)
 - Addition of `PyMOL` support for visualization (2025-04-10)
