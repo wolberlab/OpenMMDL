@@ -268,14 +268,6 @@ def main():
     if not pdb_md:
         pdb_md = mda.Universe(topology, trajectory)
 
-    if frames != None:
-        print(f"\033[1mWriting out the first {frames} out for the analysis\033[0m")
-        ag = pdb_md.select_atoms("all")
-        with DCDWriter(f"{frames}.dcd", ag.n_atoms) as w:
-            for ts in pdb_md.trajectory[: int(frames) + 1]:
-                w.write(ag)
-        pdb_md = mda.Universe(topology, f"{frames}.dcd")
-
     trajsaver = TrajectorySaver(pdb_md, ligand, special_ligand, receptor_nucleic)
 
     # TODO maybe put this part into a function possibly in visualization_functions.py TrajectorySaver
@@ -381,6 +373,15 @@ def main():
         config.DNARECEPTOR = True
     if peptide != None:
         config.PEPTIDES = [peptide]
+
+    md_len = args.frames
+    if md_len is None:
+        md_len = len(pdb_md.trajectory) - 1
+        print(type(md_len))
+        print(f"\033[1mThe whole trajectory consisting of {len(pdb_md.trajectory)} frames will be analyzed\033[0m")
+    else:
+        md_len = int(md_len)
+        print(f"\033[1mThe trajectory until frame {md_len} will be analyzed\033[0m")
 
     interaction_analysis = InteractionAnalyzer(
         pdb_md, dataframe, cpu_count, ligand, special_ligand, peptide
@@ -823,8 +824,6 @@ def main():
             topology, "representative_waters.pdb", water_eps
         )
 
-    if frames != None:
-        os.remove(f"{frames}.dcd")
 
 if __name__ == "__main__":
     main()
