@@ -10,7 +10,11 @@ build:
 sphinx:
   configuration: docs/conf.py
 
+conda:
+  environment: docs/requirements.yaml
+
 # Explicitly set the version of Python and its requirements
 python:
   install:
-    - requirements: docs/readthedocs_templates.txt
+    - method: setuptools
+      path: .
