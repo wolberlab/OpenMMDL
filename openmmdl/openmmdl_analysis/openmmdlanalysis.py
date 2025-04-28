@@ -384,7 +384,7 @@ def main():
         print(f"\033[1mThe trajectory until frame {md_len} will be analyzed\033[0m")
 
     interaction_analysis = InteractionAnalyzer(
-        pdb_md, dataframe, cpu_count, ligand, special_ligand, peptide
+        pdb_md, dataframe, cpu_count, ligand, special_ligand, peptide, md_len
     )
     interaction_list = interaction_analysis.ineraction_list
     interaction_list.to_csv("missing_frames_filled.csv")
