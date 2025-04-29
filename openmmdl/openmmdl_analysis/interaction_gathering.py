@@ -13,7 +13,7 @@ config.KEEPMOD = True
 
 class InteractionAnalyzer:
     def __init__(
-        self, pdb_md, dataframe, num_processes, lig_name, special_ligand, peptide
+        self, pdb_md, dataframe, num_processes, lig_name, special_ligand, peptide, md_len
     ):
         self.pdb_md = pdb_md
         self.dataframe = dataframe
@@ -21,6 +21,7 @@ class InteractionAnalyzer:
         self.lig_name = lig_name
         self.special = special_ligand
         self.peptide = peptide
+        self.md_len = md_len
         self.ineraction_list = self.process_trajectory()
 
     def characterize_complex(
@@ -386,7 +387,6 @@ class InteractionAnalyzer:
             pandas dataframe: DataFrame with placeholder values in the frames with no interactions.
         """
 
-        md_len = len(self.pdb_md.trajectory) - 1
         # Create a set containing all unique values in the 'FRAME' column
         existing_frames = set(df["FRAME"])
 
@@ -394,7 +394,7 @@ class InteractionAnalyzer:
         missing_rows = []
 
         # Iterate through numbers from 0 to md_len
-        for frame_number in range(1, md_len):
+        for frame_number in range(1, self.md_len):
             if frame_number not in existing_frames:
                 # Create a new row with 'FRAME' set to the missing number and other columns set to "skip"
                 missing_row = {"FRAME": frame_number}
@@ -428,17 +428,16 @@ class InteractionAnalyzer:
         if self.dataframe is None:
             print("\033[1mProcessing protein-ligand trajectory\033[0m")
             print(f"\033[1mUsing {self.num_processes} CPUs\033[0m")
-            total_frames = len(self.pdb_md.trajectory) - 1
 
             with Pool(processes=self.num_processes) as pool:
                 frame_args = [
                     (i, self.pdb_md, self.lig_name, self.special, self.peptide)
-                    for i in range(1, total_frames + 1)
+                    for i in range(1, self.md_len)
                 ]
 
                 # Initialize the progress bar with the total number of frames
                 pbar = tqdm(
-                    total=total_frames,
+                    total=self.md_len - 1,
                     ascii=True,
                     desc="\033[1mAnalyzing frames\033[0m",
                 )
