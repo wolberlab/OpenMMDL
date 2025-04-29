@@ -376,12 +376,12 @@ def main():
 
     md_len = args.frames
     if md_len is None:
-        md_len = len(pdb_md.trajectory) - 1
+        md_len = len(pdb_md.trajectory)
         print(type(md_len))
-        print(f"\033[1mThe whole trajectory consisting of {len(pdb_md.trajectory)} frames will be analyzed\033[0m")
+        print(f"\033[1mThe whole trajectory consisting of {len(pdb_md.trajectory) - 1} frames will be analyzed\033[0m")
     else:
-        md_len = int(md_len)
-        print(f"\033[1mThe trajectory until frame {md_len} will be analyzed\033[0m")
+        md_len = int(md_len) + 1
+        print(f"\033[1mThe trajectory until frame {md_len - 1} will be analyzed\033[0m")
 
     interaction_analysis = InteractionAnalyzer(
         pdb_md, dataframe, cpu_count, ligand, special_ligand, peptide, md_len
