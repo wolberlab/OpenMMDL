@@ -5,6 +5,19 @@ from PIL import Image
 from pathlib import Path
 from openmmdl.openmmdl_analysis.image_handler import *
 
+test_data_directory = Path(
+    "openmmdl/tests/data/openmmdl_analysis/rdkit_figure_generation"
+)
+test_data_directory_files = Path("openmmdl/tests/data/in")
+lig_no_h = test_data_directory_files / "lig_no_h.pdb"
+complex = test_data_directory_files / "complex.pdb"
+smi_file = test_data_directory_files / "lig_no_h.smi"
+current_directory = os.getcwd()
+output_path = "all_binding_modes_arranged.png"
+
+shutil.copy(str(lig_no_h), ".")
+shutil.copy(str(complex), ".")
+
 def test_create_and_merge_images_with_split_data():
     # Define test data
     binding_mode = "Binding_Mode_1"
@@ -166,3 +179,8 @@ def test_arranged_figure_generation():
     # Check if the output file was created
 
     assert output_path is not None
+
+
+# Run the tests
+if __name__ == "__main__":
+    pytest.main()
