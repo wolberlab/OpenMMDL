@@ -180,11 +180,13 @@ class FigureArranger:
         # Save the big figure
         big_figure.save(self.output_path, "PNG")
 
-        # Rename the merged image
-        os.rename(
-            self.output_path,
-            "Binding_Modes_Markov_States/" + os.path.basename(self.output_path),
-        )
+        # Ensure target directory exists
+        target_dir = "Binding_Modes_Markov_States"
+        os.makedirs(target_dir, exist_ok=True)
+
+        # Move the file
+        new_path = os.path.join(target_dir, os.path.basename(self.output_path))
+        os.rename(self.output_path, new_path)
 
         # Remove the individual image files
         for path in self.merged_image_paths:
