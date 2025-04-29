@@ -36,6 +36,8 @@ from openmmdl.openmmdl_analysis.markov_state_figure_generation import (
 from openmmdl.openmmdl_analysis.rdkit_figure_generation import (
     InteractionProcessor,
     LigandImageGenerator,
+)
+from openmmdl.openmmdl_analysis.image_handler import (
     FigureArranger,
     ImageMerger,
 )
