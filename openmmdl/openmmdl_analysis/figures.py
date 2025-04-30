@@ -3,7 +3,7 @@ import pylab
 import os
 
 
-class ImageMerger:
+class FigureMerger:
     def __init__(
         self, binding_mode, occurrence_percent, split_data, merged_image_paths
     ):
