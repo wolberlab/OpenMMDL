@@ -8,6 +8,8 @@ from tqdm import tqdm
 from pathlib import Path
 from numba import jit
 
+from openmmdl.openmmdl_analysis.utils import combine_subdict_values
+
 
 class BindingModeProcesser:
 
@@ -280,21 +282,7 @@ class BindingModeProcesser:
 
         return unique_data
 
-    def combine_subdict_values(self, data):
-        """Combines the values from the individual sub-dictionaries into a single list.
-
-        Args:
-            data (dict): Dictionary with values that are sub-dictionaries.
-
-        Returns:
-            dict: A dictionary with a single key named 'all' that contains a list of all combined values from all the sub-dictionaries.
-        """
-        combined_data = {"all": []}
-        for sub_dict in data.values():
-            combined_data["all"].extend(sub_dict.values())
-
-        return combined_data
-
+    
     def filtering_values(self, threshold, df):
         """Filter and append values (interactions) to a DataFrame based on occurrence counts.
 
@@ -312,7 +300,7 @@ class BindingModeProcesser:
         unique_data = self.remove_duplicate_values(self.unique_columns_rings_grouped)
 
         # Call the function to combine sub-dictionary values
-        unique_colums_rings_all = self.combine_subdict_values(unique_data)
+        unique_colums_rings_all = combine_subdict_values(unique_data)
 
         # Flatten the list of values
         all_values = unique_colums_rings_all["all"]
