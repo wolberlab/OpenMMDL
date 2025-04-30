@@ -4,7 +4,7 @@ import re
 import os
 import matplotlib.pyplot as plt
 import pytest
-from openmmdl.openmmdl_analysis.barcode_generation import BarcodeGenerator, BarcodePlotter
+from openmmdl.openmmdl_analysis.barcodes import BarcodeGenerator, BarcodePlotter
 
 
 # Barcode generation tests
