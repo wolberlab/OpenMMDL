@@ -30,7 +30,7 @@ def combine_subdict_values(data):
     return combined_data
 
 
-def update_values(self, df, new, unique_data, row_name):
+def update_values(df, new, unique_data, row_name):
     """Update the values in the input DataFrame based upon the frame values and an reference DataFrame.
 
     Args:
