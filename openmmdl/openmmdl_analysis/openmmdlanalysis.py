@@ -380,7 +380,6 @@ def main():
     md_len = args.frames
     if md_len is None:
         md_len = len(pdb_md.trajectory)
-        print(type(md_len))
         print(f"\033[1mThe whole trajectory consisting of {len(pdb_md.trajectory) - 1} frames will be analyzed\033[0m")
     else:
         md_len = int(md_len) + 1
