@@ -3,7 +3,7 @@ import os
 import shutil
 from PIL import Image
 from pathlib import Path
-from openmmdl.openmmdl_analysis.figures import FigureMerger, FigureArranger
+from openmmdl.openmmdl_analysis.visualization.figures import FigureMerger, FigureArranger
 
 test_data_directory = Path(
     "openmmdl/tests/data/openmmdl_analysis/rdkit_figure_generation"
