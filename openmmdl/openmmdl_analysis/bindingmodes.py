@@ -8,30 +8,30 @@ from tqdm import tqdm
 from pathlib import Path
 from numba import jit
 
-from openmmdl.openmmdl_analysis.utils import combine_subdict_values
+from openmmdl.openmmdl_analysis.utils import combine_subdict_values, remove_duplicate_values
 
 
 class BindingModeProcesser:
 
     def __init__(
-        self, pdb_md, ligand, peptide, special, ligand_rings, interaction_list, treshold
+        self, pdb_md, ligand, peptide, special, ligand_rings, interaction_list, threshold
     ):
         self.pdb_md = pdb_md
         self.ligand = ligand
         self.peptide = peptide
         self.special = special
+        self.threshold = threshold
         self.ligand_rings = ligand_rings
         self.unique_columns_rings_grouped = self.gather_interactions(interaction_list)
         self.interaction_list, self.unique_data = self.process_interaction_wraper(
-            interaction_list, (treshold / 100)
+            interaction_list, (threshold / 100)
         )
         self.interactions_all, self.unique_data_all = self.process_interaction_wraper(
             interaction_list.copy(), 0.00001
         )
 
-    def process_interaction_wraper(self, interaction_list, treshold):
-
-        filtered_values = self.filtering_values(treshold, interaction_list)
+    def process_interaction_wraper(self, interaction_list, threshold):
+        filtered_values = self.filtering_values(threshold, interaction_list)
         interaction_list.fillna(0, inplace=True)
         unique_data = self.unique_data_generation(filtered_values)
         self.df_iteration_numbering(interaction_list, unique_data)
@@ -287,7 +287,7 @@ class BindingModeProcesser:
         """Filter and append values (interactions) to a DataFrame based on occurrence counts.
 
         Args:
-            threshold (float): A treshold value that is used for filtering of the values (interactions) based upon the occurence count.
+            threshold (float): A threshold value that is used for filtering of the values (interactions) based upon the occurence count.
             df (pandas dataframe): DataFrame to which the filtered values (interactions) will be added.
             unique_columns_rings_grouped (dict): Dictionary containing the grouped and unique values otained from gather_interactions.
 
