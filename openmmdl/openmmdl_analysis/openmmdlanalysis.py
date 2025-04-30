@@ -48,7 +48,7 @@ from openmmdl.openmmdl_analysis.barcodes import (
 from openmmdl.openmmdl_analysis.trajectories import TrajectorySaver
 from openmmdl.openmmdl_analysis.pharmacophore import PharmacophoreGenerator
 from openmmdl.openmmdl_analysis.wateranalysis import StableWaters
-from openmmdl.openmmdl_analysis.utils import update_dict
+from openmmdl.openmmdl_analysis.utils import update_dict, update_values
 
 
 def main():
@@ -412,7 +412,7 @@ def main():
         list(unique_data.values())
     ].max()
     grouped_frames_treshold = grouped_frames_treshold.set_index("FRAME", drop=False)
-    bmode_processor.update_values(
+    update_values(
         interaction_list, grouped_frames_treshold, unique_data, "FRAME"
     )
 
