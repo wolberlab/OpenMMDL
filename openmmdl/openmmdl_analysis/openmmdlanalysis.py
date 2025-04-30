@@ -413,7 +413,7 @@ def main():
     ].max()
     grouped_frames_treshold = grouped_frames_treshold.set_index("FRAME", drop=False)
     bmode_processor.update_values(
-        interaction_list, grouped_frames_treshold, unique_data
+        interaction_list, grouped_frames_treshold, unique_data, "FRAME"
     )
 
     # Change the FRAME column value type to int
