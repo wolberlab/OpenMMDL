@@ -653,7 +653,7 @@ class BindingModeProcesser:
                             )
                             df.at[index, col] = 1 if condition else 0
 
-    def update_values(self, df, new, unique_data):
+    def update_values(self, df, new, unique_data, row_name):
         """Update the values in the input DataFrame based upon the frame values and an reference DataFrame.
 
         Args:
@@ -662,6 +662,6 @@ class BindingModeProcesser:
             unique_data (dict): A dictionary containing keys that represent the specific unique column names that need to be updated in the input DataFrame.
         """
         for idx, row in df.iterrows():
-            frame_value = row["FRAME"]
+            frame_value = row[row_name]
             values_to_update = new.loc[frame_value, list(unique_data.values())]
             df.loc[idx, list(unique_data.values())] = values_to_update
