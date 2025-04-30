@@ -26,29 +26,29 @@ from MDAnalysis.coordinates.DCD import DCDWriter
 from tqdm import tqdm
 
 
-from openmmdl.openmmdl_analysis.preprocessing import Preprocessing
-from openmmdl.openmmdl_analysis.rmsd import RMSDAnalyzer
-from openmmdl.openmmdl_analysis.interactions import InteractionAnalyzer
-from openmmdl.openmmdl_analysis.bindingmodes import BindingModeProcesser
-from openmmdl.openmmdl_analysis.markovchains import (
+from openmmdl.openmmdl_analysis.core.preprocessing import Preprocessing
+from openmmdl.openmmdl_analysis.analysis.rmsd import RMSDAnalyzer
+from openmmdl.openmmdl_analysis.analysis.interactions import InteractionAnalyzer
+from openmmdl.openmmdl_analysis.analysis.bindingmodes import BindingModeProcesser
+from openmmdl.openmmdl_analysis.analysis.markovchains import (
     MarkovChainAnalysis,
 )
-from openmmdl.openmmdl_analysis.highlight import (
+from openmmdl.openmmdl_analysis.visualization.highlighting import (
     FigureHighlighter,
     LigandImageGenerator,
 )
-from openmmdl.openmmdl_analysis.figures import (
+from openmmdl.openmmdl_analysis.visualization.figures import (
     FigureArranger,
     FigureMerger,
 )
-from openmmdl.openmmdl_analysis.barcodes import (
+from openmmdl.openmmdl_analysis.visualization.barcodes import (
     BarcodeGenerator,
     BarcodePlotter,
 )
-from openmmdl.openmmdl_analysis.trajectories import TrajectorySaver
-from openmmdl.openmmdl_analysis.pharmacophore import PharmacophoreGenerator
-from openmmdl.openmmdl_analysis.wateranalysis import StableWaters
-from openmmdl.openmmdl_analysis.utils import update_dict, update_values
+from openmmdl.openmmdl_analysis.core.trajectories import TrajectorySaver
+from openmmdl.openmmdl_analysis.visualization.pharmacophore import PharmacophoreGenerator
+from openmmdl.openmmdl_analysis.analysis.wateranalysis import StableWaters
+from openmmdl.openmmdl_analysis.core.utils import update_dict, update_values
 
 
 def main():
