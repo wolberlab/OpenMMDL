@@ -471,7 +471,7 @@ def main():
         combined_dict["all"].append(value)
 
     # Generate Markov state figures of the binding modes
-    total_frames = len(pdb_md.trajectory) - 1
+    total_frames = md_len - 1
     markov_analysis = MarkovChainAnalysis(min_transition)
     markov_analysis.generate_transition_graph(total_frames, combined_dict, fig_type)
     print("\033[1mMarkov State Figure generated\033[0m")
