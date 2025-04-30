@@ -48,6 +48,7 @@ from openmmdl.openmmdl_analysis.barcodes import (
 from openmmdl.openmmdl_analysis.trajectories import TrajectorySaver
 from openmmdl.openmmdl_analysis.pharmacophore import PharmacophoreGenerator
 from openmmdl.openmmdl_analysis.wateranalysis import StableWaters
+from openmmdl.openmmdl_analysis.utils import update_dict
 
 
 def main():
@@ -586,7 +587,7 @@ def main():
                 )
 
                 # Call the function to update hbond_donor_dict with values from other dictionaries
-                interaction_processor.update_dict(
+                update_dict(
                     hbond_donor_dict,
                     hbond_acceptor_dict,
                     ni_dict,
