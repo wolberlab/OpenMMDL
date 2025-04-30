@@ -16,7 +16,7 @@ The rules for this file:
   * accompany each entry with github issue/PR number (Issue #xyz)
 -->
 
-## [Unreleased]
+## Version 1.1.0
 
 ### Authors
 talagayev, NDoering99
@@ -36,6 +36,7 @@ talagayev, NDoering99
 - Fixed the `sanitization` implementation in OpenMMDL Setup (2025-04-09)
 
 ### Changed
+- Classes `ImageMerger` and `FigureArranger` were moved to `image_handler.py` (2025-04-30, Issue #141, PR #142)
 - The class `TrajectorySaver` was moved to `trajectory_saving.py` (2025-04-24, Issue #141, PR #142)
 - Changed to the use of `RDKitConverter` for Ligand recognition
   without `-l` flag in `OpenMMDL Analysis` (2025-04-10)
