@@ -42,3 +42,29 @@ def update_values(self, df, new, unique_data, row_name):
         frame_value = row[row_name]
         values_to_update = new.loc[frame_value, list(unique_data.values())]
         df.loc[idx, list(unique_data.values())] = values_to_update
+
+
+def remove_duplicate_values(data):
+    """Remove the duplicate values from sub-dictionaries within the input dictionary.
+
+    Args:
+        data (dict): The input dictionary containing sub-dictionaries with possible duplicate values.
+
+    Returns:
+        dict: A dictionary without duplicate values.
+    """
+    unique_data = {}
+
+    for key, sub_dict in data.items():
+        unique_sub_dict = {}
+        seen_values = set()
+
+        for sub_key, value in sub_dict.items():
+            if value not in seen_values:
+                unique_sub_dict[sub_key] = value
+                seen_values.add(value)
+
+        if unique_sub_dict:
+            unique_data[key] = unique_sub_dict
+
+    return unique_data
