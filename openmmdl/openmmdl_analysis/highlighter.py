@@ -4,7 +4,7 @@ from rdkit.Chem import AllChem, Draw
 import cairosvg
 
 
-class InteractionProcessor:
+class FigureHighlighter:
     def __init__(self, complex_pdb_file, ligand_no_h_pdb_file):
         """
         Initialize the InteractionProcessor class.
