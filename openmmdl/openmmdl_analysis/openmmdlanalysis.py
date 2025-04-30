@@ -245,7 +245,7 @@ def main():
     frame_rmsd = args.frame_rmsd
     if ligand == "*":
         ligand = "UNK"
-    treshold = int(args.binding)
+    threshold = int(args.binding)
     dataframe = args.dataframe
     min_transition = int(args.min_transition)
     cpu_count = int(args.cpu_count)
@@ -393,6 +393,9 @@ def main():
     interaction_list.to_csv("missing_frames_filled.csv")
     interaction_list = interaction_list.reset_index(drop=True)
 
+    # add amount of frames for Markov chains and binding modes
+    total_frames = md_len - 1
+    
     bmode_processor = BindingModeProcesser(
         pdb_md,
         ligand,
@@ -400,7 +403,8 @@ def main():
         special_ligand,
         ligand_rings,
         interaction_list,
-        treshold,
+        threshold,
+        total_frames
     )
     interaction_list = bmode_processor.interaction_list
     interactions_all = bmode_processor.interactions_all
@@ -471,7 +475,6 @@ def main():
         combined_dict["all"].append(value)
 
     # Generate Markov state figures of the binding modes
-    total_frames = md_len - 1
     markov_analysis = MarkovChainAnalysis(min_transition)
     markov_analysis.generate_transition_graph(total_frames, combined_dict, fig_type)
     print("\033[1mMarkov State Figure generated\033[0m")
