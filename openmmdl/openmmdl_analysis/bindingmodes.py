@@ -12,9 +12,8 @@ from openmmdl.openmmdl_analysis.utils import combine_subdict_values, remove_dupl
 
 
 class BindingModeProcesser:
-
     def __init__(
-        self, pdb_md, ligand, peptide, special, ligand_rings, interaction_list, threshold
+        self, pdb_md, ligand, peptide, special, ligand_rings, interaction_list, threshold, total_frames
     ):
         self.pdb_md = pdb_md
         self.ligand = ligand
@@ -22,6 +21,7 @@ class BindingModeProcesser:
         self.special = special
         self.threshold = threshold
         self.ligand_rings = ligand_rings
+        self.total_frames = total_frames
         self.unique_columns_rings_grouped = self.gather_interactions(interaction_list)
         self.interaction_list, self.unique_data = self.process_interaction_wraper(
             interaction_list, (threshold / 100)
@@ -257,31 +257,6 @@ class BindingModeProcesser:
 
         return unique_columns_rings_grouped
 
-    def remove_duplicate_values(self, data):
-        """Remove the duplicate values from sub-dictionaries within the input dictionary.
-
-        Args:
-            data (dict): The input dictionary containing sub-dictionaries with possible duplicate values.
-
-        Returns:
-            dict: A dictionary without duplicate values.
-        """
-        unique_data = {}
-
-        for key, sub_dict in data.items():
-            unique_sub_dict = {}
-            seen_values = set()
-
-            for sub_key, value in sub_dict.items():
-                if value not in seen_values:
-                    unique_sub_dict[sub_key] = value
-                    seen_values.add(value)
-
-            if unique_sub_dict:
-                unique_data[key] = unique_sub_dict
-
-        return unique_data
-
     
     def filtering_values(self, threshold, df):
         """Filter and append values (interactions) to a DataFrame based on occurrence counts.
@@ -294,10 +269,8 @@ class BindingModeProcesser:
         Returns:
             list: A list of values, with unique values and their corresponding occurence counts.
         """
-
-        frames = len(self.pdb_md.trajectory) - 1
         # Call the function to remove duplicate keys
-        unique_data = self.remove_duplicate_values(self.unique_columns_rings_grouped)
+        unique_data = remove_duplicate_values(self.unique_columns_rings_grouped)
 
         # Call the function to combine sub-dictionary values
         unique_colums_rings_all = combine_subdict_values(unique_data)
@@ -314,7 +287,7 @@ class BindingModeProcesser:
                 occurrences[value] = 1
 
         # Calculate the threshold (20% of 1000)
-        threshold = threshold * frames
+        threshold = threshold * self.total_frames
 
         # Filter out values that appear in less than 20% of 1000
         filtered_values = [
