@@ -12,3 +12,19 @@ def update_dict(target_dict, *source_dicts):
             int_key = int(key)
             if int_key not in target_dict:
                 target_dict[int_key] = value
+
+
+def combine_subdict_values(data):
+    """Combines the values from the individual sub-dictionaries into a single list.
+
+    Args:
+        data (dict): Dictionary with values that are sub-dictionaries.
+
+    Returns:
+        dict: A dictionary with a single key named 'all' that contains a list of all combined values from all the sub-dictionaries.
+    """
+    combined_data = {"all": []}
+    for sub_dict in data.values():
+        combined_data["all"].extend(sub_dict.values())
+
+    return combined_data
