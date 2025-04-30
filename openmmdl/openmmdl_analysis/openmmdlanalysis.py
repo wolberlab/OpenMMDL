@@ -27,27 +27,27 @@ from tqdm import tqdm
 
 
 from openmmdl.openmmdl_analysis.preprocessing import Preprocessing
-from openmmdl.openmmdl_analysis.rmsd_calculation import RMSDAnalyzer
-from openmmdl.openmmdl_analysis.interaction_gathering import InteractionAnalyzer
-from openmmdl.openmmdl_analysis.binding_mode_processing import BindingModeProcesser
-from openmmdl.openmmdl_analysis.markov_state_figure_generation import (
+from openmmdl.openmmdl_analysis.rmsd import RMSDAnalyzer
+from openmmdl.openmmdl_analysis.interactions import InteractionAnalyzer
+from openmmdl.openmmdl_analysis.bindingmodes import BindingModeProcesser
+from openmmdl.openmmdl_analysis.markovchains import (
     MarkovChainAnalysis,
 )
-from openmmdl.openmmdl_analysis.rdkit_figure_generation import (
-    InteractionProcessor,
+from openmmdl.openmmdl_analysis.highlight import (
+    FigureHighlighter,
     LigandImageGenerator,
 )
-from openmmdl.openmmdl_analysis.image_handler import (
+from openmmdl.openmmdl_analysis.figures import (
     FigureArranger,
-    ImageMerger,
+    FigureMerger,
 )
-from openmmdl.openmmdl_analysis.barcode_generation import (
+from openmmdl.openmmdl_analysis.barcodes import (
     BarcodeGenerator,
     BarcodePlotter,
 )
-from openmmdl.openmmdl_analysis.trajectory_saving import TrajectorySaver
+from openmmdl.openmmdl_analysis.trajectories import TrajectorySaver
 from openmmdl.openmmdl_analysis.pharmacophore import PharmacophoreGenerator
-from openmmdl.openmmdl_analysis.find_stable_waters import StableWaters
+from openmmdl.openmmdl_analysis.wateranalysis import StableWaters
 
 
 def main():
@@ -508,7 +508,7 @@ def main():
     # Generate an Figure for each of the binding modes with rdkit Drawer with the atoms interacting highlighted by colors
     try:
         if peptide is None:
-            interaction_processor = InteractionProcessor("complex.pdb", "lig_no_h.pdb")
+            interaction_processor = FigureHighlighter("complex.pdb", "lig_no_h.pdb")
             matplotlib.use("Agg")
             binding_site = {}
             merged_image_paths = []
@@ -637,7 +637,7 @@ def main():
                 )
 
                 # Generate the interactions legend and combine it with the ligand png
-                image_merger = ImageMerger(
+                image_merger = FigureMerger(
                     binding_mode, occurrence_percent, split_data, merged_image_paths
                 )
                 merged_image_paths = image_merger.create_and_merge_images()
