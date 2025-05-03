@@ -1,5 +1,5 @@
 import pytest
-from openmmdl.openmmdl_analysis.utils import update_dict, update_values
+from openmmdl.openmmdl_analysis.core.utils import update_dict, update_values
 
 
 def test_update_dict():
