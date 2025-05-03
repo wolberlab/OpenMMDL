@@ -1,3 +1,2 @@
 sphinx-rtd-theme
 renku-sphinx-theme
-networkx
