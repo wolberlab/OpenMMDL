@@ -2,8 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 import MDAnalysis as mda
 from pathlib import Path
-# Import the class to be tested
-from openmmdl.openmmdl_analysis.trajectories import TrajectorySaver
+from openmmdl.openmmdl_analysis.analysis.trajectories import TrajectorySaver
 
 test_data_directory = Path("openmmdl/tests/data/in")
 pdb_file = test_data_directory / "interacting_waters.pdb"
