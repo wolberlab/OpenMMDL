@@ -13,7 +13,14 @@ config.KEEPMOD = True
 
 class InteractionAnalyzer:
     def __init__(
-        self, pdb_md, dataframe, num_processes, lig_name, special_ligand, peptide, md_len
+        self,
+        pdb_md,
+        dataframe,
+        num_processes,
+        lig_name,
+        special_ligand,
+        peptide,
+        md_len,
     ):
         self.pdb_md = pdb_md
         self.dataframe = dataframe
