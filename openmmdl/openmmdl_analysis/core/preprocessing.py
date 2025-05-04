@@ -141,10 +141,10 @@ class Preprocessing:
             )
             return
 
-        #Using RDKit Converter to get SDF File
+        # Using RDKit Converter to get SDF File
         lig_atoms = ligand_atoms.convert_to("RDKIT")
 
-        #Write out the SDF file
+        # Write out the SDF file
         writer = SDWriter(output_filename)
         writer.write(lig_atoms)
         writer.close()
@@ -230,3 +230,4 @@ class Preprocessing:
 
         with open(output_file, "w") as f:
             f.write(modified_data)
+
