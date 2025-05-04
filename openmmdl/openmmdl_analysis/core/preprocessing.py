@@ -1,12 +1,7 @@
-import MDAnalysis as mda
-import subprocess
-import os
 import re
-import rdkit
 import mdtraj as md
-from rdkit import Chem
-from rdkit.Chem import Draw, AllChem, SDWriter
-from rdkit.Chem.Draw import rdMolDraw2D
+import MDAnalysis as mda
+from rdkit.Chem import SDWriter
 
 
 class Preprocessing:
