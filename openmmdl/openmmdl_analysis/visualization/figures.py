@@ -1,6 +1,6 @@
-from PIL import Image
-import pylab
 import os
+import pylab
+from PIL import Image
 
 
 class FigureMerger:
