@@ -46,7 +46,9 @@ from openmmdl.openmmdl_analysis.visualization.barcodes import (
     BarcodePlotter,
 )
 from openmmdl.openmmdl_analysis.core.trajectories import TrajectorySaver
-from openmmdl.openmmdl_analysis.visualization.pharmacophore import PharmacophoreGenerator
+from openmmdl.openmmdl_analysis.visualization.pharmacophore import (
+    PharmacophoreGenerator,
+)
 from openmmdl.openmmdl_analysis.analysis.wateranalysis import StableWaters
 from openmmdl.openmmdl_analysis.core.utils import update_dict, update_values
 
@@ -265,7 +267,9 @@ def main():
     print("\033[1mFiles are preprocessed\033[0m")
 
     if ligand_sdf == None:
-        preprocessor.extract_and_save_ligand_as_sdf(topology, "./ligand_prepared.sdf", ligand)
+        preprocessor.extract_and_save_ligand_as_sdf(
+            topology, "./ligand_prepared.sdf", ligand
+        )
         ligand_sdf = "./ligand_prepared.sdf"
 
     if not pdb_md:
@@ -380,7 +384,9 @@ def main():
     md_len = args.frames
     if md_len is None:
         md_len = len(pdb_md.trajectory)
-        print(f"\033[1mThe whole trajectory consisting of {len(pdb_md.trajectory) - 1} frames will be analyzed\033[0m")
+        print(
+            f"\033[1mThe whole trajectory consisting of {len(pdb_md.trajectory) - 1} frames will be analyzed\033[0m"
+        )
     else:
         md_len = int(md_len) + 1
         print(f"\033[1mThe trajectory until frame {md_len - 1} will be analyzed\033[0m")
@@ -394,7 +400,7 @@ def main():
 
     # add amount of frames for Markov chains and binding modes
     total_frames = md_len - 1
-    
+
     bmode_processor = BindingModeProcesser(
         pdb_md,
         ligand,
@@ -403,7 +409,7 @@ def main():
         ligand_rings,
         interaction_list,
         threshold,
-        total_frames
+        total_frames,
     )
     interaction_list = bmode_processor.interaction_list
     interactions_all = bmode_processor.interactions_all
@@ -415,9 +421,7 @@ def main():
         list(unique_data.values())
     ].max()
     grouped_frames_treshold = grouped_frames_treshold.set_index("FRAME", drop=False)
-    update_values(
-        interaction_list, grouped_frames_treshold, unique_data, "FRAME"
-    )
+    update_values(interaction_list, grouped_frames_treshold, unique_data, "FRAME")
 
     # Change the FRAME column value type to int
     grouped_frames_treshold["FRAME"] = grouped_frames_treshold["FRAME"].astype(int)
@@ -832,3 +836,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
