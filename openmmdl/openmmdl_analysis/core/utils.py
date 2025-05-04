@@ -1,5 +1,3 @@
-
-
 def update_dict(target_dict, *source_dicts):
     """Updates the dictionary with the keys and values from other dictionaries.
 
