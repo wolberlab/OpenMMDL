@@ -1,7 +1,7 @@
 import MDAnalysis as mda
+import cairosvg
 from rdkit import Chem
 from rdkit.Chem import AllChem, Draw
-import cairosvg
 
 
 class FigureHighlighter:
