@@ -211,17 +211,17 @@ class FigureHighlighter:
             dict: A dictionary with the interaction types are associated with their respective RGB color codes.
         """
         interaction_dict = {
-            "hbond_acceptor": (1.0, 0.6, 0.6),    # light red / pink
-            "hbond_both": (0.6, 0.0, 0.5),        # dark magenta / purple
-            "hbond_donor": (0.3, 0.5, 1.0),       # light blue
-            "hydrophobic": (1.0, 1.0, 0.0),       # yellow
-            "waterbridge": (0.0, 1.0, 0.9),       # cyan / aqua
-            "pistacking": (0.0, 0.0, 1.0),        # blue
-            "halogen": (1.0, 0.0, 0.9),           # magenta / hot pink
-            "ni": (1.0, 0.6, 0.0),                # orange
-            "pi": (0.3, 0.9, 0.8),                # turquoise / teal
-            "pication": (0.0, 0.0, 1.0),          # blue
-            "metal": (1.0, 0.6, 0.0),             # orange
+            "hbond_acceptor": (1.0, 0.6, 0.6),  # light red / pink
+            "hbond_both": (0.6, 0.0, 0.5),  # dark magenta / purple
+            "hbond_donor": (0.3, 0.5, 1.0),  # light blue
+            "hydrophobic": (1.0, 1.0, 0.0),  # yellow
+            "waterbridge": (0.0, 1.0, 0.9),  # cyan / aqua
+            "pistacking": (0.0, 0.0, 1.0),  # blue
+            "halogen": (1.0, 0.0, 0.9),  # magenta / hot pink
+            "ni": (1.0, 0.6, 0.0),  # orange
+            "pi": (0.3, 0.9, 0.8),  # turquoise / teal
+            "pication": (0.0, 0.0, 1.0),  # blue
+            "metal": (1.0, 0.6, 0.0),  # orange
         }
 
         interaction_dict = {
@@ -267,7 +267,7 @@ class LigandImageGenerator:
             # Application of RDKit Converter to obtain rdkit mol of ligand
             lig_atoms = complex_lig.convert_to("RDKIT")
             prepared_ligand = Chem.RemoveAllHs(lig_atoms)
-            
+
             AllChem.Compute2DCoords(prepared_ligand)
 
             # Map atom indices between ligand_no_h and complex
