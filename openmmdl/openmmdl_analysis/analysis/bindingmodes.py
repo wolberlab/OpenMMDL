@@ -8,12 +8,23 @@ from tqdm import tqdm
 from pathlib import Path
 from numba import jit
 
-from openmmdl.openmmdl_analysis.utils import combine_subdict_values, remove_duplicate_values
+from openmmdl.openmmdl_analysis.utils import (
+    combine_subdict_values,
+    remove_duplicate_values,
+)
 
 
 class BindingModeProcesser:
     def __init__(
-        self, pdb_md, ligand, peptide, special, ligand_rings, interaction_list, threshold, total_frames
+        self,
+        pdb_md,
+        ligand,
+        peptide,
+        special,
+        ligand_rings,
+        interaction_list,
+        threshold,
+        total_frames,
     ):
         self.pdb_md = pdb_md
         self.ligand = ligand
@@ -257,7 +268,6 @@ class BindingModeProcesser:
 
         return unique_columns_rings_grouped
 
-    
     def filtering_values(self, threshold, df):
         """Filter and append values (interactions) to a DataFrame based on occurrence counts.
 
@@ -625,3 +635,4 @@ class BindingModeProcesser:
                                 & (row["INTERACTION"] == interaction)
                             )
                             df.at[index, col] = 1 if condition else 0
+
