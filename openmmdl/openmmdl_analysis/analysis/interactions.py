@@ -3,10 +3,9 @@ import pandas as pd
 import MDAnalysis as mda
 from tqdm import tqdm
 from plip.basic import config
-from plip.structure.preparation import PDBComplex, LigandFinder, Mol, PLInteraction
+from plip.structure.preparation import PDBComplex
 from plip.exchange.report import BindingSiteReport
 from multiprocessing import Pool
-from functools import partial
 
 config.KEEPMOD = True
 
