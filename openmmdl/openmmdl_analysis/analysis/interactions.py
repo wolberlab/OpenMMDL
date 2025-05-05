@@ -3,7 +3,7 @@ import pandas as pd
 import MDAnalysis as mda
 from tqdm import tqdm
 from plip.basic import config
-from plip.structure.preparation import PDBComplex
+from plip.structure.preparation import PDBComplex, PLInteraction
 from plip.exchange.report import BindingSiteReport
 from multiprocessing import Pool
 
