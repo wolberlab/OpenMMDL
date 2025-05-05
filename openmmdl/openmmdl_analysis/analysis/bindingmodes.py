@@ -1,6 +1,6 @@
 import pandas as pd
 
-from openmmdl.openmmdl_analysis.utils import (
+from openmmdl.openmmdl_analysis.core.utils import (
     combine_subdict_values,
     remove_duplicate_values,
 )
