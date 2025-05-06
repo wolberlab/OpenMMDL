@@ -10,6 +10,16 @@ from MDAnalysis.analysis import rms, diffusionmap
 
 @jit(nopython=True, parallel=True, nogil=True)
 def calc_rmsd_2frames_jit(ref, frame):
+    """
+    Calculates the RMSD between two frames of atomic coordinates.
+
+    Args:
+        ref (np.array): Numpy array containing the reference atomic coordinates.
+        frame (np.array): Numpy array containing the atomic coordinates of the target frame.
+
+    Returns:
+        float: The RMSD value between the reference and target frame.
+    """
     dist = np.zeros(len(frame))
     for atom in range(len(frame)):
         dist[atom] = (
@@ -22,10 +32,23 @@ def calc_rmsd_2frames_jit(ref, frame):
 
 
 class RMSDAnalyzer:
-    def __init__(self, prot_lig_top_file, prot_lig_traj_file):
-        self.prot_lig_top_file = prot_lig_top_file
-        self.prot_lig_traj_file = prot_lig_traj_file
-        self.universe = mda.Universe(prot_lig_top_file, prot_lig_traj_file)
+    """A class responsible for the Root-Mean-Square Deviation (RMSD) analysis throughout the molecular dynamics simulation. The class provides functionalities to calculate 
+    RMSD over time, compute pairwise RMSD between trajectory frames, and identify the representative frames within clusters of the binding modes.
+
+    Parameters
+    ----------
+    top_file : str
+        Path to the topology file.
+    traj_file : str
+        Path to the trajectory file.
+
+    Attributes
+    ----------
+    universe : mda.Universe
+        MDAnalysis Universe object initialized with the provided topology and trajectory files.
+    """
+    def __init__(self, top_file, traj_file):
+        self.universe = mda.Universe(top_file, traj_file)
 
     def rmsd_for_atomgroups(self, fig_type, selection1, selection2=None):
         """Calculate the RMSD for selected atom groups, and save the csv file and plot.
@@ -125,6 +148,17 @@ class RMSDAnalyzer:
         return calc_rmsd_2frames_jit(ref, frame)
 
     def calculate_distance_matrix(self, selection):
+    """
+    Calculates the pairwise RMSD-based distance matrix for all trajectory frames 
+    for the selected atom selection.
+
+    Args:
+        selection (str): Selection string for the atoms (e.g., 'protein', 'resname LIG') 
+                         used to compute the RMSD between frames.
+
+    Returns:
+        np.array: Numpy array containing RMSD values between all pairs of frames.
+    """
         distances = np.zeros(
             (len(self.universe.trajectory), len(self.universe.trajectory))
         )
