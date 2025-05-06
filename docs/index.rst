@@ -59,8 +59,7 @@
    :maxdepth: 1
    :caption: API Docs
    
-   modules/openmmdl_analysis/analysis/markovchains
-   modules/openmmdl_analysis/core/trajectories
+   api
 
 
 Introduction
