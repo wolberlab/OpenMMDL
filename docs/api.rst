@@ -9,6 +9,11 @@ molecule in IPywidgets.
 
 .. toctree::
    :maxdepth: 2
-   :caption: API MarkovChains:
+   :caption: API Analysis Modules:
 
+   modules/openmmdl_analysis/analysis/bindingmodes
+   modules/openmmdl_analysis/analysis/interactions
    modules/openmmdl_analysis/analysis/markovchains
+   modules/openmmdl_analysis/analysis/rmsd
+   modules/openmmdl_analysis/analysis/stablewaters
+
