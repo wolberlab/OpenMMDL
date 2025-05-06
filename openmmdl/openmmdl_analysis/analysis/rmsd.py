@@ -139,6 +139,7 @@ class RMSDAnalyzer:
         )
 
         plt.savefig(f"./RMSD/RMSD_between_the_frames.{fig_type}")
+        
         return pairwise_rmsd_prot, pairwise_rmsd_lig
 
     def calc_rmsd_2frames(self, ref, frame):
@@ -176,6 +177,7 @@ class RMSDAnalyzer:
                 rmsd = self.calc_rmsd_2frames(frame_i, frame_j)
                 distances[i][j] = rmsd
                 distances[j][i] = rmsd
+                
         return distances
 
     def calculate_representative_frame(self, bmode_frames, DM):
