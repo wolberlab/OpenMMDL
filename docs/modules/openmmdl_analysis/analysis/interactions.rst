@@ -1,4 +1,4 @@
-API Documentation for InteractionAnalyzer
+API documentation for interactions
 ============================
 
 
