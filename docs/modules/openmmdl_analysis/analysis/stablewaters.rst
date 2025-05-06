@@ -1,4 +1,4 @@
-API Documentation for StableWaters
+API Documentation for stablewaters
 ============================
 
 .. py:class:: StableWaters(trajectory, topology, water_eps)
