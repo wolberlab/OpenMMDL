@@ -7,7 +7,7 @@ import os
 from unittest.mock import patch, MagicMock, mock_open
 import numpy as np
 
-from openmmdl.openmmdl_analysis.markov_state_figure_generation import MarkovChainAnalysis
+from openmmdl.openmmdl_analysis.analysis.markovchains import MarkovChainAnalysis
 
 @pytest.fixture
 def markov_chain():

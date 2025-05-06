@@ -8,7 +8,7 @@ import tempfile
 import shutil
 
 # Import the class to be tested
-from openmmdl.openmmdl_analysis.rmsd_calculation import RMSDAnalyzer
+from openmmdl.openmmdl_analysis.analysis.rmsd import RMSDAnalyzer
 
 @pytest.fixture
 def analyzer():

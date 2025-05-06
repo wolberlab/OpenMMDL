@@ -7,7 +7,7 @@ import numpy as np
 import mdtraj as md
 from pathlib import Path
 import MDAnalysis as mda
-from openmmdl.openmmdl_analysis.preprocessing import Preprocessing
+from openmmdl.openmmdl_analysis.core.preprocessing import Preprocessing
 
 pdb_file_path = "openmmdl/tests/data/in/0_unk_hoh.pdb"
 

@@ -4,7 +4,7 @@ import time
 import shutil
 from PIL import Image
 from pathlib import Path
-from openmmdl.openmmdl_analysis.rdkit_figure_generation import *
+from openmmdl.openmmdl_analysis.visualization.highlighting import FigureHighlighter, LigandImageGenerator
 
 test_data_directory = Path(
     "openmmdl/tests/data/openmmdl_analysis/rdkit_figure_generation"
@@ -33,30 +33,9 @@ shutil.copy(str(complex), ".")
 )
 
 def test_split_interaction_data(input_data, expected_output):
-    interaction = InteractionProcessor(complex, lig_no_h)
+    interaction = FigureHighlighter(complex, lig_no_h)
     result = interaction.split_interaction_data(input_data)
     assert result == expected_output
-
-
-def test_update_dict():
-    interaction = InteractionProcessor(complex, lig_no_h)
-    # Test case 1: Check if the target dictionary is updated correctly
-    target_dict = {1: "1", 2: "2"}
-    source_dict = {3: "3", 4: "4"}
-    interaction.update_dict(target_dict, source_dict)
-    assert target_dict == {1: "1", 2: "2", 3: "3", 4: "4"}
-
-    # Test case 2: Check if the function handles multiple source dictionaries
-    target_dict = {}
-    source_dict1 = {1: "1"}
-    source_dict2 = {2: "2", 3: "3"}
-    interaction.update_dict(target_dict, source_dict1, source_dict2)
-    assert target_dict == {1: "1", 2: "2", 3: "3"}
-
-    # Test case 3: Check if the function handles empty source dictionaries
-    target_dict = {1: "1", 2: "2"}
-    interaction.update_dict(target_dict)  # No source dictionaries provided
-    assert target_dict == {1: "1", 2: "2"}
 
 
 def test_generate_interaction_dict():
@@ -64,7 +43,7 @@ def test_generate_interaction_dict():
     interaction_type = "hydrophobic"
     keys = [1, 2, 3]
     expected_result = {1: (1.0, 1.0, 0.0), 2: (1.0, 1.0, 0.0), 3: (1.0, 1.0, 0.0)}
-    interaction = InteractionProcessor(complex, lig_no_h)
+    interaction = FigureHighlighter(complex, lig_no_h)
     result = interaction.generate_interaction_dict(interaction_type, keys)
     assert result == expected_result
 

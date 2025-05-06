@@ -1,12 +1,11 @@
-import matplotlib.pyplot as plt
-import pandas as pd
+import os
 import numpy as np
+import pandas as pd
+import MDAnalysis as mda
+import matplotlib.pyplot as plt
 from numba import jit
 from tqdm import tqdm
-import os
-import MDAnalysis as mda
 from MDAnalysis.analysis import rms, diffusionmap
-from MDAnalysis.analysis.distances import dist
 
 
 @jit(nopython=True, parallel=True, nogil=True)

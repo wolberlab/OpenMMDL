@@ -1,10 +1,10 @@
+import cairosvg
 import MDAnalysis as mda
 from rdkit import Chem
 from rdkit.Chem import AllChem, Draw
-import cairosvg
 
 
-class InteractionProcessor:
+class FigureHighlighter:
     def __init__(self, complex_pdb_file, ligand_no_h_pdb_file):
         """
         Initialize the InteractionProcessor class.
@@ -211,36 +211,23 @@ class InteractionProcessor:
             dict: A dictionary with the interaction types are associated with their respective RGB color codes.
         """
         interaction_dict = {
-            "hbond_acceptor": (1.0, 0.6, 0.6),    # light red / pink
-            "hbond_both": (0.6, 0.0, 0.5),        # dark magenta / purple
-            "hbond_donor": (0.3, 0.5, 1.0),       # light blue
-            "hydrophobic": (1.0, 1.0, 0.0),       # yellow
-            "waterbridge": (0.0, 1.0, 0.9),       # cyan / aqua
-            "pistacking": (0.0, 0.0, 1.0),        # blue
-            "halogen": (1.0, 0.0, 0.9),           # magenta / hot pink
-            "ni": (1.0, 0.6, 0.0),                # orange
-            "pi": (0.3, 0.9, 0.8),                # turquoise / teal
-            "pication": (0.0, 0.0, 1.0),          # blue
-            "metal": (1.0, 0.6, 0.0),             # orange
+            "hbond_acceptor": (1.0, 0.6, 0.6),  # light red / pink
+            "hbond_both": (0.6, 0.0, 0.5),  # dark magenta / purple
+            "hbond_donor": (0.3, 0.5, 1.0),  # light blue
+            "hydrophobic": (1.0, 1.0, 0.0),  # yellow
+            "waterbridge": (0.0, 1.0, 0.9),  # cyan / aqua
+            "pistacking": (0.0, 0.0, 1.0),  # blue
+            "halogen": (1.0, 0.0, 0.9),  # magenta / hot pink
+            "ni": (1.0, 0.6, 0.0),  # orange
+            "pi": (0.3, 0.9, 0.8),  # turquoise / teal
+            "pication": (0.0, 0.0, 1.0),  # blue
+            "metal": (1.0, 0.6, 0.0),  # orange
         }
 
         interaction_dict = {
             int(key): interaction_dict[interaction_type] for key in keys
         }
         return interaction_dict
-
-    def update_dict(self, target_dict, *source_dicts):
-        """Updates the dictionary with the keys and values from other dictionaries.
-
-        Args:
-            target_dict (dict): The dictionary that needs to be updated with new keys and values.
-            source_dicts (dict): One or multiple dictionaries that are used to update the target dictionary with new keys and values.
-        """
-        for source_dict in source_dicts:
-            for key, value in source_dict.items():
-                int_key = int(key)
-                if int_key not in target_dict:
-                    target_dict[int_key] = value
 
 
 class LigandImageGenerator:
@@ -280,7 +267,7 @@ class LigandImageGenerator:
             # Application of RDKit Converter to obtain rdkit mol of ligand
             lig_atoms = complex_lig.convert_to("RDKIT")
             prepared_ligand = Chem.RemoveAllHs(lig_atoms)
-            
+
             AllChem.Compute2DCoords(prepared_ligand)
 
             # Map atom indices between ligand_no_h and complex

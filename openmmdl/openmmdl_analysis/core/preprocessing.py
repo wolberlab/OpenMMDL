@@ -1,12 +1,7 @@
-import MDAnalysis as mda
-import subprocess
-import os
 import re
-import rdkit
 import mdtraj as md
-from rdkit import Chem
-from rdkit.Chem import Draw, AllChem, SDWriter
-from rdkit.Chem.Draw import rdMolDraw2D
+import MDAnalysis as mda
+from rdkit.Chem import SDWriter
 
 
 class Preprocessing:
@@ -141,10 +136,10 @@ class Preprocessing:
             )
             return
 
-        #Using RDKit Converter to get SDF File
+        # Using RDKit Converter to get SDF File
         lig_atoms = ligand_atoms.convert_to("RDKIT")
 
-        #Write out the SDF file
+        # Write out the SDF file
         writer = SDWriter(output_filename)
         writer.write(lig_atoms)
         writer.close()
@@ -230,3 +225,4 @@ class Preprocessing:
 
         with open(output_file, "w") as f:
             f.write(modified_data)
+

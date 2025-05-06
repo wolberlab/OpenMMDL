@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 from unittest.mock import patch, mock_open
 from io import StringIO
 
-from openmmdl.openmmdl_analysis.pharmacophore import PharmacophoreGenerator
+from openmmdl.openmmdl_analysis.visualization.pharmacophore import PharmacophoreGenerator
 
 
 @pytest.fixture

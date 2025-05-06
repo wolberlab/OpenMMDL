@@ -3,17 +3,23 @@ import pandas as pd
 import MDAnalysis as mda
 from tqdm import tqdm
 from plip.basic import config
-from plip.structure.preparation import PDBComplex, LigandFinder, Mol, PLInteraction
+from plip.structure.preparation import PDBComplex, PLInteraction
 from plip.exchange.report import BindingSiteReport
 from multiprocessing import Pool
-from functools import partial
 
 config.KEEPMOD = True
 
 
 class InteractionAnalyzer:
     def __init__(
-        self, pdb_md, dataframe, num_processes, lig_name, special_ligand, peptide, md_len
+        self,
+        pdb_md,
+        dataframe,
+        num_processes,
+        lig_name,
+        special_ligand,
+        peptide,
+        md_len,
     ):
         self.pdb_md = pdb_md
         self.dataframe = dataframe

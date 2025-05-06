@@ -1,9 +1,9 @@
-from PIL import Image
-import pylab
 import os
+import pylab
+from PIL import Image
 
 
-class ImageMerger:
+class FigureMerger:
     def __init__(
         self, binding_mode, occurrence_percent, split_data, merged_image_paths
     ):
@@ -38,45 +38,45 @@ class ImageMerger:
             if label == "hydrophobic":
                 (line,) = ax.plot(
                     x, y, label=data, color=(1.0, 1.0, 0.0), linewidth=5.0
-                ) # yellow
+                )  # yellow
             elif label == "hbond":
                 if type == "Acceptor":
                     (line,) = ax.plot(
                         x, y, label=data, color=(1.0, 0.6, 0.6), linewidth=5.0
-                    ) # light red / pink
+                    )  # light red / pink
                 elif type == "Donor":
                     (line,) = ax.plot(
                         x, y, label=data, color=(0.3, 0.5, 1.0), linewidth=5.0
-                    ) # light blue
+                    )  # light blue
             elif label == "halogen":
                 (line,) = ax.plot(
                     x, y, label=data, color=(1.0, 0.0, 0.9), linewidth=5.0
-                ) # magenta / hot pink
+                )  # magenta / hot pink
             elif label == "pistacking":
                 (line,) = ax.plot(
                     x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0
-                ) # blue
+                )  # blue
             elif label == "pication":
                 (line,) = ax.plot(
                     x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0
-                ) # blue
+                )  # blue
             elif label == "waterbridge":
                 (line,) = ax.plot(
                     x, y, label=data, color=(0.0, 1.0, 0.9), linewidth=5.0
-                ) # cyan / aqua
+                )  # cyan / aqua
             elif label == "metal":
                 (line,) = ax.plot(
                     x, y, label=data, color=(1.0, 0.6, 0.0), linewidth=5.0
-                ) # orange
+                )  # orange
             elif label == "saltbridge":
                 if type == "NI":
                     (line,) = ax.plot(
                         x, y, label=data, color=(1.0, 0.6, 0.0), linewidth=5.0
-                    ) # orange
+                    )  # orange
                 elif type == "PI":
                     (line,) = ax.plot(
                         x, y, label=data, color=(0.3, 0.9, 0.8), linewidth=5.0
-                    ) # turquoise / teal
+                    )  # turquoise / teal
             else:
                 (line,) = ax.plot(x, y, label=data)
             lines.append(line)

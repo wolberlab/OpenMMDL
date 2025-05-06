@@ -26,28 +26,31 @@ from MDAnalysis.coordinates.DCD import DCDWriter
 from tqdm import tqdm
 
 
-from openmmdl.openmmdl_analysis.preprocessing import Preprocessing
-from openmmdl.openmmdl_analysis.rmsd_calculation import RMSDAnalyzer
-from openmmdl.openmmdl_analysis.interaction_gathering import InteractionAnalyzer
-from openmmdl.openmmdl_analysis.binding_mode_processing import BindingModeProcesser
-from openmmdl.openmmdl_analysis.markov_state_figure_generation import (
+from openmmdl.openmmdl_analysis.core.preprocessing import Preprocessing
+from openmmdl.openmmdl_analysis.analysis.rmsd import RMSDAnalyzer
+from openmmdl.openmmdl_analysis.analysis.interactions import InteractionAnalyzer
+from openmmdl.openmmdl_analysis.analysis.bindingmodes import BindingModeProcesser
+from openmmdl.openmmdl_analysis.analysis.markovchains import (
     MarkovChainAnalysis,
 )
-from openmmdl.openmmdl_analysis.rdkit_figure_generation import (
-    InteractionProcessor,
+from openmmdl.openmmdl_analysis.visualization.highlighting import (
+    FigureHighlighter,
     LigandImageGenerator,
 )
-from openmmdl.openmmdl_analysis.image_handler import (
+from openmmdl.openmmdl_analysis.visualization.figures import (
     FigureArranger,
-    ImageMerger,
+    FigureMerger,
 )
-from openmmdl.openmmdl_analysis.barcode_generation import (
+from openmmdl.openmmdl_analysis.visualization.barcodes import (
     BarcodeGenerator,
     BarcodePlotter,
 )
-from openmmdl.openmmdl_analysis.trajectory_saving import TrajectorySaver
-from openmmdl.openmmdl_analysis.pharmacophore import PharmacophoreGenerator
-from openmmdl.openmmdl_analysis.find_stable_waters import StableWaters
+from openmmdl.openmmdl_analysis.core.trajectories import TrajectorySaver
+from openmmdl.openmmdl_analysis.visualization.pharmacophore import (
+    PharmacophoreGenerator,
+)
+from openmmdl.openmmdl_analysis.analysis.wateranalysis import StableWaters
+from openmmdl.openmmdl_analysis.core.utils import update_dict, update_values
 
 
 def main():
@@ -244,7 +247,7 @@ def main():
     frame_rmsd = args.frame_rmsd
     if ligand == "*":
         ligand = "UNK"
-    treshold = int(args.binding)
+    threshold = int(args.binding)
     dataframe = args.dataframe
     min_transition = int(args.min_transition)
     cpu_count = int(args.cpu_count)
@@ -264,7 +267,9 @@ def main():
     print("\033[1mFiles are preprocessed\033[0m")
 
     if ligand_sdf == None:
-        preprocessor.extract_and_save_ligand_as_sdf(topology, "./ligand_prepared.sdf", ligand)
+        preprocessor.extract_and_save_ligand_as_sdf(
+            topology, "./ligand_prepared.sdf", ligand
+        )
         ligand_sdf = "./ligand_prepared.sdf"
 
     if not pdb_md:
@@ -379,8 +384,9 @@ def main():
     md_len = args.frames
     if md_len is None:
         md_len = len(pdb_md.trajectory)
-        print(type(md_len))
-        print(f"\033[1mThe whole trajectory consisting of {len(pdb_md.trajectory) - 1} frames will be analyzed\033[0m")
+        print(
+            f"\033[1mThe whole trajectory consisting of {len(pdb_md.trajectory) - 1} frames will be analyzed\033[0m"
+        )
     else:
         md_len = int(md_len) + 1
         print(f"\033[1mThe trajectory until frame {md_len - 1} will be analyzed\033[0m")
@@ -392,6 +398,9 @@ def main():
     interaction_list.to_csv("missing_frames_filled.csv")
     interaction_list = interaction_list.reset_index(drop=True)
 
+    # add amount of frames for Markov chains and binding modes
+    total_frames = md_len - 1
+
     bmode_processor = BindingModeProcesser(
         pdb_md,
         ligand,
@@ -399,7 +408,8 @@ def main():
         special_ligand,
         ligand_rings,
         interaction_list,
-        treshold,
+        threshold,
+        total_frames,
     )
     interaction_list = bmode_processor.interaction_list
     interactions_all = bmode_processor.interactions_all
@@ -411,9 +421,7 @@ def main():
         list(unique_data.values())
     ].max()
     grouped_frames_treshold = grouped_frames_treshold.set_index("FRAME", drop=False)
-    bmode_processor.update_values(
-        interaction_list, grouped_frames_treshold, unique_data
-    )
+    update_values(interaction_list, grouped_frames_treshold, unique_data, "FRAME")
 
     # Change the FRAME column value type to int
     grouped_frames_treshold["FRAME"] = grouped_frames_treshold["FRAME"].astype(int)
@@ -470,7 +478,6 @@ def main():
         combined_dict["all"].append(value)
 
     # Generate Markov state figures of the binding modes
-    total_frames = len(pdb_md.trajectory) - 1
     markov_analysis = MarkovChainAnalysis(min_transition)
     markov_analysis.generate_transition_graph(total_frames, combined_dict, fig_type)
     print("\033[1mMarkov State Figure generated\033[0m")
@@ -508,7 +515,7 @@ def main():
     # Generate an Figure for each of the binding modes with rdkit Drawer with the atoms interacting highlighted by colors
     try:
         if peptide is None:
-            interaction_processor = InteractionProcessor("complex.pdb", "lig_no_h.pdb")
+            interaction_processor = FigureHighlighter("complex.pdb", "lig_no_h.pdb")
             matplotlib.use("Agg")
             binding_site = {}
             merged_image_paths = []
@@ -586,7 +593,7 @@ def main():
                 )
 
                 # Call the function to update hbond_donor_dict with values from other dictionaries
-                interaction_processor.update_dict(
+                update_dict(
                     hbond_donor_dict,
                     hbond_acceptor_dict,
                     ni_dict,
@@ -637,7 +644,7 @@ def main():
                 )
 
                 # Generate the interactions legend and combine it with the ligand png
-                image_merger = ImageMerger(
+                image_merger = FigureMerger(
                     binding_mode, occurrence_percent, split_data, merged_image_paths
                 )
                 merged_image_paths = image_merger.create_and_merge_images()
@@ -829,3 +836,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

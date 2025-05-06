@@ -1,35 +1,40 @@
-import os
-import itertools
 import pandas as pd
-import numpy as np
-from MDAnalysis.analysis import rms, diffusionmap
-from MDAnalysis.analysis.distances import dist
-from tqdm import tqdm
-from pathlib import Path
-from numba import jit
+
+from openmmdl.openmmdl_analysis.core.utils import (
+    combine_subdict_values,
+    remove_duplicate_values,
+)
 
 
 class BindingModeProcesser:
-
     def __init__(
-        self, pdb_md, ligand, peptide, special, ligand_rings, interaction_list, treshold
+        self,
+        pdb_md,
+        ligand,
+        peptide,
+        special,
+        ligand_rings,
+        interaction_list,
+        threshold,
+        total_frames,
     ):
         self.pdb_md = pdb_md
         self.ligand = ligand
         self.peptide = peptide
         self.special = special
+        self.threshold = threshold
         self.ligand_rings = ligand_rings
+        self.total_frames = total_frames
         self.unique_columns_rings_grouped = self.gather_interactions(interaction_list)
         self.interaction_list, self.unique_data = self.process_interaction_wraper(
-            interaction_list, (treshold / 100)
+            interaction_list, (threshold / 100)
         )
         self.interactions_all, self.unique_data_all = self.process_interaction_wraper(
             interaction_list.copy(), 0.00001
         )
 
-    def process_interaction_wraper(self, interaction_list, treshold):
-
-        filtered_values = self.filtering_values(treshold, interaction_list)
+    def process_interaction_wraper(self, interaction_list, threshold):
+        filtered_values = self.filtering_values(threshold, interaction_list)
         interaction_list.fillna(0, inplace=True)
         unique_data = self.unique_data_generation(filtered_values)
         self.df_iteration_numbering(interaction_list, unique_data)
@@ -255,64 +260,22 @@ class BindingModeProcesser:
 
         return unique_columns_rings_grouped
 
-    def remove_duplicate_values(self, data):
-        """Remove the duplicate values from sub-dictionaries within the input dictionary.
-
-        Args:
-            data (dict): The input dictionary containing sub-dictionaries with possible duplicate values.
-
-        Returns:
-            dict: A dictionary without duplicate values.
-        """
-        unique_data = {}
-
-        for key, sub_dict in data.items():
-            unique_sub_dict = {}
-            seen_values = set()
-
-            for sub_key, value in sub_dict.items():
-                if value not in seen_values:
-                    unique_sub_dict[sub_key] = value
-                    seen_values.add(value)
-
-            if unique_sub_dict:
-                unique_data[key] = unique_sub_dict
-
-        return unique_data
-
-    def combine_subdict_values(self, data):
-        """Combines the values from the individual sub-dictionaries into a single list.
-
-        Args:
-            data (dict): Dictionary with values that are sub-dictionaries.
-
-        Returns:
-            dict: A dictionary with a single key named 'all' that contains a list of all combined values from all the sub-dictionaries.
-        """
-        combined_data = {"all": []}
-        for sub_dict in data.values():
-            combined_data["all"].extend(sub_dict.values())
-
-        return combined_data
-
     def filtering_values(self, threshold, df):
         """Filter and append values (interactions) to a DataFrame based on occurrence counts.
 
         Args:
-            threshold (float): A treshold value that is used for filtering of the values (interactions) based upon the occurence count.
+            threshold (float): A threshold value that is used for filtering of the values (interactions) based upon the occurence count.
             df (pandas dataframe): DataFrame to which the filtered values (interactions) will be added.
             unique_columns_rings_grouped (dict): Dictionary containing the grouped and unique values otained from gather_interactions.
 
         Returns:
             list: A list of values, with unique values and their corresponding occurence counts.
         """
-
-        frames = len(self.pdb_md.trajectory) - 1
         # Call the function to remove duplicate keys
-        unique_data = self.remove_duplicate_values(self.unique_columns_rings_grouped)
+        unique_data = remove_duplicate_values(self.unique_columns_rings_grouped)
 
         # Call the function to combine sub-dictionary values
-        unique_colums_rings_all = self.combine_subdict_values(unique_data)
+        unique_colums_rings_all = combine_subdict_values(unique_data)
 
         # Flatten the list of values
         all_values = unique_colums_rings_all["all"]
@@ -326,7 +289,7 @@ class BindingModeProcesser:
                 occurrences[value] = 1
 
         # Calculate the threshold (20% of 1000)
-        threshold = threshold * frames
+        threshold = threshold * self.total_frames
 
         # Filter out values that appear in less than 20% of 1000
         filtered_values = [
@@ -665,15 +628,3 @@ class BindingModeProcesser:
                             )
                             df.at[index, col] = 1 if condition else 0
 
-    def update_values(self, df, new, unique_data):
-        """Update the values in the input DataFrame based upon the frame values and an reference DataFrame.
-
-        Args:
-            df (pandas dataframe): Input DataFrame that will be updated.
-            new (pandas dataframe): The reference DataFrame containing values that are used to update the input DataFrame.
-            unique_data (dict): A dictionary containing keys that represent the specific unique column names that need to be updated in the input DataFrame.
-        """
-        for idx, row in df.iterrows():
-            frame_value = row["FRAME"]
-            values_to_update = new.loc[frame_value, list(unique_data.values())]
-            df.loc[idx, list(unique_data.values())] = values_to_update

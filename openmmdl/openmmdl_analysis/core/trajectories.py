@@ -6,10 +6,10 @@ class TrajectorySaver:
         """Initializes the TrajectorySaver with a mda.Universe object, ligand name, special residue name and if receptor is nucleic.
 
         Args:
-            pdb_md (mda.Universe): MDAnalysis Universe object containing the trajectory
-            ligname (str): name of the ligand in the pdb file
-            special (str): name of the special residue/ligand in the pdb file (e.g. HEM)
-            nucleic (bool): True if receptor is nucleic, False otherwise
+            pdb_md (mda.Universe): MDAnalysis Universe object containing the trajectory.
+            ligname (str): name of the ligand in the pdb file.
+            special (str): name of the special residue/ligand in the pdb file (e.g. HEM).
+            nucleic (bool): True if receptor is nucleic, False otherwise.
         """
         self.pdb_md = pdb_md
         self.ligname = ligname
@@ -20,7 +20,7 @@ class TrajectorySaver:
         """Saves .pdb and .dcd files of the trajectory containing ligand, receptor and all interacting waters.
 
         Args:
-            interacting_waters (list): list of all interacting water ids
+            interacting_waters (list): list of all interacting water ids.
             outputpath (str, optional): filepath to output new pdb and dcd files. Defaults to './Visualization/'.
         """
         water_atoms = self.pdb_md.select_atoms(
@@ -43,8 +43,8 @@ class TrajectorySaver:
         """Saves a single frame of the trajectory.
 
         Args:
-            frame (int): Number of the frame to save
-            outpath (str): Path to save the frame to
+            frame (int): Number of the frame to save.
+            outpath (str): Path to save the frame to.
             selection (str, optional): MDAnalysis selection string. Defaults to False.
         """
         self.pdb_md.trajectory[frame]

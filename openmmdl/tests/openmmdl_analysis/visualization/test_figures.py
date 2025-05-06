@@ -3,7 +3,7 @@ import os
 import shutil
 from PIL import Image
 from pathlib import Path
-from openmmdl.openmmdl_analysis.image_handler import *
+from openmmdl.openmmdl_analysis.visualization.figures import FigureMerger, FigureArranger
 
 test_data_directory = Path(
     "openmmdl/tests/data/openmmdl_analysis/rdkit_figure_generation"
@@ -54,7 +54,7 @@ def test_create_and_merge_images_with_split_data():
     print("Files in Working Directory before:", files_in_working_directory)
 
     # Run the function
-    merger = ImageMerger(binding_mode, occurrence_percent, split_data, merged_image_paths)
+    merger = FigureMerger(binding_mode, occurrence_percent, split_data, merged_image_paths)
     merged_image_paths = merger.create_and_merge_images()
 
     # Print the current files in the working directory for debugging
