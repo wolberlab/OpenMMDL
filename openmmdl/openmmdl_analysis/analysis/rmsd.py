@@ -144,22 +144,32 @@ class RMSDAnalyzer:
 
     def calc_rmsd_2frames(self, ref, frame):
         """
-        RMSD calculation between a reference and a frame.
+        Calculates the RMSD between a reference and a target frame.
+    
+        This method serves as a wrapper for the `calc_rmsd_2frames_jit` function, 
+        which dpes the actual RMSD calculation between two sets of coordinates.
+    
+        Args:
+            ref (np.array): Numpy array representing the reference atom positions.
+            frame (np.array): Numpy array representing the atom positions of the target frame.
+    
+        Returns:
+            float: The RMSD value between the reference and target frame.
         """
         return calc_rmsd_2frames_jit(ref, frame)
 
     def calculate_distance_matrix(self, selection):
-    """
-    Calculates the pairwise RMSD-based distance matrix for all trajectory frames 
-    for the selected atom selection.
-
-    Args:
-        selection (str): Selection string for the atoms (e.g., 'protein', 'resname LIG') 
-                         used to compute the RMSD between frames.
-
-    Returns:
-        np.array: Numpy array containing RMSD values between all pairs of frames.
-    """
+        """
+        Calculates the pairwise RMSD-based distance matrix for all trajectory frames 
+        for the selected atom selection.
+    
+        Args:
+            selection (str): Selection string for the atoms (e.g., 'protein', 'resname LIG') 
+                             used to compute the RMSD between frames.
+    
+        Returns:
+            np.array: Numpy array containing RMSD values between all pairs of frames.
+        """
         distances = np.zeros(
             (len(self.universe.trajectory), len(self.universe.trajectory))
         )
