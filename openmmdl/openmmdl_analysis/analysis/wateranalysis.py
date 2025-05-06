@@ -9,6 +9,24 @@ from sklearn.cluster import DBSCAN
 
 
 class StableWaters:
+    """
+    A pipeline for identifying and analyzing stable water molecules from molecular dynamics (MD) trajectories.
+
+    This class processes MD simulations to trace water molecules that exhibit limited movement over time,
+    clusters them using DBSCAN and identifies representative water positions. Additionally, it analyzes
+    potential interactions between stable water clusters and protein residues.
+
+    Attributes:
+    ----------
+        trajectory : str
+            Path to the trajectory file.
+        topology : str
+            Path to the topology file.
+        u : mda.Universe
+            Universe object created from the topology and trajectory files.
+        water_eps : float
+            Epsilon parameter for DBSCAN clustering, in Angstrom.
+    """
     def __init__(self, trajectory, topology, water_eps):
         self.trajectory = trajectory
         self.topology = topology
@@ -16,7 +34,8 @@ class StableWaters:
         self.water_eps = water_eps
 
     def trace_waters(self, output_directory):
-        """trace the water molecules in a trajectory and write all which move below one Angstrom distance. To adjust the distance alter the integer
+        """trace the water molecules in a trajectory and write all which move below one Angstrom distance. To adjust the distance alter the integer.
+        
         Args:
             topology (str): Path to the topology file.
             trajectory (str): Path to the trajectory file.
@@ -140,14 +159,12 @@ class StableWaters:
     def write_pdb_clusters_and_representatives(
         self, clustered_waters, min_samples, output_sub_directory
     ):
-        """
-        Writes the clusters and their representatives to PDB files.
+        """Writes the clusters and their representatives to PDB files.
 
         Args:
             clustered_waters (pd.DataFrame): DataFrame containing clustered water coordinates.
             min_samples (int): Minimum number of samples for DBSCAN clustering.
             output_sub_directory (str): Subdirectory where output PDB files will be saved.
-
         """
         atom_counter = 1
         pdb_file_counter = 1
@@ -188,16 +205,15 @@ class StableWaters:
                     pdb_line = f"ATOM{index + 1:6}  O   WAT A{index + 1:4}    {x:8.3f}{y:8.3f}{z:8.3f}  1.00  0.00           O\n"
                     pdb_file.write(pdb_line)
 
-    # Example usage
-    # stable_waters_pipeline("topology_file", "trajectory_file", 0.5)
+
     def stable_waters_pipeline(self, output_directory="./stableWaters"):
-        """Function to run the pipeline to extract stable water clusters, and their representatives from a PDB & DCD file
+        """Function to run the pipeline to extract stable water clusters, and their representatives from a PDB & DCD file.
+        
         Args:
             topology (str): Path to the topology file.
             trajectory (str): Path to the trajectory file.
             water_eps (float): DBSCAN clustering epsilon parameter.
             output_directory (str, optional): Directory where output files will be saved. Default is "./stableWaters".
-
         """
         # Load the PDB and DCD files
         output_directory += "_clusterEps_"
@@ -243,7 +259,8 @@ class StableWaters:
         return structure
 
     def find_interacting_residues(structure, representative_waters, distance_threshold):
-        """This function maps waters (e.g. the representative waters) to interacting residues of a different PDB structure input. Use "filter_and_parse_pdb" to get the input for this function
+        """This function maps waters (e.g. the representative waters) to interacting residues of a different PDB structure input. Use "filter_and_parse_pdb" to get the input for this function.
+        
         Args:
             structure (biopython.structure): Biopython PDB structure object.
             representative_waters (pandasd.DataFrame): DataFrame containing representative water coordinates.
@@ -322,10 +339,11 @@ class StableWaters:
         output_directory="./stableWaters",
         distance_threshold=5.0,
     ):
-        """Analyse the interaction of residues to water molecules using a threshold that can be specified when calling the function
+        """Analyse the interaction of residues to water molecules using a threshold that can be specified when calling the function.
+        
         Args:
             protein_pdb_file (str): Path to the protein PDB file without waters.
-            representative_waters_file (str): Path to the representative waters PDB file, or any PDB file containing only waters
+            representative_waters_file (str): Path to the representative waters PDB file, or any PDB file containing only waters.
             cluster_eps (float): DBSCAN clustering epsilon parameter.
             output_directory (str, optional): Directory where output files will be saved. Default is "./stableWaters".
             distance_threshold (float, optional): Threshold distance for identifying interacting residues. Default is 5.0 (Angstrom).
