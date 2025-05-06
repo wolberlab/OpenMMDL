@@ -4,6 +4,20 @@ from PIL import Image
 
 
 class FigureMerger:
+    """
+    Handles the creation and merging of binding mode figures with corresponding legends.
+
+    Attributes
+    ----------
+    binding_mode : str
+        Name of the binding mode for which figures are created.
+    occurrence_percent : float
+        Occurrence percentage of the binding mode.
+    split_data : list of str
+        Interaction descriptors used for generating the figure legend.
+    merged_image_paths : list of str
+        List storing paths to the output merged images.
+    """
     def __init__(
         self, binding_mode, occurrence_percent, split_data, merged_image_paths
     ):
@@ -136,12 +150,26 @@ class FigureMerger:
 
 
 class FigureArranger:
+    """
+    Arranges multiple merged binding mode figures into a single image.
+
+    Attributes
+    ----------
+    merged_image_paths : list of str
+        List of file paths to pre merged figures.
+    output_path : str
+        File path where the final arranged figure should be saved.
+    """
     def __init__(self, merged_image_paths, output_path):
         self.merged_image_paths = merged_image_paths
         self.output_path = output_path
 
     def arranged_figure_generation(self):
-        """Generate an arranged figure by arranging merged images in rows and columns."""
+        """Generate an arranged figure by arranging merged images in rows and columns.
+
+        Returns:
+            None
+        """
         # Open the list of images
         merged_images = [Image.open(path) for path in self.merged_image_paths]
 
