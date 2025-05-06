@@ -2,15 +2,20 @@ import MDAnalysis as mda
 
 
 class TrajectorySaver:
-    def __init__(self, pdb_md, ligname, special, nucleic):
-        """Initializes the TrajectorySaver with a mda.Universe object, ligand name, special residue name and if receptor is nucleic.
+    """A class to handle the saving of molecular dynamics trajectory data for ligand–receptor complexes, with or without interacting water molecules.
 
-        Args:
-            pdb_md (mda.Universe): MDAnalysis Universe object containing the trajectory.
-            ligname (str): name of the ligand in the pdb file.
-            special (str): name of the special residue/ligand in the pdb file (e.g. HEM).
-            nucleic (bool): True if receptor is nucleic, False otherwise.
-        """
+    Attributes
+    ----------
+    pdb_md : mda.Universe
+        An MDAnalysis Universe object containing the trajectory and topology.
+    ligname : str
+        The residue name (3 letters) of the ligand in the PDB file.
+    special : str
+        The residue name (3 letters) of any special ligand or cofactor (e.g., HEM) in the PDB file.
+    nucleic : bool
+        Flag indicating if the receptor is nucleic acid (DNA/RNA). Used for proper atom selection.
+    """
+    def __init__(self, pdb_md, ligname, special, nucleic):
         self.pdb_md = pdb_md
         self.ligname = ligname
         self.special = special
