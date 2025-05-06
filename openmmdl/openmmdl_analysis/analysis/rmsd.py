@@ -32,7 +32,8 @@ def calc_rmsd_2frames_jit(ref, frame):
 
 
 class RMSDAnalyzer:
-    """A class responsible for the Root-Mean-Square Deviation (RMSD) analysis throughout the molecular dynamics simulation. The class provides functionalities to calculate 
+    """
+    A class responsible for the Root-Mean-Square Deviation (RMSD) analysis throughout the molecular dynamics simulation. The class provides functionalities to calculate 
     RMSD over time, compute pairwise RMSD between trajectory frames, and identify the representative frames within clusters of the binding modes.
 
     Parameters
