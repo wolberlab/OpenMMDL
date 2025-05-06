@@ -5,6 +5,9 @@ from rdkit.Chem import SDWriter
 
 
 class Preprocessing:
+    """
+    A utility class for preprocessing PDB files. 
+    """
     def __init__(self):
         pass
 
