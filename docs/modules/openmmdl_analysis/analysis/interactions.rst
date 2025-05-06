@@ -1,4 +1,4 @@
-API documentation for interactions
+API Documentation for interactions
 ============================
 
 
