@@ -18,6 +18,38 @@ class BindingModeProcesser:
         threshold,
         total_frames,
     ):
+    """
+    A class that processes protein-ligand interaction data for a given molecular dynamics (MD) simulation trajectory.
+    The class performs multiple analyses on interaction data, such as filtering interactions based on frequency, 
+    generating fingerprints according to the combination of interactions present in frames creating specific binding modes.
+
+    Attributes
+    ----------
+    pdb_md : str
+        The path to the molecular dynamics (MD) PDB file for the protein-ligand complex.
+    ligand : str
+        The ligand information (e.g., name or structure).
+    peptide : str or None
+        The peptide chain ID, if applicable, or None if not considered.
+    special : str
+        Special handling or unique identifiers related to the ligand or protein.
+    ligand_rings : list
+        List of ligand ring information used for hydrophobic interaction detection.
+    interaction_list : pd.DataFrame
+        DataFrame containing the interactions for the trajectory frames.
+    threshold : float
+        The threshold for filtering interactions based on their occurrence frequency.
+    total_frames : int
+        The total number of frames in the molecular dynamics simulation trajectory.
+    unique_columns_rings_grouped : dict
+        A dictionary containing the grouped interactions based on frames.
+    interactions_all : pd.DataFrame
+        DataFrame containing all interaction data processed.
+    unique_data_all : dict
+        Dictionary of unique data generated for all interactions across all frames.
+    unique_data : dict
+        Dictionary of unique data generated based on filtered interactions and threshold.
+    """
         self.pdb_md = pdb_md
         self.ligand = ligand
         self.peptide = peptide
@@ -44,9 +76,7 @@ class BindingModeProcesser:
         """Process a DataFrame with the protein-ligand interaction and generate column names for each unique interaction.
 
         Args:
-            df (pandas dataframe): DataFrame that contains the interaction data for the whole trajectory.
-            ligand_rings (list): A list of the ligand ring information to recognize the atom numbers belonging to rings for hydrophobic interactions.
-            peptide (str, optional): chainid of the peptide in the topology. Defaults to None.
+            df (pd.dataframe): DataFrame that contains the interaction data for the whole trajectory.
 
         Returns:
             dict: A dictionary with the keys being 'FRAME' numbers and values being dictionaries containing row indices and their corresponding unique column names for interactions.
@@ -265,8 +295,7 @@ class BindingModeProcesser:
 
         Args:
             threshold (float): A threshold value that is used for filtering of the values (interactions) based upon the occurence count.
-            df (pandas dataframe): DataFrame to which the filtered values (interactions) will be added.
-            unique_columns_rings_grouped (dict): Dictionary containing the grouped and unique values otained from gather_interactions.
+            df (pd.Dataframe): DataFrame to which the filtered values (interactions) will be added.
 
         Returns:
             list: A list of values, with unique values and their corresponding occurence counts.
@@ -329,7 +358,6 @@ class BindingModeProcesser:
         Args:
             df (pandas dataframe): DataFrame which has the interaction data for all of the frames.
             unique_data (dict): Dictionary that contains the unique interactions obtained from unique_data_generation.
-            peptide (str, optional): name of the peptide chainid in the original topology. Defaults to None.
         """
         if self.peptide is None:
             for index, row in df.iterrows():
@@ -627,4 +655,3 @@ class BindingModeProcesser:
                                 & (row["INTERACTION"] == interaction)
                             )
                             df.at[index, col] = 1 if condition else 0
-
