@@ -1,33 +1,41 @@
 API Documentation for markovchains
-============================
-
+==================================
 
 .. py:class:: MarkovChainAnalysis(min_transition)
 
-    Performs Markov Chain analysis of binding mode transitions in molecular dynamics simulations.
+    Analyzes binding mode transitions in molecular dynamics simulations using Markov chain models.
 
-    :param int min_transition: Minimum transition percentage used to threshold transitions for plotting.
+    This class enables the construction of Markov chain graphs to visualize transition probabilities and trends
+    in binding mode behavior over the course of a simulation.
 
-    :ivar list min_transitions: A list of transition thresholds derived from the input using scaling factors (1×, 2×, 5×, 10×).
+    :param float min_transition: Minimum transition percentage threshold for transitions in the graph.
+    
+    :ivar list min_transitions: List of transition thresholds [x1, x2, x5, x10] derived from min_transition.
 
 
     .. py:method:: calculate_min_transitions()
 
-        Calculates a list of minimum transition thresholds using multipliers (1, 2, 5, 10) on the `min_transition` value.
+        Calculates a list based on the minimum transition time provided values and returns it in factors 1, 2, 5, 10.
 
-        :returns: List of threshold percentages to be used in Markov Chain analysis.
+        :returns: List with the minimum transition time with factors 1, 2, 5, 10.
         :rtype: list
 
 
     .. py:method:: generate_transition_graph(total_frames, combined_dict, fig_type='png', font_size=36, size_node=200)
 
-        Generates and saves Markov Chain visualizations showing state transitions and self-loops across a molecular dynamics trajectory.
+        Generates Markov chain graphs showing binding mode transitions across a simulation trajectory.
 
-        :param int total_frames: Total number of frames in the MD simulation.
-        :param dict combined_dict: Dictionary with binding mode data, where `combined_dict["all"]` contains the frame-by-frame mode sequence.
-        :param str fig_type: File format for the output plots. Defaults to `'png'`.
-        :param int font_size: Font size for the graph node labels. Defaults to `36`.
-        :param int size_node: Base node size in the plot. Scaled by number of occurrences. Defaults to `200`.
+        Nodes represent binding modes, with size proportional to their frequency. Node colors reflect their dominant
+        occurrence in one-third of the trajectory. Arrows represent transitions; dual direction arrows show reversible behavior.
+        Self-loops are drawn for modes that persist over time and transition in themselves.
 
-        :returns: Saves figures to disk in the directory `Binding_Modes_Markov_States` with one image per transition threshold.
+        For each transition threshold in `min_transitions`, a separate plot is generated and saved.
+
+        :param int total_frames: Total number of frames in the simulation.
+        :param dict combined_dict: Dictionary containing the frame-by-frame binding mode assignments. Expects a key `'all'`.
+        :param str fig_type: File format for the output plots. Default is `'png'`.
+        :param int font_size: Font size for node labels. Default is `36`.
+        :param int size_node: Base size for graph nodes, scaled by mode occurrence. Default is `200`.
+
+        :returns: Saves one plot per transition threshold in the directory `Binding_Modes_Markov_States`.
         :rtype: None
