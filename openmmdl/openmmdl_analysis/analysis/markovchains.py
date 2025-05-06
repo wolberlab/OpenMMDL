@@ -5,16 +5,18 @@ from matplotlib.patches import Patch
 
 
 class MarkovChainAnalysis:
-    """
-    Class for analyzing binding mode transitions using Markov chains.
+    """Class for analyzing binding mode transitions using Markov chains.
 
     This class provides functionality to analyze the transitions of binding modes over time in MD simulations.
     It allows the generation of Markov chain plots based on transition probabilities between the binding modes
     and highlights key binding modes based on their occurency in the trajectory.
 
-    Attributes:
-        min_transition (float): Minimum transition percentage threshold for transitions in the graph.
-        min_transitions (list): List of transition thresholds [x1, x2, x5, x10] derived from min_transition.
+    Attributes
+    ----------
+    min_transition : float
+        Minimum transition percentage threshold for transitions in the graph.
+    min_transitions : list
+        List of transition thresholds [x1, x2, x5, x10] derived from min_transition.
     """
     def __init__(self, min_transition):
         self.min_transition = min_transition
