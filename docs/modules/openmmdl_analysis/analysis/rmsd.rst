@@ -1,4 +1,4 @@
-API Documentation for RMSDAnalyzer
+API Documentation for rmsd
 ==================================
 
 .. py:class:: RMSDAnalyzer(top_file, traj_file)
