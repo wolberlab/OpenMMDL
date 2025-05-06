@@ -1,4 +1,4 @@
-API Documentation for MarkovChainAnalysis
+API Documentation for markovchains
 ============================
 
 
