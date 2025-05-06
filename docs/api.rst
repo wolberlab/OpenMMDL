@@ -9,6 +9,6 @@ molecule in IPywidgets.
 
 .. toctree::
    :maxdepth: 2
-   :caption: API MoleculeVisualizer:
+   :caption: API MarkovChains:
 
    modules/openmmdl_analysis/analysis/markovchains
