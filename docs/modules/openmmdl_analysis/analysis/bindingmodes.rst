@@ -1,4 +1,4 @@
-API Documentation for BindingModeProcesser
+API Documentation for bindingmodes
 ============================
 
 
