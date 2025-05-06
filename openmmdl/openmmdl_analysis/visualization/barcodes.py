@@ -4,13 +4,17 @@ import matplotlib.pyplot as plt
 
 
 class BarcodeGenerator:
-    def __init__(self, df):
-        """
-        Initializes the BarcodeGenerator with a dataframe.
+    """
+    Generates binary barcodes representing the presence of interactions across MD frames.
 
-        Args:
-            df (pandas dataframe): Dataframe containing all interactions from plip analysis (typically df_all)
-        """
+    Attributes
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing all interactions extracted from PLIP analysis.
+    interactions : dict
+        Dictionary mapping interaction types to their corresponding columns in the DataFrame.
+    """
+    def __init__(self, df):
         self.df = df
         self.interactions = self.gather_interactions()
 
@@ -92,7 +96,6 @@ class BarcodeGenerator:
         """Generates a list of all water ids that form water bridge interactions.
 
         Args:
-            df_all (pandas dataframe): dataframe containing all interactions from plip analysis (typicaly df_all)
             waterbridge_interactions (list): list of strings containing the names of all water bridge interactions
 
         Returns:
@@ -104,15 +107,36 @@ class BarcodeGenerator:
             for waterid in waterid_barcode:
                 if waterid != 0:
                     interacting_waters.append(waterid)
+
         return list(set(interacting_waters))
 
 
 class BarcodePlotter:
+    """
+    Visualizes interaction barcodes and waterbridge statistics using bar plots and pie charts.
+
+    Attributes
+    ----------
+    df_all : pandas.DataFrame
+        Full PLIP interaction dataframe passed for plotting.
+    barcode_gen : BarcodeGenerator
+        Instance of BarcodeGenerator used to compute barcodes from interaction data.
+    """
     def __init__(self, df_all):
         self.df_all = df_all
         self.barcode_gen = BarcodeGenerator(df_all)
 
     def plot_barcodes(self, barcodes, save_path):
+        """
+        Plots barcodes of the interactions depending on the presence of the interaction.
+    
+        Args:
+            barcodes (dict): Dictionary where keys are interaction names and values are 1D numpy arrays (barcodes).
+            save_path (str): Path to save the generated barcode plot image.
+    
+        Returns:
+            None
+        """
         if not barcodes:
             print("No barcodes to plot.")
             return
@@ -158,6 +182,16 @@ class BarcodePlotter:
     def plot_waterbridge_piechart(
         self, waterbridge_barcodes, waterbridge_interactions, fig_type
     ):
+    """Generates and saves pie charts showing the frequency of each of the water IDs participating in waterbridge interactions.
+
+    Args:
+        waterbridge_barcodes (dict): Dictionary of waterbridge interaction barcodes.
+        waterbridge_interactions (list): List of interaction column names related to waterbridge interactions.
+        fig_type (str): Image file format for saving (e.g., 'png', 'svg').
+
+    Returns:
+        None
+    """
         if not waterbridge_barcodes:
             print("No Piecharts to plot.")
             return
@@ -230,6 +264,17 @@ class BarcodePlotter:
             )
 
     def plot_barcodes_grouped(self, interactions, interaction_type, fig_type):
+    """
+    Groups barcodes by ligand atom, plots individual and grouped barcodes, and saves them.
+
+    Args:
+        interactions (list): List of interaction names to be grouped and visualized.
+        interaction_type (str): The type of interaction (e.g., 'donor', 'acceptor', 'waterbridge').
+        fig_type (str): Image file format for saving (e.g., 'png', 'svg').
+
+    Returns:
+        None
+    """
         ligatoms_dict = {}
         for interaction in interactions:
             ligatom = interaction.split("_")
