@@ -11,6 +11,29 @@ config.KEEPMOD = True
 
 
 class InteractionAnalyzer:
+    """
+    Analyzes molecular interactions between a protein and a ligand/peptide 
+    throughout an MD trajectory using PLIP (Protein-Ligand Interaction Profiler).
+
+    Attributes
+    ----------
+    pdb_md : mda.Universe
+        MDAnalysis Universe object representing the topology and trajectory.
+    dataframe : str or None
+        Path to an existing interaction CSV file. If None, the trajectory will be processed anew.
+    num_processes : int
+        Number of CPU cores to use for parallel frame analysis.
+    lig_name : str
+        Residue name of the ligand in the complex.
+    special : str
+        Residue name for special ligands like metal ions (optional).
+    peptide : str
+        Chain ID of the peptide ligand (optional).
+    md_len : int
+        Number of frames in the trajectory.
+    ineraction_list : pd.DataFrame
+        DataFrame storing the extracted interactions across the trajectory.
+    """
     def __init__(
         self,
         pdb_md,
@@ -102,7 +125,6 @@ class InteractionAnalyzer:
 
         Args:
             pdb_file (str): The path of the PDB file of the complex.
-            peptide (str): Chainid of the peptide that will be analyzed.
 
         Returns:
             dict: A dictionary of the binding sites and the interactions.
@@ -182,7 +204,6 @@ class InteractionAnalyzer:
 
         Args:
             file_path (str): Filepath of the topology file.
-            old_residue_name (str): Residue name of the ligand.
             new_residue_name (str): New residue name of the ligand now changed to mimic an amino acid residue.
         """
         with open(file_path, "r") as file:
@@ -211,10 +232,6 @@ class InteractionAnalyzer:
 
         Args:
             frame (int): The number of the frame that will be processed.
-            pdb_md (mda universe): The MDAnalysis Universe class representation of the topology and the trajectory of the file that is being processed.
-            lig_name (str): Name of the ligand in the complex that will be analyzed.
-            special (str, optional): Name of the special ligand in the complex that will be analyzed. Defaults to None.
-            peptide (srt, optional): Chainid of the peptide that will be analyzed. Defaults to None.
 
         Returns:
             pandas dataframe: A dataframe conatining the interaction data for the processed frame.
@@ -334,9 +351,6 @@ class InteractionAnalyzer:
 
         Args:
             frame (int): Number of the frame that will be processed.
-            pdb_md (mda universe): MDA Universe class representation of the topology and the trajectory of the file that is being processed.
-            lig_name (str): Name of the ligand in the complex that will be analyzed.
-            special (str, optional): Name of the special ligand that will be analysed. Defaults to None.
 
         Returns:
             list: list of dataframes containing the interaction data for the processed frame with the special ligand.
@@ -373,7 +387,7 @@ class InteractionAnalyzer:
         """Wrapper for the MD Trajectory procession.
 
         Args:
-            args (tuple): Tuple containing (frame_idx: int - number of the frame to be processed, pdb_md: mda universe - MDA Universe class representation of the topology and the trajectory of the file that is being processed, lig_name: str - Name of the ligand in the complex that will be analyzed, special_ligand: str - Name of the special ligand that will be analysed, peptide: str - Chainid of the peptide that will be analyzed)
+            args (tuple): Tuple containing (frame_idx: int - number of the frame to be processed)
 
         Returns:
             tuple: tuple containing the frame index and the result of from the process_frame function.
@@ -387,7 +401,6 @@ class InteractionAnalyzer:
 
         Args:
             df (pandas dataframe): The input DataFrame with frames that have no Interactions
-            md_len (int): The value that indicates the number of frames, thus allowing the function to loop through the DataFrame
 
         Returns:
             pandas dataframe: DataFrame with placeholder values in the frames with no interactions.
@@ -419,14 +432,6 @@ class InteractionAnalyzer:
 
     def process_trajectory(self):
         """Process protein-ligand trajectory with multiple CPUs in parallel.
-
-        Args:
-            pdb_md (mda universe): MDAnalysis Universe class representation of the topology and the trajectory of the file that is being processed.
-            dataframe (str): Name of a CSV file as str, where the interaction data will be read from if not None.
-            num_processes (int): The number of CPUs that will be used for the processing of the protein-ligand trajectory. Defaults to half of the CPUs in the system.
-            lig_name (str): Name of the Ligand in the complex that will be analyzed.
-            special_ligand (str): Name of the special ligand in the complex that will be analyzed.
-            peptide (str): Chainid of the peptide that will be analyzed.
 
         Returns:
             pandas dataframe: A DataFrame containing all the protein-ligand interaction data from the whole trajectory.
