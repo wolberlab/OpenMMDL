@@ -7,8 +7,14 @@ The following API represents the MoleculeVisualizer, which is responsible for th
 molecule in IPywidgets.
 
 
+OpenMMDL Analysis API
+------------------------------
+**OpenMMDL Analysis** consists of **analysis**, **core** and **visualization** modules.
+
+Here is the API of the **analysis** modules:
+
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: API Analysis Modules:
 
    modules/openmmdl_analysis/analysis/bindingmodes
