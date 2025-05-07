@@ -22,13 +22,6 @@ class FigureHighlighter:
         AtomGroup of all atoms in the ligand without hydrogens.
     """
     def __init__(self, complex_pdb_file, ligand_no_h_pdb_file):
-        """
-        Initialize the InteractionProcessor class.
-
-        Args:
-            complex_pdb_file (str): Path to the protein-ligand complex PDB file.
-            ligand_no_h_pdb_file (str): Path to the ligand PDB file without hydrogens.
-        """
         self.complex_pdb_file = complex_pdb_file
         self.ligand_no_h_pdb_file = ligand_no_h_pdb_file
         self.complex = mda.Universe(complex_pdb_file)
