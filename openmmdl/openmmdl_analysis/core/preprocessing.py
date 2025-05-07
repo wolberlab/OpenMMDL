@@ -12,12 +12,21 @@ class Preprocessing:
         pass
 
     def renumber_protein_residues(self, input_pdb, reference_pdb, output_pdb):
-        """Renumber protein residues in a molecular dynamics trajectory based on a reference structure.
+        """
+        Renumber protein residues in a molecular dynamics trajectory based on a reference structure.
 
-        Args:
-            input_pdb (str): Path to the input PDB file representing the molecular dynamics trajectory to be renumbered.
-            reference_pdb (str): Path to the reference PDB file representing the molecular dynamics trajectory used as a reference.
-            output_pdb (str): Path to the output PDB file where the renumbered trajectory will be saved..
+        Parameters
+        ----------
+        input_pdb : str 
+            Path to the input PDB file representing the molecular dynamics trajectory to be renumbered.
+        reference_pdb : str 
+            Path to the reference PDB file representing the molecular dynamics trajectory used as a reference.
+        output_pdb : str 
+            Path to the output PDB file where the renumbered trajectory will be saved.
+
+        Returns
+        -------
+        None
         """
         # Load trajectories
         traj_input = md.load(input_pdb)
@@ -84,22 +93,35 @@ class Preprocessing:
         new_traj.save(output_pdb)
 
     def increase_ring_indices(self, ring, lig_index):
-        """Increases the atom indices in a ring of the ligand obtained from the ligand to fit the atom indices present in the protein-ligand complex.
+        """
+        Increases the atom indices in a ring of the ligand obtained from the ligand to fit the atom indices present in the protein-ligand complex.
 
-        Args:
-            ring (str): A list of atom indices belonging to a ring that need to be modified.
-            lig_index (int): An integer that is the first number of the ligand atom indices obtained from the protein-ligand, which is used to modify the ring indices
+        Parameters
+        ----------
+        ring : list of int
+            A list of atom indices belonging to a ring that need to be modified.
+        lig_index : int
+            An integer that is the first number of the ligand atom indices obtained from the protein-ligand, which is used to modify the ring indices
 
-        Returns:
-            list:  A new list with modified atom indicies.
+        Returns
+        -------
+        list of int
+            A new list with modified atom indicies.
         """
         return [atom_idx + lig_index for atom_idx in ring]
 
     def process_pdb_file(self, input_pdb_filename):
-        """Process a PDB file to make it compatible with the openmmdl_analysis package.
+        """
+        Process a PDB file to make it compatible with the openmmdl_analysis package.
 
-        Args:
-            input_pdb_filename (str): path to the input PDB file
+        Parameters
+        ----------
+        input_pdb_filename : str
+            Path to the input PDB file.
+
+        Returns
+        -------
+        None
         """
         # Load the PDB file
         u = mda.Universe(input_pdb_filename)
@@ -120,12 +142,21 @@ class Preprocessing:
     def extract_and_save_ligand_as_sdf(
         self, input_pdb_filename, output_filename, target_resname
     ):
-        """Extract and save the ligand from the receptor ligand complex PDB file into a new PDB file by itself.
+        """
+        Extract and save the ligand from the receptor ligand complex PDB file into a new PDB file by itself.
 
-        Args:
-            input_pdb_filename (str): name of the input PDB file
-            output_pdb_filename (str): name of the output SDF file
-            target_resname (str): resname of the ligand in the original PDB file
+        Parameters
+        ----------
+        input_pdb_filename : str 
+            Name of the input PDB file.
+        output_filename : str
+            Name of the output SDF file.
+        target_resname : str
+            resname of the ligand in the original PDB file.
+
+        Returns
+        -------
+        None
         """
         # Load the PDB file using MDAnalysis
         u = mda.Universe(input_pdb_filename)
@@ -148,12 +179,17 @@ class Preprocessing:
         writer.close()
 
     def renumber_atoms_in_residues(self, input_pdb_file, output_pdb_file, lig_name):
-        """Renumer the atoms of the ligand in the topology PDB file.
+        """
+        Renumer the atoms of the ligand in the topology PDB file.
 
-        Args:
-            input_pdb_file (str): Path to the initial PDB file.
-            output_pdb_file (str): Path to the output PDB file.
-            lig_name (str): Name of the ligand in the input PDB file.
+        Parameters
+        ----------
+        input_pdb_file : str 
+            Path to the initial PDB file.
+        output_pdb_file : str 
+            Path to the output PDB file.
+        lig_name : str 
+            Name of the ligand in the input PDB file.
         """
         # Read the input PDB file
         with open(input_pdb_file, "r") as f:
@@ -197,13 +233,18 @@ class Preprocessing:
             f.writelines(new_pdb_lines)
 
     def replace_atom_type(self, data):
-        """Replace wrong ligand atom types in the topology PDB file.
+        """
+        Replace ligand atom types in the topology PDB file.
 
-        Args:
-            data (str): Text of the initial PDB file.
+        Parameters
+        ----------
+        data : str
+            Text of the initial PDB file.
 
-        Returns:
-            str: Edited text of the PDB file.
+        Returns
+        -------
+        str
+            Modified PDB file with the corrected atom types.
         """
         lines = data.split("\n")
         for i, line in enumerate(lines):
@@ -215,11 +256,19 @@ class Preprocessing:
         return "\n".join(lines)
 
     def process_pdb(self, input_file, output_file):
-        """Wrapper function to process a PDB file.
+        """
+        Wrapper function to process a PDB file.
 
-        Args:
-            input_file (str): Path to the input PDB file.
-            output_file (str): Path of the output PDB file.
+        Parameters
+        ----------
+        input_file : str
+            Path to the input PDB file.
+        output_file : str
+            Path of the output PDB file.
+
+        Returns
+        -------
+        None
         """
         with open(input_file, "r") as f:
             pdb_data = f.read()
