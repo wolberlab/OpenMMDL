@@ -5,6 +5,22 @@ from rdkit.Chem import AllChem, Draw
 
 
 class FigureHighlighter:
+    """
+    Identifies and highlights ligand atoms involved in various types of protein-ligand interactions.
+
+    Attributes
+    ----------
+    complex_pdb_file : str
+        Path to the protein-ligand complex PDB file.
+    ligand_no_h_pdb_file : str
+        Path to the ligand PDB file without hydrogens.
+    complex : mda.Universe
+        MDAnalysis Universe object of the protein-ligand complex.
+    ligand_no_h : mda.Universe
+        MDAnalysis Universe object of the ligand without hydrogens.
+    lig_noh : mda.AtomGroup
+        AtomGroup of all atoms in the ligand without hydrogens.
+    """
     def __init__(self, complex_pdb_file, ligand_no_h_pdb_file):
         """
         Initialize the InteractionProcessor class.
@@ -20,13 +36,18 @@ class FigureHighlighter:
         self.lig_noh = self.ligand_no_h.select_atoms("all")
 
     def split_interaction_data(self, data):
-        """Splits the input data into multiple parts.
+        """
+        Splits the input data into multiple parts.
 
-        Args:
-            data (list): A list of ResNr and ResType, Atom indices, interaction type that needs to be split.
+        Parameters
+        ----------
+        data : list of str
+            A list containing strings with protein residue name, interacting indices and interaction type.
 
-        Returns:
-            list: A new list of the interaction data that consists of three parts.
+        Returns
+        -------
+        list of str
+            List of separate formatted strings with separated protein residue name, interacting indices and interaction type.
         """
         split_data = []
         for item in data:
@@ -36,18 +57,24 @@ class FigureHighlighter:
             interaction_type = parts[-1]
             split_value = f"{protein_partner_name} {numeric_codes} {interaction_type}"
             split_data.append(split_value)
+            
         return split_data
 
     def highlight_numbers(self, split_data, starting_idx):
-        """Extracts the data from the split_data output of the interactions and categorizes it to its respective list.
+        """
+        Extracts the data from the split_data output of the interactions and categorizes it to the correct interaction list.
 
-        Args:
-            split_data (list): A list of interaction data items, where each item contains information about protein partner name,
-            numeric codes and interaction type.
-            starting_idx (list): Starting index of the ligand atom indices used for identifying the correct atom to highlight.
+        Parameters
+        ----------
+        split_data : list of str
+            Split interaction data strings with the protein residue name, interacting indices and interaction type.
+        starting_idx : list of int
+            Starting indices of ligand atoms used to correctly identify atoms.
 
-        Returns:
-            tuple: A tuple that contains list of all of the highlighted atoms of all of the interactions.
+        Returns
+        -------
+        tuple of lists
+            Lists of highlighted atom indices categorized by interaction types.
         """
         highlighted_hbond_acceptor = []
         highlighted_hbond_donor = []
@@ -201,14 +228,20 @@ class FigureHighlighter:
         )
 
     def generate_interaction_dict(self, interaction_type, keys):
-        """Generates a dictionary of interaction RGB color model based on the provided interaction type.
+        """
+        Generates a dictionary of interaction RGB color model based on the provided interaction type.
 
-        Args:
-            interaction_type (str): The type of the interaction, for example 'hydrophobic'.
-            keys (list): List of the highlighted atoms that display an interaction.
+        Parameters
+        ----------
+        interaction_type : str
+            The type of interaction (e.g., 'hydrophobic', 'hbond_donor').
+        keys : list of int
+            Atom indices corresponding to the given interaction type.
 
-        Returns:
-            dict: A dictionary with the interaction types are associated with their respective RGB color codes.
+        Returns
+        -------
+        dict
+            Dictionary mapping each atom index to an RGB color code tuple.
         """
         interaction_dict = {
             "hbond_acceptor": (1.0, 0.6, 0.6),  # light red / pink
@@ -227,10 +260,27 @@ class FigureHighlighter:
         interaction_dict = {
             int(key): interaction_dict[interaction_type] for key in keys
         }
+        
         return interaction_dict
 
 
 class LigandImageGenerator:
+    """
+    Generates 2D images of the ligand structure from a protein-ligand complex with atom indices mapped.
+
+    Attributes
+    ----------
+    ligand_name : str
+        Name of the ligand (3 letters) in the protein-ligand complex topology.
+    complex_pdb_file : str
+        Path to the protein-ligand complex PDB file.
+    ligand_no_h_pdb_file : str
+        Path to the ligand PDB file without hydrogens.
+    output_svg_filename : str
+        Output filename for the generated SVG image.
+    fig_type : str
+        Type of image to generate. Can be "svg" or "png".
+    """
     def __init__(
         self,
         ligand_name,
@@ -239,16 +289,6 @@ class LigandImageGenerator:
         output_svg_filename,
         fig_type="svg",
     ):
-        """
-        Initialize the LigandImageGenerator class.
-
-        Args:
-            ligand_name (str): Name of the ligand in the protein-ligand complex topology.
-            complex_pdb_file (str): Path to the protein-ligand complex PDB file.
-            ligand_no_h_pdb_file (str): Path to the ligand PDB file without hydrogens.
-            output_svg_filename (str): Name of the output SVG file.
-            fig_type (str): Type of the output figure. Can be "svg" or "png".
-        """
         self.ligand_name = ligand_name
         self.complex_pdb_file = complex_pdb_file
         self.ligand_no_h_pdb_file = ligand_no_h_pdb_file
@@ -256,7 +296,14 @@ class LigandImageGenerator:
         self.fig_type = fig_type
 
     def generate_image(self):
-        """Generates an SVG image (or PNG) of the ligand."""
+        """
+        Generates an SVG image (or PNG) of the ligand.
+
+        Raises
+        ------
+        Exception
+            If any step in the image generation pipeline fails.
+        """
         try:
             # Load complex and ligand structures
             complex = mda.Universe(self.complex_pdb_file)
