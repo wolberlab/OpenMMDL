@@ -1,9 +1,18 @@
 def update_dict(target_dict, *source_dicts):
-    """Updates the dictionary with the keys and values from other dictionaries.
+    """
+    Updates the dictionary with the keys and values from other dictionaries.
+    Only new keys (not already present in the target) are added.
 
-    Args:
-        target_dict (dict): The dictionary that needs to be updated with new keys and values.
-        source_dicts (dict): One or multiple dictionaries that are used to update the target dictionary with new keys and values.
+    Parameters
+    ----------
+    target_dict : dict 
+        The dictionary that needs to be updated with new keys and values.
+    source_dicts : dict 
+        One or multiple dictionaries that are used to update the target dictionary with new keys and values.
+
+    Returns
+    -------
+    None
     """
     for source_dict in source_dicts:
         for key, value in source_dict.items():
@@ -13,13 +22,18 @@ def update_dict(target_dict, *source_dicts):
 
 
 def combine_subdict_values(data):
-    """Combines the values from the individual sub-dictionaries into a single list.
+    """
+    Combines the values from the individual sub-dictionaries into a single list.
 
-    Args:
-        data (dict): Dictionary with values that are sub-dictionaries.
+    Parameters
+    ----------
+    data : dict
+        Dictionary with values that are sub-dictionaries.
 
-    Returns:
-        dict: A dictionary with a single key named 'all' that contains a list of all combined values from all the sub-dictionaries.
+    Returns
+    -------
+    dict
+        A dictionary with a single key named 'all' that contains a list of all combined values from all the sub-dictionaries.
     """
     combined_data = {"all": []}
     for sub_dict in data.values():
@@ -29,12 +43,23 @@ def combine_subdict_values(data):
 
 
 def update_values(df, new, unique_data, row_name):
-    """Update the values in the input DataFrame based upon the frame values and an reference DataFrame.
+    """
+    Update the values in the input DataFrame based upon the frame values and an reference DataFrame.
 
-    Args:
-        df (pandas dataframe): Input DataFrame that will be updated.
-        new (pandas dataframe): The reference DataFrame containing values that are used to update the input DataFrame.
-        unique_data (dict): A dictionary containing keys that represent the specific unique column names that need to be updated in the input DataFrame.
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input DataFrame that will be updated.
+    new : pd.DataFrame 
+        The reference DataFrame containing values that are used to update the input DataFrame.
+    unique_data : dict 
+        A dictionary containing keys that represent the specific unique column names that need to be updated in the input DataFrame.
+    row_name : str
+        The name of the column in the DataFrame used to index into new DataFrame.
+
+    Returns
+    -------
+    None
     """
     for idx, row in df.iterrows():
         frame_value = row[row_name]
@@ -43,13 +68,18 @@ def update_values(df, new, unique_data, row_name):
 
 
 def remove_duplicate_values(data):
-    """Remove the duplicate values from sub-dictionaries within the input dictionary.
+    """
+    Remove the duplicate values from sub-dictionaries within the input dictionary.
 
-    Args:
-        data (dict): The input dictionary containing sub-dictionaries with possible duplicate values.
+    Parameters
+    ----------
+    data : dict
+        The input dictionary containing sub-dictionaries with possible duplicate values.
 
-    Returns:
-        dict: A dictionary without duplicate values.
+    Returns
+    -------
+    dict
+        A dictionary without duplicate values.
     """
     unique_data = {}
 
