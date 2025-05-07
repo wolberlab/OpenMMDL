@@ -19,6 +19,14 @@ class BarcodeGenerator:
         self.interactions = self.gather_interactions()
 
     def gather_interactions(self):
+        """
+        Gathers interaction column names grouped by the corresponding interaction type.
+    
+        Returns
+        -------
+        dict
+            Dictionary where the keys are interaction types and values are lists of corresponding column names.
+        """
         hydrophobic_interactions = self.df.filter(regex="hydrophobic").columns
         acceptor_interactions = self.df.filter(regex="Acceptor_hbond").columns
         donor_interactions = self.df.filter(regex="Donor_hbond").columns
@@ -47,11 +55,15 @@ class BarcodeGenerator:
         """
         Generates barcodes for a given interaction.
 
-        Args:
-            interaction (str): Name of the interaction to generate a barcode for
+        Parameters
+        ----------
+        interaction : str
+            Name of the interaction to generate a barcode for
 
-        Returns:
-            np.array: Binary array with 1 representing the interaction is present in the corresponding frame
+        Returns
+        -------
+        np.ndarray
+            Binary array with 1 representing the interaction is present in the corresponding frame
         """
         barcode = []
         unique_frames = self.df["FRAME"].unique()
@@ -69,11 +81,19 @@ class BarcodeGenerator:
         """
         Generates a barcode containing corresponding water ids for a given interaction.
 
-        Args:
-            interaction (str): Name of the interaction to generate a barcode for
+        Parameters
+        ----------
+        interaction : str
+            Name of the interaction to generate a barcode for.
 
-        Returns:
-            list: List of water ids for the frames where the interaction is present, 0 if no interaction present
+        Returns
+        -------
+        list of int
+            List with water IDs for frames where interaction is present, 0 otherwise.
+    
+        Notes
+        -----
+        Water IDs are obtained from the "WATER_IDX" column in the DataFrame.
         """
         water_id_list = []
         waterid_barcode = []
@@ -93,13 +113,18 @@ class BarcodeGenerator:
         return waterid_barcode
 
     def interacting_water_ids(self, waterbridge_interactions):
-        """Generates a list of all water ids that form water bridge interactions.
+        """
+        Generates a list of all water ids that form water bridge interactions.
 
-        Args:
-            waterbridge_interactions (list): list of strings containing the names of all water bridge interactions
+        Parameters
+        ----------
+        waterbridge_interactions : list of str
+            list containing the names of all water bridge interactions.
 
-        Returns:
-            list: list of all unique water ids that form water bridge interactions
+        Returns
+        -------
+        list of int
+            Unique water IDs that form waterbridge interactions.
         """
         interacting_waters = []
         for waterbridge_interaction in waterbridge_interactions:
@@ -130,12 +155,16 @@ class BarcodePlotter:
         """
         Plots barcodes of the interactions depending on the presence of the interaction.
     
-        Args:
-            barcodes (dict): Dictionary where keys are interaction names and values are 1D numpy arrays (barcodes).
-            save_path (str): Path to save the generated barcode plot image.
+        Parameters
+        ----------
+        barcodes : dict
+            Dictionary where keys are interaction names and values are 1D numpy arrays (barcodes).
+        save_path : str
+            Path to save the generated barcode plot image.
     
-        Returns:
-            None
+        Returns
+        -------
+        None
         """
         if not barcodes:
             print("No barcodes to plot.")
@@ -182,16 +211,22 @@ class BarcodePlotter:
     def plot_waterbridge_piechart(
         self, waterbridge_barcodes, waterbridge_interactions, fig_type
     ):
-    """Generates and saves pie charts showing the frequency of each of the water IDs participating in waterbridge interactions.
-
-    Args:
-        waterbridge_barcodes (dict): Dictionary of waterbridge interaction barcodes.
-        waterbridge_interactions (list): List of interaction column names related to waterbridge interactions.
-        fig_type (str): Image file format for saving (e.g., 'png', 'svg').
-
-    Returns:
+        """
+        Generates and saves pie charts showing the frequency of each of the water IDs participating in waterbridge interactions.
+    
+        Parameters
+        ----------
+        waterbridge_barcodes : dict
+            Dictionary of waterbridge interaction barcodes.
+        waterbridge_interactions : list of str
+            List of interaction column names related to waterbridge interactions.
+        fig_type : str
+            Image file format for saving (e.g., 'png', 'svg').
+    
+        Returns
+        -------
         None
-    """
+        """
         if not waterbridge_barcodes:
             print("No Piecharts to plot.")
             return
@@ -264,17 +299,22 @@ class BarcodePlotter:
             )
 
     def plot_barcodes_grouped(self, interactions, interaction_type, fig_type):
-    """
-    Groups barcodes by ligand atom, plots individual and grouped barcodes, and saves them.
-
-    Args:
-        interactions (list): List of interaction names to be grouped and visualized.
-        interaction_type (str): The type of interaction (e.g., 'donor', 'acceptor', 'waterbridge').
-        fig_type (str): Image file format for saving (e.g., 'png', 'svg').
-
-    Returns:
+        """
+        Groups barcodes by ligand atom, plots individual and grouped barcodes, and saves them.
+    
+        Parameters
+        ----------
+        interactions : list of str
+            List of interaction names to be grouped and visualized.
+        interaction_type : str 
+            The type of interaction (e.g., 'donor', 'acceptor', 'waterbridge').
+        fig_type : str 
+            Image file format for saving (e.g., 'png', 'svg').
+    
+        Returns
+        -------
         None
-    """
+        """
         ligatoms_dict = {}
         for interaction in interactions:
             ligatom = interaction.split("_")
