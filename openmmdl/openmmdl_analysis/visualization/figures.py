@@ -27,10 +27,13 @@ class FigureMerger:
         self.merged_image_paths = merged_image_paths
 
     def create_and_merge_images(self):
-        """Create and merge images to generate a legend for binding modes.
+        """
+        Create and merge images to generate a legend for binding modes.
 
-        Returns:
-            list: Paths to the merged images.
+        Returns
+        -------
+        list of str
+            Updated list of paths to the merged images.
         """
         # Create the main figure and axis
         fig = pylab.figure()
@@ -165,10 +168,12 @@ class FigureArranger:
         self.output_path = output_path
 
     def arranged_figure_generation(self):
-        """Generate an arranged figure by arranging merged images in rows and columns.
+        """
+        Generate an arranged figure by arranging merged images in rows and columns.
 
-        Returns:
-            None
+        Returns
+        -------
+        None
         """
         # Open the list of images
         merged_images = [Image.open(path) for path in self.merged_image_paths]
