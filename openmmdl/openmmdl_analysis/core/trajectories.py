@@ -24,9 +24,16 @@ class TrajectorySaver:
     def save_interacting_waters_trajectory(self, interacting_waters, outputpath):
         """Saves .pdb and .dcd files of the trajectory containing ligand, receptor and all interacting waters.
 
-        Args:
-            interacting_waters (list): list of all interacting water ids.
-            outputpath (str, optional): filepath to output new pdb and dcd files. Defaults to './Visualization/'.
+        Parameters
+        ----------
+        interacting_waters : list of int
+            List of all interacting water IDs.
+        outputpath : str
+            Filepath to output new PDB and DCD files.
+
+        Returns
+        -------
+        None
         """
         water_atoms = self.pdb_md.select_atoms(
             f"protein or nucleic or resname {self.ligname} or resname {self.special}"
@@ -45,12 +52,21 @@ class TrajectorySaver:
                 W.write(water_atoms)
 
     def save_frame(self, frame, outpath, selection=False):
-        """Saves a single frame of the trajectory.
+        """
+        Saves a single frame of the trajectory.
 
-        Args:
-            frame (int): Number of the frame to save.
-            outpath (str): Path to save the frame to.
-            selection (str, optional): MDAnalysis selection string. Defaults to False.
+        Parameters
+        ----------
+        frame : int
+            Number of the frame to save.
+        outpath : str
+            Path to save the frame to.
+        selection : str or bool, optional 
+            A MDAnalysis selection string to specify which atoms to save. Defaults to False.
+
+        Returns
+        -------
+        None
         """
         self.pdb_md.trajectory[frame]
         if selection:
