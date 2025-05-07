@@ -23,10 +23,13 @@ class MarkovChainAnalysis:
         self.min_transitions = self.calculate_min_transitions()
 
     def calculate_min_transitions(self):
-        """Calculates a list based on the minimum transition time provided values and returns it in factors 1, 2, 5, 10.
+        """
+        Calculates a list based on the minimum transition time provided values and returns it in factors 1, 2, 5, 10.
 
-        Returns:
-            list: List with the minimum transition time with factors 1, 2, 5, 10.
+        Returns
+        -------
+        list of float
+            List with the minimum transition time with factors 1, 2, 5, 10.
         """
         min_transitions = [
             self.min_transition,
@@ -39,9 +42,11 @@ class MarkovChainAnalysis:
     def generate_transition_graph(
         self, total_frames, combined_dict, fig_type="png", font_size=36, size_node=200
     ):
-        """Generate Markov Chain plots based on transition probabilities.
+        """
+        Generate Markov Chain plots based on transition probabilities.
 
-        Args:
+        Parameters
+        ----------
             total_frames (int): The number of frames in the protein-ligand MD simulation.
             combined_dict (dict): A dictionary with the information of the Binding Modes and their order of appearance during the simulation for all frames.
             fig_type (str, optional): File type for the output figures. Default is 'png'.
