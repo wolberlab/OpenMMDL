@@ -232,29 +232,6 @@ class Preprocessing:
         with open(output_pdb_file, "w") as f:
             f.writelines(new_pdb_lines)
 
-    def replace_atom_type(self, data):
-        """
-        Replace ligand atom types in the topology PDB file.
-
-        Parameters
-        ----------
-        data : str
-            Text of the initial PDB file.
-
-        Returns
-        -------
-        str
-            Modified PDB file with the corrected atom types.
-        """
-        lines = data.split("\n")
-        for i, line in enumerate(lines):
-            if " LIG  X" in line:
-                # Extract the last column which contains the atom type (O/N/H)
-                atom_type = line[12:13].strip()
-                # Replace 'X' with the correct atom type
-                lines[i] = line.replace(" LIG  X", f" LIG  {atom_type}")
-        return "\n".join(lines)
-
     def process_pdb(self, input_file, output_file):
         """
         Wrapper function to process a PDB file.
@@ -278,3 +255,26 @@ class Preprocessing:
         with open(output_file, "w") as f:
             f.write(modified_data)
 
+    def _replace_atom_type(self, data):
+        """
+        Replace ligand atom types in the topology PDB file.
+
+        Parameters
+        ----------
+        data : str
+            Text of the initial PDB file.
+
+        Returns
+        -------
+        str
+            Modified PDB file with the corrected atom types.
+        """
+        lines = data.split("\n")
+        for i, line in enumerate(lines):
+            if " LIG  X" in line:
+                # Extract the last column which contains the atom type (O/N/H)
+                atom_type = line[12:13].strip()
+                # Replace 'X' with the correct atom type
+                lines[i] = line.replace(" LIG  X", f" LIG  {atom_type}")
+                
+        return "\n".join(lines)
