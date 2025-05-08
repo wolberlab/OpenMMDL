@@ -159,7 +159,7 @@ class Preprocessing:
         Returns
         -------
         None
-            This function writes output directly to a new PDB file and does not return anything.
+            This function writes output directly to a new SDF file and does not return anything.
         """
         # Load the PDB file using MDAnalysis
         u = mda.Universe(input_pdb_filename)
