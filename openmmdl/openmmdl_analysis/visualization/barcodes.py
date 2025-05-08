@@ -9,7 +9,7 @@ class BarcodeGenerator:
 
     Attributes
     ----------
-    df : pandas.DataFrame
+    df : pd.DataFrame
         DataFrame containing all interactions extracted from PLIP analysis.
     interactions : dict
         Dictionary mapping interaction types to their corresponding columns in the DataFrame.
@@ -142,7 +142,7 @@ class BarcodePlotter:
 
     Attributes
     ----------
-    df_all : pandas.DataFrame
+    df_all : pd.DataFrame
         Full PLIP interaction dataframe passed for plotting.
     barcode_gen : BarcodeGenerator
         Instance of BarcodeGenerator used to compute barcodes from interaction data.
