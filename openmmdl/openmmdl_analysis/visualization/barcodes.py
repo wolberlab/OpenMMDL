@@ -169,6 +169,7 @@ class BarcodePlotter:
         Returns
         -------
         None
+            This function writes out a figure and does not return anything.
         """
         if not waterbridge_barcodes:
             print("No Piecharts to plot.")
@@ -257,6 +258,7 @@ class BarcodePlotter:
         Returns
         -------
         None
+            This function writes out a figure and does not return anything.
         """
         ligatoms_dict = {}
         for interaction in interactions:
@@ -312,6 +314,7 @@ class BarcodePlotter:
         Returns
         -------
         None
+            This function writes out a figure and does not return anything.
         """
         if not barcodes:
             print("No barcodes to plot.")
