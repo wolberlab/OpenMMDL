@@ -66,20 +66,44 @@ class BindingModeProcesser:
         )
 
     def process_interaction_wraper(self, interaction_list, threshold):
+        """
+        Apply filtering and interaction enumeration to an interaction DataFrame.
+    
+        Parameters
+        ----------
+        interaction_list : pd.DataFrame
+            Interaction data obtained from the MD simulation.
+        threshold : float
+            Threshold for interaction occurrence (as a fraction of total frames).
+    
+        Returns
+        -------
+        interaction_list : pd.DataFrame
+            Modified DataFrame including new interaction columns that contain the filtered values.
+        unique_data : dict
+            Dictionary containing unique filtered interaction names.
+        """
         filtered_values = self.filtering_values(threshold, interaction_list)
         interaction_list.fillna(0, inplace=True)
         unique_data = self.unique_data_generation(filtered_values)
         self.df_iteration_numbering(interaction_list, unique_data)
+        
         return interaction_list, unique_data
 
     def gather_interactions(self, df):
-        """Process a DataFrame with the protein-ligand interaction and generate column names for each unique interaction.
+        """
+        Process a DataFrame with the protein-ligand interaction and generate column names for each unique interaction.
 
-        Args:
-            df (pd.dataframe): DataFrame that contains the interaction data for the whole trajectory.
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame that contains the interaction data for the whole trajectory.
 
-        Returns:
-            dict: A dictionary with the keys being 'FRAME' numbers and values being dictionaries containing row indices and their corresponding unique column names for interactions.
+        Returns
+        -------
+        dict
+            A dictionary with the keys being 'FRAME' numbers and values being dictionaries containing 
+            row indices and their corresponding unique column names for interactions.
         """
         unique_columns_rings = {}
         unique_columns_rings_grouped = {}
@@ -291,14 +315,20 @@ class BindingModeProcesser:
         return unique_columns_rings_grouped
 
     def filtering_values(self, threshold, df):
-        """Filter and append values (interactions) to a DataFrame based on occurrence counts.
+        """
+        Filter and append values (interactions) to a DataFrame based on occurrence counts.
 
-        Args:
-            threshold (float): A threshold value that is used for filtering of the values (interactions) based upon the occurence count.
-            df (pd.Dataframe): DataFrame to which the filtered values (interactions) will be added.
+        Parameters
+        ----------
+        threshold : float
+            A threshold value that is used for filtering of the values (interactions) based upon the occurence count.
+        df : pd.DataFrame 
+            DataFrame to which the filtered values (interactions) will be added.
 
-        Returns:
-            list: A list of values, with unique values and their corresponding occurence counts.
+        Returns
+        -------
+        list of str
+            A list of values, with unique values and their corresponding occurence counts.
         """
         # Call the function to remove duplicate keys
         unique_data = remove_duplicate_values(self.unique_columns_rings_grouped)
@@ -332,13 +362,19 @@ class BindingModeProcesser:
         return filtered_values
 
     def unique_data_generation(self, filtered_values):
-        """Generate a dictionary conataing the unique interactions from a list of filtered values obtained by filtering_values.
+        """
+        Generate a dictionary conataing the unique interactions from a list of filtered values obtained by filtering_values.
 
-        Args:
-            filtered_values (list): A list of values, where the unique interactions are extracted from.
 
-        Returns:
-            dict: A dictionary containing the filtered unique interactions.
+        Parameters
+        ----------
+        filtered_values : list of str
+            A list of values, where the unique interactions are extracted from.
+
+        Returns
+        -------
+        dict
+            A dictionary containing the filtered unique interactions.
         """
         # Create a new dictionary to store unique values
         unique_data = {}
@@ -353,11 +389,19 @@ class BindingModeProcesser:
         return unique_data
 
     def df_iteration_numbering(self, df, unique_data):
-        """Loop through the DataFrame and assign the values 1 and 0 to the rows, depending if the corresponding interaction from unique data is present.
+        """
+        Loop through the DataFrame and assign the values 1 and 0 to the rows, depending if the corresponding interaction from unique data is present.
 
-        Args:
-            df (pandas dataframe): DataFrame which has the interaction data for all of the frames.
-            unique_data (dict): Dictionary that contains the unique interactions obtained from unique_data_generation.
+        Parameters
+        ----------
+        df : pandas.DataFrame 
+            DataFrame which has the interaction data for all of the frames.
+        unique_data : dict 
+            Dictionary that contains the unique interactions obtained from unique_data_generation.
+            
+        Returns
+        -------
+        None
         """
         if self.peptide is None:
             for index, row in df.iterrows():
