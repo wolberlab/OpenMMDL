@@ -112,7 +112,7 @@ class PharmacophoreGenerator:
         """
         return self.clouds
 
-    def generate_pharmacophore_centers(self, interactions):
+    def _generate_pharmacophore_centers(self, interactions):
         """
         Generates pharmacophore points for interactions that are points such as hydrophobic and ionic interactions.
 
@@ -148,7 +148,7 @@ class PharmacophoreGenerator:
 
         return pharmacophore
 
-    def generate_pharmacophore_vectors(self, interactions):
+    def _generate_pharmacophore_vectors(self, interactions):
         """
         Generates pharmacophore points for interactions that are vectors such as hydrogen bond donors or acceptors.
 
@@ -250,7 +250,7 @@ class PharmacophoreGenerator:
 
             feature_type = feature_types[interaction]
             if interaction in ["Acceptor_hbond", "Donor_hbond"]:
-                pharm = self.generate_pharmacophore_vectors(
+                pharm = self._generate_pharmacophore_vectors(
                     self.df_all.filter(regex=interaction).columns
                 )
                 for feature_name, position in pharm.items():
@@ -307,7 +307,7 @@ class PharmacophoreGenerator:
                             tolerance="1.5",
                         )
             elif interaction in ["hydrophobic", "PI_saltbridge", "NI_saltbridge"]:
-                pharm = self.generate_pharmacophore_centers(
+                pharm = self._generate_pharmacophore_centers(
                     self.df_all.filter(regex=interaction).columns
                 )
                 for feature_name, position in pharm.items():
@@ -332,7 +332,7 @@ class PharmacophoreGenerator:
                         tolerance="1.5",
                     )
             elif interaction == "pistacking":
-                pharm = self.generate_pharmacophore_vectors(
+                pharm = self._generate_pharmacophore_vectors(
                     self.df_all.filter(regex=interaction).columns
                 )
                 feature_id_counter += 1
@@ -535,7 +535,7 @@ class PharmacophoreGenerator:
             xml_declaration=True,
         )
 
-    def generate_pharmacophore_centers_all_points(self, interactions):
+    def _generate_pharmacophore_centers_all_points(self, interactions):
         """
         Generates pharmacophore points for all interactions to generate point cloud
 
@@ -579,25 +579,25 @@ class PharmacophoreGenerator:
             This function writes output directly to a .pml file and does not return anything.
         """
         cloud_dict = {}
-        cloud_dict["H"] = self.generate_pharmacophore_centers_all_points(
+        cloud_dict["H"] = self._generate_pharmacophore_centers_all_points(
             self.df_all.filter(regex="hydrophobic").columns
         )
-        cloud_dict["HBA"] = self.generate_pharmacophore_centers_all_points(
+        cloud_dict["HBA"] = self._generate_pharmacophore_centers_all_points(
             self.df_all.filter(regex="Acceptor_hbond").columns
         )
-        cloud_dict["HBD"] = self.generate_pharmacophore_centers_all_points(
+        cloud_dict["HBD"] = self._generate_pharmacophore_centers_all_points(
             self.df_all.filter(regex="Donor_hbond").columns
         )
-        cloud_dict["AR"] = self.generate_pharmacophore_centers_all_points(
+        cloud_dict["AR"] = self._generate_pharmacophore_centers_all_points(
             self.df_all.filter(regex="pistacking").columns
         )
-        cloud_dict["PI"] = self.generate_pharmacophore_centers_all_points(
+        cloud_dict["PI"] = self._generate_pharmacophore_centers_all_points(
             self.df_all.filter(regex="PI_saltbridge").columns
         )
-        cloud_dict["NI"] = self.generate_pharmacophore_centers_all_points(
+        cloud_dict["NI"] = self._generate_pharmacophore_centers_all_points(
             self.df_all.filter(regex="NI_saltbridge").columns
         )
-        cloud_dict["M"] = self.generate_pharmacophore_centers_all_points(
+        cloud_dict["M"] = self._generate_pharmacophore_centers_all_points(
             self.df_all.filter(regex="metal").columns
         )
 
