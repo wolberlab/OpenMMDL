@@ -18,39 +18,6 @@ class BarcodeGenerator:
         self.df = df
         self.interactions = self._gather_interactions()
 
-    def _gather_interactions(self):
-        """
-        Gathers interaction column names grouped by the corresponding interaction type.
-    
-        Returns
-        -------
-        dict
-            Dictionary where the keys are interaction types and values are lists of corresponding column names.
-        """
-        hydrophobic_interactions = self.df.filter(regex="hydrophobic").columns
-        acceptor_interactions = self.df.filter(regex="Acceptor_hbond").columns
-        donor_interactions = self.df.filter(regex="Donor_hbond").columns
-        pistacking_interactions = self.df.filter(regex="pistacking").columns
-        halogen_interactions = self.df.filter(regex="halogen").columns
-        waterbridge_interactions = self.df.filter(regex="waterbridge").columns
-        pication_interactions = self.df.filter(regex="pication").columns
-        saltbridge_ni_interactions = self.df.filter(regex="NI_saltbridge").columns
-        saltbridge_pi_interactions = self.df.filter(regex="PI_saltbridge").columns
-        metal_interactions = self.df.filter(regex="metal").columns
-
-        return {
-            "hydrophobic": hydrophobic_interactions,
-            "acceptor": acceptor_interactions,
-            "donor": donor_interactions,
-            "pistacking": pistacking_interactions,
-            "halogen": halogen_interactions,
-            "waterbridge": waterbridge_interactions,
-            "pication": pication_interactions,
-            "saltbridge_ni": saltbridge_ni_interactions,
-            "saltbridge_pi": saltbridge_pi_interactions,
-            "metal": metal_interactions,
-        }
-
     def generate_barcode(self, interaction):
         """
         Generates barcodes for a given interaction.
@@ -76,6 +43,29 @@ class BarcodeGenerator:
                 barcode.append(0)
 
         return np.array(barcode)
+
+    def interacting_water_ids(self, waterbridge_interactions):
+        """
+        Generates a list of all water ids that form water bridge interactions.
+
+        Parameters
+        ----------
+        waterbridge_interactions : list of str
+            list containing the names of all water bridge interactions.
+
+        Returns
+        -------
+        list of int
+            Unique water IDs that form waterbridge interactions.
+        """
+        interacting_waters = []
+        for waterbridge_interaction in waterbridge_interactions:
+            waterid_barcode = self._generate_waterids_barcode(waterbridge_interaction)
+            for waterid in waterid_barcode:
+                if waterid != 0:
+                    interacting_waters.append(waterid)
+
+        return list(set(interacting_waters))
 
     def _generate_waterids_barcode(self, interaction):
         """
@@ -112,28 +102,38 @@ class BarcodeGenerator:
 
         return waterid_barcode
 
-    def interacting_water_ids(self, waterbridge_interactions):
+    def _gather_interactions(self):
         """
-        Generates a list of all water ids that form water bridge interactions.
-
-        Parameters
-        ----------
-        waterbridge_interactions : list of str
-            list containing the names of all water bridge interactions.
-
+        Gathers interaction column names grouped by the corresponding interaction type.
+    
         Returns
         -------
-        list of int
-            Unique water IDs that form waterbridge interactions.
+        dict
+            Dictionary where the keys are interaction types and values are lists of corresponding column names.
         """
-        interacting_waters = []
-        for waterbridge_interaction in waterbridge_interactions:
-            waterid_barcode = self._generate_waterids_barcode(waterbridge_interaction)
-            for waterid in waterid_barcode:
-                if waterid != 0:
-                    interacting_waters.append(waterid)
+        hydrophobic_interactions = self.df.filter(regex="hydrophobic").columns
+        acceptor_interactions = self.df.filter(regex="Acceptor_hbond").columns
+        donor_interactions = self.df.filter(regex="Donor_hbond").columns
+        pistacking_interactions = self.df.filter(regex="pistacking").columns
+        halogen_interactions = self.df.filter(regex="halogen").columns
+        waterbridge_interactions = self.df.filter(regex="waterbridge").columns
+        pication_interactions = self.df.filter(regex="pication").columns
+        saltbridge_ni_interactions = self.df.filter(regex="NI_saltbridge").columns
+        saltbridge_pi_interactions = self.df.filter(regex="PI_saltbridge").columns
+        metal_interactions = self.df.filter(regex="metal").columns
 
-        return list(set(interacting_waters))
+        return {
+            "hydrophobic": hydrophobic_interactions,
+            "acceptor": acceptor_interactions,
+            "donor": donor_interactions,
+            "pistacking": pistacking_interactions,
+            "halogen": halogen_interactions,
+            "waterbridge": waterbridge_interactions,
+            "pication": pication_interactions,
+            "saltbridge_ni": saltbridge_ni_interactions,
+            "saltbridge_pi": saltbridge_pi_interactions,
+            "metal": metal_interactions,
+        }
 
 
 class BarcodePlotter:
@@ -150,63 +150,6 @@ class BarcodePlotter:
     def __init__(self, df_all):
         self.df_all = df_all
         self.barcode_gen = BarcodeGenerator(df_all)
-
-    def _plot_barcodes(self, barcodes, save_path):
-        """
-        Plots barcodes of the interactions depending on the presence of the interaction.
-    
-        Parameters
-        ----------
-        barcodes : dict
-            Dictionary where keys are interaction names and values are 1D numpy arrays (barcodes).
-        save_path : str
-            Path to save the generated barcode plot image.
-    
-        Returns
-        -------
-        None
-        """
-        if not barcodes:
-            print("No barcodes to plot.")
-            return
-
-        num_plots = len(barcodes)
-        num_cols = 1
-        num_rows = (num_plots + num_cols - 1) // num_cols
-
-        fig, axs = plt.subplots(num_rows, num_cols, figsize=(8.50, num_rows * 1))
-
-        if num_rows == 1:
-            axs = [axs]
-
-        for i, (title, barcode) in enumerate(barcodes.items()):
-            ax = axs[i]
-            ax.set_axis_off()
-            ax.imshow(
-                barcode.reshape(1, -1),
-                cmap="binary",
-                aspect="auto",
-                interpolation="nearest",
-                vmin=0,
-                vmax=1,
-            )
-
-            percent_occurrence = (barcode.sum() / len(barcode)) * 100
-            ax.text(
-                1.05,
-                0.5,
-                f"{percent_occurrence:.2f}%",
-                transform=ax.transAxes,
-                va="center",
-                fontsize=8,
-            )
-            ax.set_title(title, fontweight="bold", fontsize=8)
-
-        save_dir = os.path.dirname(save_path)
-        if save_dir:
-            os.makedirs(save_dir, exist_ok=True)
-        plt.tight_layout()
-        plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
     def plot_waterbridge_piechart(
         self, waterbridge_barcodes, waterbridge_interactions, fig_type
@@ -354,3 +297,60 @@ class BarcodePlotter:
         self._plot_barcodes(
             total_interactions, f"./Barcodes/{interaction_type}_interactions.{fig_type}"
         )
+
+    def _plot_barcodes(self, barcodes, save_path):
+        """
+        Plots barcodes of the interactions depending on the presence of the interaction.
+    
+        Parameters
+        ----------
+        barcodes : dict
+            Dictionary where keys are interaction names and values are 1D numpy arrays (barcodes).
+        save_path : str
+            Path to save the generated barcode plot image.
+    
+        Returns
+        -------
+        None
+        """
+        if not barcodes:
+            print("No barcodes to plot.")
+            return
+
+        num_plots = len(barcodes)
+        num_cols = 1
+        num_rows = (num_plots + num_cols - 1) // num_cols
+
+        fig, axs = plt.subplots(num_rows, num_cols, figsize=(8.50, num_rows * 1))
+
+        if num_rows == 1:
+            axs = [axs]
+
+        for i, (title, barcode) in enumerate(barcodes.items()):
+            ax = axs[i]
+            ax.set_axis_off()
+            ax.imshow(
+                barcode.reshape(1, -1),
+                cmap="binary",
+                aspect="auto",
+                interpolation="nearest",
+                vmin=0,
+                vmax=1,
+            )
+
+            percent_occurrence = (barcode.sum() / len(barcode)) * 100
+            ax.text(
+                1.05,
+                0.5,
+                f"{percent_occurrence:.2f}%",
+                transform=ax.transAxes,
+                va="center",
+                fontsize=8,
+            )
+            ax.set_title(title, fontweight="bold", fontsize=8)
+
+        save_dir = os.path.dirname(save_path)
+        if save_dir:
+            os.makedirs(save_dir, exist_ok=True)
+        plt.tight_layout()
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
