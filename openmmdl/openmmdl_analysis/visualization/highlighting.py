@@ -292,6 +292,11 @@ class LigandImageGenerator:
         """
         Generates an SVG image (or PNG) of the ligand.
 
+        Returns
+        -------
+        None
+            This function writes out a figure and does not return anything.
+
         Raises
         ------
         Exception
