@@ -22,7 +22,8 @@ class TrajectorySaver:
         self.nucleic = nucleic
 
     def save_interacting_waters_trajectory(self, interacting_waters, outputpath):
-        """Saves .pdb and .dcd files of the trajectory containing ligand, receptor and all interacting waters.
+        """
+        Saves .pdb and .dcd files of the trajectory containing ligand, receptor and all interacting waters.
 
         Parameters
         ----------
@@ -34,6 +35,7 @@ class TrajectorySaver:
         Returns
         -------
         None
+            This function writes output directly to a new PDB or DCD file and does not return anything.
         """
         water_atoms = self.pdb_md.select_atoms(
             f"protein or nucleic or resname {self.ligname} or resname {self.special}"
@@ -67,6 +69,7 @@ class TrajectorySaver:
         Returns
         -------
         None
+            This function writes output directly to a new PDB file and does not return anything.
         """
         self.pdb_md.trajectory[frame]
         if selection:
