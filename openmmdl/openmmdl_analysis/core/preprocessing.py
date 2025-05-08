@@ -27,6 +27,7 @@ class Preprocessing:
         Returns
         -------
         None
+            This function writes output directly to a new PDB file and does not return anything.
         """
         # Load trajectories
         traj_input = md.load(input_pdb)
@@ -122,6 +123,7 @@ class Preprocessing:
         Returns
         -------
         None
+            This function writes output directly to a new PDB file and does not return anything.
         """
         # Load the PDB file
         u = mda.Universe(input_pdb_filename)
@@ -157,6 +159,7 @@ class Preprocessing:
         Returns
         -------
         None
+            This function writes output directly to a new PDB file and does not return anything.
         """
         # Load the PDB file using MDAnalysis
         u = mda.Universe(input_pdb_filename)
@@ -190,6 +193,11 @@ class Preprocessing:
             Path to the output PDB file.
         lig_name : str 
             Name of the ligand in the input PDB file.
+
+        Returns
+        -------
+        None
+            This function writes output directly to a new PDB file and does not return anything.
         """
         # Read the input PDB file
         with open(input_pdb_file, "r") as f:
@@ -246,6 +254,7 @@ class Preprocessing:
         Returns
         -------
         None
+            This function writes output directly to a new PDB file and does not return anything.
         """
         with open(input_file, "r") as f:
             pdb_data = f.read()
