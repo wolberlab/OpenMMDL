@@ -16,9 +16,9 @@ class BarcodeGenerator:
     """
     def __init__(self, df):
         self.df = df
-        self.interactions = self.gather_interactions()
+        self.interactions = self._gather_interactions()
 
-    def gather_interactions(self):
+    def _gather_interactions(self):
         """
         Gathers interaction column names grouped by the corresponding interaction type.
     
@@ -77,7 +77,7 @@ class BarcodeGenerator:
 
         return np.array(barcode)
 
-    def generate_waterids_barcode(self, interaction):
+    def _generate_waterids_barcode(self, interaction):
         """
         Generates a barcode containing corresponding water ids for a given interaction.
 
@@ -128,7 +128,7 @@ class BarcodeGenerator:
         """
         interacting_waters = []
         for waterbridge_interaction in waterbridge_interactions:
-            waterid_barcode = self.generate_waterids_barcode(waterbridge_interaction)
+            waterid_barcode = self._generate_waterids_barcode(waterbridge_interaction)
             for waterid in waterid_barcode:
                 if waterid != 0:
                     interacting_waters.append(waterid)
@@ -151,7 +151,7 @@ class BarcodePlotter:
         self.df_all = df_all
         self.barcode_gen = BarcodeGenerator(df_all)
 
-    def plot_barcodes(self, barcodes, save_path):
+    def _plot_barcodes(self, barcodes, save_path):
         """
         Plots barcodes of the interactions depending on the presence of the interaction.
     
@@ -236,7 +236,7 @@ class BarcodePlotter:
 
         for waterbridge_interaction in waterbridge_interactions:
             plt.clf()
-            waterid_barcode = self.barcode_gen.generate_waterids_barcode(
+            waterid_barcode = self.barcode_gen._generate_waterids_barcode(
                 waterbridge_interaction
             )
             waters_count = {}
@@ -340,7 +340,7 @@ class BarcodePlotter:
                 barcode = self.barcode_gen.generate_barcode(interaction)
                 ligatom_interaction_barcodes[interaction] = barcode
             os.makedirs(f"./Barcodes/{ligatom}", exist_ok=True)
-            self.plot_barcodes(
+            self._plot_barcodes(
                 ligatom_interaction_barcodes,
                 f"./Barcodes/{ligatom}/{ligatom}_{interaction_type}_barcodes.{fig_type}",
             )
@@ -351,6 +351,6 @@ class BarcodePlotter:
             grouped_array = grouped_array.astype(int)
             total_interactions[ligatom] = grouped_array
 
-        self.plot_barcodes(
+        self._plot_barcodes(
             total_interactions, f"./Barcodes/{interaction_type}_interactions.{fig_type}"
         )
