@@ -51,7 +51,7 @@ class InteractionAnalyzer:
         self.special = special_ligand
         self.peptide = peptide
         self.md_len = md_len
-        self.ineraction_list = self.process_trajectory()
+        self.ineraction_list = self._process_trajectory()
 
     def characterize_complex(
         self, pdb_file: str, binding_site_id: str
@@ -82,7 +82,7 @@ class InteractionAnalyzer:
 
         return pdb_complex.interaction_sets[binding_site_id]
 
-    def retrieve_plip_interactions(self, pdb_file, lig_name):
+    def _retrieve_plip_interactions(self, pdb_file, lig_name):
         """
         Retrieves the interactions from PLIP.
 
@@ -132,7 +132,7 @@ class InteractionAnalyzer:
 
         return sites
 
-    def retrieve_plip_interactions_peptide(self, pdb_file):
+    def _retrieve_plip_interactions_peptide(self, pdb_file):
         """
         Retrives the interactions from PLIP for a peptide.
 
@@ -178,7 +178,7 @@ class InteractionAnalyzer:
 
         return sites
 
-    def create_df_from_binding_site(
+    def _create_df_from_binding_site(
         self, selected_site_interactions, interaction_type="hbond"
     ):
         """
@@ -222,7 +222,7 @@ class InteractionAnalyzer:
         )
         return df
 
-    def change_lig_to_residue(self, file_path, new_residue_name):
+    def _change_lig_to_residue(self, file_path, new_residue_name):
         """
         Reformats the topology file to change the ligand to a residue. This is needed for interactions with special ligands such as metal ions.
 
@@ -258,7 +258,7 @@ class InteractionAnalyzer:
                 else:
                     file.write(line)
 
-    def process_frame(self, frame):
+    def _process_frame(self, frame):
         """
         Process a single frame of MD simulation.
 
@@ -278,7 +278,7 @@ class InteractionAnalyzer:
         for num in self.pdb_md.trajectory[(frame) : (frame + 1)]:
             atoms_selected.write(f"processing_frame_{frame}.pdb")
         if self.peptide is None:
-            interactions_by_site = self.retrieve_plip_interactions(
+            interactions_by_site = self._retrieve_plip_interactions(
                 f"processing_frame_{frame}.pdb", self.lig_name
             )
             index_of_selected_site = -1
@@ -297,7 +297,7 @@ class InteractionAnalyzer:
 
             interaction_list = pd.DataFrame()
             for interaction_type in interaction_types:
-                tmp_interaction = self.create_df_from_binding_site(
+                tmp_interaction = self._create_df_from_binding_site(
                     interactions_by_site[selected_site],
                     interaction_type=interaction_type,
                 )
@@ -311,7 +311,7 @@ class InteractionAnalyzer:
                 combi_lig_special = mda.Universe("ligand_special.pdb")
                 complex = mda.Universe("complex.pdb")
                 complex_all = complex.select_atoms("all")
-                result = self.process_frame_special(frame)
+                result = self._process_frame_special(frame)
                 results_df = pd.concat(result, ignore_index=True)
                 results_df = results_df[results_df["LOCATION"] == "protein.sidechain"]
                 results_df["RESTYPE"] = results_df["RESTYPE"].replace(
@@ -351,7 +351,7 @@ class InteractionAnalyzer:
                 # Concatenate the updated results_df to interaction_list
                 interaction_list = pd.concat([interaction_list, results_df])
         if self.peptide is not None:
-            interactions_by_site = self.retrieve_plip_interactions_peptide(
+            interactions_by_site = self._retrieve_plip_interactions_peptide(
                 f"processing_frame_{frame}.pdb"
             )
             index_of_selected_site = -1
@@ -370,7 +370,7 @@ class InteractionAnalyzer:
 
             interaction_list = pd.DataFrame()
             for interaction_type in interaction_types:
-                tmp_interaction = self.create_df_from_binding_site(
+                tmp_interaction = self._create_df_from_binding_site(
                     interactions_by_site[selected_site],
                     interaction_type=interaction_type,
                 )
@@ -382,7 +382,7 @@ class InteractionAnalyzer:
 
         return interaction_list
 
-    def process_frame_special(self, frame):
+    def _process_frame_special(self, frame):
         """
         Function extension of process_frame to process special ligands.
 
@@ -404,8 +404,8 @@ class InteractionAnalyzer:
                 f"resname {self.lig_name} or resname {self.special}"
             )
             atoms_selected.write(f"processing_frame_{frame}.pdb")
-            self.change_lig_to_residue(f"processing_frame_{frame}.pdb", res)
-            interactions_by_site = self.retrieve_plip_interactions(
+            self._change_lig_to_residue(f"processing_frame_{frame}.pdb", res)
+            interactions_by_site = self._retrieve_plip_interactions(
                 f"processing_frame_{frame}.pdb", self.special
             )
             index_of_selected_site = -1
@@ -413,7 +413,7 @@ class InteractionAnalyzer:
             interaction_types = ["metal"]
             interaction_list = pd.DataFrame()
             for interaction_type in interaction_types:
-                tmp_interaction = self.create_df_from_binding_site(
+                tmp_interaction = self._create_df_from_binding_site(
                     interactions_by_site[selected_site],
                     interaction_type=interaction_type,
                 )
@@ -424,7 +424,7 @@ class InteractionAnalyzer:
             os.remove(f"processing_frame_{frame}.pdb")
         return interaction_dfs
 
-    def process_frame_wrapper(self, args):
+    def _process_frame_wrapper(self, args):
         """
         Wrapper for the MD Trajectory procession.
 
@@ -440,9 +440,9 @@ class InteractionAnalyzer:
         """
         frame_idx, pdb_md, lig_name, special_ligand, peptide = args
 
-        return frame_idx, self.process_frame(frame_idx)
+        return frame_idx, self._process_frame(frame_idx)
 
-    def fill_missing_frames(self, df):
+    def _fill_missing_frames(self, df):
         """
         Fills the frames with no interactions in the DataFrame with placeholder values.
 
@@ -481,7 +481,7 @@ class InteractionAnalyzer:
 
         return df
 
-    def process_trajectory(self):
+    def _process_trajectory(self):
         """
         Process protein-ligand trajectory with multiple CPUs in parallel.
 
@@ -534,7 +534,7 @@ class InteractionAnalyzer:
             + interaction_list["RESCHAIN"]
         )
 
-        interaction_list = self.fill_missing_frames(
+        interaction_list = self._fill_missing_frames(
             interaction_list,
         )
 
