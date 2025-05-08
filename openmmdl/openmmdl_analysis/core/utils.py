@@ -104,12 +104,24 @@ def remove_duplicate_values(data):
     return unique_data
 
 def read_pdb_as_dataframe(pdb_file):
-    """Helper function reading a PDB
-    Args:
-        pdb_file (str): Path to the PDB file.
+    """
+    Helper function reading a PDB
 
-    Returns:
-        pandas.DataFrame: DataFrame containing PDB data.
+    Parameters
+    ----------
+    pdb_file : str
+        Path to the PDB file.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame containing PDB data of the x, y, z coordinates of atoms.
+
+    Notes
+    -----
+    This function extracts only lines starting with 'ATOM' and parses the
+    x, y, z coordinates based on selected fields in the PDB format.
+    Assumes coordinates are located at columns 31–54.
     """
     lines = []
     with open(pdb_file, "r") as f:
@@ -131,12 +143,25 @@ def read_pdb_as_dataframe(pdb_file):
     return representative_waters
 
 def filter_and_parse_pdb(protein_pdb):
-    """This function reads in a PDB and returns the structure with bioparser.
-    Args:
-        protein_pdb (str): Path to a protein PDB file.
+    """
+    This function reads in a PDB and returns the structure with bioparser.
+    
+    Parameters
+    ----------
+    protein_pdb : str
+        Path to a protein PDB file.
 
-    Returns:
-        biopython.structure: PDB structure object.
+    Returns
+    -------
+    Bio.PDB.Structure.Structure
+        Parsed PDB structure object containing protein atoms.
+
+    Notes
+    -----
+    The function:
+    - Includes only lines starting with 'ATOM'.
+    - Excludes water molecules (residue names 'HOH', 'WAT') and terminal phosphates ('T4P', 'T3P').
+    - Skips lines with non-numeric residue sequence identifiers.
     """
     with open(protein_pdb, "r") as pdb_file:
         lines = [
