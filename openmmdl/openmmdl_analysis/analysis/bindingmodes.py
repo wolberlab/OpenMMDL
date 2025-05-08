@@ -7,17 +7,6 @@ from openmmdl.openmmdl_analysis.core.utils import (
 
 
 class BindingModeProcesser:
-    def __init__(
-        self,
-        pdb_md,
-        ligand,
-        peptide,
-        special,
-        ligand_rings,
-        interaction_list,
-        threshold,
-        total_frames,
-    ):
     """
     A class that processes protein-ligand interaction data for a given molecular dynamics (MD) simulation trajectory.
     The class performs multiple analyses on interaction data, such as filtering interactions based on frequency, 
@@ -50,6 +39,17 @@ class BindingModeProcesser:
     unique_data : dict
         Dictionary of unique data generated based on filtered interactions and threshold.
     """
+    def __init__(
+        self,
+        pdb_md,
+        ligand,
+        peptide,
+        special,
+        ligand_rings,
+        interaction_list,
+        threshold,
+        total_frames,
+    ):
         self.pdb_md = pdb_md
         self.ligand = ligand
         self.peptide = peptide
