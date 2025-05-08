@@ -259,7 +259,7 @@ class Preprocessing:
         with open(input_file, "r") as f:
             pdb_data = f.read()
 
-        modified_data = self.replace_atom_type(pdb_data)
+        modified_data = self._replace_atom_type(pdb_data)
 
         with open(output_file, "w") as f:
             f.write(modified_data)
