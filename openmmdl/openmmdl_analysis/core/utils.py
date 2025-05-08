@@ -1,3 +1,8 @@
+import pandas as pd
+from io import StringIO
+from Bio.PDB import PDBParser
+
+
 def update_dict(target_dict, *source_dicts):
     """
     Updates the dictionary with the keys and values from other dictionaries.
@@ -97,3 +102,61 @@ def remove_duplicate_values(data):
             unique_data[key] = unique_sub_dict
 
     return unique_data
+
+def read_pdb_as_dataframe(pdb_file):
+    """Helper function reading a PDB
+    Args:
+        pdb_file (str): Path to the PDB file.
+
+    Returns:
+        pandas.DataFrame: DataFrame containing PDB data.
+    """
+    lines = []
+    with open(pdb_file, "r") as f:
+        lines = f.readlines()
+
+    # Extract relevant information from PDB file lines
+    data = []
+    for line in lines:
+        if line.startswith("ATOM"):
+            x = float(line[30:38].strip())
+            y = float(line[38:46].strip())
+            z = float(line[46:54].strip())
+            data.append([x, y, z])
+
+    # Create a DataFrame
+    columns = ["Oxygen_X", "Oxygen_Y", "Oxygen_Z"]
+    representative_waters = pd.DataFrame(data, columns=columns)
+
+    return representative_waters
+
+def filter_and_parse_pdb(protein_pdb):
+    """This function reads in a PDB and returns the structure with bioparser.
+    Args:
+        protein_pdb (str): Path to a protein PDB file.
+
+    Returns:
+        biopython.structure: PDB structure object.
+    """
+    with open(protein_pdb, "r") as pdb_file:
+        lines = [
+            line
+            for line in pdb_file
+            if (
+                line.startswith("ATOM")
+                and line[17:20].strip() not in ["HOH", "WAT", "T4P", "T3P"]
+                and line[22:26]
+                .strip()
+                .isdigit()  # Exclude lines with non-numeric sequence identifiers
+            )
+        ]
+
+    # Convert the list of lines to a string buffer
+    pdb_string = "".join(lines)
+    pdb_buffer = StringIO(pdb_string)
+
+    # Now parse the filtered lines
+    parser = PDBParser(QUIET=True)
+    structure = parser.get_structure("protein", pdb_buffer)
+
+    return structure
