@@ -5,7 +5,8 @@ from matplotlib.patches import Patch
 
 
 class MarkovChainAnalysis:
-    """Class for analyzing binding mode transitions using Markov chains.
+    """
+    Class for analyzing binding mode transitions using Markov chains.
 
     This class provides functionality to analyze the transitions of binding modes over time in MD simulations.
     It allows the generation of Markov chain plots based on transition probabilities between the binding modes
