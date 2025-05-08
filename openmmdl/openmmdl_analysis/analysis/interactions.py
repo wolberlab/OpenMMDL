@@ -56,14 +56,20 @@ class InteractionAnalyzer:
     def characterize_complex(
         self, pdb_file: str, binding_site_id: str
     ) -> PLInteraction:
-        """Characterize the protein-ligand complex and return their interaction set
+        """
+        Characterizes the protein-ligand complex with PLIP and returns their interaction set.
 
-        Args:
-            pdb_file (str): A string, which represents the path to the PDB File
-            binding_site_id (str): A string that specifies the identifier of the binding site
+        Parameters
+        ----------
+        pdb_file : str 
+            A string, which represents the path to the PDB File.
+        binding_site_id : str 
+            A string that specifies the identifier of the binding site.
 
-        Returns:
-            PLInteraction: A object representing the interactions if. If Binding site is not found returns None
+        Returns
+        -------
+        PLInteraction 
+            A object representing the interactions if. If Binding site is not found returns None.
         """
         pdb_complex = PDBComplex()
         pdb_complex.load_pdb(pdb_file)
@@ -77,14 +83,20 @@ class InteractionAnalyzer:
         return pdb_complex.interaction_sets[binding_site_id]
 
     def retrieve_plip_interactions(self, pdb_file, lig_name):
-        """Retrieves the interactions from PLIP.
+        """
+        Retrieves the interactions from PLIP.
 
-        Args:
-            pdb_file (str): The path of the PDB file of the complex.
-            lig_name (str): Name of the Ligand in the complex topology that will be analyzed.
+        Parameters
+        ----------
+        pdb_file : str 
+            The path of the PDB file of the complex.
+        lig_name : str 
+            Name of the Ligand in the complex topology that will be analyzed.
 
-        Returns:
-            dict: A dictionary of the binding sites and the interactions.
+        Returns
+        -------
+        dict
+            A dictionary of the binding sites and the interactions.
         """
         protlig = PDBComplex()
         protlig.load_pdb(pdb_file)  # load the pdb file
@@ -121,13 +133,18 @@ class InteractionAnalyzer:
         return sites
 
     def retrieve_plip_interactions_peptide(self, pdb_file):
-        """Retrives the interactions from PLIP for a peptide.
+        """
+        Retrives the interactions from PLIP for a peptide.
 
-        Args:
-            pdb_file (str): The path of the PDB file of the complex.
+        Parameters
+        ----------
+        pdb_file : str 
+            The path of the PDB file of the complex.
 
-        Returns:
-            dict: A dictionary of the binding sites and the interactions.
+        Returns
+        -------
+        dict 
+            A dictionary of the binding sites and the interactions.
         """
         protlig = PDBComplex()
         protlig.load_pdb(pdb_file)  # load the pdb file
@@ -164,14 +181,20 @@ class InteractionAnalyzer:
     def create_df_from_binding_site(
         self, selected_site_interactions, interaction_type="hbond"
     ):
-        """Creates a data frame from a binding site and interaction type.
+        """
+        Creates a data frame from a binding site and interaction type.
 
-        Args:
-            selected_site_interactions (dict): Precaluclated interactions from PLIP for the selected site
-            interaction_type (str, optional): The interaction type of interest (default set to hydrogen bond). Defaults to "hbond".
+        Parameters
+        ----------
+        selected_site_interactions : dict 
+            Precaluclated interactions from PLIP for the selected site.
+        interaction_type : str, optional
+            The interaction type of interest (default set to hydrogen bond). Defaults to "hbond".
 
-        Returns:
-            pandas dataframe: DataFrame with information retrieved from PLIP.
+        Returns
+        -------
+        pd.DataFrame 
+            DataFrame with information retrieved from PLIP.
         """
         # check if interaction type is valid:
         valid_types = [
@@ -200,11 +223,19 @@ class InteractionAnalyzer:
         return df
 
     def change_lig_to_residue(self, file_path, new_residue_name):
-        """Reformats the topology file to change the ligand to a residue. This is needed for interactions with special ligands such as metal ions.
+        """
+        Reformats the topology file to change the ligand to a residue. This is needed for interactions with special ligands such as metal ions.
 
-        Args:
-            file_path (str): Filepath of the topology file.
-            new_residue_name (str): New residue name of the ligand now changed to mimic an amino acid residue.
+        Parameters
+        ----------
+        file_path : str
+            Filepath of the topology file.
+        new_residue_name : str 
+            New residue name of the ligand now changed to mimic an amino acid residue.
+
+        Returns
+        -------
+        None
         """
         with open(file_path, "r") as file:
             lines = file.readlines()
@@ -228,13 +259,18 @@ class InteractionAnalyzer:
                     file.write(line)
 
     def process_frame(self, frame):
-        """Process a single frame of MD simulation.
+        """
+        Process a single frame of MD simulation.
 
-        Args:
-            frame (int): The number of the frame that will be processed.
+        Parameters
+        ----------
+        frame : int
+            The number of the frame that will be processed.
 
-        Returns:
-            pandas dataframe: A dataframe conatining the interaction data for the processed frame.
+        Returns
+        -------
+        pd.DataFrame 
+            A dataframe conatining the interaction data for the processed frame.
         """
         atoms_selected = self.pdb_md.select_atoms(
             f"protein or nucleic or resname {self.lig_name} or (resname HOH and around 10 resname {self.lig_name}) or resname {self.special}"
@@ -347,13 +383,18 @@ class InteractionAnalyzer:
         return interaction_list
 
     def process_frame_special(self, frame):
-        """Function extension of process_frame to process special ligands.
+        """
+        Function extension of process_frame to process special ligands.
 
-        Args:
-            frame (int): Number of the frame that will be processed.
+        Parameters
+        ----------
+        frame : int 
+            Number of the frame that will be processed.
 
-        Returns:
-            list: list of dataframes containing the interaction data for the processed frame with the special ligand.
+        Returns
+        -------
+        list of pd.DataFrame 
+            List of dataframes containing the interaction data for the processed frame with the special ligand.
         """
         res_renaming = ["HIS", "SER", "CYS"]
         interaction_dfs = []
@@ -384,26 +425,36 @@ class InteractionAnalyzer:
         return interaction_dfs
 
     def process_frame_wrapper(self, args):
-        """Wrapper for the MD Trajectory procession.
+        """
+        Wrapper for the MD Trajectory procession.
 
-        Args:
-            args (tuple): Tuple containing (frame_idx: int - number of the frame to be processed)
+        Parameters
+        ----------
+        args : tuple
+            Tuple containing (frame_idx: int - number of the frame to be processed)
 
-        Returns:
-            tuple: tuple containing the frame index and the result of from the process_frame function.
+        Returns
+        -------
+        tuple
+            Tuple containing the frame index and the result of from the process_frame function.
         """
         frame_idx, pdb_md, lig_name, special_ligand, peptide = args
 
         return frame_idx, self.process_frame(frame_idx)
 
     def fill_missing_frames(self, df):
-        """Fills the frames with no interactions in the DataFrame with placeholder values.
+        """
+        Fills the frames with no interactions in the DataFrame with placeholder values.
 
-        Args:
-            df (pandas dataframe): The input DataFrame with frames that have no Interactions
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            The input DataFrame with frames that have no interactions.
 
-        Returns:
-            pandas dataframe: DataFrame with placeholder values in the frames with no interactions.
+        Returns
+        -------
+        pd.DataFrame 
+            DataFrame with placeholder values in the frames with no interactions.
         """
 
         # Create a set containing all unique values in the 'FRAME' column
@@ -431,10 +482,13 @@ class InteractionAnalyzer:
         return df
 
     def process_trajectory(self):
-        """Process protein-ligand trajectory with multiple CPUs in parallel.
+        """
+        Process protein-ligand trajectory with multiple CPUs in parallel.
 
-        Returns:
-            pandas dataframe: A DataFrame containing all the protein-ligand interaction data from the whole trajectory.
+        Returns
+        -------
+        pd.DataFrame 
+            A DataFrame containing all the protein-ligand interaction data from the whole trajectory.
         """
         if self.dataframe is None:
             print("\033[1mProcessing protein-ligand trajectory\033[0m")
