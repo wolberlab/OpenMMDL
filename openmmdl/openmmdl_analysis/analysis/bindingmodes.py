@@ -394,7 +394,7 @@ class BindingModeProcesser:
 
         Parameters
         ----------
-        df : pandas.DataFrame 
+        df : pd.DataFrame 
             DataFrame which has the interaction data for all of the frames.
         unique_data : dict 
             Dictionary that contains the unique interactions obtained from unique_data_generation.
