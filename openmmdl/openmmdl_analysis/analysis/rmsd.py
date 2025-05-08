@@ -142,7 +142,7 @@ class RMSDAnalyzer:
         
         return pairwise_rmsd_prot, pairwise_rmsd_lig
 
-    def calc_rmsd_2frames(self, ref, frame):
+    def _calc_rmsd_2frames(self, ref, frame):
         """
         Calculates the RMSD between a reference and a target frame.
     
@@ -184,7 +184,7 @@ class RMSDAnalyzer:
             for j in range(i + 1, len(self.universe.trajectory)):
                 self.universe.trajectory[j]
                 frame_j = self.universe.select_atoms(selection).positions
-                rmsd = self.calc_rmsd_2frames(frame_i, frame_j)
+                rmsd = self._calc_rmsd_2frames(frame_i, frame_j)
                 distances[i][j] = rmsd
                 distances[j][i] = rmsd
                 
