@@ -60,6 +60,7 @@ def update_values(df, new, unique_data, row_name):
     Returns
     -------
     None
+        This function updates a dataframe and does not return anything.
     """
     for idx, row in df.iterrows():
         frame_value = row[row_name]
