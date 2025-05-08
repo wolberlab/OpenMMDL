@@ -57,15 +57,15 @@ class BindingModeProcesser:
         self.threshold = threshold
         self.ligand_rings = ligand_rings
         self.total_frames = total_frames
-        self.unique_columns_rings_grouped = self.gather_interactions(interaction_list)
-        self.interaction_list, self.unique_data = self.process_interaction_wraper(
+        self.unique_columns_rings_grouped = self._gather_interactions(interaction_list)
+        self.interaction_list, self.unique_data = self._process_interaction_wraper(
             interaction_list, (threshold / 100)
         )
-        self.interactions_all, self.unique_data_all = self.process_interaction_wraper(
+        self.interactions_all, self.unique_data_all = self._process_interaction_wraper(
             interaction_list.copy(), 0.00001
         )
 
-    def process_interaction_wraper(self, interaction_list, threshold):
+    def _process_interaction_wraper(self, interaction_list, threshold):
         """
         Apply filtering and interaction enumeration to an interaction DataFrame.
     
@@ -83,14 +83,14 @@ class BindingModeProcesser:
         unique_data : dict
             Dictionary containing unique filtered interaction names.
         """
-        filtered_values = self.filtering_values(threshold, interaction_list)
+        filtered_values = self._filtering_values(threshold, interaction_list)
         interaction_list.fillna(0, inplace=True)
-        unique_data = self.unique_data_generation(filtered_values)
-        self.df_iteration_numbering(interaction_list, unique_data)
+        unique_data = self._unique_data_generation(filtered_values)
+        self._df_iteration_numbering(interaction_list, unique_data)
         
         return interaction_list, unique_data
 
-    def gather_interactions(self, df):
+    def _gather_interactions(self, df):
         """
         Process a DataFrame with the protein-ligand interaction and generate column names for each unique interaction.
 
@@ -314,7 +314,7 @@ class BindingModeProcesser:
 
         return unique_columns_rings_grouped
 
-    def filtering_values(self, threshold, df):
+    def _filtering_values(self, threshold, df):
         """
         Filter and append values (interactions) to a DataFrame based on occurrence counts.
 
@@ -361,7 +361,7 @@ class BindingModeProcesser:
 
         return filtered_values
 
-    def unique_data_generation(self, filtered_values):
+    def _unique_data_generation(self, filtered_values):
         """
         Generate a dictionary conataing the unique interactions from a list of filtered values obtained by filtering_values.
 
@@ -388,7 +388,7 @@ class BindingModeProcesser:
 
         return unique_data
 
-    def df_iteration_numbering(self, df, unique_data):
+    def _df_iteration_numbering(self, df, unique_data):
         """
         Loop through the DataFrame and assign the values 1 and 0 to the rows, depending if the corresponding interaction from unique data is present.
 
