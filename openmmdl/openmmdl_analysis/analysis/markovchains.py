@@ -47,11 +47,20 @@ class MarkovChainAnalysis:
 
         Parameters
         ----------
-            total_frames (int): The number of frames in the protein-ligand MD simulation.
-            combined_dict (dict): A dictionary with the information of the Binding Modes and their order of appearance during the simulation for all frames.
-            fig_type (str, optional): File type for the output figures. Default is 'png'.
-            font_size (int, optional): The font size for the node labels. The default value is set to 36.
-            size_node (int, optional): The size of the nodes in the Markov Chain plot. The default value is set to 200.
+        total_frames : int 
+            The number of frames in the protein-ligand MD simulation.
+        combined_dict : dict 
+            A dictionary with the information of the Binding Modes and their order of appearance during the simulation for all frames.
+        fig_type : str, optional 
+            File type for the output figures. Default is 'png'.
+        font_size : int, optional 
+            The font size for the node labels. The default value is set to 36.
+        size_node : int, optional 
+            The size of the nodes in the Markov Chain plot. The default value is set to 200.
+
+        Returns
+        -------
+        None
         """
         # Calculate the number of elements in each part
         total_length = len(combined_dict["all"])
