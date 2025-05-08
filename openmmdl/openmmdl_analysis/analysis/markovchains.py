@@ -21,9 +21,9 @@ class MarkovChainAnalysis:
     """
     def __init__(self, min_transition):
         self.min_transition = min_transition
-        self.min_transitions = self.calculate_min_transitions()
+        self.min_transitions = self._calculate_min_transitions()
 
-    def calculate_min_transitions(self):
+    def _calculate_min_transitions(self):
         """
         Calculates a list based on the minimum transition time provided values and returns it in factors 1, 2, 5, 10.
 
