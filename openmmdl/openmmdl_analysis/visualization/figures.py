@@ -174,6 +174,7 @@ class FigureArranger:
         Returns
         -------
         None
+            This function writes out a figure and does not return anything.
         """
         # Open the list of images
         merged_images = [Image.open(path) for path in self.merged_image_paths]
