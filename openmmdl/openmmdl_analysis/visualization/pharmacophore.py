@@ -395,7 +395,7 @@ class PharmacophoreGenerator:
         Returns
         -------
         None
-            This function writes output directly to a .pml XML file and does not return anything.
+            This function writes output directly to a .pml file and does not return anything.
         """
         feature_types = {
             "Acceptor_hbond": "HBA",
