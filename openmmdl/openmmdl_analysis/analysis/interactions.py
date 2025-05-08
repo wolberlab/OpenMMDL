@@ -53,35 +53,6 @@ class InteractionAnalyzer:
         self.md_len = md_len
         self.ineraction_list = self._process_trajectory()
 
-    def characterize_complex(
-        self, pdb_file: str, binding_site_id: str
-    ) -> PLInteraction:
-        """
-        Characterizes the protein-ligand complex with PLIP and returns their interaction set.
-
-        Parameters
-        ----------
-        pdb_file : str 
-            A string, which represents the path to the PDB File.
-        binding_site_id : str 
-            A string that specifies the identifier of the binding site.
-
-        Returns
-        -------
-        PLInteraction 
-            A object representing the interactions if. If Binding site is not found returns None.
-        """
-        pdb_complex = PDBComplex()
-        pdb_complex.load_pdb(pdb_file)
-        for ligand in pdb_complex.ligands:
-            if (
-                ":".join([ligand.hetid, ligand.chain, str(ligand.position)])
-                == binding_site_id
-            ):
-                pdb_complex.characterize_complex(ligand)
-
-        return pdb_complex.interaction_sets[binding_site_id]
-
     def _retrieve_plip_interactions(self, pdb_file, lig_name):
         """
         Retrieves the interactions from PLIP.
