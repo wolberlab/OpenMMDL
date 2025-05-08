@@ -33,7 +33,7 @@ class StableWaters:
         self.u = mda.Universe(self.topology, self.trajectory)
         self.water_eps = water_eps
 
-    def trace_waters(self, output_directory):
+    def _trace_waters(self, output_directory):
         """trace the water molecules in a trajectory and write all which move below one Angstrom distance. To adjust the distance alter the integer.
         
         Args:
@@ -118,7 +118,7 @@ class StableWaters:
         )
         return stable_waters, total_frames
 
-    def perform_clustering_and_writing(
+    def _perform_clustering_and_writing(
         self, stable_waters, cluster_eps, total_frames, output_directory
     ):
         """
@@ -152,11 +152,11 @@ class StableWaters:
             os.makedirs(output_sub_directory, exist_ok=True)
             print("cluster_eps:")
             print(cluster_eps)
-            self.write_pdb_clusters_and_representatives(
+            self._write_pdb_clusters_and_representatives(
                 clustered_waters, min_samples, output_sub_directory
             )
 
-    def write_pdb_clusters_and_representatives(
+    def _write_pdb_clusters_and_representatives(
         self, clustered_waters, min_samples, output_sub_directory
     ):
         """Writes the clusters and their representatives to PDB files.
@@ -221,13 +221,13 @@ class StableWaters:
         output_directory += strEps
         os.makedirs(output_directory, exist_ok=True)
         # Create a stable waters list by calling the process_trajectory_and_cluster function
-        stable_waters, total_frames = self.trace_waters(output_directory)
+        stable_waters, total_frames = self._trace_waters(output_directory)
         # Now call perform_clustering_and_writing with the returned values
-        self.perform_clustering_and_writing(
+        self._perform_clustering_and_writing(
             stable_waters, self.water_eps, total_frames, output_directory
         )
 
-    def filter_and_parse_pdb(protein_pdb):
+    def _filter_and_parse_pdb(protein_pdb):
         """This function reads in a PDB and returns the structure with bioparser.
         Args:
             protein_pdb (str): Path to a protein PDB file.
@@ -258,7 +258,7 @@ class StableWaters:
 
         return structure
 
-    def find_interacting_residues(structure, representative_waters, distance_threshold):
+    def _find_interacting_residues(structure, representative_waters, distance_threshold):
         """This function maps waters (e.g. the representative waters) to interacting residues of a different PDB structure input. Use "filter_and_parse_pdb" to get the input for this function.
         
         Args:
@@ -303,7 +303,7 @@ class StableWaters:
 
         return interacting_residues
 
-    def read_pdb_as_dataframe(pdb_file):
+    def _read_pdb_as_dataframe(pdb_file):
         """Helper function reading a PDB
         Args:
             pdb_file (str): Path to the PDB file.
@@ -357,11 +357,11 @@ class StableWaters:
             subdirectory_path = os.path.join(output_directory, subdirectory)
             if os.path.isdir(subdirectory_path):
                 # Perform operations within each subdirectory
-                representative_waters = self.read_pdb_as_dataframe(
+                representative_waters = self._read_pdb_as_dataframe(
                     os.path.join(subdirectory_path, representative_waters_file)
                 )
-                filtered_structure = self.filter_and_parse_pdb(protein_pdb_file)
-                interacting_residues = self.find_interacting_residues(
+                filtered_structure = self._filter_and_parse_pdb(protein_pdb_file)
+                interacting_residues = self._find_interacting_residues(
                     filtered_structure, representative_waters, distance_threshold
                 )
                 result_df = pd.DataFrame(
