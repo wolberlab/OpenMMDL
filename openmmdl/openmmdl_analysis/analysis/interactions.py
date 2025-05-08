@@ -508,7 +508,7 @@ class InteractionAnalyzer:
                 )
 
                 results = []
-                for result in pool.imap(self.process_frame_wrapper, frame_args):
+                for result in pool.imap(self._process_frame_wrapper, frame_args):
                     results.append(result)
                     pbar.update(1)  # Update the progress manually
 
