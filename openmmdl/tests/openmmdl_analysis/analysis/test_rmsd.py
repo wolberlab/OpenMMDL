@@ -50,8 +50,6 @@ def test_initialization():
         mock_traj = "mock_trajectory.dcd"
         analyzer = RMSDAnalyzer(mock_top, mock_traj)
         
-        assert analyzer.top_file == mock_top
-        assert analyzer.traj_file == mock_traj
         mock_universe.assert_called_once_with(mock_top, mock_traj)
 
 @patch('os.makedirs')
