@@ -62,6 +62,7 @@ class MarkovChainAnalysis:
         Returns
         -------
         None
+            This function writes out a figure of the markov chains and does not return anything.
         """
         # Calculate the number of elements in each part
         total_length = len(combined_dict["all"])
