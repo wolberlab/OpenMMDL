@@ -72,7 +72,7 @@ class RMSDAnalyzer:
 
         Returns
         -------
-        rmsd_df: pd.DataFrame
+        pd.DataFrame
             DataFrame containing RMSD of the selected atom groups over time.
         """
         self.universe.trajectory[0]
@@ -198,7 +198,7 @@ class RMSDAnalyzer:
     
         Returns
         -------
-        distances: np.ndarray
+        np.ndarray
             Numpy array containing RMSD values between all pairs of frames.
         """
         distances = np.zeros(
@@ -235,7 +235,7 @@ class RMSDAnalyzer:
 
         Returns
         -------
-        repre: int
+        int
             Number of the most representative frame.
         """
         frames = bmode_frames
