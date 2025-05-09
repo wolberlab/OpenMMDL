@@ -9,7 +9,7 @@ API Documentation for markovchains
     It allows the generation of Markov chain plots based on transition probabilities between the binding modes
     and highlights key binding modes based on their occurency in the trajectory.
 
-    :param float min_transition: Minimum transition percentage threshold for transitions in the graph.
+    :ivar float min_transition: Minimum transition percentage threshold for transitions in the graph.
     
     :ivar list min_transitions: List of transition thresholds [x1, x2, x5, x10] derived from min_transition.
 
