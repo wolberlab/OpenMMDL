@@ -31,7 +31,7 @@ class InteractionAnalyzer:
         Chain ID of the peptide ligand (optional).
     md_len : int
         Number of frames in the trajectory.
-    ineraction_list : pd.DataFrame
+    interaction_list : pd.DataFrame
         DataFrame storing the extracted interactions across the trajectory.
     """
     def __init__(
@@ -51,7 +51,7 @@ class InteractionAnalyzer:
         self.special = special_ligand
         self.peptide = peptide
         self.md_len = md_len
-        self.ineraction_list = self._process_trajectory()
+        self.interaction_list = self._process_trajectory()
 
     def _retrieve_plip_interactions(self, pdb_file, lig_name):
         """
