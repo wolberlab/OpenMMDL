@@ -54,7 +54,7 @@ def test_plot_barcodes(sample_dataframe_barcode_generation):
     plotter=BarcodePlotter(sample_dataframe_barcode_generation)
 
     # Test case 1: No barcode
-    plotter.plot_barcodes({}, "no_barcodes.png")
+    plotter._plot_barcodes({}, "no_barcodes.png")
     assert not os.path.isfile("no_barcodes.png")
 
     # Test case 2: Single barcode
@@ -115,7 +115,7 @@ def test_plot_barcodes(sample_dataframe_barcode_generation):
             ]
         )
     }
-    plotter.plot_barcodes(barcode_data, "single_barcode.png")
+    plotter._plot_barcodes(barcode_data, "single_barcode.png")
     single_barcode = "single_barcode.png"
     assert single_barcode is not None
 
@@ -230,7 +230,7 @@ def test_plot_barcodes(sample_dataframe_barcode_generation):
         ),
         # Include more barcodes as needed
     }
-    plotter.plot_barcodes(barcodes, "multiple_barcodes.png")
+    plotter._plot_barcodes(barcodes, "multiple_barcodes.png")
 
     files_in_working_directory = os.listdir(working_directory)
     print("Files in Working Directory after:", files_in_working_directory)
