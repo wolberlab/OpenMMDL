@@ -50,8 +50,8 @@ def test_initialization():
         mock_traj = "mock_trajectory.dcd"
         analyzer = RMSDAnalyzer(mock_top, mock_traj)
         
-        assert analyzer.prot_lig_top_file == mock_top
-        assert analyzer.prot_lig_traj_file == mock_traj
+        assert analyzer.top_file == mock_top
+        assert analyzer.traj_file == mock_traj
         mock_universe.assert_called_once_with(mock_top, mock_traj)
 
 @patch('os.makedirs')
@@ -111,7 +111,7 @@ def test_calc_rmsd_2frames(analyzer):
     frame = np.array([[1.1, 0.9, 1.0], [2.1, 1.9, 2.0], [3.1, 2.9, 3.0]])
     
     # Calculate RMSD
-    rmsd = analyzer.calc_rmsd_2frames(ref, frame)
+    rmsd = analyzer._calc_rmsd_2frames(ref, frame)
     
     # Calculate expected RMSD by hand
     expected = np.sqrt(((0.1**2 + 0.1**2 + 0**2) + (0.1**2 + 0.1**2 + 0**2) + (0.1**2 + 0.1**2 + 0**2)) / 3)
@@ -143,7 +143,7 @@ def test_calculate_distance_matrix(mock_tqdm, analyzer):
     analyzer.universe.trajectory.__getitem__.side_effect = set_positions
     
     # Mock the RMSD calculation
-    with patch.object(analyzer, 'calc_rmsd_2frames') as mock_calc_rmsd:
+    with patch.object(analyzer, '_calc_rmsd_2frames') as mock_calc_rmsd:
         # Define RMSD values
         rmsd_values = {
             (0, 1): 0.1,
