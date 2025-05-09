@@ -72,7 +72,7 @@ class RMSDAnalyzer:
 
         Returns
         -------
-        pandas.DataFrame
+        rmsd_df: pd.DataFrame
             DataFrame containing RMSD of the selected atom groups over time.
         """
         self.universe.trajectory[0]
@@ -114,9 +114,9 @@ class RMSDAnalyzer:
 
         Returns
         -------
-        np.ndarray
+        pairwise_rmsd_prot: np.ndarray
             Numpy array of RMSD values for pairwise protein structures.
-        np.ndarray 
+        pairwise_rmsd_lig: np.ndarray 
             Numpy array of RMSD values for ligand structures.
         """
         if nucleic:
@@ -198,7 +198,7 @@ class RMSDAnalyzer:
     
         Returns
         -------
-        np.ndarray
+        distances: np.ndarray
             Numpy array containing RMSD values between all pairs of frames.
         """
         distances = np.zeros(
@@ -235,7 +235,7 @@ class RMSDAnalyzer:
 
         Returns
         -------
-        int
+        repre: int
             Number of the most representative frame.
         """
         frames = bmode_frames
