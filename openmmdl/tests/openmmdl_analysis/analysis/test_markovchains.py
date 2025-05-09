@@ -37,11 +37,11 @@ def test_calculate_min_transitions():
     """Test the calculate_min_transitions method."""
     analyzer = MarkovChainAnalysis(min_transition=2)
     
-    assert analyzer.calculate_min_transitions() == [2, 4, 10, 20]
+    assert analyzer._calculate_min_transitions() == [2, 4, 10, 20]
     
     # Test with a different value
     analyzer.min_transition = 10
-    assert analyzer.calculate_min_transitions() == [10, 20, 50, 100]
+    assert analyzer._calculate_min_transitions() == [10, 20, 50, 100]
 
 
 @patch("matplotlib.pyplot.figure")
@@ -208,7 +208,7 @@ def test_min_transitions_property_setter():
     
     # Change min_transition and recalculate
     analyzer.min_transition = 10
-    analyzer.min_transitions = analyzer.calculate_min_transitions()
+    analyzer.min_transitions = analyzer._calculate_min_transitions()
     
     # Check that min_transitions has been updated
     assert analyzer.min_transitions != initial_transitions
