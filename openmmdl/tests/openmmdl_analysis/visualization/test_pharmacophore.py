@@ -82,12 +82,12 @@ def test_to_dict(sample_df):
 
 
 def test_generate_pharmacophore_centers(sample_df):
-    """Test the generate_pharmacophore_centers method."""
+    """Test the _generate_pharmacophore_centers method."""
     generator = PharmacophoreGenerator(sample_df, "test_ligand")
     
     # Test with hydrophobic interactions
     interactions = ["hydrophobic"]
-    centers = generator.generate_pharmacophore_centers(interactions)
+    centers = generator._generate_pharmacophore_centers(interactions)
     
     assert "hydrophobic" in centers
     assert len(centers["hydrophobic"]) == 3  # x, y, z coordinates
@@ -95,12 +95,12 @@ def test_generate_pharmacophore_centers(sample_df):
 
 
 def test_generate_pharmacophore_vectors(sample_df):
-    """Test the generate_pharmacophore_vectors method."""
+    """Test the _generate_pharmacophore_vectors method."""
     generator = PharmacophoreGenerator(sample_df, "test_ligand")
     
     # Test with donor interactions
     interactions = ["Donor_hbond"]
-    vectors = generator.generate_pharmacophore_vectors(interactions)
+    vectors = generator._generate_pharmacophore_vectors(interactions)
     
     assert "Donor_hbond" in vectors
     assert len(vectors["Donor_hbond"]) == 2  # ligand and protein coords
@@ -149,12 +149,12 @@ def test_generate_bindingmode_pharmacophore(mock_write, mock_open, sample_df):
 
 
 def test_generate_pharmacophore_centers_all_points(sample_df):
-    """Test the generate_pharmacophore_centers_all_points method."""
+    """Test the _generate_pharmacophore_centers_all_points method."""
     generator = PharmacophoreGenerator(sample_df, "test_ligand")
     
     # Test with hydrophobic interactions
     interactions = ["hydrophobic"]
-    points = generator.generate_pharmacophore_centers_all_points(interactions)
+    points = generator._generate_pharmacophore_centers_all_points(interactions)
     
     assert "hydrophobic" in points
     assert len(points["hydrophobic"]) == 1  # One point for the single hydrophobic interaction
