@@ -44,7 +44,12 @@ class MarkovChainAnalysis:
         self, total_frames, combined_dict, fig_type="png", font_size=36, size_node=200
     ):
         """
-        Generate Markov Chain plots based on transition probabilities.
+        Generates Markov chain graphs showing binding mode transitions across a simulation trajectory.
+
+        Nodes represent binding modes, with size proportional to their frequency. Node colors reflect their dominant
+        occurrence in one-third of the trajectory. Arrows represent transitions. Dual direction arrows show reversible behavior.
+
+        For each transition threshold in `min_transitions`, a separate plot is generated and saved.
 
         Parameters
         ----------
@@ -62,7 +67,7 @@ class MarkovChainAnalysis:
         Returns
         -------
         None
-            This function writes out a figure of the markov chains and does not return anything.
+            Saves one plot per transition threshold in the directory `Binding_Modes_Markov_States`.
         """
         # Calculate the number of elements in each part
         total_length = len(combined_dict["all"])
