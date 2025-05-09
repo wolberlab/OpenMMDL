@@ -33,7 +33,7 @@ def test_barcodegeneration(sample_dataframe_barcode_generation):
 def test_waterids_barcode_generator(sample_dataframe_barcode_generation):
     generator = BarcodeGenerator(sample_dataframe_barcode_generation)
     interaction = "Interaction2"
-    waterid_barcode = generator.generate_waterids_barcode(
+    waterid_barcode = generator._generate_waterids_barcode(
         interaction
     )
 
