@@ -13,12 +13,17 @@ def calc_rmsd_2frames_jit(ref, frame):
     """
     Calculates the RMSD between two frames of atomic coordinates.
 
-    Args:
-        ref (np.array): Numpy array containing the reference atomic coordinates.
-        frame (np.array): Numpy array containing the atomic coordinates of the target frame.
+    Parameters
+    ----------
+    ref : np.ndarray
+        Numpy array containing the reference atomic coordinates.
+    frame : np.ndarray 
+        Numpy array containing the atomic coordinates of the target frame.
 
-    Returns:
-        float: The RMSD value between the reference and target frame.
+    Returns
+    -------
+    float
+        The RMSD value between the reference and target frame.
     """
     dist = np.zeros(len(frame))
     for atom in range(len(frame)):
@@ -32,8 +37,10 @@ def calc_rmsd_2frames_jit(ref, frame):
 
 
 class RMSDAnalyzer:
-    """A class responsible for the Root-Mean-Square Deviation (RMSD) analysis throughout the molecular dynamics simulation. The class provides functionalities to calculate 
-    RMSD over time, compute pairwise RMSD between trajectory frames, and identify the representative frames within clusters of the binding modes.
+    """
+    A class responsible for the Root-Mean-Square Deviation (RMSD) analysis throughout the molecular dynamics simulation. 
+    The class provides functionalities to calculate RMSD over time, compute pairwise RMSD between trajectory frames 
+    and identify the representative frames within clusters of the binding modes.
 
     Parameters
     ----------
@@ -51,15 +58,22 @@ class RMSDAnalyzer:
         self.universe = mda.Universe(top_file, traj_file)
 
     def rmsd_for_atomgroups(self, fig_type, selection1, selection2=None):
-        """Calculate the RMSD for selected atom groups, and save the csv file and plot.
+        """
+        Calculate the RMSD for selected atom groups, and save the csv file and plot.
 
-        Args:
-            fig_type (str): Type of the figure to save (e.g., 'png', 'jpg').
-            selection1 (str): Selection string for main atom group, also used during alignment.
-            selection2 (list, optional): Selection strings for additional atom groups. Defaults to None.
+        Parameters
+        ----------
+        fig_type : str
+            Type of the figure to save (e.g., 'png', 'jpg').
+        selection1 : str 
+            Selection string for main atom group, also used during alignment.
+        selection2 : list of str, optional 
+            Selection strings for additional atom groups. Defaults to None.
 
-        Returns:
-            pandas dataframe: rmsd_df. DataFrame containing RMSD of the selected atom groups over time.
+        Returns
+        -------
+        pandas.DataFrame
+            DataFrame containing RMSD of the selected atom groups over time.
         """
         self.universe.trajectory[0]
         ref = self.universe
@@ -86,16 +100,24 @@ class RMSDAnalyzer:
         return rmsd_df
 
     def rmsd_dist_frames(self, fig_type, lig, nucleic=False):
-        """Calculate the RMSD between all frames in a matrix.
+        """
+        Calculate the RMSD between all frames in a matrix.
 
-        Args:
-            fig_type (str): Type of the figure to save (e.g., 'png', 'jpg').
-            lig (str): ligand name saved in the above pdb file. Selection string for the atomgroup to be investigated, also used during alignment.
-            nucleic (bool, optional): Bool indicating if the receptor to be analyzed contains nucleic acids. Defaults to False.
+        Parameters
+        ----------
+        fig_type : str 
+            Type of the figure to save (e.g., 'png', 'jpg').
+        lig : str 
+            Ligand name saved in the above PDB file. Selection string for the MDAnalysis AtomGroup to be investigated, also used during alignment.
+        nucleic : bool, optional 
+            Bool indicating if the receptor to be analyzed contains nucleic acids. Defaults to False.
 
-        Returns:
-            np.array: pairwise_rmsd_prot. Numpy array of RMSD values for pairwise protein structures.
-            np.array: pairwise_rmsd_lig. Numpy array of RMSD values for ligand structures.
+        Returns
+        -------
+        np.ndarray
+            Numpy array of RMSD values for pairwise protein structures.
+        np.ndarray 
+            Numpy array of RMSD values for ligand structures.
         """
         if nucleic:
             pairwise_rmsd_prot = (
@@ -149,12 +171,17 @@ class RMSDAnalyzer:
         This method serves as a wrapper for the `calc_rmsd_2frames_jit` function, 
         which dpes the actual RMSD calculation between two sets of coordinates.
     
-        Args:
-            ref (np.array): Numpy array representing the reference atom positions.
-            frame (np.array): Numpy array representing the atom positions of the target frame.
+        Parameters
+        ----------
+        ref : np.ndarray 
+            Numpy array representing the reference atom positions, shape (N, 3).
+        frame : np.ndarray 
+            Numpy array representing the atom positions of the target frame, shape (N, 3).
     
-        Returns:
-            float: The RMSD value between the reference and target frame.
+        Returns
+        -------
+        float 
+            The RMSD value between the reference and target frame.
         """
         return calc_rmsd_2frames_jit(ref, frame)
 
@@ -163,12 +190,16 @@ class RMSDAnalyzer:
         Calculates the pairwise RMSD-based distance matrix for all trajectory frames 
         for the selected atom selection.
     
-        Args:
-            selection (str): Selection string for the atoms (e.g., 'protein', 'resname LIG') 
-                             used to compute the RMSD between frames.
+        Parameters
+        ----------
+        selection : str 
+            Selection string for the atoms (e.g., 'protein', 'resname LIG') 
+            used to compute the RMSD between frames.
     
-        Returns:
-            np.array: Numpy array containing RMSD values between all pairs of frames.
+        Returns
+        -------
+        np.ndarray
+            Numpy array containing RMSD values between all pairs of frames.
         """
         distances = np.zeros(
             (len(self.universe.trajectory), len(self.universe.trajectory))
@@ -191,14 +222,21 @@ class RMSDAnalyzer:
         return distances
 
     def calculate_representative_frame(self, bmode_frames, DM):
-        """Calculates the most representative frame for a bindingmode. This is based uppon the averagwe RMSD of a frame to all other frames in the binding mode.
+        """
+        Calculates the most representative frame for a bindingmode. 
+        This is based uppon the averagwe RMSD of a frame to all other frames in the binding mode.
 
-        Args:
-            bmode_frame_list (list): List of frames belonging to a binding mode.
-            DM (np.array): Distance matrix of trajectory.
+        Parameters
+        ----------
+        bmode_frames : list of int 
+            List of frames belonging to a binding mode.
+        DM : np.ndarray 
+            Distance matrix of trajectory.
 
-        Returns:
-            int: Number of the most representative frame.
+        Returns
+        -------
+        int
+            Number of the most representative frame.
         """
         frames = bmode_frames
         mean_rmsd_per_frame = {}
