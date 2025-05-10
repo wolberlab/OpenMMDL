@@ -402,6 +402,7 @@ class BindingModeProcesser:
         Returns
         -------
         None
+            Modifies the input DataFrame in-place by appending columns corresponding to recurring interactions.
         """
         if self.peptide is None:
             for index, row in df.iterrows():
