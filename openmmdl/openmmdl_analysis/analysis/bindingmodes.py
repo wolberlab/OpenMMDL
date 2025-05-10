@@ -65,31 +65,6 @@ class BindingModeProcesser:
             interaction_list.copy(), 0.00001
         )
 
-    def _process_interaction_wraper(self, interaction_list, threshold):
-        """
-        Apply filtering and interaction enumeration to an interaction DataFrame.
-    
-        Parameters
-        ----------
-        interaction_list : pd.DataFrame
-            Interaction data obtained from the MD simulation.
-        threshold : float
-            Threshold for interaction occurrence (as a fraction of total frames).
-    
-        Returns
-        -------
-        interaction_list : pd.DataFrame
-            Modified DataFrame including new interaction columns that contain the filtered values.
-        unique_data : dict
-            Dictionary containing unique filtered interaction names.
-        """
-        filtered_values = self._filtering_values(threshold, interaction_list)
-        interaction_list.fillna(0, inplace=True)
-        unique_data = self._unique_data_generation(filtered_values)
-        self._df_iteration_numbering(interaction_list, unique_data)
-        
-        return interaction_list, unique_data
-
     def _gather_interactions(self, df):
         """
         Process a DataFrame with the protein-ligand interaction and generate column names for each unique interaction.
@@ -313,6 +288,31 @@ class BindingModeProcesser:
         print("\033[1minteraction partners generated\033[0m")
 
         return unique_columns_rings_grouped
+
+    def _process_interaction_wraper(self, interaction_list, threshold):
+        """
+        Apply filtering and interaction enumeration to an interaction DataFrame.
+    
+        Parameters
+        ----------
+        interaction_list : pd.DataFrame
+            Interaction data obtained from the MD simulation.
+        threshold : float
+            Threshold for interaction occurrence (as a fraction of total frames).
+    
+        Returns
+        -------
+        interaction_list : pd.DataFrame
+            Modified DataFrame including new interaction columns that contain the filtered values.
+        unique_data : dict
+            Dictionary containing unique filtered interaction names.
+        """
+        filtered_values = self._filtering_values(threshold, interaction_list)
+        interaction_list.fillna(0, inplace=True)
+        unique_data = self._unique_data_generation(filtered_values)
+        self._df_iteration_numbering(interaction_list, unique_data)
+        
+        return interaction_list, unique_data
 
     def _filtering_values(self, threshold, df):
         """
