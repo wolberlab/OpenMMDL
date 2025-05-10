@@ -36,33 +36,33 @@ API Documentation for bindingmodes
 
         :param pd.DataFrame interaction_list: Interaction data obtained from the MD simulation.
         :param float threshold: Threshold for interaction occurrence (as a fraction of total frames).
-        :returns: Tuple of the processed interaction list and a dictionary of unique identifiers.
-        :rtype: Tuple[pd.DataFrame, dict]
-
-    .. py:method:: filtering_values(threshold, df)
-
-        Apply filtering and interaction enumeration to an interaction DataFrame.
-
-        :param float threshold: Minimum fraction of total frames an interaction must appear in.
-        :param pandas.DataFrame df: The interaction list DataFrame.
         :returns: 
             - **interaction_list** (*pd.DataFrame*): Modified DataFrame including new interaction columns that contain the filtered values.
             - **unique_data** (*dict*): Dictionary containing unique filtered interaction names.
-        :rtype: tuple(pd.DataFrame, dict)
+        :rtype: tuple[pd.DataFrame, dict]
 
-    .. py:method:: unique_data_generation(filtered_values)
+    .. py:method:: _filtering_values(threshold, df)
 
-        Generates a dictionary of unique interactions from a filtered list of interactions.
+        Filter and append values (interactions) to a DataFrame based on occurrence counts.
 
-        :param list filtered_values: List of filtered interaction identifiers.
-        :returns: Dictionary mapping interaction identifiers to themselves.
+        :param float threshold: A threshold value that is used for filtering of the values (interactions) based upon the occurence count.
+        :param pd.DataFrame df: DataFrame to which the filtered values (interactions) will be added.
+        :returns: A list of values, with unique values and their corresponding occurence counts.
+        :rtype: list of str
+
+    .. py:method:: _unique_data_generation(filtered_values)
+
+        Generate a dictionary conataing the unique interactions from a list of filtered values obtained by filtering_values.
+
+        :param list of str filtered_values: A list of values, where the unique interactions are extracted from.
+        :returns: A dictionary containing the filtered unique interactions.
         :rtype: dict
 
-    .. py:method:: df_iteration_numbering(df, unique_data)
+    .. py:method:: _df_iteration_numbering(df, unique_data)
 
-        Iterates over a DataFrame of interaction data and assigns binary indicators (1 or 0) to each row depending on whether the interaction matches any entry in `unique_data`.
+        Loop through the DataFrame and assign the values 1 and 0 to the rows, depending if the corresponding interaction from unique data is present.
 
-        :param pandas.DataFrame df: DataFrame containing interaction data for all frames.
-        :param dict unique_data: Dictionary of unique interaction identifiers obtained from :py:meth:`unique_data_generation`.
+        :param pd.DataFrame df: DataFrame which has the interaction data for all of the frames.
+        :param dict unique_data: Dictionary that contains the unique interactions obtained from unique_data_generation.
         :returns: Modifies the input DataFrame in-place by appending columns corresponding to recurring interactions.
         :rtype: None
