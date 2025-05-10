@@ -25,7 +25,7 @@ class InteractionAnalyzer:
         Number of CPU cores to use for parallel frame analysis.
     lig_name : str
         Residue name of the ligand in the complex.
-    special : str
+    special_ligand : str
         Residue name for special ligands like metal ions (optional).
     peptide : str
         Chain ID of the peptide ligand (optional).
@@ -207,6 +207,7 @@ class InteractionAnalyzer:
         Returns
         -------
         None
+            Modifies and writes out new topology file.
         """
         with open(file_path, "r") as file:
             lines = file.readlines()
@@ -393,6 +394,7 @@ class InteractionAnalyzer:
                 interaction_list = pd.concat([interaction_list, tmp_interaction])
             interaction_dfs.append(interaction_list)
             os.remove(f"processing_frame_{frame}.pdb")
+
         return interaction_dfs
 
     def _process_frame_wrapper(self, args):
@@ -402,7 +404,7 @@ class InteractionAnalyzer:
         Parameters
         ----------
         args : tuple
-            Tuple containing (frame_idx: int - number of the frame to be processed)
+            Tuple containing (frame_idx: int - number of the frame to be processed).
 
         Returns
         -------
