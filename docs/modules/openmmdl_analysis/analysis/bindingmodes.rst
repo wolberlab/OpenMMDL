@@ -4,16 +4,18 @@ API Documentation for bindingmodes
 
 .. py:class:: BindingModeProcesser(pdb_md, ligand, peptide, special, ligand_rings, interaction_list, threshold, total_frames)
 
-    Processes protein-ligand interaction data to extract and analyze recurring binding modes.
+    A class that processes protein-ligand interaction data for a given molecular dynamics (MD) simulation trajectory.
+    The class performs multiple analyses on interaction data, such as filtering interactions based on frequency, 
+    generating fingerprints according to the combination of interactions present in frames creating specific binding modes.
 
-    :param str pdb_md: Path to the MD simulation PDB file.
-    :param str ligand: Identifier for the ligand.
-    :param str peptide: Identifier for the peptide chain (can be None).
-    :param bool special: Special flag used in downstream logic (not documented further).
-    :param list ligand_rings: List of ligand rings for identifying ring-based hydrophobic interactions.
-    :param pandas.DataFrame interaction_list: DataFrame containing protein-ligand interaction data.
-    :param float threshold: Threshold (percentage) used to filter recurring interactions.
-    :param int total_frames: Total number of trajectory frames used in the analysis.
+    :ivar str pdb_md: The path to the molecular dynamics (MD) PDB file for the protein-ligand complex.
+    :ivar str ligand: The ligand information (e.g., name or structure).
+    :ivar str or None peptide: The peptide chain ID, if applicable, or None if not considered.
+    :ivar bool special: Special handling or unique identifiers related to the ligand or protein.
+    :ivar list ligand_rings: List of ligand rings for identifying ring-based hydrophobic interactions.
+    :ivar pandas.DataFrame interaction_list: DataFrame containing protein-ligand interaction data.
+    :ivar float threshold: Threshold (percentage) used to filter recurring interactions.
+    :ivar int total_frames: Total number of trajectory frames used in the analysis.
 
     .. py:method:: gather_interactions(df)
 
