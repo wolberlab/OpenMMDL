@@ -26,8 +26,7 @@ API Documentation for bindingmodes
         Process a DataFrame with the protein-ligand interaction and generate column names for each unique interaction.
 
         :param pd.DataFrame df: DataFrame that contains the interaction data for the whole trajectory.
-        :returns: A dictionary with the keys being 'FRAME' numbers and values being dictionaries containing 
-        row indices and their corresponding unique column names for interactions.
+        :returns: A dictionary with the keys being 'FRAME' numbers and values being dictionaries containing row indices and their corresponding unique column names for interactions.
         :rtype: dict
 
     .. py:method:: _process_interaction_wraper(interaction_list, threshold)
