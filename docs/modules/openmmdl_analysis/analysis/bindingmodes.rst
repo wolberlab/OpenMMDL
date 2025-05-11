@@ -63,5 +63,5 @@ API Documentation for bindingmodes
 
         :param pd.DataFrame df: DataFrame which has the interaction data for all of the frames.
         :param dict unique_data: Dictionary that contains the unique interactions obtained from unique_data_generation.
-        :returns: Modifies the input DataFrame in-place by appending columns corresponding to recurring interactions.
+        :returns: None. Modifies the input DataFrame in-place by appending columns corresponding to recurring interactions.
         :rtype: None
