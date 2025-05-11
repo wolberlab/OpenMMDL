@@ -31,7 +31,7 @@ class RMSDAnalyzer:
 
     def rmsd_for_atomgroups(self, fig_type, selection1, selection2=None):
         """
-        Calculate the RMSD for selected atom groups, and save the csv file and plot.
+        Calculate the RMSD for selected atom groups, and save the CSV file and plot.
 
         Parameters
         ----------
