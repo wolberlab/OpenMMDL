@@ -15,26 +15,30 @@ class StableWaters:
     clusters them using DBSCAN and identifies representative water positions. Additionally, it analyzes
     potential interactions between stable water clusters and protein residues.
 
-    Attributes:
+    Parameters:
     ----------
         trajectory : str
             Path to the trajectory file.
         topology : str
             Path to the topology file.
+        water_eps : float
+            Epsilon parameter for DBSCAN clustering, in Angstrom.
+
+    Attributes:
+    ----------
         u : mda.Universe
             Universe object created from the topology and trajectory files.
         water_eps : float
             Epsilon parameter for DBSCAN clustering, in Angstrom.
     """
     def __init__(self, trajectory, topology, water_eps):
-        self.trajectory = trajectory
-        self.topology = topology
-        self.u = mda.Universe(self.topology, self.trajectory)
+        self.u = mda.Universe(topology, trajectory)
         self.water_eps = water_eps
 
     def _trace_waters(self, output_directory):
         """
-        Trace the water molecules in a trajectory and write all which move below one Angstrom distance. To adjust the distance alter the integer.
+        Trace the water molecules in a trajectory and write all which move below one Angstrom distance.
+        To adjust the distance alter the integer.
         
         Parameters
         ----------
@@ -142,6 +146,7 @@ class StableWaters:
         Returns
         -------
         None
+            Writes out the clusters into their representatives PDB files.
         """
         # Feature extraction: XYZ coordinates
         X = stable_waters[["Oxygen_X", "Oxygen_Y", "Oxygen_Z"]]
@@ -187,6 +192,7 @@ class StableWaters:
         Returns
         -------
         None
+            Writes clusters out as PDB files.
         """
         atom_counter = 1
         pdb_file_counter = 1
