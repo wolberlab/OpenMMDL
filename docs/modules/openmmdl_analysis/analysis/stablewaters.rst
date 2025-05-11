@@ -36,7 +36,7 @@ API Documentation for stablewaters
         :param float cluster_eps: DBSCAN clustering epsilon parameter. This is in Angstrom in this case, and defines which Water distances should be within one cluster.
         :param int total_frames: Total number of frames.
         :param str output_directory: Directory where output files will be saved.
-        :returns: Writes out the clusters into their representatives PDB files.
+        :returns: None. Writes out the clusters into their representatives PDB files.
         :rtype: None
 
     .. py:method:: _write_pdb_clusters_and_representatives(clustered_waters, min_samples, output_sub_directory)
@@ -46,7 +46,7 @@ API Documentation for stablewaters
         :param pd.DataFrame clustered_waters: DataFrame containing clustered water coordinates.
         :param int min_samples: Minimum number of samples for DBSCAN clustering.
         :param str output_sub_directory: Subdirectory where output PDB files will be saved.
-        :returns: Writes clusters out as PDB files.
+        :returns: None. Writes clusters out as PDB files.
         :rtype: None
 
     .. py:method:: stable_waters_pipeline(output_directory="./stableWaters")
@@ -54,7 +54,7 @@ API Documentation for stablewaters
         Function to run the pipeline to extract stable water clusters, and their representatives from a PDB & DCD file.
 
         :param str, optional output_directory: Directory where output files will be saved. Default is "./stableWaters".
-        :returns: This function does not return anything and saves the files.
+        :returns: None. This function does not return anything and saves the files.
         :rtype: None
 
 
@@ -79,4 +79,5 @@ API Documentation for stablewaters
         :param float cluster_eps: DBSCAN clustering epsilon parameter.
         :param str, optional output_directory: Directory where output files will be saved. Default is "./stableWaters".
         :param float, optional distance_threshold: Threshold distance for identifying interacting residues. Default is 5.0 (Angstrom).
-
+        :returns: None. This function does not return anything and saves the data in a Dataframe.
+        :rtype: None
