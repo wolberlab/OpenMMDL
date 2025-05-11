@@ -8,34 +8,6 @@ from tqdm import tqdm
 from MDAnalysis.analysis import rms, diffusionmap
 
 
-@jit(nopython=True, parallel=True, nogil=True)
-def calc_rmsd_2frames_jit(ref, frame):
-    """
-    Calculates the RMSD between two frames of atomic coordinates.
-
-    Parameters
-    ----------
-    ref : np.ndarray
-        Numpy array containing the reference atomic coordinates.
-    frame : np.ndarray 
-        Numpy array containing the atomic coordinates of the target frame.
-
-    Returns
-    -------
-    float
-        The RMSD value between the reference and target frame.
-    """
-    dist = np.zeros(len(frame))
-    for atom in range(len(frame)):
-        dist[atom] = (
-            (ref[atom][0] - frame[atom][0]) ** 2
-            + (ref[atom][1] - frame[atom][1]) ** 2
-            + (ref[atom][2] - frame[atom][2]) ** 2
-        )
-
-    return np.sqrt(dist.mean())
-
-
 class RMSDAnalyzer:
     """
     A class responsible for the Root-Mean-Square Deviation (RMSD) analysis throughout the molecular dynamics simulation. 
@@ -259,3 +231,31 @@ class RMSDAnalyzer:
             repre = min(mean_rmsd_per_frame, key=mean_rmsd_per_frame.get)
 
         return repre
+
+
+@jit(nopython=True, parallel=True, nogil=True)
+def calc_rmsd_2frames_jit(ref, frame):
+    """
+    Calculates the RMSD between two frames of atomic coordinates.
+
+    Parameters
+    ----------
+    ref : np.ndarray
+        Numpy array containing the reference atomic coordinates.
+    frame : np.ndarray 
+        Numpy array containing the atomic coordinates of the target frame.
+
+    Returns
+    -------
+    float
+        The RMSD value between the reference and target frame.
+    """
+    dist = np.zeros(len(frame))
+    for atom in range(len(frame)):
+        dist[atom] = (
+            (ref[atom][0] - frame[atom][0]) ** 2
+            + (ref[atom][1] - frame[atom][1]) ** 2
+            + (ref[atom][2] - frame[atom][2]) ** 2
+        )
+
+    return np.sqrt(dist.mean())
