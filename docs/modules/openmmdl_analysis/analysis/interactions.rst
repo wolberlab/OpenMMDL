@@ -48,7 +48,7 @@ API Documentation for interactions
 
         :param str file_path: Filepath of the topology file.
         :param str new_residue_name: New residue name of the ligand now changed to mimic an amino acid residue.
-        :returns: Modifies and writes out new topology file.
+        :returns: None. Modifies and writes out new topology file.
         :rtype: None
 
     .. py:method:: _process_frame(self, frame)
