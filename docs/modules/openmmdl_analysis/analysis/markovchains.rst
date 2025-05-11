@@ -37,5 +37,5 @@ API Documentation for markovchains
         :param int font_size: The font size for the node labels. The default value is set to 36.
         :param int size_node: The size of the nodes in the Markov Chain plot. The default value is set to 200.
 
-        :returns: Saves one plot per transition threshold in the directory `Binding_Modes_Markov_States`.
+        :returns: None. Saves one plot per transition threshold in the directory `Binding_Modes_Markov_States`.
         :rtype: None
