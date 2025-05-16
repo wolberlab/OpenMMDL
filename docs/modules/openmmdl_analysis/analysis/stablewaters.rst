@@ -16,6 +16,28 @@ API Documentation for stablewaters
     :ivar float water_eps: Epsilon parameter for DBSCAN clustering, in Angstrom.
 
 
+    .. py:method:: stable_waters_pipeline(output_directory="./stableWaters")
+
+        Function to run the pipeline to extract stable water clusters, and their representatives from a PDB & DCD file.
+
+        :param str, optional output_directory: Directory where output files will be saved. Default is "./stableWaters".
+        :returns: None. This function does not return anything and saves the files.
+        :rtype: None
+
+
+    .. py:method:: analyze_protein_and_water_interaction(protein_pdb_file, representative_waters_file, cluster_eps, output_directory="./stableWaters", distance_threshold=5.0)
+
+        Analyse the interaction of residues to water molecules using a threshold that can be specified when calling the function.
+
+        :param str protein_pdb_file: Path to the protein PDB file without waters.
+        :param str representative_waters_file: Path to the representative waters PDB file, or any PDB file containing only waters.
+        :param float cluster_eps: DBSCAN clustering epsilon parameter.
+        :param str, optional output_directory: Directory where output files will be saved. Default is "./stableWaters".
+        :param float, optional distance_threshold: Threshold distance for identifying interacting residues. Default is 5.0 (Angstrom).
+        :returns: None. This function does not return anything and saves the data in a Dataframe.
+        :rtype: None
+
+
     .. py:method:: _trace_waters(output_directory)
 
         Trace the water molecules in a trajectory and write all which move below one Angstrom distance.
@@ -39,6 +61,7 @@ API Documentation for stablewaters
         :returns: None. Writes out the clusters into their representatives PDB files.
         :rtype: None
 
+
     .. py:method:: _write_pdb_clusters_and_representatives(clustered_waters, min_samples, output_sub_directory)
 
         Writes the clusters and their representatives to PDB files.
@@ -47,14 +70,6 @@ API Documentation for stablewaters
         :param int min_samples: Minimum number of samples for DBSCAN clustering.
         :param str output_sub_directory: Subdirectory where output PDB files will be saved.
         :returns: None. Writes clusters out as PDB files.
-        :rtype: None
-
-    .. py:method:: stable_waters_pipeline(output_directory="./stableWaters")
-
-        Function to run the pipeline to extract stable water clusters, and their representatives from a PDB & DCD file.
-
-        :param str, optional output_directory: Directory where output files will be saved. Default is "./stableWaters".
-        :returns: None. This function does not return anything and saves the files.
         :rtype: None
 
 
@@ -68,16 +83,3 @@ API Documentation for stablewaters
         :param float distance_threshold: Threshold distance for identifying interacting residues.
         :returns: Dictionary mapping cluster numbers to interacting residues.
         :rtype: dict
-
-
-    .. py:method:: analyze_protein_and_water_interaction(protein_pdb_file, representative_waters_file, cluster_eps, output_directory="./stableWaters", distance_threshold=5.0)
-
-        Analyse the interaction of residues to water molecules using a threshold that can be specified when calling the function.
-
-        :param str protein_pdb_file: Path to the protein PDB file without waters.
-        :param str representative_waters_file: Path to the representative waters PDB file, or any PDB file containing only waters.
-        :param float cluster_eps: DBSCAN clustering epsilon parameter.
-        :param str, optional output_directory: Directory where output files will be saved. Default is "./stableWaters".
-        :param float, optional distance_threshold: Threshold distance for identifying interacting residues. Default is 5.0 (Angstrom).
-        :returns: None. This function does not return anything and saves the data in a Dataframe.
-        :rtype: None
