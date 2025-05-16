@@ -30,6 +30,6 @@ Here is the API of the **core** modules:
    :maxdepth: 3
    :caption: API Analysis Modules:
 
-   modules/openmmdl_analysis/analysis/preprocessing
-   modules/openmmdl_analysis/analysis/trajectories
-   modules/openmmdl_analysis/analysis/utils
+   modules/openmmdl_analysis/core/preprocessing
+   modules/openmmdl_analysis/core/trajectories
+   modules/openmmdl_analysis/core/utils
