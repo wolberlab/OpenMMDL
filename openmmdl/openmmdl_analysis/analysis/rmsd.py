@@ -211,6 +211,27 @@ class RMSDAnalyzer:
 
         return repre
 
+    def _calc_rmsd_2frames(self, ref, frame):
+        """
+        Calculates the RMSD between a reference and a target frame.
+    
+        This method serves as a wrapper for the `calc_rmsd_2frames_jit` function, 
+        which dpes the actual RMSD calculation between two sets of coordinates.
+    
+        Parameters
+        ----------
+        ref : np.ndarray 
+            Numpy array representing the reference atom positions, shape (N, 3).
+        frame : np.ndarray 
+            Numpy array representing the atom positions of the target frame, shape (N, 3).
+    
+        Returns
+        -------
+        float 
+            The RMSD value between the reference and target frame.
+        """
+        return calc_rmsd_2frames_jit(ref, frame)
+
 
 @jit(nopython=True, parallel=True, nogil=True)
 def calc_rmsd_2frames_jit(ref, frame):
@@ -238,24 +259,3 @@ def calc_rmsd_2frames_jit(ref, frame):
         )
 
     return np.sqrt(dist.mean())
-
-    def _calc_rmsd_2frames(self, ref, frame):
-        """
-        Calculates the RMSD between a reference and a target frame.
-    
-        This method serves as a wrapper for the `calc_rmsd_2frames_jit` function, 
-        which dpes the actual RMSD calculation between two sets of coordinates.
-    
-        Parameters
-        ----------
-        ref : np.ndarray 
-            Numpy array representing the reference atom positions, shape (N, 3).
-        frame : np.ndarray 
-            Numpy array representing the atom positions of the target frame, shape (N, 3).
-    
-        Returns
-        -------
-        float 
-            The RMSD value between the reference and target frame.
-        """
-        return calc_rmsd_2frames_jit(ref, frame)
