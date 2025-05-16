@@ -34,18 +34,6 @@ API Documentation for rmsd
             - **pairwise_rmsd_lig** (*np.ndarray*): Numpy array of RMSD values for ligand structures.
         :rtype: Tuple[numpy.ndarray, numpy.ndarray]
 
-    .. py:method:: _calc_rmsd_2frames(ref, frame)
-
-        Calculates the RMSD between a reference and a target frame.
-    
-        This method serves as a wrapper for the `calc_rmsd_2frames_jit` function, 
-        which dpes the actual RMSD calculation between two sets of coordinates.
-
-        :param np.ndarray ref: Numpy array representing the reference atom positions, shape (N, 3).
-        :param np.ndarray frame: Numpy array representing the atom positions of the target frame, shape (N, 3).
-        :returns: The RMSD value between the reference and target frame.
-        :rtype: float
-
     .. py:method:: calculate_distance_matrix(selection)
 
         Calculates the pairwise RMSD-based distance matrix for all trajectory frames 
@@ -64,6 +52,18 @@ API Documentation for rmsd
         :param np.ndarray DM: Distance matrix of trajectory.
         :returns: Number of the most representative frame.
         :rtype: int
+
+    .. py:method:: _calc_rmsd_2frames(ref, frame)
+
+        Calculates the RMSD between a reference and a target frame.
+    
+        This method serves as a wrapper for the `calc_rmsd_2frames_jit` function, 
+        which dpes the actual RMSD calculation between two sets of coordinates.
+
+        :param np.ndarray ref: Numpy array representing the reference atom positions, shape (N, 3).
+        :param np.ndarray frame: Numpy array representing the atom positions of the target frame, shape (N, 3).
+        :returns: The RMSD value between the reference and target frame.
+        :rtype: float
 
 
 .. py:function:: calc_rmsd_2frames_jit(ref, frame)
