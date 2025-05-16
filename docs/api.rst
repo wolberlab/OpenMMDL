@@ -28,8 +28,16 @@ Here is the API of the **core** modules:
 
 .. toctree::
    :maxdepth: 3
-   :caption: API Analysis Modules:
+   :caption: API Core Modules:
 
    modules/openmmdl_analysis/core/preprocessing
    modules/openmmdl_analysis/core/trajectories
    modules/openmmdl_analysis/core/utils
+
+Here is the API of the **visualization** modules:
+
+.. toctree::
+   :maxdepth: 3
+   :caption: API Visualization Modules:
+
+   modules/openmmdl_analysis/visualization/figures
