@@ -12,6 +12,7 @@ API Documentation for rmsd
     
     :ivar mda.Universe universe: MDAnalysis Universe object initialized with the provided topology and trajectory files.
 
+
     .. py:method:: rmsd_for_atomgroups(fig_type, selection1, selection2=None)
 
         Calculate the RMSD for selected atom groups, and save the CSV file and plot.
@@ -21,6 +22,7 @@ API Documentation for rmsd
         :param list of str, optional selection2: Selection strings for additional atom groups. Defaults to None.
         :returns: DataFrame containing RMSD of the selected atom groups over time.
         :rtype: pd.DataFrame
+
 
     .. py:method:: rmsd_dist_frames(fig_type, lig, nucleic=False)
 
@@ -34,6 +36,7 @@ API Documentation for rmsd
             - **pairwise_rmsd_lig** (*np.ndarray*): Numpy array of RMSD values for ligand structures.
         :rtype: Tuple[numpy.ndarray, numpy.ndarray]
 
+
     .. py:method:: calculate_distance_matrix(selection)
 
         Calculates the pairwise RMSD-based distance matrix for all trajectory frames 
@@ -42,6 +45,7 @@ API Documentation for rmsd
         :param str selection: Selection string for the atoms (e.g., 'protein', 'resname LIG') used to compute the RMSD between frames.
         :returns: Numpy array containing RMSD values between all pairs of frames.
         :rtype: np.ndarray
+
 
     .. py:method:: calculate_representative_frame(bmode_frames, DM)
 
@@ -52,6 +56,7 @@ API Documentation for rmsd
         :param np.ndarray DM: Distance matrix of trajectory.
         :returns: Number of the most representative frame.
         :rtype: int
+
 
     .. py:method:: _calc_rmsd_2frames(ref, frame)
 
