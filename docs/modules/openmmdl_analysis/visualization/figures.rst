@@ -1,4 +1,4 @@
-API Documentation for FigureMerger
+API Documentation for figures
 ============================
 
 
