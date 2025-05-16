@@ -23,3 +23,13 @@ Here is the API of the **analysis** modules:
    modules/openmmdl_analysis/analysis/rmsd
    modules/openmmdl_analysis/analysis/stablewaters
 
+
+Here is the API of the **core** modules:
+
+.. toctree::
+   :maxdepth: 3
+   :caption: API Analysis Modules:
+
+   modules/openmmdl_analysis/analysis/preprocessing
+   modules/openmmdl_analysis/analysis/trajectories
+   modules/openmmdl_analysis/analysis/utils
