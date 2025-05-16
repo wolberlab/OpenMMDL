@@ -23,23 +23,6 @@ class MarkovChainAnalysis:
         self.min_transition = min_transition
         self.min_transitions = self._calculate_min_transitions()
 
-    def _calculate_min_transitions(self):
-        """
-        Calculates a list based on the minimum transition time provided values and returns it in factors 1, 2, 5, 10.
-
-        Returns
-        -------
-        list of float
-            List with the minimum transition time with factors 1, 2, 5, 10.
-        """
-        min_transitions = [
-            self.min_transition,
-            self.min_transition * 2,
-            self.min_transition * 5,
-            self.min_transition * 10,
-        ]
-        return min_transitions
-
     def generate_transition_graph(
         self, total_frames, combined_dict, fig_type="png", font_size=36, size_node=200
     ):
@@ -374,3 +357,20 @@ class MarkovChainAnalysis:
 
             plt.savefig(plot_path, dpi=300)
             plt.clf()  # Clear the current figure for the next iteration
+
+    def _calculate_min_transitions(self):
+        """
+        Calculates a list based on the minimum transition time provided values and returns it in factors 1, 2, 5, 10.
+
+        Returns
+        -------
+        list of float
+            List with the minimum transition time with factors 1, 2, 5, 10.
+        """
+        min_transitions = [
+            self.min_transition,
+            self.min_transition * 2,
+            self.min_transition * 5,
+            self.min_transition * 10,
+        ]
+        return min_transitions
