@@ -2,7 +2,8 @@ import MDAnalysis as mda
 
 
 class TrajectorySaver:
-    """A class to handle the saving of molecular dynamics trajectory data for ligand–receptor complexes, with or without interacting water molecules.
+    """
+    A class to handle the saving of molecular dynamics trajectory data for ligand–receptor complexes, with or without interacting water molecules.
 
     Attributes
     ----------
