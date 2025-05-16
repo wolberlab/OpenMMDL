@@ -14,14 +14,6 @@ API Documentation for markovchains
     :ivar list min_transitions: List of transition thresholds [x1, x2, x5, x10] derived from min_transition.
 
 
-    .. py:method:: _calculate_min_transitions()
-
-        Calculates a list based on the minimum transition time provided values and returns it in factors 1, 2, 5, 10.
-
-        :returns: List with the minimum transition time with factors 1, 2, 5, 10.
-        :rtype: list
-
-
     .. py:method:: generate_transition_graph(total_frames, combined_dict, fig_type='png', font_size=36, size_node=200)
 
         Generates Markov chain graphs showing binding mode transitions across a simulation trajectory.
@@ -39,3 +31,11 @@ API Documentation for markovchains
 
         :returns: None. Saves one plot per transition threshold in the directory `Binding_Modes_Markov_States`.
         :rtype: None
+
+
+    .. py:method:: _calculate_min_transitions()
+
+        Calculates a list based on the minimum transition time provided values and returns it in factors 1, 2, 5, 10.
+
+        :returns: List with the minimum transition time with factors 1, 2, 5, 10.
+        :rtype: list
