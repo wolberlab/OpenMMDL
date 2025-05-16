@@ -35,6 +35,88 @@ class StableWaters:
         self.u = mda.Universe(topology, trajectory)
         self.water_eps = water_eps
 
+    def stable_waters_pipeline(self, output_directory="./stableWaters"):
+        """
+        Function to run the pipeline to extract stable water clusters, and their representatives from a PDB & DCD file.
+        
+        Parameters
+        ----------
+        output_directory : str, optional 
+            Directory where output files will be saved. Default is "./stableWaters".
+
+        Returns
+        -------
+        None
+            This function does not return anything and saves the files.
+        """
+        # Load the PDB and DCD files
+        output_directory += "_clusterEps_"
+        strEps = str(self.water_eps).replace(".", "")
+        output_directory += strEps
+        os.makedirs(output_directory, exist_ok=True)
+        # Create a stable waters list by calling the process_trajectory_and_cluster function
+        stable_waters, total_frames = self._trace_waters(output_directory)
+        # Now call perform_clustering_and_writing with the returned values
+        self._perform_clustering_and_writing(
+            stable_waters, self.water_eps, total_frames, output_directory
+        )
+
+    def analyze_protein_and_water_interaction(
+        self,
+        protein_pdb_file,
+        representative_waters_file,
+        cluster_eps,
+        output_directory="./stableWaters",
+        distance_threshold=5.0,
+    ):
+        """
+        Analyse the interaction of residues to water molecules using a threshold that can be specified when calling the function.
+        
+        Parameters
+        ----------
+        protein_pdb_file : str
+            Path to the protein PDB file without waters.
+        representative_waters_file : str 
+            Path to the representative waters PDB file, or any PDB file containing only waters.
+        cluster_eps : float 
+            DBSCAN clustering epsilon parameter.
+        output_directory : str, optional 
+            Directory where output files will be saved. Default is "./stableWaters".
+        distance_threshold : float, optional 
+            Threshold distance for identifying interacting residues. Default is 5.0 (Angstrom).
+
+        Returns
+        -------
+        None
+            This function does not return anything and saves the data in a Dataframe.
+        """
+        output_directory += "_clusterEps_"
+        strEps = str(cluster_eps).replace(".", "")
+        output_directory += strEps
+
+        # Iterate over subdirectories
+        for subdirectory in os.listdir(output_directory):
+            subdirectory_path = os.path.join(output_directory, subdirectory)
+            if os.path.isdir(subdirectory_path):
+                # Perform operations within each subdirectory
+                representative_waters = read_pdb_as_dataframe(
+                    os.path.join(subdirectory_path, representative_waters_file)
+                )
+                filtered_structure = filter_and_parse_pdb(protein_pdb_file)
+                interacting_residues = self._find_interacting_residues(
+                    filtered_structure, representative_waters, distance_threshold
+                )
+                result_df = pd.DataFrame(
+                    interacting_residues.items(),
+                    columns=["Cluster_Number", "Interacting_Residues"],
+                )
+                # Save result to each subdirectory
+                result_df.to_csv(
+                    os.path.join(subdirectory_path, "interacting_residues.csv"),
+                    index=False,
+                )
+                print(f"Exported interacting_residues.csv in {subdirectory_path}")
+    
     def _trace_waters(self, output_directory):
         """
         Trace the water molecules in a trajectory and write all which move below one Angstrom distance.
@@ -233,33 +315,6 @@ class StableWaters:
                     pdb_line = f"ATOM{index + 1:6}  O   WAT A{index + 1:4}    {x:8.3f}{y:8.3f}{z:8.3f}  1.00  0.00           O\n"
                     pdb_file.write(pdb_line)
 
-
-    def stable_waters_pipeline(self, output_directory="./stableWaters"):
-        """
-        Function to run the pipeline to extract stable water clusters, and their representatives from a PDB & DCD file.
-        
-        Parameters
-        ----------
-        output_directory : str, optional 
-            Directory where output files will be saved. Default is "./stableWaters".
-
-        Returns
-        -------
-        None
-            This function does not return anything and saves the files.
-        """
-        # Load the PDB and DCD files
-        output_directory += "_clusterEps_"
-        strEps = str(self.water_eps).replace(".", "")
-        output_directory += strEps
-        os.makedirs(output_directory, exist_ok=True)
-        # Create a stable waters list by calling the process_trajectory_and_cluster function
-        stable_waters, total_frames = self._trace_waters(output_directory)
-        # Now call perform_clustering_and_writing with the returned values
-        self._perform_clustering_and_writing(
-            stable_waters, self.water_eps, total_frames, output_directory
-        )
-
     def _find_interacting_residues(structure, representative_waters, distance_threshold):
         """
         This function maps waters (e.g. the representative waters) to interacting residues of a different PDB structure input.
@@ -312,60 +367,3 @@ class StableWaters:
                                 )
 
         return interacting_residues
-
-    # Analyse protein and water interaction, get the residues and the corresponding weater molecules that interact.
-    def analyze_protein_and_water_interaction(
-        self,
-        protein_pdb_file,
-        representative_waters_file,
-        cluster_eps,
-        output_directory="./stableWaters",
-        distance_threshold=5.0,
-    ):
-        """
-        Analyse the interaction of residues to water molecules using a threshold that can be specified when calling the function.
-        
-        Parameters
-        ----------
-        protein_pdb_file : str
-            Path to the protein PDB file without waters.
-        representative_waters_file : str 
-            Path to the representative waters PDB file, or any PDB file containing only waters.
-        cluster_eps : float 
-            DBSCAN clustering epsilon parameter.
-        output_directory : str, optional 
-            Directory where output files will be saved. Default is "./stableWaters".
-        distance_threshold : float, optional 
-            Threshold distance for identifying interacting residues. Default is 5.0 (Angstrom).
-
-        Returns
-        -------
-        None
-            This function does not return anything and saves the data in a Dataframe.
-        """
-        output_directory += "_clusterEps_"
-        strEps = str(cluster_eps).replace(".", "")
-        output_directory += strEps
-
-        # Iterate over subdirectories
-        for subdirectory in os.listdir(output_directory):
-            subdirectory_path = os.path.join(output_directory, subdirectory)
-            if os.path.isdir(subdirectory_path):
-                # Perform operations within each subdirectory
-                representative_waters = read_pdb_as_dataframe(
-                    os.path.join(subdirectory_path, representative_waters_file)
-                )
-                filtered_structure = filter_and_parse_pdb(protein_pdb_file)
-                interacting_residues = self._find_interacting_residues(
-                    filtered_structure, representative_waters, distance_threshold
-                )
-                result_df = pd.DataFrame(
-                    interacting_residues.items(),
-                    columns=["Cluster_Number", "Interacting_Residues"],
-                )
-                # Save result to each subdirectory
-                result_df.to_csv(
-                    os.path.join(subdirectory_path, "interacting_residues.csv"),
-                    index=False,
-                )
-                print(f"Exported interacting_residues.csv in {subdirectory_path}")
