@@ -13,7 +13,7 @@ class PharmacophoreGenerator:
 
     Attributes
     ----------
-    df_all : pandas.DataFrame
+    df_all : pd.DataFrame
         DataFrame storing the input interaction data.
     ligand_name : str
         Name of the ligand.
