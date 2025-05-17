@@ -4,7 +4,10 @@ API Documentation for MarkovChainAnalysis
 
 .. py:class:: PharmacophoreGenerator(df_all, ligand_name)
 
-    A class to extract and organize pharmacophoric features from protein-ligand interaction data (e.g., PLIP analysis results).
+    A class for generating pharmacophore features from molecular dynamics (MD) interaction data.
+
+    This class processes interaction data from MD simulations and generates pharmacophore features 
+    including hydrogen bond donors/acceptors, hydrophobic features etc. exporting them in .pml format.
 
     :param pandas.DataFrame df_all: DataFrame containing interaction data.
     :param str ligand_name: Name of the ligand for labeling outputs.
