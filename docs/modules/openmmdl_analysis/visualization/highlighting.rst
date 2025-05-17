@@ -1,38 +1,41 @@
-API Documentation for FigureHighlighter and LigandImageGenerator
+API Documentation for highlighting
 ============================
 
 
 .. py:class:: FigureHighlighter(complex_pdb_file, ligand_no_h_pdb_file)
 
-    A class for identifying and categorizing ligand atoms involved in different types of protein-ligand interactions.
+   dentifies and highlights ligand atoms involved in various types of protein-ligand interactions.
 
     :param str complex_pdb_file: Path to the protein-ligand complex PDB file.
     :param str ligand_no_h_pdb_file: Path to the ligand PDB file without hydrogens.
+    :ivar mda.Universe complex: MDAnalysis Universe object of the protein-ligand complex.
+    :ivar mda.Universe ligand_no_h: MDAnalysis Universe object of the ligand without hydrogens.
+    :ivar mda.AtomGroup lig_noh: AtomGroup of all atoms in the ligand without hydrogens.
 
     .. py:method:: split_interaction_data(data)
 
-        Splits interaction strings into components: residue/atom identifiers and interaction type.
+        Splits the input data into multiple parts.
 
-        :param list data: A list of raw interaction strings.
-        :return: A list of split interaction strings.
+        :param list data: A list containing strings with protein residue name, interacting indices and interaction type.
+        :return: List of separate formatted strings with separated protein residue name, interacting indices and interaction type.
         :rtype: list
 
     .. py:method:: highlight_numbers(split_data, starting_idx)
 
-        Parses interaction data to identify and categorize ligand atom indices involved in interactions.
+        Extracts the data from the split_data output of the interactions and categorizes it to the correct interaction list.
 
-        :param list split_data: Parsed interaction data.
-        :param list starting_idx: Starting indices to help resolve atom positions.
+        :param list split_data: Split interaction data strings with the protein residue name, interacting indices and interaction type.
+        :param list starting_idx: Starting indices of ligand atoms used to correctly identify atoms.
         :return: A tuple of lists of highlighted atom indices by interaction type.
         :rtype: tuple
 
     .. py:method:: generate_interaction_dict(interaction_type, keys)
 
-        Returns an RGB color mapping for a given interaction type and corresponding atoms.
+        Generates a dictionary of interaction RGB color model based on the provided interaction type.
 
-        :param str interaction_type: Type of interaction (e.g., 'hydrophobic').
-        :param list keys: Atom indices involved in the interaction.
-        :return: Dictionary mapping atom indices to RGB tuples.
+        :param str interaction_type: The type of interaction (e.g., 'hydrophobic', 'hbond_donor').
+        :param list keys: Atom indices corresponding to the given interaction type.
+        :return: Dictionary mapping each atom index to an RGB color code tuple.
         :rtype: dict
 
 
