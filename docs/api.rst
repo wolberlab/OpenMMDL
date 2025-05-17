@@ -40,4 +40,7 @@ Here is the API of the **visualization** modules:
    :maxdepth: 3
    :caption: API Visualization Modules:
 
+   modules/openmmdl_analysis/visualization/barcodes
    modules/openmmdl_analysis/visualization/figures
+   modules/openmmdl_analysis/visualization/highlighting
+   modules/openmmdl_analysis/visualization/pharmacophore
