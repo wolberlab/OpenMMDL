@@ -41,14 +41,17 @@ API Documentation for highlighting
 
 .. py:class:: LigandImageGenerator(ligand_name, complex_pdb_file, ligand_no_h_pdb_file, output_svg_filename, fig_type='svg')
 
-    A class for generating annotated 2D ligand structure images using RDKit, with optional export to PNG.
+    Generates 2D images of the ligand structure from a protein-ligand complex with atom indices mapped.
 
-    :param str ligand_name: Ligand residue name in the complex.
+    :param str ligand_name: Name of the ligand (3 letters) in the protein-ligand complex topology.
     :param str complex_pdb_file: Path to the protein-ligand complex PDB file.
     :param str ligand_no_h_pdb_file: Path to the ligand PDB file without hydrogens.
-    :param str output_svg_filename: Path to save the output SVG image.
-    :param str fig_type: Type of image to save ('svg' or 'png'). Default is 'svg'.
+    :param str output_svg_filename: Output filename for the generated SVG image.
+    :param str fig_type: Type of image to generate. Can be "svg" or "png".
 
     .. py:method:: generate_image()
 
         Generates and saves a 2D depiction of the ligand with atom indices labeled. Converts to PNG if specified.
+
+        :return: None. This function writes out a figure and does not return anything.
+        :rtype: None
