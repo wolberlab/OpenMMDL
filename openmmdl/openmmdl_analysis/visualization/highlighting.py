@@ -67,7 +67,7 @@ class FigureHighlighter:
         Returns
         -------
         tuple of lists
-            Lists of highlighted atom indices categorized by interaction types.
+            A tuple of lists of highlighted atom indices by interaction type.
         """
         highlighted_hbond_acceptor = []
         highlighted_hbond_donor = []
