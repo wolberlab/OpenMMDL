@@ -15,6 +15,11 @@ class Visualizer:
     visualization, ligand highlighting, interacting water molecules, and various interaction cloud types
     (e.g., hydrogen bonds, hydrophobic regions, etc.).
 
+    Parameters
+    ----------
+    cloud_path : str
+        Path to the location where the JSON file containing interaction cloud coordinates is.
+
     Attributes
     ----------
     md : MDAnalysis.Universe
