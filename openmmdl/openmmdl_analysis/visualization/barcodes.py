@@ -143,7 +143,7 @@ class BarcodePlotter:
     Attributes
     ----------
     df_all : pd.DataFrame
-        Full PLIP interaction dataframe passed for plotting.
+        Full interaction dataframe passed for plotting.
     barcode_gen : BarcodeGenerator
         Instance of BarcodeGenerator used to compute barcodes from interaction data.
     """
