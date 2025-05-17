@@ -17,7 +17,7 @@ class PharmacophoreGenerator:
         DataFrame storing the input interaction data.
     ligand_name : str
         Name of the ligand.
-    comlex_name : str
+    complex_name : str
         Name of the complex consisting of ligand name and "_complex".
     coord_pattern : re.Pattern
         Regular expression pattern for extracting 3D coordinates from strings.
@@ -27,7 +27,7 @@ class PharmacophoreGenerator:
     def __init__(self, df_all, ligand_name):
         self.df_all = df_all
         self.ligand_name = ligand_name
-        self.comlex_name = f"{ligand_name}_complex"
+        self.complex_name = f"{ligand_name}_complex"
         self.coord_pattern = re.compile(r"\(([\d.-]+), ([\d.-]+), ([\d.-]+)\)")
         self.clouds = self._generate_clouds()
 
@@ -65,12 +65,12 @@ class PharmacophoreGenerator:
             "MolecularEnvironment",
             version="0.0",
             id=f"OpennMMDL_Analysis{id_num}",
-            name=self.comlex_name,
+            name=self.complex_name,
         )
         pharmacophore = ET.SubElement(
             root,
             "pharmacophore",
-            name=self.comlex_name,
+            name=self.complex_name,
             id=f"pharmacophore{id_num}",
             pharmacophoreType="LIGAND_SCOUT",
         )
@@ -259,7 +259,7 @@ class PharmacophoreGenerator:
 
         pharmacophore = ET.Element(
             "pharmacophore",
-            name=f"{self.comlex_name}_pointcloud",
+            name=f"{self.complex_name}_pointcloud",
             id=f"pharmacophore0",
             pharmacophoreType="LIGAND_SCOUT",
         )
@@ -333,12 +333,12 @@ class PharmacophoreGenerator:
             "MolecularEnvironment",
             version="0.0",
             id=f"OpennMMDL_Analysis{id_num}",
-            name=self.comlex_name,
+            name=self.complex_name,
         )
         pharmacophore = ET.SubElement(
             root,
             "pharmacophore",
-            name=self.comlex_name,
+            name=self.complex_name,
             id=f"pharmacophore{id_num}",
             pharmacophoreType="LIGAND_SCOUT",
         )
@@ -370,7 +370,7 @@ class PharmacophoreGenerator:
                     optional="false",
                     disabled="false",
                     weight="1.0",
-                    coreCompound=self.comlex_name,
+                    coreCompound=self.complex_name,
                     id=f"feature{str(feature_id_counter)}",
                 )
                 origin = ET.SubElement(
@@ -401,7 +401,7 @@ class PharmacophoreGenerator:
                     optional="false",
                     disabled="false",
                     weight="1.0",
-                    coreCompound=self.comlex_name,
+                    coreCompound=self.complex_name,
                     id=f"feature{str(feature_id_counter)}",
                 )
                 position = ET.SubElement(
@@ -431,7 +431,7 @@ class PharmacophoreGenerator:
                     optional="false",
                     disabled="false",
                     weight="1.0",
-                    coreCompound=self.comlex_name,
+                    coreCompound=self.complex_name,
                     id=f"feature{str(feature_id_counter)}",
                 )
                 position = ET.SubElement(
