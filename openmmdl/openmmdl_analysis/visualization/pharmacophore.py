@@ -596,7 +596,8 @@ class PharmacophoreGenerator:
         Returns
         -------
         dict
-            Dict of interactions from which pharmacophore is generated as key and list of coordinates as value (first coords are ligand side, second are protein side).
+            Dict of interactions from which pharmacophore is generated as key and list of
+            coordinates as value (first coords are ligand side, second are protein side).
         """
         coord_pattern = re.compile(r"\(([\d.-]+), ([\d.-]+), ([\d.-]+)\)")
         pharmacophore = {}
