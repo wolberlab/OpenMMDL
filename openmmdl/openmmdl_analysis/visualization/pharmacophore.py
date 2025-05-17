@@ -5,6 +5,25 @@ import xml.etree.ElementTree as ET
 
 
 class PharmacophoreGenerator:
+    """
+    A class for generating pharmacophore features from molecular dynamics (MD) interaction data.
+
+    This class processes interaction data from MD simulations and generates pharmacophore features 
+    including hydrogen bond donors/acceptors, hydrophobic features etc. exporting them in .pml format.
+
+    Attributes
+    ----------
+    df_all : pandas.DataFrame
+        DataFrame storing the input interaction data.
+    ligand_name : str
+        Name of the ligand.
+    comlex_name : str
+        Name of the complex consisting of ligand name and "_complex".
+    coord_pattern : re.Pattern
+        Regular expression pattern for extracting 3D coordinates from strings.
+    clouds : dict
+        Dictionary containing interaction types and associated 3D coordinates with visualization metadata.
+    """
     def __init__(self, df_all, ligand_name):
         self.df_all = df_all
         self.ligand_name = ligand_name
