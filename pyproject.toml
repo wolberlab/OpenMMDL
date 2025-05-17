@@ -73,4 +73,4 @@ version = { attr = "openmmdl._version.__version__" }
 openmmdl_setup = "openmmdl.openmmdl_setup.openmmdlsetup:main"
 openmmdl_simulation = "openmmdl.openmmdl_simulation.openmmdlsimulation:main"
 openmmdl_analysis = "openmmdl.openmmdl_analysis.openmmdlanalysis:main"
-openmmdl_visualization = "openmmdl.openmmdl_analysis.visualization_functions:run_visualization"
+openmmdl_visualization = "openmmdl.openmmdl_analysis.visualization.visualization:run_visualization"
