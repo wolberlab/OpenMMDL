@@ -39,7 +39,7 @@ def test_init(sample_df):
     
     assert generator.df_all.equals(sample_df)
     assert generator.ligand_name == "test_ligand"
-    assert generator.comlex_name == "test_ligand_complex"
+    assert generator.complex_name == "test_ligand_complex"
     assert isinstance(generator.coord_pattern, re.Pattern)
     assert isinstance(generator.clouds, dict)
 
