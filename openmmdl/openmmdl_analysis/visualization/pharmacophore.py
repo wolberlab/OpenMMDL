@@ -296,7 +296,168 @@ class PharmacophoreGenerator:
 
         tree = ET.ElementTree(pharmacophore)
         tree.write(f"{outname}.pml", encoding="UTF-8", xml_declaration=True)
-    
+
+    def generate_bindingmode_pharmacophore(
+        self,
+        dict_bindingmode,
+        outname,
+        id_num=0,
+    ):
+        """
+        Generates pharmacophore from a binding mode and writes it to a .pml file.
+
+        Parameters
+        ----------
+        dict_bindingmode : dict 
+            Dictionary containing all interactions of the bindingmode and thei coresponding ligand and protein coordinates.
+        outname : str
+            Name of the output .pml file.
+        id_num : int, optional
+            if multiple id number can enumerate the diferent bindingmodes. Defaults to 0.
+
+        Returns
+        -------
+        None
+            This function writes output directly to a .pml file and does not return anything.
+        """
+        feature_types = {
+            "Acceptor_hbond": "HBA",
+            "Donor_hbond": "HBD",
+            "pistacking": "AR",
+            "hydrophobic": "H",
+            "PI_saltbridge": "PI",
+            "NI_saltbridge": "NI",
+        }
+        feature_id_counter = 0
+        root = ET.Element(
+            "MolecularEnvironment",
+            version="0.0",
+            id=f"OpennMMDL_Analysis{id_num}",
+            name=self.comlex_name,
+        )
+        pharmacophore = ET.SubElement(
+            root,
+            "pharmacophore",
+            name=self.comlex_name,
+            id=f"pharmacophore{id_num}",
+            pharmacophoreType="LIGAND_SCOUT",
+        )
+
+        for interaction in dict_bindingmode.keys():
+            # get feature type
+            for interactiontype in feature_types.keys():
+                if interactiontype in interaction:
+                    feature_type = feature_types[interactiontype]
+                    break
+            # generate vector features
+            if feature_type in ["HBA", "HBD"]:
+                if feature_type == "HBA":
+                    orig_loc = dict_bindingmode[interaction]["PROTCOO"][0]
+                    targ_loc = dict_bindingmode[interaction]["LIGCOO"][0]
+                elif feature_type == "HBD":
+                    orig_loc = dict_bindingmode[interaction]["LIGCOO"][0]
+                    targ_loc = dict_bindingmode[interaction]["PROTCOO"][0]
+                feature_id_counter += 1
+                points_to_lig = "true" if feature_type == "HBA" else "false"
+                hasSyntheticProjectedPoint = "false"
+                vector = ET.SubElement(
+                    pharmacophore,
+                    "vector",
+                    name=feature_type,
+                    featureId=interaction,
+                    pointsToLigand=points_to_lig,
+                    hasSyntheticProjectedPoint=hasSyntheticProjectedPoint,
+                    optional="false",
+                    disabled="false",
+                    weight="1.0",
+                    coreCompound=self.comlex_name,
+                    id=f"feature{str(feature_id_counter)}",
+                )
+                origin = ET.SubElement(
+                    vector,
+                    "origin",
+                    x3=str(orig_loc[0]),
+                    y3=str(orig_loc[1]),
+                    z3=str(orig_loc[2]),
+                    tolerance="1.9499999",
+                )
+                target = ET.SubElement(
+                    vector,
+                    "target",
+                    x3=str(targ_loc[0]),
+                    y3=str(targ_loc[1]),
+                    z3=str(targ_loc[2]),
+                    tolerance="1.5",
+                )
+            # generate point features
+            elif feature_type in ["H", "PI", "NI"]:
+                position = dict_bindingmode[interaction]["LIGCOO"][0]
+                feature_id_counter += 1
+                point = ET.SubElement(
+                    pharmacophore,
+                    "point",
+                    name=feature_type,
+                    featureId=interaction,
+                    optional="false",
+                    disabled="false",
+                    weight="1.0",
+                    coreCompound=self.comlex_name,
+                    id=f"feature{str(feature_id_counter)}",
+                )
+                position = ET.SubElement(
+                    point,
+                    "position",
+                    x3=str(position[0]),
+                    y3=str(position[1]),
+                    z3=str(position[2]),
+                    tolerance="1.5",
+                )
+            # generate plane features
+            elif feature_type == "AR":
+                feature_id_counter += 1
+                lig_loc = dict_bindingmode[interaction]["LIGCOO"][0]
+                prot_loc = dict_bindingmode[interaction]["PROTCOO"][0]
+
+                # normalize vector of plane
+                vector = np.array(lig_loc) - np.array(prot_loc)
+                normal_vector = vector / np.linalg.norm(vector)
+                x, y, z = normal_vector
+
+                plane = ET.SubElement(
+                    pharmacophore,
+                    "plane",
+                    name=feature_type,
+                    featureId=interaction,
+                    optional="false",
+                    disabled="false",
+                    weight="1.0",
+                    coreCompound=self.comlex_name,
+                    id=f"feature{str(feature_id_counter)}",
+                )
+                position = ET.SubElement(
+                    plane,
+                    "position",
+                    x3=str(lig_loc[0]),
+                    y3=str(lig_loc[1]),
+                    z3=str(lig_loc[2]),
+                    tolerance="0.9",
+                )
+                normal = ET.SubElement(
+                    plane,
+                    "normal",
+                    x3=str(x),
+                    y3=str(y),
+                    z3=str(z),
+                    tolerance="0.43633232",
+                )
+
+        tree = ET.ElementTree(root)
+        tree.write(
+            f"./Binding_Modes_Markov_States/{outname}.pml",
+            encoding="UTF-8",
+            xml_declaration=True,
+        )
+
     def _generate_clouds(self):
         """
         Process the dataframe with the interactions to extract and categorize ligand/protein interactions.
@@ -469,167 +630,6 @@ class PharmacophoreGenerator:
                 [center_a, center_b, center_c],
             ]
         return pharmacophore
-
-    def generate_bindingmode_pharmacophore(
-        self,
-        dict_bindingmode,
-        outname,
-        id_num=0,
-    ):
-        """
-        Generates pharmacophore from a binding mode and writes it to a .pml file.
-
-        Parameters
-        ----------
-        dict_bindingmode : dict 
-            Dictionary containing all interactions of the bindingmode and thei coresponding ligand and protein coordinates.
-        outname : str
-            Name of the output .pml file.
-        id_num : int, optional
-            if multiple id number can enumerate the diferent bindingmodes. Defaults to 0.
-
-        Returns
-        -------
-        None
-            This function writes output directly to a .pml file and does not return anything.
-        """
-        feature_types = {
-            "Acceptor_hbond": "HBA",
-            "Donor_hbond": "HBD",
-            "pistacking": "AR",
-            "hydrophobic": "H",
-            "PI_saltbridge": "PI",
-            "NI_saltbridge": "NI",
-        }
-        feature_id_counter = 0
-        root = ET.Element(
-            "MolecularEnvironment",
-            version="0.0",
-            id=f"OpennMMDL_Analysis{id_num}",
-            name=self.comlex_name,
-        )
-        pharmacophore = ET.SubElement(
-            root,
-            "pharmacophore",
-            name=self.comlex_name,
-            id=f"pharmacophore{id_num}",
-            pharmacophoreType="LIGAND_SCOUT",
-        )
-
-        for interaction in dict_bindingmode.keys():
-            # get feature type
-            for interactiontype in feature_types.keys():
-                if interactiontype in interaction:
-                    feature_type = feature_types[interactiontype]
-                    break
-            # generate vector features
-            if feature_type in ["HBA", "HBD"]:
-                if feature_type == "HBA":
-                    orig_loc = dict_bindingmode[interaction]["PROTCOO"][0]
-                    targ_loc = dict_bindingmode[interaction]["LIGCOO"][0]
-                elif feature_type == "HBD":
-                    orig_loc = dict_bindingmode[interaction]["LIGCOO"][0]
-                    targ_loc = dict_bindingmode[interaction]["PROTCOO"][0]
-                feature_id_counter += 1
-                points_to_lig = "true" if feature_type == "HBA" else "false"
-                hasSyntheticProjectedPoint = "false"
-                vector = ET.SubElement(
-                    pharmacophore,
-                    "vector",
-                    name=feature_type,
-                    featureId=interaction,
-                    pointsToLigand=points_to_lig,
-                    hasSyntheticProjectedPoint=hasSyntheticProjectedPoint,
-                    optional="false",
-                    disabled="false",
-                    weight="1.0",
-                    coreCompound=self.comlex_name,
-                    id=f"feature{str(feature_id_counter)}",
-                )
-                origin = ET.SubElement(
-                    vector,
-                    "origin",
-                    x3=str(orig_loc[0]),
-                    y3=str(orig_loc[1]),
-                    z3=str(orig_loc[2]),
-                    tolerance="1.9499999",
-                )
-                target = ET.SubElement(
-                    vector,
-                    "target",
-                    x3=str(targ_loc[0]),
-                    y3=str(targ_loc[1]),
-                    z3=str(targ_loc[2]),
-                    tolerance="1.5",
-                )
-            # generate point features
-            elif feature_type in ["H", "PI", "NI"]:
-                position = dict_bindingmode[interaction]["LIGCOO"][0]
-                feature_id_counter += 1
-                point = ET.SubElement(
-                    pharmacophore,
-                    "point",
-                    name=feature_type,
-                    featureId=interaction,
-                    optional="false",
-                    disabled="false",
-                    weight="1.0",
-                    coreCompound=self.comlex_name,
-                    id=f"feature{str(feature_id_counter)}",
-                )
-                position = ET.SubElement(
-                    point,
-                    "position",
-                    x3=str(position[0]),
-                    y3=str(position[1]),
-                    z3=str(position[2]),
-                    tolerance="1.5",
-                )
-            # generate plane features
-            elif feature_type == "AR":
-                feature_id_counter += 1
-                lig_loc = dict_bindingmode[interaction]["LIGCOO"][0]
-                prot_loc = dict_bindingmode[interaction]["PROTCOO"][0]
-
-                # normalize vector of plane
-                vector = np.array(lig_loc) - np.array(prot_loc)
-                normal_vector = vector / np.linalg.norm(vector)
-                x, y, z = normal_vector
-
-                plane = ET.SubElement(
-                    pharmacophore,
-                    "plane",
-                    name=feature_type,
-                    featureId=interaction,
-                    optional="false",
-                    disabled="false",
-                    weight="1.0",
-                    coreCompound=self.comlex_name,
-                    id=f"feature{str(feature_id_counter)}",
-                )
-                position = ET.SubElement(
-                    plane,
-                    "position",
-                    x3=str(lig_loc[0]),
-                    y3=str(lig_loc[1]),
-                    z3=str(lig_loc[2]),
-                    tolerance="0.9",
-                )
-                normal = ET.SubElement(
-                    plane,
-                    "normal",
-                    x3=str(x),
-                    y3=str(y),
-                    z3=str(z),
-                    tolerance="0.43633232",
-                )
-
-        tree = ET.ElementTree(root)
-        tree.write(
-            f"./Binding_Modes_Markov_States/{outname}.pml",
-            encoding="UTF-8",
-            xml_declaration=True,
-        )
 
     def _generate_pharmacophore_centers_all_points(self, interactions):
         """
