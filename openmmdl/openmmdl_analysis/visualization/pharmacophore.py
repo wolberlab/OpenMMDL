@@ -309,7 +309,8 @@ class PharmacophoreGenerator:
         Parameters
         ----------
         dict_bindingmode : dict 
-            Dictionary containing all interactions of the bindingmode and thei coresponding ligand and protein coordinates.
+            Dictionary containing all interactions of the bindingmode and their 
+            coresponding ligand and protein coordinates.
         outname : str
             Name of the output .pml file.
         id_num : int, optional
