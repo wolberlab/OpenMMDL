@@ -36,7 +36,11 @@ talagayev, NDoering99
 - Fixed the `sanitization` implementation in OpenMMDL Setup (2025-04-09)
 
 ### Changed
-- Classes `ImageMerger` and `FigureArranger` were moved to `image_handler.py` (2025-04-30, Issue #141, PR #142)
+- Scripts moved into `analysis`, `core` and visualization` sections (PR #149)
+- Functions `update_dict`, `combine_subdict_values`, `update_values`, `remove_duplicate_values`,
+  `read_pdb_as_dataframe` and `filter_and_parse_pdb`were moved to `utils.py` (PR #149)
+- Classes `ImageMerger` and `FigureArranger` were moved to `image_handler.py`
+  (2025-04-30, Issue #141, PR #142)
 - The class `TrajectorySaver` was moved to `trajectory_saving.py` (2025-04-24, Issue #141, PR #142)
 - Changed to the use of `RDKitConverter` for Ligand recognition
   without `-l` flag in `OpenMMDL Analysis` (2025-04-10)
