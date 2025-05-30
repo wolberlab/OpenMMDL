@@ -15,6 +15,16 @@ What OS does OpenMMDL support?
 
 **OpenMMDL** is available for Linux and Mac systems. **OpenMMDL Setup** and **OpenMMDL Simulation** are currently incompatible with Windows systems, thus only **OpenMMDL Analysis** of the **OpenMMDL** package can be used on Windows systems.
 
+How can I install OpenMMDL?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**OpenMMDL** is available as a conda package. To install it, you can use the following command:
+.. code-block:: text
+   
+   conda install -c conda-forge openmmdl
+
+How do I cite OpenMMDL?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Please refer to the :doc:`citation` page.
 
 OpenMMDL Setup
 ------------------------------------

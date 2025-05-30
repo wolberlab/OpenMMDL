@@ -1,8 +1,3 @@
-"""
-openmmdl_simulation.py
-Perform Simulations of Protein-ligand complexes with OpenMM
-"""
-
 import argparse
 import sys
 import warnings
@@ -27,84 +22,54 @@ from rdkit.Chem import AllChem, Draw
 from rdkit.Chem.Draw import rdMolDraw2D
 from plip.basic import config
 from MDAnalysis.analysis import rms
+from MDAnalysis.coordinates.DCD import DCDWriter
 from tqdm import tqdm
 
-from openmmdl.openmmdl_analysis.preprocessing import (
-    process_pdb_file,
-    renumber_protein_residues,
-    renumber_atoms_in_residues,
-    process_pdb,
-    extract_and_save_ligand_as_sdf,
-    convert_ligand_to_smiles,
+
+from openmmdl.openmmdl_analysis.core.preprocessing import Preprocessing
+from openmmdl.openmmdl_analysis.analysis.rmsd import RMSDAnalyzer
+from openmmdl.openmmdl_analysis.analysis.interactions import InteractionAnalyzer
+from openmmdl.openmmdl_analysis.analysis.bindingmodes import BindingModeProcesser
+from openmmdl.openmmdl_analysis.analysis.markovchains import (
+    MarkovChainAnalysis,
 )
-from openmmdl.openmmdl_analysis.rmsd_calculation import (
-    rmsd_for_atomgroups,
-    RMSD_dist_frames,
+from openmmdl.openmmdl_analysis.visualization.highlighting import (
+    FigureHighlighter,
+    LigandImageGenerator,
 )
-from openmmdl.openmmdl_analysis.interaction_gathering import (
-    process_trajectory,
-    fill_missing_frames,
+from openmmdl.openmmdl_analysis.visualization.figures import (
+    FigureArranger,
+    FigureMerger,
 )
-from openmmdl.openmmdl_analysis.binding_mode_processing import (
-    gather_interactions,
-    filtering_values,
-    unique_data_generation,
-    df_iteration_numbering,
-    update_values,
-    calculate_representative_frame,
-    calculate_distance_matrix,
+from openmmdl.openmmdl_analysis.visualization.barcodes import (
+    BarcodeGenerator,
+    BarcodePlotter,
 )
-from openmmdl.openmmdl_analysis.markov_state_figure_generation import (
-    min_transition_calculation,
-    binding_site_markov_network,
+from openmmdl.openmmdl_analysis.core.trajectories import TrajectorySaver
+from openmmdl.openmmdl_analysis.visualization.pharmacophore import (
+    PharmacophoreGenerator,
 )
-from openmmdl.openmmdl_analysis.rdkit_figure_generation import (
-    split_interaction_data,
-    highlight_numbers,
-    generate_interaction_dict,
-    update_dict,
-    create_and_merge_images,
-    arranged_figure_generation,
-    generate_ligand_image,
-)
-from openmmdl.openmmdl_analysis.barcode_generation import (
-    barcodegeneration,
-    plot_waterbridge_piechart,
-    plot_barcodes_grouped,
-)
-from openmmdl.openmmdl_analysis.visualization_functions import (
-    interacting_water_ids,
-    save_interacting_waters_trajectory,
-    cloud_json_generation,
-)
-from openmmdl.openmmdl_analysis.pml_writer import (
-    generate_md_pharmacophore_cloudcenters,
-    generate_bindingmode_pharmacophore,
-    generate_pharmacophore_centers_all_points,
-    generate_point_cloud_pml,
-)
-from openmmdl.openmmdl_analysis.find_stable_waters import (
-    stable_waters_pipeline,
-    analyze_protein_and_water_interaction,
-)
+from openmmdl.openmmdl_analysis.analysis.wateranalysis import StableWaters
+from openmmdl.openmmdl_analysis.core.utils import update_dict, update_values
 
 
 def main():
     logo = "\n".join(
         [
-            "     ,-----.    .-------.     .-''-.  ,---.   .--.,---.    ,---.,---.    ,---. ______       .---.      ",
-            "   .'  .-,  '.  \  _(`)_ \  .'_ _   \ |    \  |  ||    \  /    ||    \  /    ||    _ `''.   | ,_|      ",
-            "  / ,-.|  \ _ \ | (_ o._)| / ( ` )   '|  ,  \ |  ||  ,  \/  ,  ||  ,  \/  ,  || _ | ) _  \,-./  )      ",
-            " ;  \  '_ /  | :|  (_,_) /. (_ o _)  ||  |\_ \|  ||  |\_   /|  ||  |\_   /|  ||( ''_'  ) |\  '_ '`)    ",
-            " |  _`,/ \ _/  ||   '-.-' |  (_,_)___||  _( )_\  ||  _( )_/ |  ||  _( )_/ |  || . (_) `. | > (_)  )    ",
-            " : (  '\_/ \   ;|   |     '  \   .---.| (_ o _)  || (_ o _) |  || (_ o _) |  ||(_    ._) '(  .  .-'    ",
-            "  \ `_/  \  ) / |   |      \  `-'    /|  (_,_)\  ||  (_,_)  |  ||  (_,_)  |  ||  (_.\.' /  `-'`-'|___  ",
-            "   '. \_/``'.'  /   )       \       / |  |    |  ||  |      |  ||  |      |  ||       .'    |        \ ",
-            "     '-----'    `---'        `'-..-'  '--'    '--''--'      '--''--'      '--''-----'`      `--------` ",
-            "              Prepare and Perform OpenMM Protein-Ligand MD Simulations                                 ",
-            "                                     Alpha Version                                                     ",
+            r"     ,-----.    .-------.     .-''-.  ,---.   .--.,---.    ,---.,---.    ,---. ______       .---.      ",
+            r"   .'  .-,  '.  \  _(`)_ \  .'_ _   \ |    \  |  ||    \  /    ||    \  /    ||    _ `''.   | ,_|      ",
+            r"  / ,-.|  \ _ \ | (_ o._)| / ( ` )   '|  ,  \ |  ||  ,  \/  ,  ||  ,  \/  ,  || _ | ) _  \,-./  )      ",
+            r" ;  \  '_ /  | :|  (_,_) /. (_ o _)  ||  |\_ \|  ||  |\_   /|  ||  |\_   /|  ||( ''_'  ) |\  '_ '`)    ",
+            r" |  _`,/ \ _/  ||   '-.-' |  (_,_)___||  _( )_\  ||  _( )_/ |  ||  _( )_/ |  || . (_) `. | > (_)  )    ",
+            r" : (  '\_/ \   ;|   |     '  \   .---.| (_ o _)  || (_ o _) |  || (_ o _) |  ||(_    ._) '(  .  .-'    ",
+            r"  \ `_/  \  ) / |   |      \  `-'    /|  (_,_)\  ||  (_,_)  |  ||  (_,_)  |  ||  (_.\.' /  `-'`-'|___  ",
+            r"   '. \_/``'.'  /   )       \       / |  |    |  ||  |      |  ||  |      |  ||       .'    |        \ ",
+            r"     '-----'    `---'        `'-..-'  '--'    '--''--'      '--''--'      '--''-----'`      `--------` ",
+            r"              Prepare and Perform OpenMM Protein-Ligand MD Simulations                                 ",
+            r"                                     Version 1.1.0                                                     ",
         ]
     )
+    print(logo)
 
     parser = argparse.ArgumentParser(
         prog="openmmdl_analysis",
@@ -118,13 +83,13 @@ def main():
         "-d", dest="trajectory", help="Trajectory File in DCD Format", required=True
     )
     parser.add_argument(
-        "-l", dest="ligand_sdf", help="Ligand in SDF Format", default=None
-    )
-    parser.add_argument(
         "-n",
         dest="ligand_name",
         help="Ligand Name (3 Letter Code in PDB)",
         default=None,
+    )
+    parser.add_argument(
+        "-l", dest="ligand_sdf", help="Ligand in SDF Format", default=None
     )
     parser.add_argument(
         "-b",
@@ -136,6 +101,12 @@ def main():
         "-df",
         dest="dataframe",
         help='Dataframe (use if the interactions were already calculated, default name would be "df_all.csv")',
+        default=None,
+    )
+    parser.add_argument(
+        "-f",
+        dest="frames",
+        help="final frame of the analysis (if you want to analyze only a certain part of the trajectory)",
         default=None,
     )
     parser.add_argument(
@@ -198,14 +169,12 @@ def main():
         help="Calculate the representative frame for each binding mode. Defaults to False",
         default=False,
     )
-
     parser.add_argument(
         "--watereps",
         dest="water_eps",
         help="Set the Eps for clustering, this defines how big clusters can be spatially in Angstrom",
         default=1.0,
     )
-    
     parser.add_argument(
         "--figure",
         dest="figure_type",
@@ -232,7 +201,11 @@ def main():
         and input_formats[6] not in args.trajectory
     ):
         print("Trajectory is missing, try the absolute path")
-
+    if args.ligand_name == None:
+        print(
+            "Ligand name is missing. Add the name of your ligand from your topology file"
+        )
+        sys.exit(1)
     # set variables for analysis and preprocess input files
     topology = args.topology
     trajectory = args.trajectory
@@ -257,20 +230,16 @@ def main():
         trajectory = "trajectory.dcd"
     water_eps = float(args.water_eps)
     stable_water_analysis = bool(args.stable_water_analysis)
+    if stable_water_analysis:
+        stable_water_analyser = StableWaters(trajectory, topology, water_eps)
 
     # The following is the current water analysis if no ligand is present.
     if not args.ligand_sdf and args.peptide == None and stable_water_analysis:
         print("All analyses will be run which can be done without a ligand present")
-        # ...
-        stable_waters_pipeline(topology, trajectory, water_eps)
-        analyze_protein_and_water_interaction(
+        stable_water_analyser.stable_waters_pipeline()
+        stable_water_analyser.analyze_protein_and_water_interaction(
             topology, "representative_waters.pdb", water_eps
         )
-
-    # if input_formats[2] not in args.ligand_sdf:
-    #     print("SDF is missing, try the absolute path. Maybe you don't own a ligand (sad), in this case we'll only analyze the stable waters!")
-    # if args.ligand_name == None:
-    #     print("Ligand Name is Missing, Add Ligand Name")
 
     # set variables for analysis and preprocess input files
     ligand_sdf = args.ligand_sdf
@@ -278,7 +247,7 @@ def main():
     frame_rmsd = args.frame_rmsd
     if ligand == "*":
         ligand = "UNK"
-    treshold = int(args.binding)
+    threshold = int(args.binding)
     dataframe = args.dataframe
     min_transition = int(args.min_transition)
     cpu_count = int(args.cpu_count)
@@ -288,29 +257,34 @@ def main():
     reference = args.reference
     peptide = args.peptide
     fig_type = args.figure_type
-
     generate_representative_frame = args.representative_frame
+    preprocessor = Preprocessing()
 
     if reference != None:
         print("\033[1mPDB File residues are being renumbered\033[0m")
-        renumber_protein_residues(topology, reference, topology)
-    process_pdb_file(topology)
+        preprocessor.renumber_protein_residues(topology, reference, topology)
+    preprocessor.process_pdb_file(topology)
     print("\033[1mFiles are preprocessed\033[0m")
 
     if ligand_sdf == None:
-        extract_and_save_ligand_as_sdf(topology, "./lig.sdf", ligand)
-        ligand_sdf = "./lig.sdf"
+        preprocessor.extract_and_save_ligand_as_sdf(
+            topology, "./ligand_prepared.sdf", ligand
+        )
+        ligand_sdf = "./ligand_prepared.sdf"
 
     if not pdb_md:
         pdb_md = mda.Universe(topology, trajectory)
 
+    trajsaver = TrajectorySaver(pdb_md, ligand, special_ligand, receptor_nucleic)
+
+    # TODO maybe put this part into a function possibly in visualization_functions.py TrajectorySaver
     # Writing out the complex of the protein and ligand with water around 10A of the ligand
     complex = pdb_md.select_atoms(
         f"protein or nucleic or resname {ligand} or (resname HOH and around 10 resname {ligand}) or resname {special_ligand}"
     )
     complex.write("complex.pdb")
-    renumber_atoms_in_residues("complex.pdb", "complex.pdb", ligand)
-    process_pdb("complex.pdb", "complex.pdb")
+    preprocessor.renumber_atoms_in_residues("complex.pdb", "complex.pdb", ligand)
+    preprocessor.process_pdb("complex.pdb", "complex.pdb")
     # Writing out the ligand in a separate pdb file for ring calculation
     if peptide == None:
         ligand_complex = pdb_md.select_atoms(f"resname {ligand}")
@@ -321,8 +295,8 @@ def main():
             )
             ligand_special.write("ligand_special.pdb")
         ligand_complex_no_h.write("lig_no_h.pdb")
-        renumber_atoms_in_residues("lig_no_h.pdb", "lig_no_h.pdb", ligand)
-        process_pdb("lig_no_h.pdb", "lig_no_h.pdb")
+        preprocessor.renumber_atoms_in_residues("lig_no_h.pdb", "lig_no_h.pdb", ligand)
+        preprocessor.process_pdb("lig_no_h.pdb", "lig_no_h.pdb")
         ligand_complex.write("lig.pdb")
 
         # getting Ring Information from the ligand pdb file
@@ -363,45 +337,43 @@ def main():
             ligand_rings.append(current_ring)
         print("\033[1mLigand ring data gathered\033[0m")
 
-        convert_ligand_to_smiles(ligand_sdf, output_smi="lig.smi")
     if peptide != None:
         ligand_rings = None
 
     os.makedirs("RMSD", exist_ok=True)
+    rmsd_analyzer = RMSDAnalyzer(f"{topology}", f"{trajectory}")
     if receptor_nucleic:
-        rmsd_for_atomgroups(
-            f"{topology}",
-            f"{trajectory}",
+        rmsd_df = rmsd_analyzer.rmsd_for_atomgroups(
             fig_type,
             selection1="nucleicbackbone",
             selection2=["nucleic", f"resname {ligand}"],
         )
         if frame_rmsd != "No":
-            RMSD_dist_frames(
-                f"{topology}", f"{trajectory}", fig_type, lig=f"{ligand}", nucleic=True
+            pairwise_rmsd_prot, pairwise_rmsd_lig = rmsd_analyzer.rmsd_dist_frames(
+                fig_type, lig=f"{ligand}", nucleic=True
             )
             print("\033[1mRMSD calculated\033[0m")
     elif peptide != None:
-        rmsd_for_atomgroups(
-            f"{topology}",
-            f"{trajectory}",
+        rmsd_df = rmsd_analyzer.rmsd_for_atomgroups(
             fig_type,
             selection1="backbone",
             selection2=["protein", f"chainID {peptide}"],
         )
         if frame_rmsd != "No":
-            RMSD_dist_frames(f"{topology}", f"{trajectory}", fig_type, lig=f"chainID {peptide}")
+            pairwise_rmsd_prot, pairwise_rmsd_lig = rmsd_analyzer.rmsd_dist_frames(
+                fig_type, lig=f"chainID {peptide}"
+            )
             print("\033[1mRMSD calculated\033[0m")
     else:
-        rmsd_for_atomgroups(
-            f"{topology}",
-            f"{trajectory}",
+        rmsd_df = rmsd_analyzer.rmsd_for_atomgroups(
             fig_type,
             selection1="backbone",
             selection2=["protein", f"resname {ligand}"],
         )
         if frame_rmsd != "No":
-            RMSD_dist_frames(f"{topology}", f"{trajectory}", fig_type, lig=f"{ligand}")
+            pairwise_rmsd_prot, pairwise_rmsd_lig = rmsd_analyzer.rmsd_dist_frames(
+                fig_type, lig=f"{ligand}"
+            )
             print("\033[1mRMSD calculated\033[0m")
 
     if receptor_nucleic:
@@ -409,88 +381,47 @@ def main():
     if peptide != None:
         config.PEPTIDES = [peptide]
 
-    interaction_list = pd.DataFrame(
-        columns=[
-            "RESNR",
-            "RESTYPE",
-            "RESCHAIN",
-            "RESNR_LIG",
-            "RESTYPE_LIG",
-            "RESCHAIN_LIG",
-            "DIST",
-            "LIGCARBONIDX",
-            "PROTCARBONIDX",
-            "LIGCOO",
-            "PROTCOO",
-        ]
-    )
+    md_len = args.frames
+    if md_len is None:
+        md_len = len(pdb_md.trajectory)
+        print(
+            f"\033[1mThe whole trajectory consisting of {len(pdb_md.trajectory) - 1} frames will be analyzed\033[0m"
+        )
+    else:
+        md_len = int(md_len) + 1
+        print(f"\033[1mThe trajectory until frame {md_len - 1} will be analyzed\033[0m")
 
-    interaction_list = process_trajectory(
-        pdb_md,
-        dataframe=dataframe,
-        num_processes=cpu_count,
-        lig_name=ligand,
-        special_ligand=special_ligand,
-        peptide=peptide,
+    interaction_analysis = InteractionAnalyzer(
+        pdb_md, dataframe, cpu_count, ligand, special_ligand, peptide, md_len
     )
-
-    interaction_list["Prot_partner"] = (
-        interaction_list["RESNR"].astype(str)
-        + interaction_list["RESTYPE"]
-        + interaction_list["RESCHAIN"]
-    )
-
-    interaction_list = fill_missing_frames(
-        interaction_list, md_len=len(pdb_md.trajectory) - 1
-    )
-
+    interaction_list = interaction_analysis.interaction_list
     interaction_list.to_csv("missing_frames_filled.csv")
-
     interaction_list = interaction_list.reset_index(drop=True)
 
-    unique_columns_rings_grouped = gather_interactions(
-        interaction_list, ligand_rings, peptide=peptide
+    # add amount of frames for Markov chains and binding modes
+    total_frames = md_len - 1
+
+    bmode_processor = BindingModeProcesser(
+        pdb_md,
+        ligand,
+        peptide,
+        special_ligand,
+        ligand_rings,
+        interaction_list,
+        threshold,
+        total_frames,
     )
-
-    interactions_all = interaction_list.copy()
-
-    # Add Frames + Treshold by user
-    filtered_values = filtering_values(
-        threshold=treshold / 100,
-        frames=len(pdb_md.trajectory) - 1,
-        df=interaction_list,
-        unique_columns_rings_grouped=unique_columns_rings_grouped,
-    )
-
-    filtering_all = filtering_values(
-        threshold=0.00001,
-        frames=len(pdb_md.trajectory) - 1,
-        df=interactions_all,
-        unique_columns_rings_grouped=unique_columns_rings_grouped,
-    )
-
-    # Replace NaN values with 0 in the entire DataFrame
-    interaction_list.fillna(0, inplace=True)
-    interactions_all.fillna(0, inplace=True)
-
-    unique_data = unique_data_generation(filtered_values)
-    unique_data_all = unique_data_generation(filtering_all)
-
-    # Iteration through the dataframe and numbering the interactions with 1 and 0, depending if the interaction exists or not
-    df_iteration_numbering(interaction_list, unique_data, peptide=peptide)
-    df_iteration_numbering(interactions_all, unique_data_all, peptide=peptide)
-    print("\033[1mInteraction values assigned\033[0m")
-
-    # Saving the dataframe
-    interactions_all.to_csv("df_all.csv")
+    interaction_list = bmode_processor.interaction_list
+    interactions_all = bmode_processor.interactions_all
+    unique_data = bmode_processor.unique_data
+    interactions_all.to_csv("df_all.csv")  # Saving the dataframe
 
     # Group by 'FRAME' and transform each group to set all values to 1 if there is at least one 1 in each column
     grouped_frames_treshold = interaction_list.groupby("FRAME", as_index=False)[
         list(unique_data.values())
     ].max()
     grouped_frames_treshold = grouped_frames_treshold.set_index("FRAME", drop=False)
-
-    update_values(interaction_list, grouped_frames_treshold, unique_data)
+    update_values(interaction_list, grouped_frames_treshold, unique_data, "FRAME")
 
     # Change the FRAME column value type to int
     grouped_frames_treshold["FRAME"] = grouped_frames_treshold["FRAME"].astype(int)
@@ -530,9 +461,9 @@ def main():
 
         # Check if the fingerprint has been encountered before
         if fingerprint in treshold_fingerprint_dict:
-            grouped_frames_treshold.at[
-                index, "Binding_fingerprint_treshold"
-            ] = treshold_fingerprint_dict[fingerprint]
+            grouped_frames_treshold.at[index, "Binding_fingerprint_treshold"] = (
+                treshold_fingerprint_dict[fingerprint]
+            )
         else:
             # Assign a new label if the fingerprint is new
             label = f"Binding_Mode_{label_counter}"
@@ -547,9 +478,8 @@ def main():
         combined_dict["all"].append(value)
 
     # Generate Markov state figures of the binding modes
-    total_frames = len(pdb_md.trajectory) - 1
-    min_transitions = min_transition_calculation(min_transition)
-    binding_site_markov_network(total_frames, min_transitions, combined_dict, fig_type)
+    markov_analysis = MarkovChainAnalysis(min_transition)
+    markov_analysis.generate_transition_graph(total_frames, combined_dict, fig_type)
     print("\033[1mMarkov State Figure generated\033[0m")
 
     # Get the top 10 nodes with the most occurrences
@@ -585,6 +515,7 @@ def main():
     # Generate an Figure for each of the binding modes with rdkit Drawer with the atoms interacting highlighted by colors
     try:
         if peptide is None:
+            interaction_processor = FigureHighlighter("complex.pdb", "lig_no_h.pdb")
             matplotlib.use("Agg")
             binding_site = {}
             merged_image_paths = []
@@ -592,17 +523,13 @@ def main():
                 binding_site[binding_mode] = values
                 occurrence_count = top_10_nodes_with_occurrences[binding_mode]
                 occurrence_percent = 100 * occurrence_count / total_frames
-                with open("lig.smi", "r") as file:
-                    reference_smiles = (
-                        file.read().strip()
-                    )  # Read the SMILES from the file and remove any leading/trailing whitespace
-                reference_mol = Chem.MolFromSmiles(reference_smiles)
-                prepared_ligand = AllChem.AssignBondOrdersFromTemplate(
-                    reference_mol, lig_rd
-                )
+                # Convert ligand to RDKit with Converter
+                lig_atoms = complex_lig.convert_to("RDKIT")
+                # Remove Hydrogens and get 2D representation
+                prepared_ligand = Chem.RemoveAllHs(lig_atoms)
                 # Generate 2D coordinates for the molecule
                 AllChem.Compute2DCoords(prepared_ligand)
-                split_data = split_interaction_data(values)
+                split_data = interaction_processor.split_interaction_data(values)
                 # Get the highlighted atom indices based on interaction type
                 (
                     highlighted_hbond_donor,
@@ -616,44 +543,54 @@ def main():
                     highlighted_pi,
                     highlighted_pication,
                     highlighted_metal,
-                ) = highlight_numbers(split_data, starting_idx=lig_index)
+                ) = interaction_processor.highlight_numbers(
+                    split_data, starting_idx=lig_index
+                )
 
                 # Generate a dictionary for hydrogen bond acceptors
-                hbond_acceptor_dict = generate_interaction_dict(
+                hbond_acceptor_dict = interaction_processor.generate_interaction_dict(
                     "hbond_acceptor", highlighted_hbond_acceptor
                 )
                 # Generate a dictionary for hydrogen bond acceptors and donors
-                hbond_both_dict = generate_interaction_dict(
+                hbond_both_dict = interaction_processor.generate_interaction_dict(
                     "hbond_both", highlighted_hbond_both
                 )
                 # Generate a dictionary for hydrogen bond donors
-                hbond_donor_dict = generate_interaction_dict(
+                hbond_donor_dict = interaction_processor.generate_interaction_dict(
                     "hbond_donor", highlighted_hbond_donor
                 )
                 # Generate a dictionary for hydrophobic features
-                hydrophobic_dict = generate_interaction_dict(
+                hydrophobic_dict = interaction_processor.generate_interaction_dict(
                     "hydrophobic", highlighted_hydrophobic
                 )
                 # Generate a dictionary for water bridge interactions
-                waterbridge_dict = generate_interaction_dict(
+                waterbridge_dict = interaction_processor.generate_interaction_dict(
                     "waterbridge", highlighted_waterbridge
                 )
                 # Generate a dictionary for pistacking
-                pistacking_dict = generate_interaction_dict(
+                pistacking_dict = interaction_processor.generate_interaction_dict(
                     "pistacking", highlighted_pistacking
                 )
                 # Generate a dictionary for halogen interactions
-                halogen_dict = generate_interaction_dict("halogen", highlighted_halogen)
+                halogen_dict = interaction_processor.generate_interaction_dict(
+                    "halogen", highlighted_halogen
+                )
                 # Generate a dictionary for negative ionizables
-                ni_dict = generate_interaction_dict("ni", highlighted_ni)
+                ni_dict = interaction_processor.generate_interaction_dict(
+                    "ni", highlighted_ni
+                )
                 # Generate a dictionary for negative ionizables
-                pi_dict = generate_interaction_dict("pi", highlighted_pi)
+                pi_dict = interaction_processor.generate_interaction_dict(
+                    "pi", highlighted_pi
+                )
                 # Generate a dictionary for pication
-                pication_dict = generate_interaction_dict(
+                pication_dict = interaction_processor.generate_interaction_dict(
                     "pication", highlighted_pication
                 )
                 # Generate a dictionary for metal interactions
-                metal_dict = generate_interaction_dict("metal", highlighted_metal)
+                metal_dict = interaction_processor.generate_interaction_dict(
+                    "metal", highlighted_metal
+                )
 
                 # Call the function to update hbond_donor_dict with values from other dictionaries
                 update_dict(
@@ -707,27 +644,32 @@ def main():
                 )
 
                 # Generate the interactions legend and combine it with the ligand png
-                merged_image_paths = create_and_merge_images(
+                image_merger = FigureMerger(
                     binding_mode, occurrence_percent, split_data, merged_image_paths
                 )
+                merged_image_paths = image_merger.create_and_merge_images()
 
             # Create Figure with all Binding modes
-            arranged_figure_generation(
+            figure_arranger = FigureArranger(
                 merged_image_paths, "all_binding_modes_arranged.png"
             )
-            generate_ligand_image(
-                ligand, "complex.pdb", "lig_no_h.pdb", "lig.smi", f"ligand_numbering.svg"
+            figure_arranger.arranged_figure_generation()
+
+            generator = LigandImageGenerator(
+                ligand,
+                "complex.pdb",
+                "lig_no_h.pdb",
+                f"ligand_numbering.svg",
+                fig_type,
             )
-            if fig_type == "png":
-                cairosvg.svg2png(
-                    url=f"ligand_numbering.svg", write_to=f"ligand_numbering.png"
-                )
+            generator.generate_image()
             print("\033[1mBinding mode figure generated\033[0m")
     except Exception as e:
         print(f"Ligand could not be recognized, use the -l option")
 
     df_all = pd.read_csv("df_all.csv")
 
+    pham_generator = PharmacophoreGenerator(df_all, ligand)
     # get the top 10 bindingmodes with the most occurrences
     binding_modes = grouped_frames_treshold["Binding_fingerprint_treshold"].str.split(
         "\n"
@@ -744,9 +686,8 @@ def main():
         "Percentage Occurrence": [],
     }
     if generate_representative_frame:
-        DM = calculate_distance_matrix(
-            pdb_md,
-            f"protein or nucleic or resname {ligand} or resname {special_ligand}",
+        DM = rmsd_analyzer.calculate_distance_matrix(
+            f"protein or nucleic or resname {ligand} or resname {special_ligand}"
         )
         modes_to_process = top_10_binding_modes.index
         for mode in tqdm(modes_to_process):
@@ -769,19 +710,20 @@ def main():
             result_dict["First Frame"].append(first_frame)
             result_dict["All Frames"].append(all_frames)
             result_dict["Percentage Occurrence"].append(percent_occurrence)
-            representative_frame = calculate_representative_frame(all_frames, DM)
+            representative_frame = rmsd_analyzer.calculate_representative_frame(
+                all_frames, DM
+            )
             result_dict["Representative Frame"].append(representative_frame)
         top_10_binding_modes_df = pd.DataFrame(result_dict)
         top_10_binding_modes_df.to_csv("top_10_binding_modes.csv")
         print("\033[1mFound representative frame for each binding mode\033[0m")
         # save bindingmode pdb and .pml
-        id_num = 0
         for index, row in top_10_binding_modes_df.iterrows():
             b_mode = row["Binding Mode"]
             rep_frame = int(row["Representative Frame"])
-            pdb_md.trajectory[rep_frame]
-            frame_atomgroup = pdb_md.atoms
-            frame_atomgroup.write(f"./Binding_Modes_Markov_States/{b_mode}.pdb")
+            trajsaver.save_frame(
+                rep_frame, f"./Binding_Modes_Markov_States/{b_mode}.pdb"
+            )
             if generate_pml:
                 filtered_df_all = df_all[df_all["FRAME"] == rep_frame]
                 filtered_df_bindingmodes = grouped_frames_treshold[
@@ -834,102 +776,64 @@ def main():
                                         bindingmode_dict[column]["PROTCOO"].append(
                                             protcoo_values
                                         )
-                generate_bindingmode_pharmacophore(
-                    bindingmode_dict, ligand, f"{ligand}_complex", b_mode, id_num
+                pham_generator.generate_bindingmode_pharmacophore(
+                    bindingmode_dict, b_mode
                 )
 
         print("\033[1mBinding mode pdb files saved\033[0m")
 
-    hydrophobic_interactions = df_all.filter(regex="hydrophobic").columns
-    acceptor_interactions = df_all.filter(regex="Acceptor_hbond").columns
-    donor_interactions = df_all.filter(regex="Donor_hbond").columns
-    pistacking_interactions = df_all.filter(regex="pistacking").columns
-    halogen_interactions = df_all.filter(regex="halogen").columns
-    waterbridge_interactions = df_all.filter(regex="waterbridge").columns
-    pication_interactions = df_all.filter(regex="pication").columns
-    saltbridge_ni_interactions = df_all.filter(regex="NI_saltbridge").columns
-    saltbridge_pi_interactions = df_all.filter(regex="PI_saltbridge").columns
-    metal_interactions = df_all.filter(regex="metal").columns
-
     waterbridge_barcodes = {}
-    for waterbridge_interaction in waterbridge_interactions:
-        barcode = barcodegeneration(df_all, waterbridge_interaction)
+    barcode_gen = BarcodeGenerator(df_all)
+    interaction_types = barcode_gen.interactions
+    for waterbridge_interaction in interaction_types["waterbridge"]:
+        barcode = barcode_gen.generate_barcode(waterbridge_interaction)
         waterbridge_barcodes[waterbridge_interaction] = barcode
 
-    interaction_types = {
-        "hydrophobic": hydrophobic_interactions,
-        "acceptor": acceptor_interactions,
-        "donor": donor_interactions,
-        "pistacking": pistacking_interactions,
-        "halogen": halogen_interactions,
-        "waterbridge": waterbridge_interactions,
-        "pication": pication_interactions,
-        "saltbridge_ni": saltbridge_ni_interactions,
-        "saltbridge_pi": saltbridge_pi_interactions,
-        "metal": metal_interactions,
-    }
+    # Initialize BarcodePlotter
+    barcode_plotter = BarcodePlotter(df_all)
 
     for interaction_type, interaction_data in interaction_types.items():
-        plot_barcodes_grouped(interaction_data, df_all, interaction_type, fig_type)
+        barcode_plotter.plot_barcodes_grouped(
+            interaction_data, interaction_type, fig_type
+        )
 
-    plot_waterbridge_piechart(df_all, waterbridge_barcodes, waterbridge_interactions, fig_type)
+    barcode_plotter.plot_waterbridge_piechart(
+        waterbridge_barcodes, interaction_types["waterbridge"], fig_type
+    )
     print("\033[1mBarcodes generated\033[0m")
 
-    interacting_water_id_list = interacting_water_ids(df_all, waterbridge_interactions)
+    interacting_water_id_list = barcode_gen.interacting_water_ids(
+        interaction_types["waterbridge"]
+    )
 
     # dump interacting waters for visualization
     os.makedirs("Visualization", exist_ok=True)  # Create the folder if it doesn't exist
     with open("Visualization/interacting_waters.pkl", "wb") as f:
         pickle.dump(interacting_water_id_list, f)
-    save_interacting_waters_trajectory(
-        topology, trajectory, interacting_water_id_list, ligand, special_ligand
+    trajsaver.save_interacting_waters_trajectory(
+        interacting_water_id_list, "./Visualization/"
     )
 
     # save clouds for visualization with NGL
     with open("Visualization/clouds.json", "w") as f:
-        json.dump(cloud_json_generation(df_all), f)
+        json.dump(pham_generator.clouds, f)
 
     # generate poincloud pml for visualization
-    cloud_dict = {}
-    cloud_dict["H"] = generate_pharmacophore_centers_all_points(
-        df_all, df_all.filter(regex="hydrophobic").columns
-    )
-    cloud_dict["HBA"] = generate_pharmacophore_centers_all_points(
-        df_all, df_all.filter(regex="Acceptor_hbond").columns
-    )
-    cloud_dict["HBD"] = generate_pharmacophore_centers_all_points(
-        df_all, df_all.filter(regex="Donor_hbond").columns
-    )
-    cloud_dict["AR"] = generate_pharmacophore_centers_all_points(
-        df_all, df_all.filter(regex="pistacking").columns
-    )
-    cloud_dict["PI"] = generate_pharmacophore_centers_all_points(
-        df_all, df_all.filter(regex="PI_saltbridge").columns
-    )
-    cloud_dict["NI"] = generate_pharmacophore_centers_all_points(
-        df_all, df_all.filter(regex="NI_saltbridge").columns
-    )
-    cloud_dict["M"] = generate_pharmacophore_centers_all_points(
-        df_all, df_all.filter(regex="metal").columns
-    )
-
     if generate_pml:
-        generate_point_cloud_pml(cloud_dict, f"{ligand}_complex", "point_cloud")
-
+        pham_generator.generate_point_cloud_pml("point_cloud")
         # generate combo pharmacophore of the md with each interaction as a single pharmacophore feature
-        generate_md_pharmacophore_cloudcenters(
-            df_all, ligand, "combopharm.pml", f"{ligand}_complex"
-        )
+        pham_generator.generate_md_pharmacophore_cloudcenters("combopharm")
         print("\033[1mPharmacophores generated\033[0m")
 
     print("\033[1mAnalysis is Finished.\033[0m")
 
     if stable_water_analysis:
-        stable_waters_pipeline(topology, trajectory, water_eps)
-        analyze_protein_and_water_interaction(
+        stable_water_analyser.stable_waters_pipeline(topology, trajectory, water_eps)
+        stable_water_analyser.analyze_protein_and_water_interaction(
             topology, "representative_waters.pdb", water_eps
         )
 
 
 if __name__ == "__main__":
     main()
+

@@ -2,6 +2,7 @@ name: openmmdl  # Name of the Conda environment
 
 channels:
   - conda-forge  # Add the conda-forge channel here
+  - nodefaults
 
 dependencies:
   - pip
@@ -24,6 +25,7 @@ dependencies:
   - flask>=2.2.2
   - cairosvg
   - nglview
+  - mdonatello
   - numba>=0.59.1
   - jupyter
   # Add any additional runtime dependencies from pyproject.toml here

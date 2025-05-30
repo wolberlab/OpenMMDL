@@ -16,19 +16,34 @@ The rules for this file:
   * accompany each entry with github issue/PR number (Issue #xyz)
 -->
 
-## [Unreleased]
+## Version 1.1.0
 
 ### Authors
-<!-- GitHub usernames of contributors to this release -->
+talagayev, NDoering99
 
 ### Added
-<!-- New added features -->
+- Addition of option to select final frame in OpenMMDL Analysis (2025-04-23, Issue #136, PR #140)
+- Addition of `MDontallo` Visualization (2025-04-11)
+- Addition of `SMIRNOFF` small molecule force field (2025-04-10, Issue #76)
+- Addition of `PyMOL` support for visualization (2025-04-10)
+- Added `Dockerfile` for image creation  (2025-04-10)
+- Addition of citation page in documentation (2025-04-10)
 
 ### Fixed
-<!-- Bug fixes -->
+- Fixed error cases, where `ligand name` was not specified (2025-04-22, Issue #138, PR #139)
+- Fixed wrong color of the positive and negative ionizable interactions (2025-04-21, PR #137)
+- Fixed the `XMLSerializer` error appearing during simulation (2025-04-10, Issue #122)
+- Fixed the `sanitization` implementation in OpenMMDL Setup (2025-04-09)
 
 ### Changed
-<!-- Changes in existing functionality -->
+- Scripts moved into `analysis`, `core` and visualization` sections (PR #149)
+- Functions `update_dict`, `combine_subdict_values`, `update_values`, `remove_duplicate_values`,
+  `read_pdb_as_dataframe` and `filter_and_parse_pdb`were moved to `utils.py` (PR #149)
+- Classes `ImageMerger` and `FigureArranger` were moved to `image_handler.py`
+  (2025-04-30, Issue #141, PR #142)
+- The class `TrajectorySaver` was moved to `trajectory_saving.py` (2025-04-24, Issue #141, PR #142)
+- Changed to the use of `RDKitConverter` for Ligand recognition
+  without `-l` flag in `OpenMMDL Analysis` (2025-04-10)
 
 ### Deprecated
 <!-- Soon-to-be removed features -->
