@@ -5,7 +5,7 @@ import MDAnalysis as mda
 from tqdm import tqdm
 from sklearn.cluster import DBSCAN
 
-from openmmdl.analysis.core.utils import read_pdb_as_dataframe, filter_and_parse_pdb
+from openmmdl.openmmdl_analysis.core.utils import read_pdb_as_dataframe, filter_and_parse_pdb
 
 class StableWaters:
     """
