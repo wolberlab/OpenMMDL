@@ -15,6 +15,18 @@ The rules for this file:
     * YYYY-MM-DD date format (following ISO 8601)
   * accompany each entry with github issue/PR number (Issue #xyz)
 -->
+## Version 1.1.1
+
+### Authors
+talagayev
+
+### Added
+
+### Fixed
+- Update of `OpenFF` forcefield version and fixed `GAFF` type error (2025-06-17, PR #155)
+
+### Changed
+
 
 ## Version 1.1.0
 
