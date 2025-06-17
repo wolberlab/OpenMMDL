@@ -50,6 +50,14 @@ def test_water_forcefield_selection():
         water_forcefield_selection("TIP4P-FB", "amber14-all.xml")
         == "amber14/tip4pfb.xml"
     )
+    assert (
+        water_forcefield_selection("OPC", "amber14-all.xml")
+        == "amber14/opc.xml"
+    )
+    assert (
+        water_forcefield_selection("OPC3", "amber14-all.xml")
+        == "amber14/opc3.xml"
+    )
     assert water_forcefield_selection("TIP5P", "amber14-all.xml") is None
     assert water_forcefield_selection("NonexistentWater", "amber14-all.xml") is None
     assert water_forcefield_selection("TIP3P", "NonexistentFF") is None
@@ -103,6 +111,16 @@ def test_water_model_selection():
     assert water_model_selection("TIP4P-FB", "amber99sbildn.xml") == "tip4pfb"
     assert water_model_selection("TIP4P-FB", "amber03.xml") == "tip4pfb"
     assert water_model_selection("TIP4P-FB", "amber10.xml") == "tip4pfb"
+
+    assert water_model_selection("OPC", "amber99sb.xml") == "opc"
+    assert water_model_selection("OPC", "amber99sbildn.xml") == "opc"
+    assert water_model_selection("OPC", "amber03.xml") == "opc"
+    assert water_model_selection("OPC", "amber10.xml") == "opc"
+
+    assert water_model_selection("OPC3", "amber99sb.xml") == "opc3"
+    assert water_model_selection("OPC3", "amber99sbildn.xml") == "opc3"
+    assert water_model_selection("OPC3", "amber03.xml") == "opc3"
+    assert water_model_selection("OPC3", "amber10.xml") == "opc3"
 
     assert water_model_selection("TIP5P", "amber99sb.xml") is None
     assert water_model_selection("TIP5P", "amber99sbildn.xml") is None

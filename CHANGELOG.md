@@ -21,6 +21,7 @@ The rules for this file:
 talagayev
 
 ### Added
+- Implementation of `OPC` and `OPC3` water models (2025-06-17, PR #156)
 
 ### Fixed
 - Update of `OpenFF` forcefield version and fixed `GAFF` type error (2025-06-17, PR #155)

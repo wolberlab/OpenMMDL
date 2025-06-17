@@ -47,6 +47,8 @@ def water_forcefield_selection(water, forcefield_selection):
         "TIP4P-Ew": "tip4pew.xml",
         "TIP4P-FB": "tip4pfb.xml",
         "TIP5P": "tip5p.xml",
+        "OPC": "opc.xml",
+        "OPC3": "opc3.xml",
     }
 
     if forcefield_selection in old_amber:
@@ -59,6 +61,8 @@ def water_forcefield_selection(water, forcefield_selection):
                 "SPC/E": "amber14/spce.xml",
                 "TIP4P-Ew": "amber14/tip4pew.xml",
                 "TIP4P-FB": "amber14/tip4pfb.xml",
+                "OPC": "amber14/opc.xml",
+                "OPC3": "amber14/opc3.xml",
             },
             "charmm36.xml": {
                 "CHARMM default": "charmm36/water.xml",
@@ -95,6 +99,8 @@ def water_model_selection(water, forcefield_selection):
         "SPC/E": "spce",
         "TIP4P-Ew": "tip4pew",
         "TIP4P-FB": "tip4pfb",
+        "OPC": "opc",
+        "OPC3": "opc3",
     }
 
     if forcefield_selection in old_amber:
