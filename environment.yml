@@ -19,7 +19,7 @@ dependencies:
   - openff-toolkit
   - openmmforcefields
   - openmm>=8.3.0
-  - cudatoolkit>=11.7.0
+  - cuda-toolkit
   - cuda-python>=11.7.1
   - mdanalysis>=2.3.0
   - pytest-shutil>=1.7.0
