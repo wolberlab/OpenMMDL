@@ -8,6 +8,7 @@ dependencies:
   - pip
   - setuptools>=61.0
   - versioningit~=2.0
+  - sqlite>=3.40
   - pytest>=6.1.2
   - pytest-runner
   - numpy
