@@ -21,6 +21,7 @@ The rules for this file:
 talagayev
 
 ### Added
+- Implementation of `Amber19` forcefield (2025-07-07, PR #157)
 - Implementation of `OPC` and `OPC3` water models (2025-06-17, PR #156)
 
 ### Fixed
