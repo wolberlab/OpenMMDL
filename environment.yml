@@ -8,6 +8,7 @@ dependencies:
   - pip
   - setuptools>=61.0
   - versioningit~=2.0
+  - sqlite>=3.40
   - pytest>=6.1.2
   - pytest-runner
   - numpy
@@ -18,7 +19,8 @@ dependencies:
   - pdbfixer
   - openff-toolkit
   - openmmforcefields
-  - cudatoolkit>=11.7.0
+  - openmm>=8.3.0
+  - cuda-toolkit
   - cuda-python>=11.7.1
   - mdanalysis>=2.3.0
   - pytest-shutil>=1.7.0

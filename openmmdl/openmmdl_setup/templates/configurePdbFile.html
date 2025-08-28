@@ -26,7 +26,8 @@ Select the pdb input file and options for how to model it.
     <div class="form-group">
     <label for="forcefield" class="control-label col-md-2">Force Field</label>
     <div class="col-md-10"><select name="forcefield" id="forcefield" class="form-control" title="CHARMM force field does not support ligands. Select Amber force fields for ligand-protein MD simulations" onchange="optionChanged()">
-        <option value="AMBER14" selected>AMBER14</option>
+        <option value="AMBER19" selected>AMBER19</option> 
+        <option value="AMBER14">AMBER14</option>
         <option value="AMBER99SB">AMBER99SB</option>
         <option value="AMBER99SB-ILDN">AMBER99SB-ILDN</option>
         <option value="AMBER03">AMBER03</option>
@@ -72,9 +73,9 @@ Select the pdb input file and options for how to model it.
     <input type="submit" value="Continue" id="continue" class="btn" disabled="true"/>
 </form>
 <script>
-var amber14WaterModels = [
-        ["TIP3P", "TIP3P", false],
-        ["TIP3P-FB", "TIP3P-FB", true],
+var newAmberWaterModels = [
+        ["TIP3P", "TIP3P", true],
+        ["TIP3P-FB", "TIP3P-FB", false],
         ["SPC/E", "SPC/E", false],
         ["TIP4P-Ew", "TIP4P-Ew", false],
         ["TIP4P-FB", "TIP4P-FB", false],
@@ -119,7 +120,9 @@ function optionChanged() {
     else {
         document.getElementById("waterModelRow").hidden = false;
         if (forcefield == "AMBER14")
-            models = amber14WaterModels;
+            models = newAmberWaterModels;
+        else if (forcefield == "AMBER19")
+            models = newAmberWaterModels;
         else if (forcefield == "CHARMM36")
             models = charmm36WaterModels;
         else if (forcefield == "AMOEBA2018")

@@ -31,6 +31,7 @@ import time
 import traceback
 import webbrowser
 import zipfile
+warnings.filterwarnings("ignore")
 
 
 if sys.version_info >= (3, 0):

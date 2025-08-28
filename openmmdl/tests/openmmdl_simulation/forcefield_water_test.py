@@ -25,6 +25,7 @@ def sample_rdkit_molecule():
 
 
 def test_ff_selection():
+    assert ff_selection("AMBER19") == "amber19-all.xml"
     assert ff_selection("AMBER14") == "amber14-all.xml"
     assert ff_selection("AMBER99SB") == "amber99sb.xml"
     assert ff_selection("AMBER99SB-ILDN") == "amber99sbildn.xml"
@@ -35,6 +36,31 @@ def test_ff_selection():
 
 
 def test_water_forcefield_selection():
+    # Test cases for 'amber19-all.xml' force field
+    assert water_forcefield_selection("TIP3P", "amber19-all.xml") == "amber19/tip3p.xml"
+    assert (
+        water_forcefield_selection("TIP3P-FB", "amber19-all.xml")
+        == "amber19/tip3pfb.xml"
+    )
+    assert water_forcefield_selection("SPC/E", "amber19-all.xml") == "amber19/spce.xml"
+    assert (
+        water_forcefield_selection("TIP4P-Ew", "amber19-all.xml")
+        == "amber19/tip4pew.xml"
+    )
+    assert (
+        water_forcefield_selection("TIP4P-FB", "amber19-all.xml")
+        == "amber19/tip4pfb.xml"
+    )
+    assert (
+        water_forcefield_selection("OPC", "amber19-all.xml")
+        == "amber19/opc.xml"
+    )
+    assert (
+        water_forcefield_selection("OPC3", "amber19-all.xml")
+        == "amber19/opc3.xml"
+    )
+    assert water_forcefield_selection("TIP5P", "amber19-all.xml") is None
+    assert water_forcefield_selection("NonexistentWater", "amber19-all.xml") is None
     # Test cases for 'amber14-all.xml' force field
     assert water_forcefield_selection("TIP3P", "amber14-all.xml") == "amber14/tip3p.xml"
     assert (
@@ -225,6 +251,17 @@ def test_generate_forcefield_membrane_logic(sample_rdkit_molecule):
 
     assert isinstance(forcefield_9, app.ForceField)
     assert isinstance(forcefield_10, app.ForceField)
+
+    forcefield_11 = generate_forcefield(
+        "amber19-all.xml", "amber19/tip3p.xml", False, "smirnoff", sample_rdkit_molecule
+    )
+
+    forcefield_12 = generate_forcefield(
+        "amber19-all.xml", "amber19/tip3p.xml", False, "gaff", sample_rdkit_molecule
+    )
+
+    assert isinstance(forcefield_11, app.ForceField)
+    assert isinstance(forcefield_12, app.ForceField)
 
 def test_generate_transitional_forcefield(sample_rdkit_molecule):
     transitional_forcefield = generate_transitional_forcefield(
