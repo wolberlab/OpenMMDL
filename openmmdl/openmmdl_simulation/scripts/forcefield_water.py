@@ -140,8 +140,8 @@ def water_model_selection(water, forcefield_selection):
             "TIP3P-PME-B": "charmm",
             "TIP3P-PME-F": "charmm",
             "SPC/E": "charmm",
-            "TIP4P-Ew": "tip4pew",
-            "TIP4P-2005": "tip4pew",
+            "TIP4P-Ew": "charmm_tip4pew",
+            "TIP4P-2005": "charmm_tip4pew",
             "TIP5P": "tip5p",
             "TIP5P-Ew": "tip5p",
         }
