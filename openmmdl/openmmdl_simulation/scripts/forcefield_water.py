@@ -22,6 +22,7 @@ def ff_selection(ff):
         "AMBER03": "amber03.xml",
         "AMBER10": "amber10.xml",
         "CHARMM36": "charmm36.xml",
+        "CHARMM2024" "charmm36_2024.xml",
     }
 
     return forcefield_dict.get(ff, None)
@@ -84,6 +85,16 @@ def water_forcefield_selection(water, forcefield_selection):
                 "TIP5P": "charmm36/tip5p.xml",
                 "TIP5P-Ew": "charmm36/tip5pew.xml",
             },
+            "charmm36_2024.xml": {
+                "CHARMM default": "charmm36_2024/water.xml",
+                "TIP3P-PME-B": "charmm36_2024/tip3p-pme-b.xml",
+                "TIP3P-PME-F": "charmm36_2024/tip3p-pme-f.xml",
+                "SPC/E": "charmm36_2024/spce.xml",
+                "TIP4P-Ew": "charmm36_2024/tip4pew.xml",
+                "TIP4P-2005": "charmm36_2024/tip4p2005.xml",
+                "TIP5P": "charmm36_2024/tip5p.xml",
+                "TIP5P-Ew": "charmm36_2024/tip5pew.xml",
+            },
         }
         water_model = water_forcefields.get(forcefield_selection, {}).get(water, None)
 
@@ -123,7 +134,7 @@ def water_model_selection(water, forcefield_selection):
         if water == "TIP5P":
             return None  # 'TIP5P' is not available in 'amber19-all.xml'
         water_model = water_model_mapping.get(water)
-    elif forcefield_selection == "charmm36.xml":
+    elif forcefield_selection == "charmm36.xml" or forcefield_selection == "charmm36_2024.xml":
         charmm_water_mapping = {
             "CHARMM default": "charmm",
             "TIP3P-PME-B": "charmm",
