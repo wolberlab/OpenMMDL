@@ -117,6 +117,34 @@ def test_water_forcefield_selection():
     assert water_forcefield_selection("NonexistentFF", "charmm36.xml") is None
 
 
+    # Test cases for 'charmm36_2024.xml' force field
+    assert (
+        water_forcefield_selection("CHARMM default", "charmm36_2024.xml")
+        == "charmm36_2024/water.xml"
+    )
+    assert (
+        water_forcefield_selection("TIP3P-PME-B", "charmm36_2024.xml")
+        == "charmm36_2024/tip3p-pme-b.xml"
+    )
+    assert (
+        water_forcefield_selection("TIP3P-PME-F", "charmm36_2024.xml")
+        == "charmm36_2024/tip3p-pme-f.xml"
+    )
+    assert water_forcefield_selection("SPC/E", "charmm36_2024.xml") == "charmm36_2024/spce.xml"
+    assert (
+        water_forcefield_selection("TIP4P-Ew", "charmm36_2024.xml") == "charmm36_2024/tip4pew.xml"
+    )
+    assert (
+        water_forcefield_selection("TIP4P-2005", "charmm36_2024.xml")
+        == "charmm36_2024/tip4p2005.xml"
+    )
+    assert water_forcefield_selection("TIP5P", "charmm36.xml") == "charmm36_2024/tip5p.xml"
+    assert (
+        water_forcefield_selection("TIP5P-Ew", "charmm36.xml") == "charmm36_2024/tip5pew.xml"
+    )
+    assert water_forcefield_selection("NonexistentWater", "charmm36_2024.xml") is None
+    assert water_forcefield_selection("NonexistentFF", "charmm36_2024.xml") is None
+
 def test_water_model_selection():
     assert water_model_selection("TIP3P", "amber99sb.xml") == "tip3p"
     assert water_model_selection("TIP3P", "amber99sbildn.xml") == "tip3p"
@@ -167,6 +195,17 @@ def test_water_model_selection():
     assert water_model_selection("TIP5P", "charmm36.xml") == "tip5p"
     assert water_model_selection("TIP5P-Ew", "charmm36.xml") == "tip5p"
 
+    #Test new CHARMM36 2024 models
+    assert water_model_selection("CHARMM default", "charmm36.xml") == "charmm"
+    assert water_model_selection("TIP3P-PME-B", "charmm36.xml") == "charmm"
+    assert water_model_selection("TIP3P-PME-F", "charmm36.xml") == "charmm"
+    assert water_model_selection("SPC/E", "charmm36.xml") == "charmm"
+    assert water_model_selection("TIP4P-Ew", "charmm36.xml") == "tip4pew"
+    assert water_model_selection("TIP4P-2005", "charmm36.xml") == "tip4pew"
+    assert water_model_selection("TIP5P", "charmm36.xml") == "tip5p"
+    assert water_model_selection("TIP5P-Ew", "charmm36.xml") == "tip5p"
+
+    
     assert water_model_selection("TIP3P", "NonexistentFF") is None
 
 
