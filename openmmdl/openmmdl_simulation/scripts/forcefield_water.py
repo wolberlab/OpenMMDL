@@ -22,7 +22,7 @@ def ff_selection(ff):
         "AMBER03": "amber03.xml",
         "AMBER10": "amber10.xml",
         "CHARMM36": "charmm36.xml",
-        "CHARMM2024" "charmm36_2024.xml",
+        "CHARMM2024": "charmm36_2024.xml",
     }
 
     return forcefield_dict.get(ff, None)
