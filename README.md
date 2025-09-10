@@ -177,7 +177,7 @@ Start the analysis with the following Inputs:
 
 
 #### Visualization
-Most of the analysis outputs are JEPG images and do not need any further preparation to be viewed.
+Most of the analysis outputs are JPEG images and do not need any further preparation to be viewed.
 
 For the visualization of your complex with interaction pointclouds you can use NGLView with the jupyter notebook prepared in the **OpenMMDL** repository or visualize the pointclouds in PyMOL.
 
