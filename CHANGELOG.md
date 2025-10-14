@@ -15,6 +15,18 @@ The rules for this file:
     * YYYY-MM-DD date format (following ISO 8601)
   * accompany each entry with github issue/PR number (Issue #xyz)
 -->
+## Version 1.1.2
+
+### Authors
+talagayev
+
+### Added
+
+### Fixed
+- Fixes import error in `visualization.ipynb` (2025-10-14, PR #159)
+
+### Changed
+
 ## Version 1.1.1
 
 ### Authors
