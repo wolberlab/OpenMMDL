@@ -6,8 +6,9 @@ from rdkit.Chem import SDWriter
 
 class Preprocessing:
     """
-    A utility class for preprocessing PDB files. 
+    A utility class for preprocessing PDB files.
     """
+
     def __init__(self):
         pass
 
@@ -17,11 +18,11 @@ class Preprocessing:
 
         Parameters
         ----------
-        input_pdb : str 
+        input_pdb : str
             Path to the input PDB file representing the molecular dynamics trajectory to be renumbered.
-        reference_pdb : str 
+        reference_pdb : str
             Path to the reference PDB file representing the molecular dynamics trajectory used as a reference.
-        output_pdb : str 
+        output_pdb : str
             Path to the output PDB file where the renumbered trajectory will be saved.
 
         Returns
@@ -70,17 +71,14 @@ class Preprocessing:
         for chain_id in ref_top_df["chainID"].unique():
             # Extract residue indices from the reference topology for the current chain
             ref_residue_indices = (
-                ref_top_df[
-                    (ref_top_df["chainID"] == chain_id)
-                    & ref_top_df["resName"].isin(protein_residues)
-                ]["resSeq"].values
+                ref_top_df[(ref_top_df["chainID"] == chain_id) & ref_top_df["resName"].isin(protein_residues)][
+                    "resSeq"
+                ].values
                 - 1
             )
 
             # Update residue indices in the input topology DataFrame for the current chain
-            mask = (input_top_df["chainID"] == chain_id) & input_top_df["resName"].isin(
-                protein_residues
-            )
+            mask = (input_top_df["chainID"] == chain_id) & input_top_df["resName"].isin(protein_residues)
             input_top_df.loc[mask, "resSeq"] = ref_residue_indices + 1
 
         # Create a new topology from the modified DataFrame
@@ -141,15 +139,13 @@ class Preprocessing:
         # Save the modified topology to a new PDB file
         u.atoms.write(input_pdb_filename)
 
-    def extract_and_save_ligand_as_sdf(
-        self, input_pdb_filename, output_filename, target_resname
-    ):
+    def extract_and_save_ligand_as_sdf(self, input_pdb_filename, output_filename, target_resname):
         """
         Extract and save the ligand from the receptor ligand complex PDB file into a new PDB file by itself.
 
         Parameters
         ----------
-        input_pdb_filename : str 
+        input_pdb_filename : str
             Name of the input PDB file.
         output_filename : str
             Name of the output SDF file.
@@ -168,9 +164,7 @@ class Preprocessing:
         ligand_atoms = u.select_atoms(f"resname {target_resname}")
 
         if len(ligand_atoms) == 0:
-            print(
-                f"No ligand with residue name '{target_resname}' found in the PDB file."
-            )
+            print(f"No ligand with residue name '{target_resname}' found in the PDB file.")
             return
 
         # Using RDKit Converter to get SDF File
@@ -187,11 +181,11 @@ class Preprocessing:
 
         Parameters
         ----------
-        input_pdb_file : str 
+        input_pdb_file : str
             Path to the initial PDB file.
-        output_pdb_file : str 
+        output_pdb_file : str
             Path to the output PDB file.
-        lig_name : str 
+        lig_name : str
             Name of the ligand in the input PDB file.
 
         Returns
@@ -209,7 +203,6 @@ class Preprocessing:
         for line in pdb_lines:
             if line.startswith("ATOM"):
                 # Extract information from the ATOM line
-                atom_serial = int(line[6:11])
                 atom_name = line[12:16].strip()
                 residue_name = line[17:20].strip()
 
@@ -223,9 +216,7 @@ class Preprocessing:
                         element = atom_name
 
                     # Increment the count for the current element in the current residue_name residue
-                    lig_residue_elements[element] = (
-                        lig_residue_elements.get(element, 0) + 1
-                    )
+                    lig_residue_elements[element] = lig_residue_elements.get(element, 0) + 1
 
                     # Update the atom name based on the element count
                     new_atom_name = f"{element}{lig_residue_elements[element]}"
@@ -285,5 +276,5 @@ class Preprocessing:
                 atom_type = line[12:13].strip()
                 # Replace 'X' with the correct atom type
                 lines[i] = line.replace(" LIG  X", f" LIG  {atom_type}")
-                
+
         return "\n".join(lines)

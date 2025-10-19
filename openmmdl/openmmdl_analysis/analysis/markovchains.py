@@ -19,13 +19,12 @@ class MarkovChainAnalysis:
     min_transitions : list
         List of transition thresholds [x1, x2, x5, x10] derived from min_transition.
     """
+
     def __init__(self, min_transition):
         self.min_transition = min_transition
         self.min_transitions = self._calculate_min_transitions()
 
-    def generate_transition_graph(
-        self, total_frames, combined_dict, fig_type="png", font_size=36, size_node=200
-    ):
+    def generate_transition_graph(self, total_frames, combined_dict, fig_type="png", font_size=36, size_node=200):
         """
         Generates Markov chain graphs showing binding mode transitions across a simulation trajectory.
 
@@ -36,15 +35,15 @@ class MarkovChainAnalysis:
 
         Parameters
         ----------
-        total_frames : int 
+        total_frames : int
             The number of frames in the protein-ligand MD simulation.
-        combined_dict : dict 
+        combined_dict : dict
             A dictionary with the information of the Binding Modes and their order of appearance during the simulation for all frames.
-        fig_type : str, optional 
+        fig_type : str, optional
             File type for the output figures. Default is 'png'.
-        font_size : int, optional 
+        font_size : int, optional
             The font size for the node labels. The default value is set to 36.
-        size_node : int, optional 
+        size_node : int, optional
             The size of the nodes in the Markov Chain plot. The default value is set to 200.
 
         Returns
@@ -65,15 +64,9 @@ class MarkovChainAnalysis:
         part3_data = combined_dict["all"][part1_length + part2_length :]
 
         # Count the occurrences of each node in each part
-        part1_node_occurrences = {
-            node: part1_data.count(node) for node in set(part1_data)
-        }
-        part2_node_occurrences = {
-            node: part2_data.count(node) for node in set(part2_data)
-        }
-        part3_node_occurrences = {
-            node: part3_data.count(node) for node in set(part3_data)
-        }
+        part1_node_occurrences = {node: part1_data.count(node) for node in set(part1_data)}
+        part2_node_occurrences = {node: part2_data.count(node) for node in set(part2_data)}
+        part3_node_occurrences = {node: part3_data.count(node) for node in set(part3_data)}
 
         # Create the legend
         legend_labels = {
@@ -87,21 +80,14 @@ class MarkovChainAnalysis:
         legend_colors = ["skyblue", "green", "orange", "red", "yellow"]
 
         legend_handles = [
-            Patch(color=color, label=label)
-            for color, label in zip(legend_colors, legend_labels.values())
+            Patch(color=color, label=label) for color, label in zip(legend_colors, legend_labels.values())
         ]
 
         # Get the top 10 nodes with the most occurrences
-        node_occurrences = {
-            node: combined_dict["all"].count(node) for node in set(combined_dict["all"])
-        }
-        top_10_nodes = sorted(node_occurrences, key=node_occurrences.get, reverse=True)[
-            :10
-        ]
+        node_occurrences = {node: combined_dict["all"].count(node) for node in set(combined_dict["all"])}
+        top_10_nodes = sorted(node_occurrences, key=node_occurrences.get, reverse=True)[:10]
 
         for min_transition_percent in self.min_transitions:
-            min_prob = min_transition_percent / 100  # Convert percentage to probability
-
             # Create a directed graph
             G = nx.DiGraph()
 
@@ -122,9 +108,7 @@ class MarkovChainAnalysis:
             # Add edges to the graph with their probabilities
             for transition, count in transitions.items():
                 current_state, next_state = transition
-                probability = (
-                    count / len(combined_dict["all"]) * 100
-                )  # Convert probability to percentage
+                probability = count / len(combined_dict["all"]) * 100  # Convert probability to percentage
                 if probability >= min_transition_percent:
                     G.add_edge(current_state, next_state, weight=probability)
                     # Include the reverse transition with a different color
@@ -132,9 +116,7 @@ class MarkovChainAnalysis:
                     reverse_count = transitions.get(
                         reverse_transition, 0
                     )  # Use the correct count for the reverse transition
-                    reverse_probability = (
-                        reverse_count / len(combined_dict["all"]) * 100
-                    )
+                    reverse_probability = reverse_count / len(combined_dict["all"]) * 100
                     G.add_edge(
                         next_state,
                         current_state,
@@ -145,9 +127,7 @@ class MarkovChainAnalysis:
             # Add self-loops to the graph with their probabilities
             for self_loop, count in self_loops.items():
                 state = self_loop[0]
-                probability = (
-                    count / len(combined_dict["all"]) * 100
-                )  # Convert probability to percentage
+                probability = count / len(combined_dict["all"]) * 100  # Convert probability to percentage
                 if probability >= min_transition_percent:
                     G.add_edge(state, state, weight=probability)
 
@@ -170,17 +150,13 @@ class MarkovChainAnalysis:
                     forward_count / node_occurrences[start_state] * 100
                 )
 
-                transition_occurrences_forward[forward_transition] = (
-                    forward_count / len(combined_dict["all"]) * 100
-                )
+                transition_occurrences_forward[forward_transition] = forward_count / len(combined_dict["all"]) * 100
 
                 transition_probabilities_backward[backward_transition] = (
                     backward_count / node_occurrences[end_state] * 100
                 )
 
-                transition_occurrences_backward[backward_transition] = (
-                    backward_count / len(combined_dict["all"]) * 100
-                )
+                transition_occurrences_backward[backward_transition] = backward_count / len(combined_dict["all"]) * 100
 
             # Calculate self-loop probabilities
             self_loop_probabilities = {}
@@ -198,9 +174,7 @@ class MarkovChainAnalysis:
             )
 
             # Draw nodes and edges
-            pos = nx.spring_layout(
-                G, k=2, seed=42
-            )  # Increased distance between nodes (k=2)
+            pos = nx.spring_layout(G, k=2, seed=42)  # Increased distance between nodes (k=2)
             edge_colors = []
 
             for u, v, data in G.edges(data=True):
@@ -209,9 +183,7 @@ class MarkovChainAnalysis:
                 if u == v:  # Check if it is a self-loop
                     edge_colors.append("green")  # Set green color for self-loop arrows
                     width = 0.1  # Make self-loop arrows smaller
-                    connection_style = (
-                        "arc3,rad=-0.1"  # Make the self-loops more curved and compact
-                    )
+                    connection_style = "arc3,rad=-0.1"  # Make the self-loops more curved and compact
                     nx.draw_networkx_edges(
                         G,
                         pos,
@@ -222,9 +194,7 @@ class MarkovChainAnalysis:
                         connectionstyle=connection_style,
                     )
                 elif weight >= min_transition_percent:
-                    edge_colors.append(
-                        "black"
-                    )  # Highlight significant transitions in red
+                    edge_colors.append("black")  # Highlight significant transitions in red
 
                     # Check if both nodes are present before adding labels
                     if G.has_node(u) and G.has_node(v):
@@ -243,13 +213,9 @@ class MarkovChainAnalysis:
                             edge_color=edge_colors[-1],
                             connectionstyle=connection_style,
                         )
-                        nx.draw_networkx_edge_labels(
-                            G, pos, edge_labels={(u, v): edge_label}, font_size=26
-                        )
+                        nx.draw_networkx_edge_labels(G, pos, edge_labels={(u, v): edge_label}, font_size=26)
                 else:
-                    edge_colors.append(
-                        "grey"
-                    )  # Use black for non-significant transitions
+                    edge_colors.append("grey")  # Use black for non-significant transitions
                     width = 0.5
 
                     # Check if both nodes are present before adding labels
@@ -268,23 +234,15 @@ class MarkovChainAnalysis:
                             edge_color=edge_colors[-1],
                             connectionstyle=connection_style,
                         )
-                        nx.draw_networkx_edge_labels(
-                            G, pos, edge_labels={(u, v): edge_label}, font_size=36
-                        )
+                        nx.draw_networkx_edge_labels(G, pos, edge_labels={(u, v): edge_label}, font_size=36)
 
             # Update the node colors based on their appearance percentages in each part
             node_colors = []
             for node in G.nodes():
                 if node in top_10_nodes:
-                    part1_percentage = (
-                        part1_node_occurrences.get(node, 0) / node_occurrences[node]
-                    )
-                    part2_percentage = (
-                        part2_node_occurrences.get(node, 0) / node_occurrences[node]
-                    )
-                    part3_percentage = (
-                        part3_node_occurrences.get(node, 0) / node_occurrences[node]
-                    )
+                    part1_percentage = part1_node_occurrences.get(node, 0) / node_occurrences[node]
+                    part2_percentage = part2_node_occurrences.get(node, 0) / node_occurrences[node]
+                    part3_percentage = part3_node_occurrences.get(node, 0) / node_occurrences[node]
 
                     if part1_percentage > 0.5:
                         node_colors.append("green")
@@ -299,9 +257,7 @@ class MarkovChainAnalysis:
 
             # Draw nodes with sizes correlated to occurrences and color top 10 nodes
             node_size = [size_node * node_occurrences[node] for node in G.nodes()]
-            nx.draw_networkx_nodes(
-                G, pos, node_size=node_size, node_color=node_colors, alpha=0.8
-            )
+            nx.draw_networkx_nodes(G, pos, node_size=node_size, node_color=node_colors, alpha=0.8)
 
             # Draw node labels with occurrence percentage and self-loop probability for nodes with edges
             node_labels = {}
@@ -309,24 +265,14 @@ class MarkovChainAnalysis:
             for node in G.nodes():
                 if G.degree(node) > 0:  # Check if the node has at least one edge
                     edges_with_node = [
-                        (u, v, data["weight"])
-                        for u, v, data in G.edges(data=True)
-                        if u == node or v == node
+                        (u, v, data["weight"]) for u, v, data in G.edges(data=True) if u == node or v == node
                     ]
-                    relevant_edges = [
-                        edge
-                        for edge in edges_with_node
-                        if edge[2] >= min_transition_percent
-                    ]
+                    relevant_edges = [edge for edge in edges_with_node if edge[2] >= min_transition_percent]
 
                     if relevant_edges:
                         if node in top_10_nodes:
-                            node_occurrence_percentage = (
-                                node_occurrences[node] / len(combined_dict["all"]) * 100
-                            )
-                            self_loop_probability = (
-                                self_loop_probabilities.get(node, 0) * 100
-                            )
+                            node_occurrence_percentage = node_occurrences[node] / len(combined_dict["all"]) * 100
+                            self_loop_probability = self_loop_probabilities.get(node, 0) * 100
                             self_loop_occurence = self_loop_occurences.get(node, 0)
                             node_label = f"{node}\nOccurrences: {node_occurrence_percentage:.2f}%\nSelf-Loop Probability: {self_loop_probability:.2f}% \nSelf-Loop Occurrence: {self_loop_occurence:.2f}%"
                             node_labels[node] = node_label
@@ -351,9 +297,7 @@ class MarkovChainAnalysis:
             # Save the plot
             plot_filename = f"markov_chain_plot_{min_transition_percent}.{fig_type}"
             plot_path = os.path.join("Binding_Modes_Markov_States", plot_filename)
-            os.makedirs(
-                "Binding_Modes_Markov_States", exist_ok=True
-            )  # Create the folder if it doesn't exist
+            os.makedirs("Binding_Modes_Markov_States", exist_ok=True)  # Create the folder if it doesn't exist
 
             plt.savefig(plot_path, dpi=300)
             plt.clf()  # Clear the current figure for the next iteration

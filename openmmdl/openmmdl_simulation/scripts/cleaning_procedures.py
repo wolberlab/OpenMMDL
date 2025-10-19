@@ -15,8 +15,8 @@ def cleanup(protein_name):
     print("Cleaning Up :)")
     try:
         os.remove(f"output_{protein_name}")
-        os.remove(f"centered_old_coordinates.pdb")
-        os.remove(f"centered_old_coordinates.dcd")
+        os.remove("centered_old_coordinates.pdb")
+        os.remove("centered_old_coordinates.dcd")
     except FileNotFoundError:
         print("One or more files not found. Cleanup skipped.")
     print("Cleanup is done.")
@@ -67,9 +67,7 @@ def organize_files(source, destination):
             os.rename(file, os.path.join(destination, os.path.basename(file)))
 
 
-def post_md_file_movement(
-    protein_name: str, prmtop: str = None, inpcrd: str = None, ligands: List[str] = None
-):
+def post_md_file_movement(protein_name: str, prmtop: str = None, inpcrd: str = None, ligands: List[str] = None):
     """Organizes and moves the files after the MD simulation to their respective directories.
 
     Args:

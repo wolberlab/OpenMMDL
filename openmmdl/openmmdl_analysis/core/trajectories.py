@@ -16,6 +16,7 @@ class TrajectorySaver:
     nucleic : bool
         Flag indicating if the receptor is nucleic acid (DNA/RNA). Used for proper atom selection.
     """
+
     def __init__(self, pdb_md, ligname, special, nucleic):
         self.pdb_md = pdb_md
         self.ligname = ligname
@@ -48,9 +49,7 @@ class TrajectorySaver:
 
         water_atoms.write(f"{outputpath}interacting_waters.pdb")
 
-        with mda.Writer(
-            f"{outputpath}interacting_waters.dcd", water_atoms.n_atoms
-        ) as W:
+        with mda.Writer(f"{outputpath}interacting_waters.dcd", water_atoms.n_atoms) as W:
             for ts in self.pdb_md.trajectory:
                 W.write(water_atoms)
 
@@ -64,7 +63,7 @@ class TrajectorySaver:
             Number of the frame to save.
         outpath : str
             Path to save the frame to.
-        selection : str or bool, optional 
+        selection : str or bool, optional
             A MDAnalysis selection string to specify which atoms to save. Defaults to False.
 
         Returns

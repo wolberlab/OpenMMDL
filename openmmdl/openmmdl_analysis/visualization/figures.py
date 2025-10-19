@@ -18,9 +18,8 @@ class FigureMerger:
     merged_image_paths : list of str
         List storing paths to the output merged images.
     """
-    def __init__(
-        self, binding_mode, occurrence_percent, split_data, merged_image_paths
-    ):
+
+    def __init__(self, binding_mode, occurrence_percent, split_data, merged_image_paths):
         self.binding_mode = binding_mode
         self.occurrence_percent = occurrence_percent
         self.split_data = split_data
@@ -45,55 +44,33 @@ class FigureMerger:
 
         # Plot lines on the same axis and collect them into a list
         lines = []
-        filtered_split_data = [
-            entry for entry in self.split_data if "FRAME" not in entry
-        ]
+        filtered_split_data = [entry for entry in self.split_data if "FRAME" not in entry]
         for i, data in enumerate(filtered_split_data):
             y = data_points[i]
             label = data.split()[-1]
             type = data.split()[-2]
             if label == "hydrophobic":
-                (line,) = ax.plot(
-                    x, y, label=data, color=(1.0, 1.0, 0.0), linewidth=5.0
-                )  # yellow
+                (line,) = ax.plot(x, y, label=data, color=(1.0, 1.0, 0.0), linewidth=5.0)  # yellow
             elif label == "hbond":
                 if type == "Acceptor":
-                    (line,) = ax.plot(
-                        x, y, label=data, color=(1.0, 0.6, 0.6), linewidth=5.0
-                    )  # light red / pink
+                    (line,) = ax.plot(x, y, label=data, color=(1.0, 0.6, 0.6), linewidth=5.0)  # light red / pink
                 elif type == "Donor":
-                    (line,) = ax.plot(
-                        x, y, label=data, color=(0.3, 0.5, 1.0), linewidth=5.0
-                    )  # light blue
+                    (line,) = ax.plot(x, y, label=data, color=(0.3, 0.5, 1.0), linewidth=5.0)  # light blue
             elif label == "halogen":
-                (line,) = ax.plot(
-                    x, y, label=data, color=(1.0, 0.0, 0.9), linewidth=5.0
-                )  # magenta / hot pink
+                (line,) = ax.plot(x, y, label=data, color=(1.0, 0.0, 0.9), linewidth=5.0)  # magenta / hot pink
             elif label == "pistacking":
-                (line,) = ax.plot(
-                    x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0
-                )  # blue
+                (line,) = ax.plot(x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0)  # blue
             elif label == "pication":
-                (line,) = ax.plot(
-                    x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0
-                )  # blue
+                (line,) = ax.plot(x, y, label=data, color=(0.0, 0.0, 1.0), linewidth=5.0)  # blue
             elif label == "waterbridge":
-                (line,) = ax.plot(
-                    x, y, label=data, color=(0.0, 1.0, 0.9), linewidth=5.0
-                )  # cyan / aqua
+                (line,) = ax.plot(x, y, label=data, color=(0.0, 1.0, 0.9), linewidth=5.0)  # cyan / aqua
             elif label == "metal":
-                (line,) = ax.plot(
-                    x, y, label=data, color=(1.0, 0.6, 0.0), linewidth=5.0
-                )  # orange
+                (line,) = ax.plot(x, y, label=data, color=(1.0, 0.6, 0.0), linewidth=5.0)  # orange
             elif label == "saltbridge":
                 if type == "NI":
-                    (line,) = ax.plot(
-                        x, y, label=data, color=(1.0, 0.6, 0.0), linewidth=5.0
-                    )  # orange
+                    (line,) = ax.plot(x, y, label=data, color=(1.0, 0.6, 0.0), linewidth=5.0)  # orange
                 elif type == "PI":
-                    (line,) = ax.plot(
-                        x, y, label=data, color=(0.3, 0.9, 0.8), linewidth=5.0
-                    )  # turquoise / teal
+                    (line,) = ax.plot(x, y, label=data, color=(0.3, 0.9, 0.8), linewidth=5.0)  # turquoise / teal
             else:
                 (line,) = ax.plot(x, y, label=data)
             lines.append(line)
@@ -109,9 +86,7 @@ class FigureMerger:
             line.set_linewidth(5.0)
 
         # Add text above the legend
-        figlegend.text(
-            0.5, 0.9, f"{self.binding_mode}", ha="center", fontsize=12, weight="bold"
-        )
+        figlegend.text(0.5, 0.9, f"{self.binding_mode}", ha="center", fontsize=12, weight="bold")
         figlegend.text(
             0.5,
             0.85,
@@ -163,6 +138,7 @@ class FigureArranger:
     output_path : str
         File path where the final arranged figure should be saved.
     """
+
     def __init__(self, merged_image_paths, output_path):
         self.merged_image_paths = merged_image_paths
         self.output_path = output_path
@@ -192,9 +168,7 @@ class FigureArranger:
         total_height = max_height * num_rows
 
         # Create a new image with the calculated width and height
-        big_figure = Image.new(
-            "RGB", (total_width, total_height), (255, 255, 255)
-        )  # Set background to white
+        big_figure = Image.new("RGB", (total_width, total_height), (255, 255, 255))  # Set background to white
 
         x_offset = 0
         y_offset = 0

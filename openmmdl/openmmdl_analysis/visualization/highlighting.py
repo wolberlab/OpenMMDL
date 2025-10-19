@@ -21,6 +21,7 @@ class FigureHighlighter:
     lig_noh : mda.AtomGroup
         AtomGroup of all atoms in the ligand without hydrogens.
     """
+
     def __init__(self, complex_pdb_file, ligand_no_h_pdb_file):
         self.complex_pdb_file = complex_pdb_file
         self.ligand_no_h_pdb_file = ligand_no_h_pdb_file
@@ -50,7 +51,7 @@ class FigureHighlighter:
             interaction_type = parts[-1]
             split_value = f"{protein_partner_name} {numeric_codes} {interaction_type}"
             split_data.append(split_value)
-            
+
         return split_data
 
     def highlight_numbers(self, split_data, starting_idx):
@@ -83,13 +84,11 @@ class FigureHighlighter:
 
         for item in split_data:
             parts = item.split()
-            protein_partner_name = parts[0]
             numeric_codes = parts[1:-1]
             interaction_type = parts[-1]
 
             if interaction_type == "hbond":
                 parts = item.split()
-                protein_partner_name = parts[0]
                 numeric_codes = parts[1:-2]
                 type = parts[-2]
                 interaction_type = parts[-1]
@@ -250,10 +249,8 @@ class FigureHighlighter:
             "metal": (1.0, 0.6, 0.0),  # orange
         }
 
-        interaction_dict = {
-            int(key): interaction_dict[interaction_type] for key in keys
-        }
-        
+        interaction_dict = {int(key): interaction_dict[interaction_type] for key in keys}
+
         return interaction_dict
 
 
@@ -274,6 +271,7 @@ class LigandImageGenerator:
     fig_type : str
         Type of image to generate. Can be "svg" or "png".
     """
+
     def __init__(
         self,
         ligand_name,
@@ -330,16 +328,12 @@ class LigandImageGenerator:
 
             # Generate an SVG image of the ligand
             drawer = Draw.MolDraw2DSVG(5120, 3200)
-            drawer.drawOptions().addStereoAnnotation = (
-                True  # Add stereo information if available
-            )
+            drawer.drawOptions().addStereoAnnotation = True  # Add stereo information if available
             drawer.DrawMolecule(prepared_ligand)
 
             # Adjust font size in the SVG output using the FontSize method
             font_size = drawer.FontSize()
-            drawer.SetFontSize(
-                font_size * 0.5
-            )  # You can adjust the multiplier as needed
+            drawer.SetFontSize(font_size * 0.5)  # You can adjust the multiplier as needed
 
             drawer.FinishDrawing()
             svg = drawer.GetDrawingText().replace("svg:", "")

@@ -1,6 +1,5 @@
 import re
 import numpy as np
-import pandas as pd
 import xml.etree.ElementTree as ET
 
 
@@ -8,12 +7,12 @@ class PharmacophoreGenerator:
     """
     A class for generating pharmacophore features from molecular dynamics (MD) interaction data.
 
-    This class processes interaction data from MD simulations and generates pharmacophore features 
+    This class processes interaction data from MD simulations and generates pharmacophore features
     including hydrogen bond donors/acceptors, hydrophobic features etc. exporting them in .pml format.
 
     Attributes
     ----------
-    df_all : pd.DataFrame
+    df_all : pandas.DataFrame
         DataFrame storing the input interaction data.
     ligand_name : str
         Name of the ligand.
@@ -24,6 +23,7 @@ class PharmacophoreGenerator:
     clouds : dict
         Dictionary containing interaction types and associated 3D coordinates with visualization metadata.
     """
+
     def __init__(self, df_all, ligand_name):
         self.df_all = df_all
         self.ligand_name = ligand_name
@@ -34,7 +34,7 @@ class PharmacophoreGenerator:
     def to_dict(self):
         """
         Export the interaction cloud as a dictionary.
-    
+
         Returns
         -------
         dict
@@ -49,9 +49,9 @@ class PharmacophoreGenerator:
 
         Parameters
         ----------
-        output_filename : str 
+        output_filename : str
             Name the of the output .pml file.
-        id_num : int, optional 
+        id_num : int, optional
             ID number as an identifier in the PML file. Defaults to 0.
 
         Returns
@@ -96,9 +96,7 @@ class PharmacophoreGenerator:
 
             feature_type = feature_types[interaction]
             if interaction in ["Acceptor_hbond", "Donor_hbond"]:
-                pharm = self._generate_pharmacophore_vectors(
-                    self.df_all.filter(regex=interaction).columns
-                )
+                pharm = self._generate_pharmacophore_vectors(self.df_all.filter(regex=interaction).columns)
                 for feature_name, position in pharm.items():
                     feature_id_counter += 1
                     lig_loc = position[0]
@@ -119,7 +117,7 @@ class PharmacophoreGenerator:
                         id=f"feature{str(feature_id_counter)}",
                     )
                     if feature_type == "HBA":
-                        origin = ET.SubElement(
+                        ET.SubElement(
                             vector,
                             "origin",
                             x3=str(prot_loc[0]),
@@ -127,7 +125,7 @@ class PharmacophoreGenerator:
                             z3=str(prot_loc[2]),
                             tolerance="1.9499999",
                         )
-                        target = ET.SubElement(
+                        ET.SubElement(
                             vector,
                             "target",
                             x3=str(lig_loc[0]),
@@ -136,7 +134,7 @@ class PharmacophoreGenerator:
                             tolerance="1.5",
                         )
                     if feature_type == "HBD":
-                        origin = ET.SubElement(
+                        ET.SubElement(
                             vector,
                             "origin",
                             x3=str(lig_loc[0]),
@@ -144,7 +142,7 @@ class PharmacophoreGenerator:
                             z3=str(lig_loc[2]),
                             tolerance="1.9499999",
                         )
-                        target = ET.SubElement(
+                        ET.SubElement(
                             vector,
                             "target",
                             x3=str(prot_loc[0]),
@@ -153,9 +151,7 @@ class PharmacophoreGenerator:
                             tolerance="1.5",
                         )
             elif interaction in ["hydrophobic", "PI_saltbridge", "NI_saltbridge"]:
-                pharm = self._generate_pharmacophore_centers(
-                    self.df_all.filter(regex=interaction).columns
-                )
+                pharm = self._generate_pharmacophore_centers(self.df_all.filter(regex=interaction).columns)
                 for feature_name, position in pharm.items():
                     feature_id_counter += 1
                     point = ET.SubElement(
@@ -169,7 +165,7 @@ class PharmacophoreGenerator:
                         coreCompound=self.ligand_name,
                         id=f"feature{str(feature_id_counter)}",
                     )
-                    location = ET.SubElement(
+                    ET.SubElement(
                         point,
                         "position",
                         x3=str(position[0]),
@@ -178,9 +174,7 @@ class PharmacophoreGenerator:
                         tolerance="1.5",
                     )
             elif interaction == "pistacking":
-                pharm = self._generate_pharmacophore_vectors(
-                    self.df_all.filter(regex=interaction).columns
-                )
+                pharm = self._generate_pharmacophore_vectors(self.df_all.filter(regex=interaction).columns)
                 feature_id_counter += 1
                 lig_loc = position[0]
                 prot_loc = position[1]
@@ -200,7 +194,7 @@ class PharmacophoreGenerator:
                     coreCompound=self.ligand_name,
                     id=f"feature{str(feature_id_counter)}",
                 )
-                position = ET.SubElement(
+                ET.SubElement(
                     plane,
                     "position",
                     x3=str(lig_loc[0]),
@@ -208,7 +202,7 @@ class PharmacophoreGenerator:
                     z3=str(lig_loc[2]),
                     tolerance="0.9",
                 )
-                normal = ET.SubElement(
+                ET.SubElement(
                     plane,
                     "normal",
                     x3=str(x),
@@ -253,14 +247,12 @@ class PharmacophoreGenerator:
         cloud_dict["NI"] = self._generate_pharmacophore_centers_all_points(
             self.df_all.filter(regex="NI_saltbridge").columns
         )
-        cloud_dict["M"] = self._generate_pharmacophore_centers_all_points(
-            self.df_all.filter(regex="metal").columns
-        )
+        cloud_dict["M"] = self._generate_pharmacophore_centers_all_points(self.df_all.filter(regex="metal").columns)
 
         pharmacophore = ET.Element(
             "pharmacophore",
             name=f"{self.complex_name}_pointcloud",
-            id=f"pharmacophore0",
+            id="pharmacophore0",
             pharmacophoreType="LIGAND_SCOUT",
         )
         feature_id_counter = 0
@@ -277,7 +269,7 @@ class PharmacophoreGenerator:
                         weight="1.0",
                         id=f"feature{str(feature_id_counter)}",
                     )
-                    position = ET.SubElement(
+                    ET.SubElement(
                         feature_cloud,
                         "position",
                         x3=str(cloud_dict[feature_type][interaction][0][0]),
@@ -308,8 +300,8 @@ class PharmacophoreGenerator:
 
         Parameters
         ----------
-        dict_bindingmode : dict 
-            Dictionary containing all interactions of the bindingmode and their 
+        dict_bindingmode : dict
+            Dictionary containing all interactions of the bindingmode and their
             coresponding ligand and protein coordinates.
         outname : str
             Name of the output .pml file.
@@ -374,7 +366,7 @@ class PharmacophoreGenerator:
                     coreCompound=self.complex_name,
                     id=f"feature{str(feature_id_counter)}",
                 )
-                origin = ET.SubElement(
+                ET.SubElement(
                     vector,
                     "origin",
                     x3=str(orig_loc[0]),
@@ -382,7 +374,7 @@ class PharmacophoreGenerator:
                     z3=str(orig_loc[2]),
                     tolerance="1.9499999",
                 )
-                target = ET.SubElement(
+                ET.SubElement(
                     vector,
                     "target",
                     x3=str(targ_loc[0]),
@@ -405,7 +397,7 @@ class PharmacophoreGenerator:
                     coreCompound=self.complex_name,
                     id=f"feature{str(feature_id_counter)}",
                 )
-                position = ET.SubElement(
+                ET.SubElement(
                     point,
                     "position",
                     x3=str(position[0]),
@@ -435,7 +427,7 @@ class PharmacophoreGenerator:
                     coreCompound=self.complex_name,
                     id=f"feature{str(feature_id_counter)}",
                 )
-                position = ET.SubElement(
+                ET.SubElement(
                     plane,
                     "position",
                     x3=str(lig_loc[0]),
@@ -443,7 +435,7 @@ class PharmacophoreGenerator:
                     z3=str(lig_loc[2]),
                     tolerance="0.9",
                 )
-                normal = ET.SubElement(
+                ET.SubElement(
                     plane,
                     "normal",
                     x3=str(x),
@@ -462,7 +454,7 @@ class PharmacophoreGenerator:
     def _generate_clouds(self):
         """
         Process the dataframe with the interactions to extract and categorize ligand/protein interactions.
-    
+
         Returns
         -------
         dict
@@ -489,15 +481,9 @@ class PharmacophoreGenerator:
                     x, y, z = round(x, 3), round(y, 3), round(z, 3)
                     interaction = row["INTERACTION"]
                     if interaction == "hbond":
-                        interaction = (
-                            "donor" if row["PROTISDON"] == "False" else "acceptor"
-                        )
+                        interaction = "donor" if row["PROTISDON"] == "False" else "acceptor"
                     if interaction == "saltbridge":
-                        interaction = (
-                            "negative_ionizable"
-                            if row["PROTISPOS"] == "True"
-                            else "positive_ionizable"
-                        )
+                        interaction = "negative_ionizable" if row["PROTISPOS"] == "True" else "positive_ionizable"
                     if interaction in interaction_coords:
                         interaction_coords[interaction].append([x, y, z])
 
@@ -515,12 +501,12 @@ class PharmacophoreGenerator:
     def _format_clouds(self, interaction_coords):
         """
         Add visualization properties (color, radius) to the interactions.
-    
+
         Parameters
         ----------
         interaction_coords : dict
             Dictionary of raw 3D coordinates grouped by interaction type.
-    
+
         Returns
         -------
         dict
@@ -644,7 +630,7 @@ class PharmacophoreGenerator:
 
         Returns
         -------
-        dict of str to list of list of float 
+        dict of str to list of list of float
             Dict of interactions from which pharmacophore is generated as key and list of coordinates as value.
         """
         coord_pattern = re.compile(r"\(([\d.-]+), ([\d.-]+), ([\d.-]+)\)")
