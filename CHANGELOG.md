@@ -24,6 +24,7 @@ talagayev
 
 ### Fixed
 - Fixes import error in `visualization.ipynb` (2025-10-14, PR #159)
+- Fixes numpy error in due current incompatbility with parmed (2025-10-19, PR #160)
 
 ### Changed
 
