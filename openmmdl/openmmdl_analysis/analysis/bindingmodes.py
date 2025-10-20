@@ -1,5 +1,3 @@
-import pandas as pd
-
 from openmmdl.openmmdl_analysis.core.utils import (
     combine_subdict_values,
     remove_duplicate_values,
@@ -9,7 +7,7 @@ from openmmdl.openmmdl_analysis.core.utils import (
 class BindingModeProcesser:
     """
     A class that processes protein-ligand interaction data for a given molecular dynamics (MD) simulation trajectory.
-    The class performs multiple analyses on interaction data, such as filtering interactions based on frequency, 
+    The class performs multiple analyses on interaction data, such as filtering interactions based on frequency,
     generating fingerprints according to the combination of interactions present in frames creating specific binding modes.
 
     Attributes
@@ -39,6 +37,7 @@ class BindingModeProcesser:
     unique_data : dict
         Dictionary of unique data generated based on filtered interactions and threshold.
     """
+
     def __init__(
         self,
         pdb_md,
@@ -58,12 +57,8 @@ class BindingModeProcesser:
         self.ligand_rings = ligand_rings
         self.total_frames = total_frames
         self.unique_columns_rings_grouped = self._gather_interactions(interaction_list)
-        self.interaction_list, self.unique_data = self._process_interaction_wraper(
-            interaction_list, (threshold / 100)
-        )
-        self.interactions_all, self.unique_data_all = self._process_interaction_wraper(
-            interaction_list.copy(), 0.00001
-        )
+        self.interaction_list, self.unique_data = self._process_interaction_wraper(interaction_list, (threshold / 100))
+        self.interactions_all, self.unique_data_all = self._process_interaction_wraper(interaction_list.copy(), 0.00001)
 
     def _gather_interactions(self, df):
         """
@@ -77,7 +72,7 @@ class BindingModeProcesser:
         Returns
         -------
         dict
-            A dictionary with the keys being 'FRAME' numbers and values being dictionaries containing 
+            A dictionary with the keys being 'FRAME' numbers and values being dictionaries containing
             row indices and their corresponding unique column names for interactions.
         """
         unique_columns_rings = {}
@@ -96,26 +91,22 @@ class BindingModeProcesser:
                     # Concatenate the values to form a unique column name
                     for ligand_ring in self.ligand_rings:
                         if ligcarbonidx in ligand_ring:
-                            numbers_as_strings = [
-                                str(ligcarbonidx) for ligcarbonidx in ligand_ring
-                            ]
+                            numbers_as_strings = [str(ligcarbonidx) for ligcarbonidx in ligand_ring]
                             # Create the name with numbers separated by underscores
                             name_with_numbers = "_".join(numbers_as_strings)
-                            col_name = (
-                                f"{prot_partner}_{name_with_numbers}_{interaction}"
-                            )
+                            col_name = f"{prot_partner}_{name_with_numbers}_{interaction}"
                             ring_found = True
                             break
                     if not ring_found:
                         ligcarbonidx = int(row["LIGCARBONIDX"])
                         col_name = f"{prot_partner}_{ligcarbonidx}_{interaction}"
                 elif row["INTERACTION"] == "hbond":
-                    if row["PROTISDON"] == True:
+                    if row["PROTISDON"]:
                         prot_partner = row["Prot_partner"]
                         ligcarbonidx = int(row["ACCEPTORIDX"])
                         interaction = row["INTERACTION"]
                         type = "Acceptor"
-                    elif row["PROTISDON"] == False:
+                    elif not row["PROTISDON"]:
                         prot_partner = row["Prot_partner"]
                         ligcarbonidx = int(row["DONORIDX"])
                         interaction = row["INTERACTION"]
@@ -130,14 +121,14 @@ class BindingModeProcesser:
                     # Concatenate the values to form a unique column name
                     col_name = f"{prot_partner}_{ligcarbonidx}_{halogen}_{interaction}"
                 elif row["INTERACTION"] == "waterbridge":
-                    if row["PROTISDON"] == True:
+                    if row["PROTISDON"]:
                         prot_partner = row["Prot_partner"]
                         ligcarbonidx = int(row["ACCEPTOR_IDX"])
                         interaction = row["INTERACTION"]
                         type = "Acceptor"
                         # Concatenate the values to form a unique column name
                         col_name = f"{prot_partner}_{ligcarbonidx}_{type}_{interaction}"
-                    elif row["PROTISDON"] == False:
+                    elif not row["PROTISDON"]:
                         prot_partner = row["Prot_partner"]
                         ligcarbonidx = int(row["DONOR_IDX"])
                         interaction = row["INTERACTION"]
@@ -163,17 +154,13 @@ class BindingModeProcesser:
                     ligidx = row["LIG_IDX_LIST"]
                     lig_group = row["LIG_GROUP"]
                     interaction = row["INTERACTION"]
-                    if row["PROTISPOS"] == True:
+                    if row["PROTISPOS"]:
                         type = "NI"
                         # Concatenate the values to form a unique column name
-                        col_name = (
-                            f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
-                        )
-                    elif row["PROTISPOS"] == False:
+                        col_name = f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
+                    elif not row["PROTISPOS"]:
                         type = "PI"
-                        col_name = (
-                            f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
-                        )
+                        col_name = f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
                 elif row["INTERACTION"] == "metal":
                     special_ligand = row["RESTYPE_LIG"]
                     ligcarbonidx = int(row["TARGET_IDX"])
@@ -200,12 +187,12 @@ class BindingModeProcesser:
                     ring_found = False
                     col_name = f"{prot_partner}_{peptide_partner}_{interaction}"
                 elif row["INTERACTION"] == "hbond":
-                    if row["PROTISDON"] == True:
+                    if row["PROTISDON"]:
                         prot_partner = row["Prot_partner"]
                         peptide_partner = str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]
                         interaction = row["INTERACTION"]
                         type = "Acceptor"
-                    elif row["PROTISDON"] == False:
+                    elif not row["PROTISDON"]:
                         prot_partner = row["Prot_partner"]
                         peptide_partner = str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]
                         interaction = row["INTERACTION"]
@@ -218,28 +205,22 @@ class BindingModeProcesser:
                     halogen = row["DONORTYPE"]
                     interaction = row["INTERACTION"]
                     # Concatenate the values to form a unique column name
-                    col_name = (
-                        f"{prot_partner}_{peptide_partner}_{halogen}_{interaction}"
-                    )
+                    col_name = f"{prot_partner}_{peptide_partner}_{halogen}_{interaction}"
                 elif row["INTERACTION"] == "waterbridge":
-                    if row["PROTISDON"] == True:
+                    if row["PROTISDON"]:
                         prot_partner = row["Prot_partner"]
                         peptide_partner = str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]
                         interaction = row["INTERACTION"]
                         type = "Acceptor"
                         # Concatenate the values to form a unique column name
-                        col_name = (
-                            f"{prot_partner}_{peptide_partner}_{type}_{interaction}"
-                        )
-                    elif row["PROTISDON"] == False:
+                        col_name = f"{prot_partner}_{peptide_partner}_{type}_{interaction}"
+                    elif not row["PROTISDON"]:
                         prot_partner = row["Prot_partner"]
                         peptide_partner = str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]
                         interaction = row["INTERACTION"]
                         type = "Donor"
                         # Concatenate the values to form a unique column name
-                        col_name = (
-                            f"{prot_partner}_{peptide_partner}_{type}_{interaction}"
-                        )
+                        col_name = f"{prot_partner}_{peptide_partner}_{type}_{interaction}"
                 elif row["INTERACTION"] == "pistacking":
                     prot_partner = row["Prot_partner"]
                     peptide_partner = str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]
@@ -259,17 +240,13 @@ class BindingModeProcesser:
                     ligidx = str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]
                     lig_group = row["RESTYPE_LIG"]
                     interaction = row["INTERACTION"]
-                    if row["PROTISPOS"] == True:
+                    if row["PROTISPOS"]:
                         type = "NI"
                         # Concatenate the values to form a unique column name
-                        col_name = (
-                            f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
-                        )
-                    elif row["PROTISPOS"] == False:
+                        col_name = f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
+                    elif not row["PROTISPOS"]:
                         type = "PI"
-                        col_name = (
-                            f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
-                        )
+                        col_name = f"{prot_partner}_{ligidx}_{lig_group}_{type}_{interaction}"
                 elif row["INTERACTION"] == "metal":
                     special_ligand = row["RESTYPE_LIG"]
                     ligcarbonidx = str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]
@@ -292,14 +269,14 @@ class BindingModeProcesser:
     def _process_interaction_wraper(self, interaction_list, threshold):
         """
         Apply filtering and interaction enumeration to an interaction DataFrame.
-    
+
         Parameters
         ----------
         interaction_list : pd.DataFrame
             Interaction data obtained from the MD simulation.
         threshold : float
             Threshold for interaction occurrence (as a fraction of total frames).
-    
+
         Returns
         -------
         interaction_list : pd.DataFrame
@@ -311,7 +288,7 @@ class BindingModeProcesser:
         interaction_list.fillna(0, inplace=True)
         unique_data = self._unique_data_generation(filtered_values)
         self._df_iteration_numbering(interaction_list, unique_data)
-        
+
         return interaction_list, unique_data
 
     def _filtering_values(self, threshold, df):
@@ -322,7 +299,7 @@ class BindingModeProcesser:
         ----------
         threshold : float
             A threshold value that is used for filtering of the values (interactions) based upon the occurence count.
-        df : pd.DataFrame 
+        df : pd.DataFrame
             DataFrame to which the filtered values (interactions) will be added.
 
         Returns
@@ -351,9 +328,7 @@ class BindingModeProcesser:
         threshold = threshold * self.total_frames
 
         # Filter out values that appear in less than 20% of 1000
-        filtered_values = [
-            value for value, count in occurrences.items() if count >= threshold
-        ]
+        filtered_values = [value for value, count in occurrences.items() if count >= threshold]
 
         # Append the filtered values as columns to the DataFrame
         for value in filtered_values:
@@ -394,11 +369,11 @@ class BindingModeProcesser:
 
         Parameters
         ----------
-        df : pd.DataFrame 
+        df : pd.DataFrame
             DataFrame which has the interaction data for all of the frames.
-        unique_data : dict 
+        unique_data : dict
             Dictionary that contains the unique interactions obtained from unique_data_generation.
-            
+
         Returns
         -------
         None
@@ -414,19 +389,15 @@ class BindingModeProcesser:
                                 parts = col.split("_")
                                 prot_partner = parts[0]
                                 interaction = parts[-1]
-                                condition = (row["Prot_partner"] == prot_partner) & (
-                                    row["INTERACTION"] == interaction
-                                )
+                                condition = (row["Prot_partner"] == prot_partner) & (row["INTERACTION"] == interaction)
                                 df.at[index, col] = 1 if condition else 0
                             else:
                                 continue
                 elif row["INTERACTION"] == "hbond":
-                    if row["PROTISDON"] == True:
+                    if row["PROTISDON"]:
                         for col in unique_data.values():
                             if "hbond" in col:
-                                prot_partner, ligcarbonidx, type, interaction = (
-                                    col.split("_")
-                                )
+                                prot_partner, ligcarbonidx, type, interaction = col.split("_")
                                 ligcarbonidx = int(ligcarbonidx)
                                 condition = (
                                     (row["Prot_partner"] == prot_partner)
@@ -434,12 +405,10 @@ class BindingModeProcesser:
                                     & (row["INTERACTION"] == interaction)
                                 )
                                 df.at[index, col] = 1 if condition else 0
-                    elif row["PROTISDON"] == False:
+                    elif not row["PROTISDON"]:
                         for col in unique_data.values():
                             if "hbond" in col:
-                                prot_partner, ligcarbonidx, type, interaction = (
-                                    col.split("_")
-                                )
+                                prot_partner, ligcarbonidx, type, interaction = col.split("_")
                                 ligcarbonidx = int(ligcarbonidx)
                                 condition = (
                                     (row["Prot_partner"] == prot_partner)
@@ -450,9 +419,7 @@ class BindingModeProcesser:
                 elif row["INTERACTION"] == "halogen":
                     for col in unique_data.values():
                         if "halogen" in col:
-                            prot_partner, ligcarbonidx, halogen, interaction = (
-                                col.split("_")
-                            )
+                            prot_partner, ligcarbonidx, halogen, interaction = col.split("_")
                             ligcarbonidx = int(ligcarbonidx)
                             condition = (
                                 (row["Prot_partner"] == prot_partner)
@@ -474,20 +441,16 @@ class BindingModeProcesser:
                 elif row["INTERACTION"] == "waterbridge":
                     for col in unique_data.values():
                         if "waterbridge" in col:
-                            if row["PROTISDON"] == True:
-                                prot_partner, ligcarbonidx, type, interaction = (
-                                    col.split("_")
-                                )
+                            if row["PROTISDON"]:
+                                prot_partner, ligcarbonidx, type, interaction = col.split("_")
                                 condition = (
                                     (row["Prot_partner"] == prot_partner)
                                     & (int(row["ACCEPTOR_IDX"]) == int(ligcarbonidx))
                                     & (row["INTERACTION"] == interaction)
                                 )
                                 df.at[index, col] = 1 if condition else 0
-                            elif row["PROTISDON"] == False:
-                                prot_partner, ligcarbonidx, type, interaction = (
-                                    col.split("_")
-                                )
+                            elif not row["PROTISDON"]:
+                                prot_partner, ligcarbonidx, type, interaction = col.split("_")
                                 condition = (
                                     (row["Prot_partner"] == prot_partner)
                                     & (int(row["DONOR_IDX"]) == int(ligcarbonidx))
@@ -518,7 +481,6 @@ class BindingModeProcesser:
                             ligidx = parts[1:-3]
                             ligidx = ",".join(ligidx)
                             lig_group = parts[-3]
-                            type = parts[-2]
                             interaction = parts[-1]
                             condition = (
                                 (row["Prot_partner"] == prot_partner)
@@ -552,55 +514,38 @@ class BindingModeProcesser:
                                 parts = col.split("_")
                                 prot_partner = parts[0]
                                 interaction = parts[-1]
-                                condition = (row["Prot_partner"] == prot_partner) & (
-                                    row["INTERACTION"] == interaction
-                                )
+                                condition = (row["Prot_partner"] == prot_partner) & (row["INTERACTION"] == interaction)
                                 df.at[index, col] = 1 if condition else 0
                             else:
                                 continue
                 elif row["INTERACTION"] == "hbond":
-                    if row["PROTISDON"] == True:
+                    if row["PROTISDON"]:
                         for col in unique_data.values():
                             if "hbond" in col:
-                                prot_partner, ligcarbonidx, type, interaction = (
-                                    col.split("_")
-                                )
+                                prot_partner, ligcarbonidx, type, interaction = col.split("_")
                                 condition = (
                                     (row["Prot_partner"] == prot_partner)
-                                    & (
-                                        (str(row["RESNR_LIG"]) + row["RESTYPE_LIG"])
-                                        == ligcarbonidx
-                                    )
+                                    & ((str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]) == ligcarbonidx)
                                     & (row["INTERACTION"] == interaction)
                                 )
                                 df.at[index, col] = 1 if condition else 0
-                    elif row["PROTISDON"] == False:
+                    elif not row["PROTISDON"]:
                         for col in unique_data.values():
                             if "hbond" in col:
-                                prot_partner, ligcarbonidx, type, interaction = (
-                                    col.split("_")
-                                )
+                                prot_partner, ligcarbonidx, type, interaction = col.split("_")
                                 condition = (
                                     (row["Prot_partner"] == prot_partner)
-                                    & (
-                                        ((str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]))
-                                        == ligcarbonidx
-                                    )
+                                    & ((str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]) == ligcarbonidx)
                                     & (row["INTERACTION"] == interaction)
                                 )
                                 df.at[index, col] = 1 if condition else 0
                 elif row["INTERACTION"] == "halogen":
                     for col in unique_data.values():
                         if "halogen" in col:
-                            prot_partner, ligcarbonidx, halogen, interaction = (
-                                col.split("_")
-                            )
+                            prot_partner, ligcarbonidx, halogen, interaction = col.split("_")
                             condition = (
                                 (row["Prot_partner"] == prot_partner)
-                                & (
-                                    (str(row["RESNR_LIG"]) + row["RESTYPE_LIG"])
-                                    == ligcarbonidx
-                                )
+                                & ((str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]) == ligcarbonidx)
                                 & (row["DONORTYPE"] == halogen)
                                 & (row["INTERACTION"] == interaction)
                             )
@@ -611,39 +556,26 @@ class BindingModeProcesser:
                             prot_partner, ligcarbonidx, interaction = col.split("_")
                             condition = (
                                 (row["Prot_partner"] == prot_partner)
-                                & (
-                                    (str(row["RESNR_LIG"]) + row["RESTYPE_LIG"])
-                                    == ligcarbonidx
-                                )
+                                & ((str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]) == ligcarbonidx)
                                 & (row["INTERACTION"] == interaction)
                             )
                             df.at[index, col] = 1 if condition else 0
                 elif row["INTERACTION"] == "waterbridge":
                     for col in unique_data.values():
                         if "waterbridge" in col:
-                            if row["PROTISDON"] == True:
-                                prot_partner, ligcarbonidx, type, interaction = (
-                                    col.split("_")
-                                )
+                            if row["PROTISDON"]:
+                                prot_partner, ligcarbonidx, type, interaction = col.split("_")
                                 condition = (
                                     (row["Prot_partner"] == prot_partner)
-                                    & (
-                                        (str(row["RESNR_LIG"]) + row["RESTYPE_LIG"])
-                                        == ligcarbonidx
-                                    )
+                                    & ((str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]) == ligcarbonidx)
                                     & (row["INTERACTION"] == interaction)
                                 )
                                 df.at[index, col] = 1 if condition else 0
-                            elif row["PROTISDON"] == False:
-                                prot_partner, ligcarbonidx, type, interaction = (
-                                    col.split("_")
-                                )
+                            elif not row["PROTISDON"]:
+                                prot_partner, ligcarbonidx, type, interaction = col.split("_")
                                 condition = (
                                     (row["Prot_partner"] == prot_partner)
-                                    & (
-                                        (str(row["RESNR_LIG"]) + row["RESTYPE_LIG"])
-                                        == ligcarbonidx
-                                    )
+                                    & ((str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]) == ligcarbonidx)
                                     & (row["INTERACTION"] == interaction)
                                 )
                                 df.at[index, col] = 1 if condition else 0
@@ -657,10 +589,7 @@ class BindingModeProcesser:
                             interaction = parts[-1]
                             condition = (
                                 (row["Prot_partner"] == prot_partner)
-                                & (
-                                    (str(row["RESNR_LIG"]) + row["RESTYPE_LIG"])
-                                    == ligidx
-                                )
+                                & ((str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]) == ligidx)
                                 & (row["INTERACTION"] == interaction)
                             )
                             df.at[index, col] = 1 if condition else 0
@@ -671,14 +600,10 @@ class BindingModeProcesser:
                             prot_partner = parts[0]
                             ligidx = parts[1]
                             lig_group = parts[-3]
-                            type = parts[-2]
                             interaction = parts[-1]
                             condition = (
                                 (row["Prot_partner"] == prot_partner)
-                                & (
-                                    (str(row["RESNR_LIG"]) + row["RESTYPE_LIG"])
-                                    == ligidx
-                                )
+                                & ((str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]) == ligidx)
                                 & (row["INTERACTION"] == interaction)
                             )
                             df.at[index, col] = 1 if condition else 0
@@ -692,10 +617,7 @@ class BindingModeProcesser:
                             interaction = parts[-1]
                             condition = (
                                 (row["RESTYPE_LIG"] == special_ligand)
-                                & (
-                                    (str(row["RESNR_LIG"]) + row["RESTYPE_LIG"])
-                                    == ligidx
-                                )
+                                & ((str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]) == ligidx)
                                 & (row["METAL_TYPE"] == metal_type)
                                 & (row["INTERACTION"] == interaction)
                             )

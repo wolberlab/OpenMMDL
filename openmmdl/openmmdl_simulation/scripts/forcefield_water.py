@@ -1,4 +1,3 @@
-import simtk.openmm.app as app
 from openff.toolkit.topology import Molecule
 from openmmforcefields.generators import GAFFTemplateGenerator, SMIRNOFFTemplateGenerator
 from openmm import app
@@ -153,12 +152,12 @@ def generate_forcefield(protein_ff, solvent_ff, add_membrane, smallMoleculeForce
         rdkit_mol (rdkit.Chem.rdchem.Mol): Small molecule to register in the force field.
 
     Returns:
-        simtk.openmm.app.Forcefield: Forcefield with a registered small molecule.
+        openmm.app.ForceField: Forcefield with a registered small molecule.
     """
     old_amber = {"amber99sb.xml", "amber99sbildn.xml", "amber03.xml", "amber10.xml"}
 
     # For older amber forcefields, the additional lipid17.xml is required for templates
-    if add_membrane == True:
+    if add_membrane:
         if protein_ff in old_amber:
             forcefield = app.ForceField(protein_ff, solvent_ff, "amber14/lipid17.xml")
         else:
@@ -174,13 +173,12 @@ def generate_forcefield(protein_ff, solvent_ff, add_membrane, smallMoleculeForce
             )
             forcefield.registerTemplateGenerator(gaff.generator)
         elif smallMoleculeForceField == "smirnoff":
-
             smirnoff = SMIRNOFFTemplateGenerator(
                 molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True),
                 forcefield="openff-2.2.1",
             )
             forcefield.registerTemplateGenerator(smirnoff.generator)
-            
+
     return forcefield
 
 
@@ -198,16 +196,14 @@ def generate_transitional_forcefield(
         rdkit_mol (rdkit.Chem.rdchem.Mol): Small molecule to register in the force field.
 
     Returns:
-        simtk.openmm.app.Forcefield: A transitional forcefield with TIP3P water and a registered small molecule.
+        openmm.app.ForceField: A transitional forcefield with TIP3P water and a registered small molecule.
     """
     old_amber = {"amber99sb.xml", "amber99sbildn.xml", "amber03.xml", "amber10.xml"}
 
     # For older amber forcefields, the additional lipid17.xml is required for templates
-    if add_membrane == True:
+    if add_membrane:
         if protein_ff in old_amber:
-            transitional_forcefield = app.ForceField(
-                protein_ff, "tip3p.xml", "amber14/lipid17.xml"
-            )
+            transitional_forcefield = app.ForceField(protein_ff, "tip3p.xml", "amber14/lipid17.xml")
         else:
             transitional_forcefield = app.ForceField(protein_ff, "amber14/tip3p.xml")
     else:

@@ -1,5 +1,4 @@
 import json
-import re
 import pickle
 import nglview as nv
 import subprocess
@@ -31,6 +30,7 @@ class Visualizer:
     special : str
         Additional selection string for visual emphasis (can be None).
     """
+
     def __init__(self, md, cloud_path, ligname, special):
         self.md = md
         self.cloud = self._load_cloud(cloud_path)
@@ -40,12 +40,12 @@ class Visualizer:
     def _load_cloud(self, cloud_path):
         """
         Loads interaction clouds from a JSON file.
-    
+
         Parameters
         ----------
         cloud_path : str
             Path to the JSON file containing the interaction clouds.
-    
+
         Returns
         -------
         dict
@@ -56,9 +56,7 @@ class Visualizer:
 
         return data
 
-    def visualize(
-        self, receptor_type="protein or nucleic", height="1000px", width="1000px"
-    ):
+    def visualize(self, receptor_type="protein or nucleic", height="1000px", width="1000px"):
         """
         Generates visualization of the trajectory with the interacting waters and interaction clouds.
 
@@ -86,7 +84,7 @@ class Visualizer:
                 sphere_buffer["radius"] += [cloud["radius"]]
             sphere_buffers.append(sphere_buffer)
 
-        with open(f"interacting_waters.pkl", "rb") as f:
+        with open("interacting_waters.pkl", "rb") as f:
             interacting_watersids = pickle.load(f)
 
         view = nv.show_mdanalysis(self.md)
@@ -131,7 +129,7 @@ class Visualizer:
 
 def run_visualization():
     """
-    Runs the visualization notebook in the current directory. 
+    Runs the visualization notebook in the current directory.
     The visualization notebook is copied from the package directory to the current directory and automaticaly started.
     """
     package_dir = os.path.dirname(__file__)
