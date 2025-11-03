@@ -17,6 +17,9 @@ license = { text = "MIT" }
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 requires-python = ">=3.10"
 # Declare any run-time dependencies that should be installed with the package.
@@ -74,3 +77,16 @@ openmmdl_setup = "openmmdl.openmmdl_setup.openmmdlsetup:main"
 openmmdl_simulation = "openmmdl.openmmdl_simulation.openmmdlsimulation:main"
 openmmdl_analysis = "openmmdl.openmmdl_analysis.openmmdlanalysis:main"
 openmmdl_visualization = "openmmdl.openmmdl_analysis.visualization.visualization:run_visualization"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+extend-exclude = [
+    "openmmdl/openmmdl_simulation/tutorial_systems",
+    "openmmdl/tests",
+    "**/*.ipynb",
+]
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E501"]

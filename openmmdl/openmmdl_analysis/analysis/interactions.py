@@ -3,7 +3,7 @@ import pandas as pd
 import MDAnalysis as mda
 from tqdm import tqdm
 from plip.basic import config
-from plip.structure.preparation import PDBComplex, PLInteraction
+from plip.structure.preparation import PDBComplex
 from plip.exchange.report import BindingSiteReport
 from multiprocessing import Pool
 
@@ -12,7 +12,7 @@ config.KEEPMOD = True
 
 class InteractionAnalyzer:
     """
-    Analyzes molecular interactions between a protein and a ligand/peptide 
+    Analyzes molecular interactions between a protein and a ligand/peptide
     throughout an MD trajectory using PLIP (Protein-Ligand Interaction Profiler).
 
     Attributes
@@ -34,6 +34,7 @@ class InteractionAnalyzer:
     interaction_list : pd.DataFrame
         DataFrame storing the extracted interactions across the trajectory.
     """
+
     def __init__(
         self,
         pdb_md,
@@ -59,9 +60,9 @@ class InteractionAnalyzer:
 
         Parameters
         ----------
-        pdb_file : str 
+        pdb_file : str
             The path of the PDB file of the complex.
-        lig_name : str 
+        lig_name : str
             Name of the Ligand in the complex topology that will be analyzed.
 
         Returns
@@ -73,9 +74,7 @@ class InteractionAnalyzer:
         protlig.load_pdb(pdb_file)  # load the pdb file
         for ligand in protlig.ligands:
             if str(ligand.longname) == lig_name:
-                protlig.characterize_complex(
-                    ligand
-                )  # find ligands and analyze interactions
+                protlig.characterize_complex(ligand)  # find ligands and analyze interactions
         sites = {}
         # loop over binding sites
         for key, site in sorted(protlig.interaction_sets.items()):
@@ -95,9 +94,7 @@ class InteractionAnalyzer:
             # of the possible interactions: hydrophobic, hbond, etc. in the considered
             # binding site.
             interactions = {
-                k: [getattr(binding_site, k + "_features")]
-                + getattr(binding_site, k + "_info")
-                for k in keys
+                k: [getattr(binding_site, k + "_features")] + getattr(binding_site, k + "_info") for k in keys
             }
             sites[key] = interactions
 
@@ -109,19 +106,17 @@ class InteractionAnalyzer:
 
         Parameters
         ----------
-        pdb_file : str 
+        pdb_file : str
             The path of the PDB file of the complex.
 
         Returns
         -------
-        dict 
+        dict
             A dictionary of the binding sites and the interactions.
         """
         protlig = PDBComplex()
         protlig.load_pdb(pdb_file)  # load the pdb file
-        protlig.characterize_complex(
-            protlig.ligands[-1]
-        )  # find ligands and analyze interactions
+        protlig.characterize_complex(protlig.ligands[-1])  # find ligands and analyze interactions
         sites = {}
         # loop over binding sites
         for key, site in sorted(protlig.interaction_sets.items()):
@@ -141,30 +136,26 @@ class InteractionAnalyzer:
             # of the possible interactions: hydrophobic, hbond, etc. in the considered
             # binding site.
             interactions = {
-                k: [getattr(binding_site, k + "_features")]
-                + getattr(binding_site, k + "_info")
-                for k in keys
+                k: [getattr(binding_site, k + "_features")] + getattr(binding_site, k + "_info") for k in keys
             }
             sites[key] = interactions
 
         return sites
 
-    def _create_df_from_binding_site(
-        self, selected_site_interactions, interaction_type="hbond"
-    ):
+    def _create_df_from_binding_site(self, selected_site_interactions, interaction_type="hbond"):
         """
         Creates a data frame from a binding site and interaction type.
 
         Parameters
         ----------
-        selected_site_interactions : dict 
+        selected_site_interactions : dict
             Precaluclated interactions from PLIP for the selected site.
         interaction_type : str, optional
             The interaction type of interest (default set to hydrogen bond). Defaults to "hbond".
 
         Returns
         -------
-        pd.DataFrame 
+        pd.DataFrame
             DataFrame with information retrieved from PLIP.
         """
         # check if interaction type is valid:
@@ -180,9 +171,7 @@ class InteractionAnalyzer:
         ]
 
         if interaction_type not in valid_types:
-            print(
-                "\033[1m!!! Wrong interaction type specified. Hbond is chosen by default!!!\033[0m\n"
-            )
+            print("\033[1m!!! Wrong interaction type specified. Hbond is chosen by default!!!\033[0m\n")
             interaction_type = "hbond"
 
         df = pd.DataFrame.from_records(
@@ -201,7 +190,7 @@ class InteractionAnalyzer:
         ----------
         file_path : str
             Filepath of the topology file.
-        new_residue_name : str 
+        new_residue_name : str
             New residue name of the ligand now changed to mimic an amino acid residue.
 
         Returns
@@ -217,7 +206,6 @@ class InteractionAnalyzer:
                 if line.startswith("HETATM") or line.startswith("ATOM"):
                     # Assuming the standard PDB format for simplicity
                     # You may need to adapt this part based on your specific PDB file
-                    atom_name = line[12:16].strip()
                     residue_name = line[17:20].strip()
 
                     # Check if the residue name matches the one to be changed
@@ -241,7 +229,7 @@ class InteractionAnalyzer:
 
         Returns
         -------
-        pd.DataFrame 
+        pd.DataFrame
             A dataframe conatining the interaction data for the processed frame.
         """
         atoms_selected = self.pdb_md.select_atoms(
@@ -250,9 +238,7 @@ class InteractionAnalyzer:
         for num in self.pdb_md.trajectory[(frame) : (frame + 1)]:
             atoms_selected.write(f"processing_frame_{frame}.pdb")
         if self.peptide is None:
-            interactions_by_site = self._retrieve_plip_interactions(
-                f"processing_frame_{frame}.pdb", self.lig_name
-            )
+            interactions_by_site = self._retrieve_plip_interactions(f"processing_frame_{frame}.pdb", self.lig_name)
             index_of_selected_site = -1
             selected_site = list(interactions_by_site.keys())[index_of_selected_site]
 
@@ -286,19 +272,13 @@ class InteractionAnalyzer:
                 result = self._process_frame_special(frame)
                 results_df = pd.concat(result, ignore_index=True)
                 results_df = results_df[results_df["LOCATION"] == "protein.sidechain"]
-                results_df["RESTYPE"] = results_df["RESTYPE"].replace(
-                    ["HIS", "SER", "CYS"], self.lig_name
-                )
-                results_df["LOCATION"] = results_df["LOCATION"].replace(
-                    "protein.sidechain", "ligand"
-                )
+                results_df["RESTYPE"] = results_df["RESTYPE"].replace(["HIS", "SER", "CYS"], self.lig_name)
+                results_df["LOCATION"] = results_df["LOCATION"].replace("protein.sidechain", "ligand")
                 updated_target_idx = []
 
                 for index, row in results_df.iterrows():
                     ligand_special_int_nr = int(row["TARGET_IDX"])
-                    ligand_special_int_nr_atom = combi_lig_special.select_atoms(
-                        f"id {ligand_special_int_nr}"
-                    )
+                    ligand_special_int_nr_atom = combi_lig_special.select_atoms(f"id {ligand_special_int_nr}")
                     for atom in ligand_special_int_nr_atom:
                         atom_name = atom.name
                         # Adjust atom_name based on the specified conditions
@@ -323,9 +303,7 @@ class InteractionAnalyzer:
                 # Concatenate the updated results_df to interaction_list
                 interaction_list = pd.concat([interaction_list, results_df])
         if self.peptide is not None:
-            interactions_by_site = self._retrieve_plip_interactions_peptide(
-                f"processing_frame_{frame}.pdb"
-            )
+            interactions_by_site = self._retrieve_plip_interactions_peptide(f"processing_frame_{frame}.pdb")
             index_of_selected_site = -1
             selected_site = list(interactions_by_site.keys())[index_of_selected_site]
 
@@ -360,26 +338,22 @@ class InteractionAnalyzer:
 
         Parameters
         ----------
-        frame : int 
+        frame : int
             Number of the frame that will be processed.
 
         Returns
         -------
-        list of pd.DataFrame 
+        list of pd.DataFrame
             List of dataframes containing the interaction data for the processed frame with the special ligand.
         """
         res_renaming = ["HIS", "SER", "CYS"]
         interaction_dfs = []
         for res in res_renaming:
             self.pdb_md.trajectory[frame]
-            atoms_selected = self.pdb_md.select_atoms(
-                f"resname {self.lig_name} or resname {self.special}"
-            )
+            atoms_selected = self.pdb_md.select_atoms(f"resname {self.lig_name} or resname {self.special}")
             atoms_selected.write(f"processing_frame_{frame}.pdb")
             self._change_lig_to_residue(f"processing_frame_{frame}.pdb", res)
-            interactions_by_site = self._retrieve_plip_interactions(
-                f"processing_frame_{frame}.pdb", self.special
-            )
+            interactions_by_site = self._retrieve_plip_interactions(f"processing_frame_{frame}.pdb", self.special)
             index_of_selected_site = -1
             selected_site = list(interactions_by_site.keys())[index_of_selected_site]
             interaction_types = ["metal"]
@@ -421,12 +395,12 @@ class InteractionAnalyzer:
 
         Parameters
         ----------
-        df : pd.DataFrame 
+        df : pd.DataFrame
             The input DataFrame with frames that have no interactions.
 
         Returns
         -------
-        pd.DataFrame 
+        pd.DataFrame
             DataFrame with placeholder values in the frames with no interactions.
         """
 
@@ -460,7 +434,7 @@ class InteractionAnalyzer:
 
         Returns
         -------
-        pd.DataFrame 
+        pd.DataFrame
             A DataFrame containing all the protein-ligand interaction data from the whole trajectory.
         """
         if self.dataframe is None:
@@ -469,8 +443,7 @@ class InteractionAnalyzer:
 
             with Pool(processes=self.num_processes) as pool:
                 frame_args = [
-                    (i, self.pdb_md, self.lig_name, self.special, self.peptide)
-                    for i in range(1, self.md_len)
+                    (i, self.pdb_md, self.lig_name, self.special, self.peptide) for i in range(1, self.md_len)
                 ]
 
                 # Initialize the progress bar with the total number of frames
@@ -502,9 +475,7 @@ class InteractionAnalyzer:
             interaction_list = interaction_tmp.drop(interaction_tmp.columns[0], axis=1)
 
         interaction_list["Prot_partner"] = (
-            interaction_list["RESNR"].astype(str)
-            + interaction_list["RESTYPE"]
-            + interaction_list["RESCHAIN"]
+            interaction_list["RESNR"].astype(str) + interaction_list["RESTYPE"] + interaction_list["RESCHAIN"]
         )
 
         interaction_list = self._fill_missing_frames(

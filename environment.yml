@@ -11,7 +11,7 @@ dependencies:
   - sqlite>=3.40
   - pytest>=6.1.2
   - pytest-runner
-  - numpy
+  - numpy~=2.2.6
   - plip
   - requests>=2.28.1
   - rdkit>=2022.03.5

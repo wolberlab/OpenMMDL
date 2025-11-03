@@ -21,19 +21,19 @@ def prepare_ligand(ligand_file, sanitization=False, minimize_molecule=True):
     # Reading of SDF File, converting to rdkit.
     file_name = ligand_file.lower()
     if file_name.endswith(".sdf"):
-        if sanitization == True:
+        if sanitization:
             rdkit_mol = Chem.SDMolSupplier(ligand_file, sanitize=True)
         else:
             rdkit_mol = Chem.SDMolSupplier(ligand_file, sanitize=False)
         for mol in rdkit_mol:
             rdkit_mol = mol
     elif file_name.endswith(".mol") and not file_name.endswith(".mol2"):
-        if sanitization == True:
+        if sanitization:
             rdkit_mol = Chem.rdmolfiles.MolFromMolFile(ligand_file, sanitize=True)
         else:
             rdkit_mol = Chem.rdmolfiles.MolFromMolFile(ligand_file, sanitize=False)
     elif file_name.endswith(".mol2"):
-        if sanitization == True:
+        if sanitization:
             rdkit_mol = Chem.rdmolfiles.MolFromMol2File(ligand_file, sanitize=True)
         else:
             rdkit_mol = Chem.rdmolfiles.MolFromMol2File(ligand_file, sanitize=False)
@@ -44,9 +44,7 @@ def prepare_ligand(ligand_file, sanitization=False, minimize_molecule=True):
 
     # Minimizes the molecule with the MMFF94s Forcefield if selected.
     if minimize_molecule:
-        Chem.rdForceFieldHelpers.MMFFOptimizeMolecule(
-            mol=rdkitmolh, mmffVariant="MMFF94s", maxIters=2000
-        )
+        Chem.rdForceFieldHelpers.MMFFOptimizeMolecule(mol=rdkitmolh, mmffVariant="MMFF94s", maxIters=2000)
 
     # Converting of the ligand from rdkit to an opeenforcefield Molecule object.
     Molecule(rdkitmolh)
@@ -107,15 +105,9 @@ def merge_protein_and_ligand(protein, ligand):
         complex_positions (simtk.unit.quantity.Quantity): The merged positions.
     """
     # combine topologies
-    md_protein_topology = md.Topology.from_openmm(
-        protein.topology
-    )  # using mdtraj for protein top
-    md_ligand_topology = md.Topology.from_openmm(
-        ligand.topology
-    )  # using mdtraj for ligand top
-    md_complex_topology = md_protein_topology.join(
-        md_ligand_topology
-    )  # add them together
+    md_protein_topology = md.Topology.from_openmm(protein.topology)  # using mdtraj for protein top
+    md_ligand_topology = md.Topology.from_openmm(ligand.topology)  # using mdtraj for ligand top
+    md_complex_topology = md_protein_topology.join(md_ligand_topology)  # add them together
 
     complex_topology = md_complex_topology.to_openmm()
 
@@ -125,12 +117,8 @@ def merge_protein_and_ligand(protein, ligand):
     # create an array for storing all atom positions as tupels containing a value and a unit
     # called OpenMM Quantities
     complex_positions = unit.Quantity(np.zeros([total_atoms, 3]), unit=unit.nanometers)
-    complex_positions[: len(protein.positions)] = (
-        protein.positions
-    )  # add protein positions
-    complex_positions[len(protein.positions) :] = (
-        ligand.positions
-    )  # add ligand positions
+    complex_positions[: len(protein.positions)] = protein.positions  # add protein positions
+    complex_positions[len(protein.positions) :] = ligand.positions  # add ligand positions
 
     return complex_topology, complex_positions
 
@@ -197,7 +185,7 @@ def water_padding_solvent_builder(
     # Writing out the protein with padding solvent
     with open(f"solvent_padding_{protein_name}", "w") as outfile:
         PDBFile.writeFile(modeller.topology, modeller.positions, outfile)
-    print(f"Protein with buffer solvent prepared")
+    print("Protein with buffer solvent prepared")
 
     return modeller
 
@@ -268,7 +256,7 @@ def water_absolute_solvent_builder(
     # Writing out the protein with absolute solvent
     with open(f"solvent_absolute_{protein_name}", "w") as outfile:
         PDBFile.writeFile(modeller.topology, modeller.positions, outfile)
-    print(f"Protein with absolute solvent prepared")
+    print("Protein with absolute solvent prepared")
 
     return modeller
 
@@ -371,9 +359,7 @@ def water_conversion(model_water, modeller_pre_conversion, protein_name):
     """
     # Writes out the PDB of the preconverted pdb
     with open(f"pre_converted_{protein_name}", "w") as outfile:
-        PDBFile.writeFile(
-            modeller_pre_conversion.topology, modeller_pre_conversion.positions, outfile
-        )
+        PDBFile.writeFile(modeller_pre_conversion.topology, modeller_pre_conversion.positions, outfile)
 
     # Converts the water from TIP3P to the required Water Model
     modeller_pre_conversion.convertWater(model_water)

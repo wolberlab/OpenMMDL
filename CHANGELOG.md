@@ -15,6 +15,20 @@ The rules for this file:
     * YYYY-MM-DD date format (following ISO 8601)
   * accompany each entry with github issue/PR number (Issue #xyz)
 -->
+## Version 1.1.2
+
+### Authors
+talagayev
+
+### Added
+
+### Fixed
+- Fixes import error in `visualization.ipynb` (2025-10-14, PR #159)
+- Fixes numpy error in due current incompatbility with parmed (2025-10-19, PR #160)
+
+### Changed
+- Transition to `Ruff` linting with `Black` style (2025-10-20, PR #161)
+- 
 ## Version 1.1.1
 
 ### Authors

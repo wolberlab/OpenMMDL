@@ -32,9 +32,20 @@ jobs:
         run: |
           pip install .
 
-      - name: Install linter and formatter
+      - name: Install linting tools
         run: |
-          python -m pip install shyaml flake8 black black-nb flake8-nb
+          python -m pip install shyaml flake8 black black-nb flake8-nb ruff
+
+      - name: Check Ruff formatting
+        id: ruff-format
+        continue-on-error: true
+        run: |
+          ruff format --check .
+
+      - name: Provide Ruff formatting guidance
+        if: steps.ruff-format.outcome == 'failure'
+        run: |
+          echo "::warning::Ruff formatting issues detected. Run 'ruff format .' locally to apply formatting fixes."
 
       - name: Run black formatter
         run: |

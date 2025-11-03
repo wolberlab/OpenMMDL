@@ -10,8 +10,8 @@ from MDAnalysis.analysis import rms, diffusionmap
 
 class RMSDAnalyzer:
     """
-    A class responsible for the Root-Mean-Square Deviation (RMSD) analysis throughout the molecular dynamics simulation. 
-    The class provides functionalities to calculate RMSD over time, compute pairwise RMSD between trajectory frames 
+    A class responsible for the Root-Mean-Square Deviation (RMSD) analysis throughout the molecular dynamics simulation.
+    The class provides functionalities to calculate RMSD over time, compute pairwise RMSD between trajectory frames
     and identify the representative frames within clusters of the binding modes.
 
     Parameters
@@ -26,6 +26,7 @@ class RMSDAnalyzer:
     universe : mda.Universe
         MDAnalysis Universe object initialized with the provided topology and trajectory files.
     """
+
     def __init__(self, top_file, traj_file):
         self.universe = mda.Universe(top_file, traj_file)
 
@@ -37,9 +38,9 @@ class RMSDAnalyzer:
         ----------
         fig_type : str
             Type of the figure to save (e.g., 'png', 'jpg').
-        selection1 : str 
+        selection1 : str
             Selection string for main atom group, also used during alignment.
-        selection2 : list of str, optional 
+        selection2 : list of str, optional
             Selection strings for additional atom groups. Defaults to None.
 
         Returns
@@ -49,9 +50,7 @@ class RMSDAnalyzer:
         """
         self.universe.trajectory[0]
         ref = self.universe
-        rmsd_analysis = rms.RMSD(
-            self.universe, ref, select=selection1, groupselections=selection2
-        )
+        rmsd_analysis = rms.RMSD(self.universe, ref, select=selection1, groupselections=selection2)
         rmsd_analysis.run()
         columns = [selection1, *selection2] if selection2 else [selection1]
         rmsd_df = pd.DataFrame(np.round(rmsd_analysis.rmsd[:, 2:], 2), columns=columns)
@@ -77,37 +76,25 @@ class RMSDAnalyzer:
 
         Parameters
         ----------
-        fig_type : str 
+        fig_type : str
             Type of the figure to save (e.g., 'png', 'jpg').
-        lig : str 
+        lig : str
             Ligand name saved in the above PDB file. Selection string for the MDAnalysis AtomGroup to be investigated, also used during alignment.
-        nucleic : bool, optional 
+        nucleic : bool, optional
             Bool indicating if the receptor to be analyzed contains nucleic acids. Defaults to False.
 
         Returns
         -------
         pairwise_rmsd_prot: np.ndarray
             Numpy array of RMSD values for pairwise protein structures.
-        pairwise_rmsd_lig: np.ndarray 
+        pairwise_rmsd_lig: np.ndarray
             Numpy array of RMSD values for ligand structures.
         """
         if nucleic:
-            pairwise_rmsd_prot = (
-                diffusionmap.DistanceMatrix(self.universe, select="nucleic")
-                .run()
-                .dist_matrix
-            )
+            pairwise_rmsd_prot = diffusionmap.DistanceMatrix(self.universe, select="nucleic").run().dist_matrix
         else:
-            pairwise_rmsd_prot = (
-                diffusionmap.DistanceMatrix(self.universe, select="protein")
-                .run()
-                .dist_matrix
-            )
-        pairwise_rmsd_lig = (
-            diffusionmap.DistanceMatrix(self.universe, f"resname {lig}")
-            .run()
-            .dist_matrix
-        )
+            pairwise_rmsd_prot = diffusionmap.DistanceMatrix(self.universe, select="protein").run().dist_matrix
+        pairwise_rmsd_lig = diffusionmap.DistanceMatrix(self.universe, f"resname {lig}").run().dist_matrix
 
         max_dist = max(np.amax(pairwise_rmsd_lig), np.amax(pairwise_rmsd_prot))
 
@@ -124,37 +111,33 @@ class RMSDAnalyzer:
         ax[0].set_ylabel("frames")
 
         # ligand image
-        img2 = ax[1].imshow(pairwise_rmsd_lig, cmap="viridis", vmin=0, vmax=max_dist)
+        ax[1].imshow(pairwise_rmsd_lig, cmap="viridis", vmin=0, vmax=max_dist)
         ax[1].title.set_text("ligand")
         ax[1].set_xlabel("frames")
 
-        fig.colorbar(
-            img1, ax=ax, orientation="horizontal", fraction=0.1, label="RMSD (Å)"
-        )
+        fig.colorbar(img1, ax=ax, orientation="horizontal", fraction=0.1, label="RMSD (Å)")
 
         plt.savefig(f"./RMSD/RMSD_between_the_frames.{fig_type}")
-        
+
         return pairwise_rmsd_prot, pairwise_rmsd_lig
 
     def calculate_distance_matrix(self, selection):
         """
-        Calculates the pairwise RMSD-based distance matrix for all trajectory frames 
+        Calculates the pairwise RMSD-based distance matrix for all trajectory frames
         for the selected atom selection.
-    
+
         Parameters
         ----------
-        selection : str 
-            Selection string for the atoms (e.g., 'protein', 'resname LIG') 
+        selection : str
+            Selection string for the atoms (e.g., 'protein', 'resname LIG')
             used to compute the RMSD between frames.
-    
+
         Returns
         -------
         np.ndarray
             Numpy array containing RMSD values between all pairs of frames.
         """
-        distances = np.zeros(
-            (len(self.universe.trajectory), len(self.universe.trajectory))
-        )
+        distances = np.zeros((len(self.universe.trajectory), len(self.universe.trajectory)))
         # calculate distance matrix
         for i in tqdm(
             range(len(self.universe.trajectory)),
@@ -169,19 +152,19 @@ class RMSDAnalyzer:
                 rmsd = self._calc_rmsd_2frames(frame_i, frame_j)
                 distances[i][j] = rmsd
                 distances[j][i] = rmsd
-                
+
         return distances
 
     def calculate_representative_frame(self, bmode_frames, DM):
         """
-        Calculates the most representative frame for a bindingmode. 
+        Calculates the most representative frame for a bindingmode.
         This is based uppon the averagwe RMSD of a frame to all other frames in the binding mode.
 
         Parameters
         ----------
-        bmode_frames : list of int 
+        bmode_frames : list of int
             List of frames belonging to a binding mode.
-        DM : np.ndarray 
+        DM : np.ndarray
             Distance matrix of trajectory.
 
         Returns
@@ -214,20 +197,20 @@ class RMSDAnalyzer:
     def _calc_rmsd_2frames(self, ref, frame):
         """
         Calculates the RMSD between a reference and a target frame.
-    
-        This method serves as a wrapper for the `calc_rmsd_2frames_jit` function, 
+
+        This method serves as a wrapper for the `calc_rmsd_2frames_jit` function,
         which dpes the actual RMSD calculation between two sets of coordinates.
-    
+
         Parameters
         ----------
-        ref : np.ndarray 
+        ref : np.ndarray
             Numpy array representing the reference atom positions, shape (N, 3).
-        frame : np.ndarray 
+        frame : np.ndarray
             Numpy array representing the atom positions of the target frame, shape (N, 3).
-    
+
         Returns
         -------
-        float 
+        float
             The RMSD value between the reference and target frame.
         """
         return calc_rmsd_2frames_jit(ref, frame)
@@ -242,7 +225,7 @@ def calc_rmsd_2frames_jit(ref, frame):
     ----------
     ref : np.ndarray
         Numpy array containing the reference atomic coordinates.
-    frame : np.ndarray 
+    frame : np.ndarray
         Numpy array containing the atomic coordinates of the target frame.
 
     Returns

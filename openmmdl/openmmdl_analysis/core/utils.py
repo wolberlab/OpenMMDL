@@ -10,9 +10,9 @@ def update_dict(target_dict, *source_dicts):
 
     Parameters
     ----------
-    target_dict : dict 
+    target_dict : dict
         The dictionary that needs to be updated with new keys and values.
-    source_dicts : dict 
+    source_dicts : dict
         One or multiple dictionaries that are used to update the target dictionary with new keys and values.
 
     Returns
@@ -55,9 +55,9 @@ def update_values(df, new, unique_data, row_name):
     ----------
     df : pd.DataFrame
         Input DataFrame that will be updated.
-    new : pd.DataFrame 
+    new : pd.DataFrame
         The reference DataFrame containing values that are used to update the input DataFrame.
-    unique_data : dict 
+    unique_data : dict
         A dictionary containing keys that represent the specific unique column names that need to be updated in the input DataFrame.
     row_name : str
         The name of the column in the DataFrame used to index into new DataFrame.
@@ -103,6 +103,7 @@ def remove_duplicate_values(data):
 
     return unique_data
 
+
 def read_pdb_as_dataframe(pdb_file):
     """
     Helper function reading a PDB
@@ -142,10 +143,11 @@ def read_pdb_as_dataframe(pdb_file):
 
     return representative_waters
 
+
 def filter_and_parse_pdb(protein_pdb):
     """
     This function reads in a PDB and returns the structure with bioparser.
-    
+
     Parameters
     ----------
     protein_pdb : str
@@ -170,9 +172,7 @@ def filter_and_parse_pdb(protein_pdb):
             if (
                 line.startswith("ATOM")
                 and line[17:20].strip() not in ["HOH", "WAT", "T4P", "T3P"]
-                and line[22:26]
-                .strip()
-                .isdigit()  # Exclude lines with non-numeric sequence identifiers
+                and line[22:26].strip().isdigit()  # Exclude lines with non-numeric sequence identifiers
             )
         ]
 
