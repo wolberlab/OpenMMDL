@@ -21,6 +21,7 @@ The rules for this file:
 talagayev
 
 ### Added
+- Addition of `CHARM2024` forcefield (2025-11-03, PR #163)
 
 ### Fixed
 - Fixes import error in `visualization.ipynb` (2025-10-14, PR #159)
