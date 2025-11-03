@@ -19,7 +19,7 @@ dependencies:
   - pdbfixer
   - openff-toolkit
   - openmmforcefields
-  - openmm>=8.3.0
+  - openmm>=8.3.1
   - cuda-toolkit
   - cuda-python>=11.7.1
   - mdanalysis>=2.3.0
