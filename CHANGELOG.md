@@ -24,6 +24,7 @@ talagayev
 - Addition of `CHARM2024` forcefield (2025-11-03, PR #163)
 
 ### Fixed
+- Adjusted the water selection for `Amber19` (2025-12-08, PR #166)
 - Fixes import error in `visualization.ipynb` (2025-10-14, PR #159)
 - Fixes numpy error in due current incompatbility with parmed (2025-10-19, PR #160)
 
