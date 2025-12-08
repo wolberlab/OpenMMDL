@@ -336,3 +336,9 @@ def test_generate_transitional_forcefield(sample_rdkit_molecule):
         "amber14-all.xml", "tip3p.xml", True
     )
     assert isinstance(transitional_forcefield_4, app.ForceField)
+
+    # Test for amber19
+    transitional_forcefield_5 = generate_transitional_forcefield(
+        "amber19-all.xml", "amber19/tip3p.xml", False, "gaff", sample_rdkit_molecule
+    )
+    assert isinstance(transitional_forcefield_5, app.ForceField)

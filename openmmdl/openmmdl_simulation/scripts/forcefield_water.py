@@ -215,6 +215,8 @@ def generate_transitional_forcefield(
     if add_membrane:
         if protein_ff in old_amber:
             transitional_forcefield = app.ForceField(protein_ff, "tip3p.xml", "amber14/lipid17.xml")
+        elif protein_ff == "amber19-all.xml":
+            transitional_forcefield = app.ForceField(protein_ff, "amber19/tip3p.xml",)
         else:
             transitional_forcefield = app.ForceField(protein_ff, "amber14/tip3p.xml")
     else:
