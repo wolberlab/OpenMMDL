@@ -54,6 +54,29 @@ Select the pdb input file and options for how to model it.
         <option value="smirnoff">SMIRNOFF</option>
     </select></div>
     </div>
+    <div id="gaffVersionRow" class="form-group" hidden>
+        <label for="gaffVersion" class="control-label col-md-2">GAFF Version</label>
+        <div class="col-md-10">
+            <select name="gaffVersion" id="gaffVersion" class="form-control" onchange="optionChanged()"></select>
+        </div>
+    </div>
+
+    <div id="smirnoffConstraintRow" class="form-group" hidden>
+        <label for="openffConstraint" class="control-label col-md-2">SMIRNOFF Mode</label>
+        <div class="col-md-10">
+            <select name="openffConstraint" id="openffConstraint" class="form-control" onchange="optionChanged()">
+                <option value="constrained" selected>Constrained</option>
+                <option value="unconstrained">Unconstrained</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="smirnoffVersionRow" class="form-group" hidden>
+        <label for="openffVersion" class="control-label col-md-2">SMIRNOFF Version</label>
+        <div class="col-md-10">
+            <select name="openffVersion" id="openffVersion" class="form-control" onchange="optionChanged()"></select>
+        </div>
+    </div>
     <div class="form-group">
     <label for="ligandMinimization" class="control-label col-md-2">Ligand Minimization</label>
     <div class="col-md-10"><select name="ligandMinimization" id="ligandMinimization" class="form-control" title="Minimize ligand with MMFF94 rdkit without protein" onchange="optionChanged()">
@@ -96,46 +119,46 @@ var charmmWaterModels = [
 ]
 
 var gaffVersions = [
-        ["gaff-2.2.20", "gaff-2.2.20", true],
-        ["gaff-2.11", "gaff-2.11", false],
-        ["gaff-2.1", "gaff-2.1", false],
-        ["gaff-1.81", "gaff-1.81", false],
-        ["gaff-1.8", "gaff-1.8", false],
-        ["gaff-1.4", "gaff-1.4", false],
+        ["gaff-2.2.20", "GAFF 2.2.20", true],
+        ["gaff-2.11", "GAFF 2.11", false],
+        ["gaff-2.1", "GAFF 2.1", false],
+        ["gaff-1.81", "GAFF 1.81", false],
+        ["gaff-1.8", "GAFF 1.8", false],
+        ["gaff-1.4", "GAFF 1.4", false],
 ]
 
 var openffVersionsDefault = [
-        ["openff_no_water-3.0.0-alpha0.offxml", "openff_no_water-3.0.0-alpha0.offxml", false],
-        ["openff-2.2.1.offxml", "openff-2.2.1.offxml", true],
-        ["openff-2.2.0.offxml", "openff-2.2.0.offxml", false],
-        ["openff-2.1.1.offxml", "openff-2.1.1.offxml", false],
-        ["openff-2.1.0.offxml", "openff-2.1.0.offxml", false],
-        ["openff-2.0.0.offxml", "openff-2.0.0.offxml", false],
-        ["openff-1.3.1.offxml", "openff-1.3.1.offxml", false],
-        ["openff-1.3.0.offxml", "openff-1.3.0.offxml", false],
-        ["openff-1.2.1.offxml", "openff-1.2.1.offxml", false],
-        ["openff-1.2.0.offxml", "openff-1.2.0.offxml", false],
-        ["openff-1.1.1.offxml", "openff-1.1.1.offxml", false],
-        ["openff-1.1.0.offxml", "openff-1.1.0.offxml", false],
-        ["openff-1.0.1.offxml", "openff-1.0.1.offxml", false],
-        ["openff-1.0.0.offxml", "openff-1.0.0.offxml", false],
+        ["openff_no_water-3.0.0-alpha0.offxml", "OpenFF 3.0 no water (ALPHA version – may be unstable)", false],
+        ["openff-2.2.1.offxml", "OpenFF 2.2.1", true],
+        ["openff-2.2.0.offxml", "OpenFF 2.2.0", false],
+        ["openff-2.1.1.offxml", "OpenFF 2.1.1", false],
+        ["openff-2.1.0.offxml", "OpenFF 2.1.0", false],
+        ["openff-2.0.0.offxml", "OpenFF 2.0.0", false],
+        ["openff-1.3.1.offxml", "OpenFF 1.3.1", false],
+        ["openff-1.3.0.offxml", "OpenFF 1.3.0", false],
+        ["openff-1.2.1.offxml", "OpenFF 1.2.1", false],
+        ["openff-1.2.0.offxml", "OpenFF 1.2.0", false],
+        ["openff-1.1.1.offxml", "OpenFF 1.1.1", false],
+        ["openff-1.1.0.offxml", "OpenFF 1.1.0", false],
+        ["openff-1.0.1.offxml", "OpenFF 1.0.1", false],
+        ["openff-1.0.0.offxml", "OpenFF 1.0.0", false],
 ]
 
 var openffVersionsUnconstrained = [
-        ["openff_no_water_unconstrained-3.0.0-alpha0.offxml", "openff_no_water_unconstrained-3.0.0-alpha0.offxml", false],
-        ["openff_unconstrained-2.2.1.offxml", "openff_unconstrained-2.2.1.offxml", true],
-        ["openff_unconstrained-2.2.0.offxml", "openff_unconstrained-2.2.0.offxml", false],
-        ["openff_unconstrained-2.1.1.offxml", "openff_unconstrained-2.1.1.offxml", false],
-        ["openff_unconstrained-2.1.0.offxml", "openff_unconstrained-2.1.0.offxml", false],
-        ["openff_unconstrained-2.0.0.offxml", "openff_unconstrained-2.0.0.offxml", false],
-        ["openff_unconstrained-1.3.1.offxml", "openff_unconstrained-1.3.1.offxml", false],
-        ["openff_unconstrained-1.3.0.offxml", "openff_unconstrained-1.3.0.offxml", false],
-        ["openff_unconstrained-1.2.1.offxml", "openff_unconstrained-1.2.1.offxml", false],
-        ["openff_unconstrained-1.2.0.offxml", "openff_unconstrained-1.2.0.offxml", false],
-        ["openff_unconstrained-1.1.1.offxml", "openff_unconstrained-1.1.1.offxml", false],
-        ["openff_unconstrained-1.1.0.offxml", "openff_unconstrained-1.1.0.offxml", false],
-        ["openff_unconstrained-1.0.1.offxml", "openff_unconstrained-1.0.1.offxml", false],
-        ["openff_unconstrained-1.0.0.offxml", "openff_unconstrained-1.0.0.offxml", false],
+        ["openff_no_water_unconstrained-3.0.0-alpha0.offxml", "OpenFF 3.0 no water unconstrained (ALPHA version – may be unstable)", false],
+        ["openff_unconstrained-2.2.1.offxml", "OpenFF 2.2.1 unconstrained", true],
+        ["openff_unconstrained-2.2.0.offxml", "OpenFF 2.2.0 unconstrained", false],
+        ["openff_unconstrained-2.1.1.offxml", "OpenFF 2.1.1 unconstrained", false],
+        ["openff_unconstrained-2.1.0.offxml", "OpenFF 2.1.0 unconstrained", false],
+        ["openff_unconstrained-2.0.0.offxml", "OpenFF 2.0.0 unconstrained", false],
+        ["openff_unconstrained-1.3.1.offxml", "OpenFF 1.3.1 unconstrained", false],
+        ["openff_unconstrained-1.3.0.offxml", "OpenFF 1.3.0 unconstrained", false],
+        ["openff_unconstrained-1.2.1.offxml", "OpenFF 1.2.1 unconstrained", false],
+        ["openff_unconstrained-1.2.0.offxml", "OpenFF 1.2.0 unconstrained", false],
+        ["openff_unconstrained-1.1.1.offxml", "OpenFF 1.1.1 unconstrained", false],
+        ["openff_unconstrained-1.1.0.offxml", "OpenFF 1.1.0 unconstrained", false],
+        ["openff_unconstrained-1.0.1.offxml", "OpenFF 1.0.1 unconstrained", false],
+        ["openff_unconstrained-1.0.0.offxml", "OpenFF 1.0.0 unconstrained", false],
 ]
 
 var oldAmberWaterModels = [
