@@ -3,6 +3,8 @@ import numpy as np
 import xml.etree.ElementTree as ET
 
 
+COORD_RE = re.compile(r"\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)")
+
 class PharmacophoreGenerator:
     """
     A class for generating pharmacophore features from molecular dynamics (MD) interaction data.
@@ -535,89 +537,85 @@ class PharmacophoreGenerator:
         }
 
     def _generate_pharmacophore_centers(self, interactions):
-        """
-        Generates pharmacophore points for interactions that are points such as hydrophobic and ionic interactions.
-
-        Parameters
-        ----------
-        interactions : list of str
-            List of interactions to generate pharmacophore from.
-
-        Returns
-        -------
-        dict
-            Dict of interactions from which pharmacophore is generated as key and list of coordinates as value.
-        """
-        coord_pattern = re.compile(r"\(([\d.-]+), ([\d.-]+), ([\d.-]+)\)")
         pharmacophore = {}
+    
         for interaction in interactions:
+            # Only rows where this interaction occurs
+            if interaction not in self.df_all.columns:
+                continue
+            df_hits = self.df_all[self.df_all[interaction] == 1]
+            if df_hits.empty:
+                continue
+    
             counter = 0
-            sum_x, sum_y, sum_z = 0, 0, 0
-            for index, row in self.df_all.iterrows():
-                if row[interaction] == 1:
-                    coord_match = coord_pattern.match(row["LIGCOO"])
-                    if coord_match:
-                        x, y, z = map(float, coord_match.groups())
-                        sum_x += x
-                        sum_y += y
-                        sum_z += z
-                        counter += 1
-
-            center_x = round((sum_x / counter), 3)
-            center_y = round((sum_y / counter), 3)
-            center_z = round((sum_z / counter), 3)
-            pharmacophore[interaction] = [center_x, center_y, center_z]
-
+            sum_x = sum_y = sum_z = 0.0
+    
+            for _, row in df_hits.iterrows():
+                m = COORD_RE.search(str(row.get("LIGCOO", "")))
+                if not m:
+                    continue
+                x, y, z = map(float, m.groups())
+                sum_x += x
+                sum_y += y
+                sum_z += z
+                counter += 1
+    
+            # Guard against division by zero (no parseable coords)
+            if counter == 0:
+                continue
+    
+            pharmacophore[interaction] = [
+                round(sum_x / counter, 3),
+                round(sum_y / counter, 3),
+                round(sum_z / counter, 3),
+            ]
+    
         return pharmacophore
+
 
     def _generate_pharmacophore_vectors(self, interactions):
-        """
-        Generates pharmacophore points for interactions that are vectors such as hydrogen bond donors or acceptors.
-
-        Parameters
-        ----------
-        interactions : list of str
-            List of interactions to generate pharmacophore vectors from.
-
-        Returns
-        -------
-        dict
-            Dict of interactions from which pharmacophore is generated as key and list of
-            coordinates as value (first coords are ligand side, second are protein side).
-        """
-        coord_pattern = re.compile(r"\(([\d.-]+), ([\d.-]+), ([\d.-]+)\)")
         pharmacophore = {}
+    
         for interaction in interactions:
+            if interaction not in self.df_all.columns:
+                continue
+            df_hits = self.df_all[self.df_all[interaction] == 1]
+            if df_hits.empty:
+                continue
+    
             counter = 0
-            sum_x, sum_y, sum_z = 0, 0, 0
-            sum_a, sum_b, sum_c = 0, 0, 0
-            for index, row in self.df_all.iterrows():
-                if row[interaction] == 1:
-                    coord_match = coord_pattern.match(row["LIGCOO"])
-                    if coord_match:
-                        x, y, z = map(float, coord_match.groups())
-                        sum_x += x
-                        sum_y += y
-                        sum_z += z
-                    coord_match = coord_pattern.match(row["PROTCOO"])
-                    if coord_match:
-                        a, b, c = map(float, coord_match.groups())
-                        sum_a += a
-                        sum_b += b
-                        sum_c += c
-                        counter += 1
-
-            center_x = round((sum_x / counter), 3)
-            center_y = round((sum_y / counter), 3)
-            center_z = round((sum_z / counter), 3)
-            center_a = round((sum_a / counter), 3)
-            center_b = round((sum_b / counter), 3)
-            center_c = round((sum_c / counter), 3)
+            sum_x = sum_y = sum_z = 0.0
+            sum_a = sum_b = sum_c = 0.0
+    
+            for _, row in df_hits.iterrows():
+                lig_m = COORD_RE.search(str(row.get("LIGCOO", "")))
+                prot_m = COORD_RE.search(str(row.get("PROTCOO", "")))
+    
+                # Only count frames where BOTH ends are available
+                if not lig_m or not prot_m:
+                    continue
+    
+                x, y, z = map(float, lig_m.groups())
+                a, b, c = map(float, prot_m.groups())
+    
+                sum_x += x
+                sum_y += y
+                sum_z += z
+                sum_a += a
+                sum_b += b
+                sum_c += c
+                counter += 1
+    
+            if counter == 0:
+                continue
+    
             pharmacophore[interaction] = [
-                [center_x, center_y, center_z],
-                [center_a, center_b, center_c],
+                [round(sum_x / counter, 3), round(sum_y / counter, 3), round(sum_z / counter, 3)],
+                [round(sum_a / counter, 3), round(sum_b / counter, 3), round(sum_c / counter, 3)],
             ]
+    
         return pharmacophore
+
 
     def _generate_pharmacophore_centers_all_points(self, interactions):
         """

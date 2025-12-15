@@ -121,7 +121,7 @@ class RMSDAnalyzer:
 
         return pairwise_rmsd_prot, pairwise_rmsd_lig
 
-    def calculate_distance_matrix(self, selection):
+    def calculate_distance_matrix(self, selection, n_frames=None):
         """
         Calculates the pairwise RMSD-based distance matrix for all trajectory frames
         for the selected atom selection.
@@ -137,16 +137,20 @@ class RMSDAnalyzer:
         np.ndarray
             Numpy array containing RMSD values between all pairs of frames.
         """
+        if n_frames is None:
+            n_frames = len(self.universe.trajectory)
+        n_frames = min(int(n_frames), len(self.universe.trajectory))
+        
         distances = np.zeros((len(self.universe.trajectory), len(self.universe.trajectory)))
         # calculate distance matrix
         for i in tqdm(
-            range(len(self.universe.trajectory)),
+            range(n_frames),
             desc="\033[1mCalculating distance matrix:\033[0m",
         ):
             self.universe.trajectory[i]
             frame_i = self.universe.select_atoms(selection).positions
             # distances[i] = md.rmsd(traj_aligned, traj_aligned, frame=i)
-            for j in range(i + 1, len(self.universe.trajectory)):
+            for j in range(i + 1, n_frames):
                 self.universe.trajectory[j]
                 frame_j = self.universe.select_atoms(selection).positions
                 rmsd = self._calc_rmsd_2frames(frame_i, frame_j)
