@@ -16,7 +16,7 @@ OpenMMDL @ Molecular Design Lab
 | **License**        | [![License: GPL v2][badge_license]][url_license]|
 
 
-Interface for easy setup and analysis of molecular dynamic (MD) simulations of test
+Interface for easy setup and analysis of molecular dynamic (MD) simulations of
 protein-ligand complexes with **OpenMM**
 
 http://openmmdl.readthedocs.io/
