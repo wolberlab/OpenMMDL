@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from openmmdl.cli import main
+from openmmdl.cli.cli import main
 
 if __name__ == "__main__":
     raise SystemExit(main())
