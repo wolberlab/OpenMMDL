@@ -18,7 +18,7 @@ Now that we have activated the `openmmdl` environment we can start **OpenMMDL Se
 
 .. code-block:: text
 
-    openmmdl_setup
+    openmmdl setup
 
 This will open the **OpenMMDL Setup**, which you can use for the creation of the input files for **OpenMMDL Simulation**.
 
