@@ -28,7 +28,7 @@ Now that we have activated the openmmdl environment we can start OpenMMDL-Setup.
 
 .. code-block:: text
 
-    openmmdl_setup
+    openmmdl setup
 
 
 Selecting Input Files
@@ -184,7 +184,7 @@ For this enter the following command
 
 .. code-block:: text
 
-    openmmdl-simulation -f tutorial_simulation -s OpenMMDL_Simulation.py -t 5wyz-processed_openMMDL.pdb -l 5VF.sdf
+    openmmdl simulation -f tutorial_simulation -s OpenMMDL_Simulation.py -t 5wyz-processed_openMMDL.pdb -l 5VF.sdf
 
 By entering the command we create a folder called tutorial_simulation, where the Output of the MD simulation will appear.
 
