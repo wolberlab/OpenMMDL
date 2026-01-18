@@ -4,11 +4,11 @@
 Introduction
 ------------------
 
-OpenMM enables users to perform molecular dynamics (MD) simulations using AMBER topology (`.prmtop`) and coordinate (`.inpcrd`) files as input. However, obtaining these essential Amber files can be a daunting task for users unfamiliar with Amber commands and Bash scripting. To address this challenge, OpenMMDL-Setup provides a user-friendly interface, streamlining the process of generating the required Amber files for subsequent MD simulations. 
+OpenMM enables users to perform molecular dynamics (MD) simulations using AMBER topology (`.prmtop`) and coordinate (`.inpcrd`) files as input. However, obtaining these essential Amber files can be a daunting task for users unfamiliar with Amber commands and Bash scripting. To address this challenge, OpenMMDL Setup provides a user-friendly interface, streamlining the process of generating the required Amber files for subsequent MD simulations. 
 
-In this tutorial, we will use the mu opioid receptor (PDB ID: 8EFO) as an illustrative example to provide a comprehensive, step-by-step guide on configuring and initiating an MD simulation using Amber files prepared by OpenMMDL-Setup.
+In this tutorial, we will use the mu opioid receptor (PDB ID: 8EFO) as an illustrative example to provide a comprehensive, step-by-step guide on configuring and initiating an MD simulation using Amber files prepared by OpenMMDL Setup.
 
-Starting OpenMMDL-Setup
+Starting OpenMMDL Setup
 ------------------------------
 We start the tutorial by creating an folder to store input files and facilitate the MD simulation.
 
@@ -18,7 +18,7 @@ Create a new folder we enter the following command lines in the terminal:
     
     mkdir openmmdl_amber_tutorial
 
-Copy the receptor and ligand PDB files from `/openmmdl/openmmdl-simulation/tuturial_systems/amber_path/8efo_membrane` into the newly created folder:
+Copy the receptor and ligand PDB files from `/openmmdl/openmmdl_simulation/tutorial_systems/amber_path/8efo_membrane` into the newly created folder:
 
 .. code-block:: text
     
@@ -33,11 +33,11 @@ Activate the OpenMMDL environment by entering the following command:
 
     conda activate openmmdl
 
-Launch OpenMMDL-Setup:
+Launch OpenMMDL Setup:
 
 .. code-block:: text
 
-    openmmdl_setup
+    openmmdl setup
 
 Selecting the Amber Path
 ------------------------------
