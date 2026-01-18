@@ -83,7 +83,7 @@ After installation, activate the conda environment:
 
 Start **OpenMMDL Setup** by executing the command:
 
-    openmmdl_setup
+    openmmdl setup
 
 The **OpenMMDL Setup** interface is displayed through a web browser, but it is still
 a single-user desktop application, not a web application. It should
@@ -118,7 +118,7 @@ Setup. The SDF file name should be consistent with the input in the setup
 
 #### Command line example with ligand
 
-    openmmdl_simulation -f {path/to/folder_name} -t {path/to/topology} -s {path/to/script} -l {path/to/ligand}
+    openmmdl simulation -f {path/to/folder_name} -t {path/to/topology} -s {path/to/script} -l {path/to/ligand}
 
 ## OpenMMDL Analysis
 
@@ -175,7 +175,7 @@ Start the analysis with the following Inputs:
 
 #### Command line example with default values
 
-    openmmdl_analysis -t {path/to/topology} -d {path/to/trajectory} -n {Ligand_name}
+    openmmdl analysis -t {path/to/topology} -d {path/to/trajectory} -n {Ligand_name}
 
 
 #### Visualization
@@ -185,7 +185,7 @@ For the visualization of your complex with interaction pointclouds you can use N
 
 ### Usage
 ```
-openmmdl_visualization
+openmmdl visualization
 ```
 #### Optional:
 --type = Software you wish to visualize openmmdl interactions with. Options: nglview, pymol. Default: nglview
