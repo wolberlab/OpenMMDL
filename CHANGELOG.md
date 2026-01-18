@@ -18,7 +18,7 @@ The rules for this file:
 ## Version 1.1.2
 
 ### Authors
-talagayev
+talagayev, NDoering99
 
 ### Added
 - Addition of `CHARM2024` forcefield (2025-11-03, PR #163)
