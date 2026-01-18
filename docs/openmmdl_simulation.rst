@@ -38,14 +38,14 @@ An example of how a command line of **OpenMMDL Simulation** should look is:
 
 .. code-block:: text
 
-    openmmdl_simulation -f {path/to/folder_name} -t {path/to/topology} -s {path/to/script} -l {path/to/ligand}
+    openmmdl simulation -f {path/to/folder_name} -t {path/to/topology} -s {path/to/script} -l {path/to/ligand}
 
 
 For help during the usage of **OpenMMDL Simulation** use the following command line:
 
 .. code-block:: text
 
-    openmmdl_simulation -h all
+    openmmdl simulation -h all
 
 Running OpenMMDL Simulation test simulations
 ------------------------------
@@ -55,7 +55,7 @@ There are two Systems prepared for the testing of the simulation.
 
 .. code-block:: text
 
-    openmmdl_simulation -f 6b73_testing_simulation -t ~/OpenMMDL/openmmdl_simulation/testing_sytems/6b73_membrane/6b73-moe-processed_openMMDL.pdb -s ~/OpenMMDL/openmmdl_simulation/testing_sytems/6b73_membrane/6b73_simulation.py -l  ~/OpenMMDL/openmmdl_simulation/testing_sytems/6b73_membrane/6b73_lig.sdf
+    openmmdl simulation -f 6b73_testing_simulation -t ~/OpenMMDL/openmmdl_simulation/testing_sytems/6b73_membrane/6b73-moe-processed_openMMDL.pdb -s ~/OpenMMDL/openmmdl_simulation/testing_sytems/6b73_membrane/6b73_simulation.py -l  ~/OpenMMDL/openmmdl_simulation/testing_sytems/6b73_membrane/6b73_lig.sdf
 
 2: A 10ns simulation of the 5WYZ Protein-ligand complex with TIP3P water. To run the testing of 5WYZ enter the following command line:
 
