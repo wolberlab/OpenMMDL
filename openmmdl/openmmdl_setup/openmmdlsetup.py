@@ -1,5 +1,6 @@
 import openmm as mm
 import openmm.unit as unit
+import warnings
 from openmm.app import PDBFile, PDBxFile
 from pdbfixer.pdbfixer import (
     PDBFixer,

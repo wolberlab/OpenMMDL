@@ -18,12 +18,13 @@ The rules for this file:
 ## Version 1.1.2
 
 ### Authors
-talagayev
+talagayev, NDoering99
 
 ### Added
 - Addition of `CHARM2024` forcefield (2025-11-03, PR #163)
 
 ### Fixed
+- Fixed 'warinings' import error for 'openmmdlsetup.py' (2026-01-18, PR #173)
 - Adjusted the water selection for `Amber19` (2025-12-08, PR #166)
 - Fixes import error in `visualization.ipynb` (2025-10-14, PR #159)
 - Fixes numpy error in due current incompatbility with parmed (2025-10-19, PR #160)
