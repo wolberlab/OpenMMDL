@@ -73,7 +73,7 @@ openmmdl = [
 version = { attr = "openmmdl._version.__version__" }
 
 [project.scripts]
-openmmdl = "openmmdl.cli:main"
+openmmdl = "openmmdl.cli.cli:main"
 
 [tool.ruff]
 target-version = "py310"
