@@ -64,25 +64,34 @@ Here is the table of the currently available forcefields and water models for th
 
 .. list-table:: PDBFixer path CHARMM forcefields
    :header-rows: 1
-   :widths: 34 66
+   :widths: 34 34 34
 
    * - Water model
      - CHARMM36 / CHARMM36 2024
+     - CHARMM36 2024
    * - SPC/E
+     - ✓
      - ✓
    * - TIP4P-Ew
      - ✓
+     - ✓
    * - TIP5P
+     - ✓
      - ✓
    * - CHARMM default
      - ✓
+     - ✓
    * - TIP3P-PME-B
+     - ✓
      - ✓
    * - TIP3P-PME-F
      - ✓
+     - ✓
    * - TIP4P-2005
      - ✓
+     - ✓
    * - TIP5P-Ew
+     - ✓
      - ✓
 
 2. The Amber path, where `prmtop` and `inpcrd` files are used the preparation and simulation. This path allows us to either use already prepared `prmtop` and `inpcrd` as an input or create the `prmtop` and `inpcrd` from PDB files of the receptor and ligand.
