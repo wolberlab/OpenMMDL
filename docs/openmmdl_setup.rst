@@ -33,6 +33,30 @@ Here is the table of the currently available forcefields and water models for th
    :figwidth: 725px
    :align: center
 
+.. list-table:: Supported water models by protein force field (PDBFixer path)
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Protein force field
+     - Water models selectable in OpenMMDL Setup
+   * - AMBER19
+     - TIP3P; TIP3P-FB; SPC/E; TIP4P-Ew; TIP4P-FB; OPC3; OPC
+   * - AMBER14
+     - TIP3P; TIP3P-FB; SPC/E; TIP4P-Ew; TIP4P-FB; OPC3; OPC
+   * - AMBER99SB
+     - TIP3P; TIP3P-FB; SPC/E; TIP4P-Ew; TIP5P; OPC3; OPC
+   * - AMBER99SB-ILDN
+     - TIP3P; TIP3P-FB; SPC/E; TIP4P-Ew; TIP5P; OPC3; OPC
+   * - AMBER03
+     - TIP3P; TIP3P-FB; SPC/E; TIP4P-Ew; TIP5P; OPC3; OPC
+   * - AMBER10
+     - TIP3P; TIP3P-FB; SPC/E; TIP4P-Ew; TIP5P; OPC3; OPC
+   * - CHARMM36
+     - CHARMM default; TIP3P-PME-B; TIP3P-PME-F; SPC/E; TIP4P-Ew; TIP4P-2005; TIP5P; TIP5P-Ew
+   * - CHARMM36 2024
+     - CHARMM default; TIP3P-PME-B; TIP3P-PME-F; SPC/E; TIP4P-Ew; TIP4P-2005; TIP5P; TIP5P-Ew
+
+
 2. The Amber path, where `prmtop` and `inpcrd` files are used the preparation and simulation. This path allows us to either use already prepared `prmtop` and `inpcrd` as an input or create the `prmtop` and `inpcrd` from PDB files of the receptor and ligand.
 The tutorial for the Amber path can be found :doc:`here </tutorial_amber_path>`.
 
