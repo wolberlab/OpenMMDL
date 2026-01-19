@@ -29,73 +29,61 @@ The tutorial for the PDBFixer path can be found :doc:`here </tutorial_pdb_path>`
 
 Here is the table of the currently available forcefields and water models for the PDBFixer path: 
 
-.. list-table:: Compatibility matrix (PDBFixer path; ✓ = selectable in UI)
+.. list-table:: Compatibility matrix (PDBFixer path; ✓ = selectable in UI) — AMBER
    :header-rows: 1
-   :widths: 20 20 24 20
-   :class: water-ff-matrix
+   :widths: 28 36 36
 
    * - Water model
-     - | AMBER14 /
-       | AMBER19
-     - | AMBER99SB /
-       | AMBER99SB-ILDN /
-       | AMBER03 /
-       | AMBER10
-     - | CHARMM36 /
-       | CHARMM36 2024
+     - AMBER14 / AMBER19
+     - AMBER99SB / AMBER99SB-ILDN / AMBER03 / AMBER10
    * - TIP3P
      - ✓
      - ✓
-     - —
    * - TIP3P-FB
      - ✓
      - ✓
-     - —
    * - SPC/E
-     - ✓
      - ✓
      - ✓
    * - TIP4P-Ew
      - ✓
      - ✓
-     - ✓
    * - TIP4P-FB
      - ✓
-     - —
      - —
    * - TIP5P
      - —
      - ✓
-     - ✓
    * - OPC3
      - ✓
      - ✓
-     - —
    * - OPC
      - ✓
      - ✓
-     - —
+
+
+.. list-table:: Compatibility matrix (PDBFixer path; ✓ = selectable in UI) — CHARMM
+   :header-rows: 1
+   :widths: 34 66
+
+   * - Water model
+     - CHARMM36 / CHARMM36 2024
+   * - SPC/E
+     - ✓
+   * - TIP4P-Ew
+     - ✓
+   * - TIP5P
+     - ✓
    * - CHARMM default
-     - —
-     - —
      - ✓
    * - TIP3P-PME-B
-     - —
-     - —
      - ✓
    * - TIP3P-PME-F
-     - —
-     - —
      - ✓
    * - TIP4P-2005
-     - —
-     - —
      - ✓
    * - TIP5P-Ew
-     - —
-     - —
      - ✓
-
 
 2. The Amber path, where `prmtop` and `inpcrd` files are used the preparation and simulation. This path allows us to either use already prepared `prmtop` and `inpcrd` as an input or create the `prmtop` and `inpcrd` from PDB files of the receptor and ligand.
 The tutorial for the Amber path can be found :doc:`here </tutorial_amber_path>`.
