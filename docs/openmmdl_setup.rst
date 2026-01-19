@@ -29,33 +29,9 @@ The tutorial for the PDBFixer path can be found :doc:`here </tutorial_pdb_path>`
 
 Here is the table of the currently available forcefields and water models for the PDBFixer path: 
 
-.. list-table:: Supported water models by protein force field (PDBFixer path)
-   :header-rows: 1
-   :widths: 22 75
-
-   * - Protein force field
-     - Water models selectable in OpenMMDL Setup
-   * - AMBER19
-     - TIP3P; TIP3P-FB; SPC/E; TIP4P-Ew; TIP4P-FB; OPC3; OPC
-   * - AMBER14
-     - TIP3P; TIP3P-FB; SPC/E; TIP4P-Ew; TIP4P-FB; OPC3; OPC
-   * - AMBER99SB
-     - TIP3P; TIP3P-FB; SPC/E; TIP4P-Ew; TIP5P; OPC3; OPC
-   * - AMBER99SB-ILDN
-     - TIP3P; TIP3P-FB; SPC/E; TIP4P-Ew; TIP5P; OPC3; OPC
-   * - AMBER03
-     - TIP3P; TIP3P-FB; SPC/E; TIP4P-Ew; TIP5P; OPC3; OPC
-   * - AMBER10
-     - TIP3P; TIP3P-FB; SPC/E; TIP4P-Ew; TIP5P; OPC3; OPC
-   * - CHARMM36
-     - CHARMM default; TIP3P-PME-B; TIP3P-PME-F; SPC/E; TIP4P-Ew; TIP4P-2005; TIP5P; TIP5P-Ew
-   * - CHARMM36 2024
-     - CHARMM default; TIP3P-PME-B; TIP3P-PME-F; SPC/E; TIP4P-Ew; TIP4P-2005; TIP5P; TIP5P-Ew
-
-
 .. list-table:: Compatibility matrix (PDBFixer path; ✓ = selectable in UI)
    :header-rows: 1
-   :widths: 24 24 32 24
+   :widths: 20 20 24 20
 
    * - Water model
      - AMBER14 / AMBER19
