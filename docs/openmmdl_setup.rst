@@ -32,6 +32,7 @@ Here is the table of the currently available forcefields and water models for th
 .. list-table:: Compatibility matrix (PDBFixer path; ✓ = selectable in UI)
    :header-rows: 1
    :widths: 20 20 24 20
+   :class: water-ff-matrix
 
    * - Water model
      - | AMBER14 /
