@@ -67,7 +67,7 @@ Here is the table of the currently available forcefields and water models for th
    :widths: 34 34 34
 
    * - Water model
-     - CHARMM36 / CHARMM36 2024
+     - CHARMM36
      - CHARMM36 2024
    * - SPC/E
      - ✓
