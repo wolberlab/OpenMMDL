@@ -24,7 +24,7 @@ To start the OpenMMDL-Setup we need to activate the openmmdl environment. to do 
 
     conda activate openmmdl
 
-Now that we have activated the openmmdl environment we can start OpenMMDL-Setup. To do this you need to type the following:
+Now that we have activated the openmmdl environment we can start OpenMMDL Setup. To do this you need to type the following:
 
 .. code-block:: text
 
@@ -34,7 +34,7 @@ Now that we have activated the openmmdl environment we can start OpenMMDL-Setup.
 Selecting Input Files
 ------------------------------
 
-This will open the OpenMMDL-Setup, which you can use for the creation of the input files for OpenMMDL-Simulation.
+This will open the OpenMMDL-Setup, which you can use for the creation of the input files for OpenMMDL Simulation.
 
 
 
@@ -135,29 +135,13 @@ In the Water Box we also change the Ionic strenght to 0.15.
    :align: center
 
 Now that we selected the following options we continue to the next page.
+We will simulate the protein for 50 ns.
 
-Adjusting MD Simulation Options
-------------------------------
-
-The final page displays the MD simulation options.
-
-.. figure:: /_static/images/tutorials/PDB_Path/Simulationoptions1.png
+.. figure:: /_static/images/tutorials/PDB_Path/Simulationoptions.png
    :figwidth: 725px
    :align: center
 
-We will simulate the protein for 10 ns.
-
-For this we go to the Simulation Tab and Change Simulation lenght (steps) to 250000.
-
-If you want to have a longer or shorter simulation you can increase or reduce the amount of steps.
-
-.. figure:: /_static/images/tutorials/PDB_Path/Simulationoptions2.png
-   :figwidth: 725px
-   :align: center
-
-Now that we changed the amount of steps we select the Save Script button to save the script for the simulation.
-
-Select the Save Processed PDF File to save the PDB File that will be the input for the MD simulation.
+Select the `Save All Files` to save the prepared PDB File, the created simulation script and ligand SDF that will be the input for the MD simulation.
 
 Running Tutorial OpenMMDL-Simulation
 ------------------------------
