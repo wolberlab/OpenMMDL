@@ -34,10 +34,14 @@ Here is the table of the currently available forcefields and water models for th
    :widths: 20 20 24 20
 
    * - Water model
-     - AMBER14 / AMBER19
-     - | AMBER99SB / AMBER99SB-ILDN
-       | AMBER03 / AMBER10
-     - CHARMM36 / CHARMM36 2024
+     - | AMBER14 /
+       | AMBER19
+     - | AMBER99SB /
+       | AMBER99SB-ILDN /
+       | AMBER03 /
+       | AMBER10
+     - | CHARMM36 /
+       | CHARMM36 2024
    * - TIP3P
      - ✓
      - ✓
