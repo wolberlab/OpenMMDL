@@ -2,15 +2,37 @@
 {% block title %}Select Input File Type{% endblock %}
 {% block startover %}{% endblock %}
 {% block body %}
-<h2>Welcome to OpenMMDL Configuration File Generator!</h2>
-What kind of file or files do you have describing the system to simulate?
-<p/>
-<form method="get" action="{{ url_for('selectFiles') }}">
-    <label class="control-label"><input type="radio" name="type" value="pdb" checked/> PDB</label>
-    <p style="margin-left:50px">A PDB or PDBx/mmCIF file</p>
-    <label class="control-label"><input type="radio" name="type" value="amber"/> Amber</label>
-    <p style="margin-left:50px">Amber prmtop and inpcrd files</p>
-    <input type="submit" value="Continue" class="btn"/>
+
+<div class="om-hero">
+    <h2 class="om-hero-title">Welcome to the OpenMMDL Setup</h2>
+    <div class="om-hero-sub">Choose the input format you have. You will be guided through validation, system preparation, and script generation.</div>
+</div>
+
+<form method="get" action="{{ url_for('selectFiles') }}" class="om-choice-form">
+    <div class="row om-choice-grid">
+        <div class="col-md-6">
+            <label class="om-choice-card">
+                <input type="radio" name="type" value="pdb" checked/>
+                <div class="om-choice-content">
+                    <div class="om-choice-title">PDB / mmCIF</div>
+                    <div class="om-choice-desc">A PDB or PDBx/mmCIF file describing the system.</div>
+                </div>
+            </label>
+        </div>
+        <div class="col-md-6">
+            <label class="om-choice-card">
+                <input type="radio" name="type" value="amber"/>
+                <div class="om-choice-content">
+                    <div class="om-choice-title">Amber topology + coordinates</div>
+                    <div class="om-choice-desc">Amber <code>prmtop</code> and <code>inpcrd</code> files (optionally with ligand information).</div>
+                </div>
+            </label>
+        </div>
+    </div>
+
+    <div class="om-footer-actions">
+        <input type="submit" value="Continue" class="btn"/>
+    </div>
 </form>
 
 {% endblock %}
