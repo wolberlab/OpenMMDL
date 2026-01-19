@@ -29,9 +29,9 @@ The tutorial for the PDBFixer path can be found :doc:`here </tutorial_pdb_path>`
 
 Here is the table of the currently available forcefields and water models for the PDBFixer path: 
 
-.. list-table:: Compatibility matrix (PDBFixer path; ✓ = selectable in UI) — AMBER
+.. list-table:: PDBFixer path AMBER forcefields
    :header-rows: 1
-   :widths: 28 36 36
+   :widths: 26 34 34
 
    * - Water model
      - AMBER14 / AMBER19
@@ -62,7 +62,7 @@ Here is the table of the currently available forcefields and water models for th
      - ✓
 
 
-.. list-table:: Compatibility matrix (PDBFixer path; ✓ = selectable in UI) — CHARMM
+.. list-table:: PDBFixer path CHARMM forcefields
    :header-rows: 1
    :widths: 34 66
 
