@@ -31,7 +31,7 @@ talagayev, NDoering99
 - Fixes numpy error in due current incompatbility with parmed (2025-10-19, PR #160)
 
 ### Changed
-- Changed the entry points to be bundled in 'cli.py'
+- Changed the entry points to be bundled in 'cli.py' (2026-01-19, PR #174)
 - Transition to `Ruff` linting with `Black` style (2025-10-20, PR #161)
 
 ## Version 1.1.1
