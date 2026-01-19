@@ -1,12 +1,25 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>OpenMMDL Setup: {% block title %}{% endblock %}</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+        <!-- Typography (cosmetic) -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+        <!-- Custom theme overrides (keeps Bootstrap 3 for compatibility) -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='openmmdl.css') }}">
+
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
+
+        <!-- Code highlighting (used on the final script page) -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/github.min.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
         <style>
             #progressParent {
@@ -22,7 +35,7 @@
                 height: 100%;
                 top: 0px;
                 left: 0px;
-                background-color: rgba(255,255,255);
+                background-color: rgba(255,255,255,0.75);
                 visibility:hidden;
             }
             #progressMessage {
@@ -65,32 +78,49 @@
         </script>
     </head>
     <body>
-        <div class="container-fluid">
+        <div class="container-fluid om-shell">
             <noscript>
                 <div style='color:red'>
                     <h1>Javascript Disabled</h1>
                     This application requires Javascript to operate.  Please enable Javascript in your browser, then reload this page.
                 </div>
             </noscript>
-            <form method="get" action="{{ url_for('headerControls') }}">
-            <div>
-            <img src="{{ url_for('static', filename='Icon.svg') }}" width='900' margin-left='20%'"/> 
-            <span style="float:right; margin-top:30px">
-            {% block startover %}
-            <input type="submit" class="btn" name="startOver" value="Start Over"/>
-            {% endblock %}
-            <input type="submit" class="btn" name="quit" value="Quit"/>
-            </span>
+
+            <form method="get" action="{{ url_for('headerControls') }}" class="om-header">
+            <div class="om-header-spacer"></div>
+
+            <div class="om-header-center">
+                <img src="{{ url_for('static', filename='Icon.svg') }}"
+                    class="om-logo om-logo-wide"
+                    alt="OpenMMDL"/>
+            </div>
+
+            <div class="om-actions">
+                {% block startover %}
+                <button type="submit" class="btn btn-default btn-sm" name="startOver" value="Start Over">Start Over</button>
+                {% endblock %}
+                <button type="submit" class="btn btn-default btn-sm" name="quit" value="Quit">Quit</button>
             </div>
             </form>
-            {% block body %}{% endblock %}
+
+            <div class="om-page">
+                <div class="om-pagehead">
+                    <div class="om-title">{{ self.title() }}</div>
+                </div>
+                <div class="om-card">
+                    {% block body %}{% endblock %}
+                </div>
+            </div>
         </div>
         <div id="overlay">
             <div id="progressParent"></div>
             <div id="progressMessage">
-                <div style="font-size:xx-large">Processing</div>
-                This may take some time.
+                <div class="om-processing-card">
+                    <div class="om-processing-title">Processing</div>
+                    <div class="om-processing-sub">This may take some time.</div>
+                </div>
             </div>
         </div>
     </body>
 </html>
+

@@ -54,6 +54,29 @@ Select the pdb input file and options for how to model it.
         <option value="smirnoff">SMIRNOFF</option>
     </select></div>
     </div>
+    <div id="gaffVersionRow" class="form-group" hidden>
+        <label for="gaffVersion" class="control-label col-md-2">GAFF Version</label>
+        <div class="col-md-10">
+            <select name="gaffVersion" id="gaffVersion" class="form-control" onchange="optionChanged()"></select>
+        </div>
+    </div>
+
+    <div id="smirnoffConstraintRow" class="form-group" hidden>
+        <label for="openffConstraint" class="control-label col-md-2">SMIRNOFF Mode</label>
+        <div class="col-md-10">
+            <select name="openffConstraint" id="openffConstraint" class="form-control" onchange="optionChanged()">
+                <option value="constrained" selected>Constrained</option>
+                <option value="unconstrained">Unconstrained</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="smirnoffVersionRow" class="form-group" hidden>
+        <label for="openffVersion" class="control-label col-md-2">SMIRNOFF Version</label>
+        <div class="col-md-10">
+            <select name="openffVersion" id="openffVersion" class="form-control" onchange="optionChanged()"></select>
+        </div>
+    </div>
     <div class="form-group">
     <label for="ligandMinimization" class="control-label col-md-2">Ligand Minimization</label>
     <div class="col-md-10"><select name="ligandMinimization" id="ligandMinimization" class="form-control" title="Minimize ligand with MMFF94 rdkit without protein" onchange="optionChanged()">
@@ -95,6 +118,49 @@ var charmmWaterModels = [
         ["TIP5P-Ew", "TIP5P-Ew", false],
 ]
 
+var gaffVersions = [
+        ["gaff-2.2.20", "GAFF 2.2.20", true],
+        ["gaff-2.11", "GAFF 2.11", false],
+        ["gaff-2.1", "GAFF 2.1", false],
+        ["gaff-1.81", "GAFF 1.81", false],
+        ["gaff-1.8", "GAFF 1.8", false],
+        ["gaff-1.4", "GAFF 1.4", false],
+]
+
+var openffVersionsDefault = [
+        ["openff_no_water-3.0.0-alpha0.offxml", "OpenFF 3.0 no water (ALPHA version – may be unstable)", false],
+        ["openff-2.2.1.offxml", "OpenFF 2.2.1", true],
+        ["openff-2.2.0.offxml", "OpenFF 2.2.0", false],
+        ["openff-2.1.1.offxml", "OpenFF 2.1.1", false],
+        ["openff-2.1.0.offxml", "OpenFF 2.1.0", false],
+        ["openff-2.0.0.offxml", "OpenFF 2.0.0", false],
+        ["openff-1.3.1.offxml", "OpenFF 1.3.1", false],
+        ["openff-1.3.0.offxml", "OpenFF 1.3.0", false],
+        ["openff-1.2.1.offxml", "OpenFF 1.2.1", false],
+        ["openff-1.2.0.offxml", "OpenFF 1.2.0", false],
+        ["openff-1.1.1.offxml", "OpenFF 1.1.1", false],
+        ["openff-1.1.0.offxml", "OpenFF 1.1.0", false],
+        ["openff-1.0.1.offxml", "OpenFF 1.0.1", false],
+        ["openff-1.0.0.offxml", "OpenFF 1.0.0", false],
+]
+
+var openffVersionsUnconstrained = [
+        ["openff_no_water_unconstrained-3.0.0-alpha0.offxml", "OpenFF 3.0 no water unconstrained (ALPHA version – may be unstable)", false],
+        ["openff_unconstrained-2.2.1.offxml", "OpenFF 2.2.1 unconstrained", true],
+        ["openff_unconstrained-2.2.0.offxml", "OpenFF 2.2.0 unconstrained", false],
+        ["openff_unconstrained-2.1.1.offxml", "OpenFF 2.1.1 unconstrained", false],
+        ["openff_unconstrained-2.1.0.offxml", "OpenFF 2.1.0 unconstrained", false],
+        ["openff_unconstrained-2.0.0.offxml", "OpenFF 2.0.0 unconstrained", false],
+        ["openff_unconstrained-1.3.1.offxml", "OpenFF 1.3.1 unconstrained", false],
+        ["openff_unconstrained-1.3.0.offxml", "OpenFF 1.3.0 unconstrained", false],
+        ["openff_unconstrained-1.2.1.offxml", "OpenFF 1.2.1 unconstrained", false],
+        ["openff_unconstrained-1.2.0.offxml", "OpenFF 1.2.0 unconstrained", false],
+        ["openff_unconstrained-1.1.1.offxml", "OpenFF 1.1.1 unconstrained", false],
+        ["openff_unconstrained-1.1.0.offxml", "OpenFF 1.1.0 unconstrained", false],
+        ["openff_unconstrained-1.0.1.offxml", "OpenFF 1.0.1 unconstrained", false],
+        ["openff_unconstrained-1.0.0.offxml", "OpenFF 1.0.0 unconstrained", false],
+]
+
 var oldAmberWaterModels = [
         ["TIP3P", "TIP3P", true],
         ["TIP3P-FB", "TIP3P-FB", false],
@@ -113,13 +179,23 @@ var amoebaWaterModels = [
 function optionChanged() {
     // Update UI elements.
 
+    // -------------------------
+    // Forcefield / Water model
+    // -------------------------
     forcefield = document.getElementById("forcefield").value;
     waterSelect = document.getElementById("waterModel");
+
+    // If you inject waterModel from the server, use it once; otherwise keep current selection
     currentWater = waterSelect.value;
+    if (typeof waterModel !== "undefined" && waterModel) {
+        currentWater = waterModel;
+    }
+
     if (forcefield == 'CHARMMPOLAR2019')
         document.getElementById("waterModelRow").hidden = true;
     else {
         document.getElementById("waterModelRow").hidden = false;
+
         if (forcefield == "AMBER14")
             models = newAmberWaterModels;
         else if (forcefield == "AMBER19")
@@ -132,27 +208,165 @@ function optionChanged() {
             models = amoebaWaterModels;
         else
             models = oldAmberWaterModels;
+
         while (waterSelect.length > 0)
-            waterSelect.remove(0)
+            waterSelect.remove(0);
+
         for (i = 0; i < models.length; i++) {
             option = document.createElement("option");
             option.value = models[i][0];
             option.text = models[i][1];
             waterSelect.add(option);
         }
+
         for (i = 0; i < models.length; i++)
             if (models[i][2])
                 waterSelect.selectedIndex = i;
+
         for (i = 0; i < models.length; i++)
             if (currentWater == models[i][0])
                 waterSelect.selectedIndex = i;
     }
+
+    // clear injected waterModel so user changes persist
+    if (typeof waterModel !== "undefined" && waterModel) {
+        waterModel = "";
+    }
+
+    // -------------------------------------
+    // Small molecule FF + versions handling
+    // -------------------------------------
+    smffSelect = document.getElementById("smallMoleculeForceField");
+
+    // If you inject smallMoleculeForceField from the server, apply once
+    if (smffSelect && typeof smallMoleculeForceField !== "undefined" && smallMoleculeForceField) {
+        smffSelect.value = smallMoleculeForceField;
+        smallMoleculeForceField = "";
+    }
+
+    // If nothing is selected (empty), force the HTML default
+    if (smffSelect && !smffSelect.value)
+        smffSelect.value = "gaff";
+
+    if (smffSelect) {
+        smff = smffSelect.value;
+
+        gaffVersionRow = document.getElementById("gaffVersionRow");
+        smirnoffConstraintRow = document.getElementById("smirnoffConstraintRow");
+        smirnoffVersionRow = document.getElementById("smirnoffVersionRow");
+
+        gaffVersionSelect = document.getElementById("gaffVersion");
+        openffConstraintSelect = document.getElementById("openffConstraint");
+        openffVersionSelect = document.getElementById("openffVersion");
+
+        if (smff == "gaff") {
+            if (gaffVersionRow) gaffVersionRow.hidden = false;
+            if (smirnoffConstraintRow) smirnoffConstraintRow.hidden = true;
+            if (smirnoffVersionRow) smirnoffVersionRow.hidden = true;
+
+            if (gaffVersionSelect) {
+                // Use injected smallMoleculeForceFieldVersion once if present; otherwise preserve current selection
+                currentGaff = gaffVersionSelect.value;
+                if (typeof smallMoleculeForceFieldVersion !== "undefined" && smallMoleculeForceFieldVersion)
+                    currentGaff = smallMoleculeForceFieldVersion;
+
+                models = gaffVersions;
+
+                while (gaffVersionSelect.length > 0)
+                    gaffVersionSelect.remove(0);
+
+                for (i = 0; i < models.length; i++) {
+                    option = document.createElement("option");
+                    option.value = models[i][0];
+                    option.text = models[i][1];
+                    gaffVersionSelect.add(option);
+                }
+
+                for (i = 0; i < models.length; i++)
+                    if (models[i][2])
+                        gaffVersionSelect.selectedIndex = i;
+
+                for (i = 0; i < models.length; i++)
+                    if (currentGaff == models[i][0])
+                        gaffVersionSelect.selectedIndex = i;
+            }
+
+            // clear injected version so user changes persist
+            if (typeof smallMoleculeForceFieldVersion !== "undefined" && smallMoleculeForceFieldVersion) {
+                smallMoleculeForceFieldVersion = "";
+            }
+
+        } else if (smff == "smirnoff") {
+            if (gaffVersionRow) gaffVersionRow.hidden = true;
+            if (smirnoffConstraintRow) smirnoffConstraintRow.hidden = false;
+            if (smirnoffVersionRow) smirnoffVersionRow.hidden = false;
+
+            // If we have an injected OpenFF version, set constrained/unconstrained automatically once
+            if (openffConstraintSelect && typeof smallMoleculeForceFieldVersion !== "undefined" && smallMoleculeForceFieldVersion) {
+                if (smallMoleculeForceFieldVersion.indexOf("unconstrained") != -1)
+                    openffConstraintSelect.value = "unconstrained";
+                else
+                    openffConstraintSelect.value = "constrained";
+            }
+
+            mode = "constrained";
+            if (openffConstraintSelect)
+                mode = openffConstraintSelect.value;
+
+            if (mode == "unconstrained")
+                models = openffVersionsUnconstrained;
+            else
+                models = openffVersionsDefault;
+
+            if (openffVersionSelect) {
+                // Use injected smallMoleculeForceFieldVersion once if present; otherwise preserve current selection
+                currentOpenff = openffVersionSelect.value;
+                if (typeof smallMoleculeForceFieldVersion !== "undefined" && smallMoleculeForceFieldVersion)
+                    currentOpenff = smallMoleculeForceFieldVersion;
+
+                while (openffVersionSelect.length > 0)
+                    openffVersionSelect.remove(0);
+
+                for (i = 0; i < models.length; i++) {
+                    option = document.createElement("option");
+                    option.value = models[i][0];
+                    option.text = models[i][1];
+                    openffVersionSelect.add(option);
+                }
+
+                for (i = 0; i < models.length; i++)
+                    if (models[i][2])
+                        openffVersionSelect.selectedIndex = i;
+
+                for (i = 0; i < models.length; i++)
+                    if (currentOpenff == models[i][0])
+                        openffVersionSelect.selectedIndex = i;
+            }
+
+            // clear injected version so user changes persist
+            if (typeof smallMoleculeForceFieldVersion !== "undefined" && smallMoleculeForceFieldVersion) {
+                smallMoleculeForceFieldVersion = "";
+            }
+
+        } else {
+            if (gaffVersionRow) gaffVersionRow.hidden = true;
+            if (smirnoffConstraintRow) smirnoffConstraintRow.hidden = true;
+            if (smirnoffVersionRow) smirnoffVersionRow.hidden = true;
+        }
+    }
+
+    // -------------------------
+    // File labels + submit state
+    // -------------------------
     files = document.getElementById("file").files;
     sdfFile = document.getElementById("sdfFile").files;
+
     document.getElementById("file_label").textContent = (files.length == 0 ? "" : files[0].name);
     document.getElementById("sdfFile_label").textContent = (sdfFile.length == 0 ? "" : sdfFile[0].name);
+
     document.getElementById('continue').disabled = !document.getElementById("file").value;
 }
-optionChanged()
+
+optionChanged();
 </script>
 {% endblock %}

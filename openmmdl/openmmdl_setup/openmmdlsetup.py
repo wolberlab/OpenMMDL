@@ -1,5 +1,6 @@
 import openmm as mm
 import openmm.unit as unit
+import warnings
 from openmm.app import PDBFile, PDBxFile
 from pdbfixer.pdbfixer import (
     PDBFixer,
@@ -107,6 +108,12 @@ def configureFiles():
         session["ml_forcefield"] = request.form.get("ml_forcefield", "")
         session["waterModel"] = request.form.get("waterModel", "")
         session["smallMoleculeForceField"] = request.form.get("smallMoleculeForceField", "")
+        smallMoleculeFF = session["smallMoleculeForceField"]
+        if smallMoleculeFF == "smirnoff":
+            session["smallMoleculeForceFieldVersion"] = request.form.get("openffVersion", "")
+        else:
+            # Treat "" the same as GAFF (because GAFF is your UI default)
+            session["smallMoleculeForceFieldVersion"] = request.form.get("gaffVersion", "")
         session["ligandMinimization"] = request.form.get("ligandMinimization", "")
         session["ligandSanitization"] = request.form.get("ligandSanitization", "")
         session["sdfFile"] = uploadedFiles["sdfFile"][0][1]
@@ -1069,6 +1076,7 @@ os.chdir(outputDir)"""
                 script.append('ligand_name = "UNK"')
                 script.append("minimization = %s" % session["ligandMinimization"])
                 script.append("smallMoleculeForceField = '%s'" % session["smallMoleculeForceField"])
+                script.append("smallMoleculeForceFieldVersion = '%s'" % session["smallMoleculeForceFieldVersion"])
                 script.append("sanitization = %s" % session["ligandSanitization"])
             water = session["waterModel"]
     elif fileType == "amber":
@@ -1305,8 +1313,8 @@ water_selected = water_forcefield_selection(water=water,forcefield_selection=ff_
 model_water = water_model_selection(water=water,forcefield_selection=ff_selection(ff))
 print("Forcefield and Water Model Selected")
 if add_membrane:
-    transitional_forcefield = generate_transitional_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, rdkit_mol=ligand_prepared)
-forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, rdkit_mol=ligand_prepared)
+    transitional_forcefield = generate_transitional_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=ligand_prepared)
+forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=ligand_prepared)
 complex_topology, complex_positions = merge_protein_and_ligand(protein_pdb, omm_ligand)
 print("Complex topology has", complex_topology.getNumAtoms(), "atoms.")     """
             )
@@ -1319,16 +1327,16 @@ water_selected = water_forcefield_selection(water=water,forcefield_selection=ff_
 model_water = water_model_selection(water=water,forcefield_selection=ff_selection(ff))
 print("Forcefield and Water Model Selected")
 if water_selected != None:
-    forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, rdkit_mol=None) 
+    forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=None) 
 else:
     forcefield = app.ForceField(forcefield_selected)    
 if add_membrane:
-        transitional_forcefield = generate_transitional_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, rdkit_mol=None)     """
+        transitional_forcefield = generate_transitional_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=None)     """
             )
         if session["sdfFile"] == "":
             script.append(
                 """
-forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, rdkit_mol=None)        
+forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=None)        
 modeller = app.Modeller(protein_pdb.topology, protein_pdb.positions)
 if add_membrane:
     membrane_builder(ff, model_water, forcefield, transitional_forcefield, protein_pdb, modeller, membrane_lipid_type, membrane_padding, membrane_positive_ion, membrane_negative_ion, membrane_ionicstrength, protein)

@@ -50,12 +50,12 @@ Application
 An example of how a command line input for **OpenMMDL Analysis** should look like is:
 
 .. code-block:: text
-    openmmdl_analysis -t topology.pdb -d trajectory.dcd -l ligand.sdf -n 'LIG'
+    openmmdl analysis -t topology.pdb -d trajectory.dcd -l ligand.sdf -n 'LIG'
 
 If you need help with the command line input, you can always just use:
 
 .. code-block:: text
-    openmmdl_analysis -h all
+    openmmdl analysis -h all
 
 Results
 ------------------------------
@@ -110,7 +110,7 @@ Furthermore the visualization will display all waters that are involved in formi
 Open the visualization using the following command:
 
 .. code-block:: text
-    openmmdl_visualization
+    openmmdl visualization
 
 The command will open a prepared jupyter notebook in your browser.
 You will need to edit the following variables in the notebook (please note that the paths to the files need to be the absolute file paths):
