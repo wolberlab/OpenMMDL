@@ -104,6 +104,16 @@ def MDanalysis_conversion(
         dims = np.asarray(dims[:3], dtype=float)
         return np.all(np.isfinite(dims)) and np.all(dims > 0.0)
 
+    def _can_unwrap(ag):
+        """unwrap() needs fragments -> fragments needs bonds."""
+        if ag.n_atoms == 0:
+            return False
+        try:
+            _ = ag.fragments  # triggers NoDataError if no bonds
+            return True
+        except Exception:
+            return False
+
     def reimage_to_reference(mobile_ag, ref_ag):
         """
         Translate mobile_ag so its COM is minimum-image to ref_ag COM.
@@ -185,12 +195,14 @@ def MDanalysis_conversion(
 
         # Make protein whole, keep chains together
         if protein.n_atoms:
-            transforms.append(trans.unwrap(protein))
+            if _can_unwrap(protein):
+                transforms.append(trans.unwrap(protein))
             transforms.append(reimage_segments_to_reference(protein))
 
         # Keep ligand in same protein image
         if lig.n_atoms and protein.n_atoms:
-            transforms.append(trans.unwrap(lig))
+            if _can_unwrap(lig):
+                transforms.append(trans.unwrap(lig))
             transforms.append(reimage_to_reference(lig, protein))
 
         # Keep lipids around protein image (optional)
