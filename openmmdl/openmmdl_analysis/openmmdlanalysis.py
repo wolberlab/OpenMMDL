@@ -11,6 +11,7 @@ import cairosvg
 import matplotlib
 import pandas as pd
 import rdkit
+from contextlib import contextmanager
 from plip.basic import config
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -45,8 +46,6 @@ from openmmdl.openmmdl_analysis.core.utils import update_dict, update_values
 
 
 warnings.filterwarnings("ignore")
-
-from contextlib import contextmanager
 
 
 @contextmanager
