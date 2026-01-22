@@ -92,7 +92,7 @@ def main():
             r"   '. \_/``'.'  /   )       \       / |  |    |  ||  |      |  ||  |      |  ||       .'    |        \ ",
             r"     '-----'    `---'        `'-..-'  '--'    '--''--'      '--''--'      '--''-----'`      `--------` ",
             r"              Prepare and Perform OpenMM Protein-Ligand MD Simulations                                 ",
-            r"                                     Version 1.1.0                                                     ",
+            r"                                     Version 1.2.0                                                     ",
         ]
     )
     print(logo)
