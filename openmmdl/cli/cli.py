@@ -3,9 +3,9 @@ from __future__ import annotations
 import argparse
 import importlib
 import sys
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
-COMMANDS: Dict[str, LeafCommand] = {
+COMMANDS: Dict[str, tuple[str, str]] = {
     "setup": (
         "openmmdl.openmmdl_setup.openmmdlsetup:main",
         "Start the OpenMMDL setup UI (prepare inputs for simulation)",
