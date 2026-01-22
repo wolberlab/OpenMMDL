@@ -41,9 +41,9 @@ def mdtraj_conversion(pdb_file, mdtraj_output):
         prot_idx = top.select("protein")
         if prot_idx.size > 0:
             prot = traj.atom_slice(prot_idx)
-            com = md.compute_center_of_mass(prot)   # (n_frames, 3)
-            box = traj.unitcell_lengths             # (n_frames, 3)
-            shift = (box * 0.5) - com               # move protein COM to box center
+            com = md.compute_center_of_mass(prot)  # (n_frames, 3)
+            box = traj.unitcell_lengths  # (n_frames, 3)
+            shift = (box * 0.5) - com  # move protein COM to box center
             traj.xyz = traj.xyz + shift[:, None, :]
 
         # Image molecules into the primary unit cell (anchored for multichain)
@@ -118,6 +118,7 @@ def MDanalysis_conversion(
         """
         Translate mobile_ag so its COM is minimum-image to ref_ag COM.
         """
+
         def _transform(ts):
             if mobile_ag.n_atoms == 0 or ref_ag.n_atoms == 0 or not _has_pbc(ts):
                 return ts
@@ -136,6 +137,7 @@ def MDanalysis_conversion(
         Translate each residue so its COM is minimum-image to ref_ag COM.
         Useful for lipids to keep membrane around the protein image.
         """
+
         def _transform(ts):
             if residue_ag.n_atoms == 0 or ref_ag.n_atoms == 0 or not _has_pbc(ts):
                 return ts
@@ -157,8 +159,10 @@ def MDanalysis_conversion(
         """
         segs = list(protein_ag.segments)
         if len(segs) <= 1:
+
             def _noop(ts):
                 return ts
+
             return _noop
 
         ref = segs[0].atoms
@@ -282,7 +286,8 @@ def MDanalysis_conversion(
             tmp = "centered_traj_aligned_tmp.dcd"
 
             align.AlignTraj(
-                mob, ref,
+                mob,
+                ref,
                 select="protein and name CA",
                 weights="mass",
                 filename=tmp,
@@ -311,7 +316,8 @@ def MDanalysis_conversion(
             tmp = "prot_lig_traj_aligned_tmp.dcd"
 
             align.AlignTraj(
-                mob, ref,
+                mob,
+                ref,
                 select="protein and name CA",
                 weights="mass",
                 filename=tmp,
@@ -336,7 +342,8 @@ def MDanalysis_conversion(
             tmp = "centered_traj_aligned_tmp.xtc"
 
             align.AlignTraj(
-                mob, ref,
+                mob,
+                ref,
                 select="protein and name CA",
                 weights="mass",
                 filename=tmp,
@@ -365,7 +372,8 @@ def MDanalysis_conversion(
             tmp = "prot_lig_traj_aligned_tmp.xtc"
 
             align.AlignTraj(
-                mob, ref,
+                mob,
+                ref,
                 select="protein and name CA",
                 weights="mass",
                 filename=tmp,

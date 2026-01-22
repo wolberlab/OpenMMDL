@@ -140,7 +140,7 @@ class RMSDAnalyzer:
         if n_frames is None:
             n_frames = len(self.universe.trajectory)
         n_frames = min(int(n_frames), len(self.universe.trajectory))
-        
+
         distances = np.zeros((len(self.universe.trajectory), len(self.universe.trajectory)))
         # calculate distance matrix
         for i in tqdm(

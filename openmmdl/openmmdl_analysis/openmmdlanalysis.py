@@ -48,6 +48,7 @@ warnings.filterwarnings("ignore")
 
 from contextlib import contextmanager
 
+
 @contextmanager
 def pushd(path: str):
     old = os.getcwd()
@@ -57,6 +58,7 @@ def pushd(path: str):
         yield
     finally:
         os.chdir(old)
+
 
 _FLOAT_RE = re.compile(r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?")
 
@@ -213,7 +215,7 @@ def main():
     ]
 
     run_root = os.getcwd()
-    
+
     args = parser.parse_args()
     if input_formats[0] not in args.topology and input_formats[4] not in args.topology:
         print("Topology is missing, try the absolute path")
@@ -402,17 +404,16 @@ def main():
     complex_pdb = os.path.join(run_root, "complex.pdb")
     lig_no_h_pdb = os.path.join(run_root, "lig_no_h.pdb")
 
-    
     for schema in ("residue", "ligand"):
         outdir = f"BindingModes_{schema}"
         print(f"\033[1mRunning {schema} bindig mode analysis\033[0m")
-    
+
         # IMPORTANT: fresh copy for each schema run
         interaction_list = interaction_list_raw.copy(deep=True)
-    
+
         with pushd(outdir):
             # Running with Residues
-            bm_res  = BindingModeProcesser(
+            bm_res = BindingModeProcesser(
                 pdb_md,
                 ligand,
                 peptide,
@@ -423,95 +424,101 @@ def main():
                 total_frames,
                 schema,
             )
-        
+
             interaction_list = bm_res.interaction_list
             interactions_all = bm_res.interactions_all
             unique_data = bm_res.unique_data
             interactions_all.to_csv("df_all.csv")  # Saving the dataframe
-        
+
             # Group by 'FRAME' and transform each group to set all values to 1 if there is at least one 1 in each column
-            grouped_frames_treshold = interaction_list.groupby("FRAME", as_index=False)[list(unique_data.values())].max()
+            grouped_frames_treshold = interaction_list.groupby("FRAME", as_index=False)[
+                list(unique_data.values())
+            ].max()
             grouped_frames_treshold = grouped_frames_treshold.set_index("FRAME", drop=False)
             update_values(interaction_list, grouped_frames_treshold, unique_data, "FRAME")
-        
+
             # Change the FRAME column value type to int
             grouped_frames_treshold["FRAME"] = grouped_frames_treshold["FRAME"].astype(int)
-        
+
             # Extract all columns except 'FRAME' and the index column
             selected_columns = grouped_frames_treshold.columns[1:-1]
-        
+
             # Create a list of lists with the values from selected columns for each row
-            treshold_result_list = [row[selected_columns].values.tolist() for _, row in grouped_frames_treshold.iterrows()]
-        
+            treshold_result_list = [
+                row[selected_columns].values.tolist() for _, row in grouped_frames_treshold.iterrows()
+            ]
+
             # Calculate the occurrences of each list in the result_list
             # Create a new column 'fingerprint' in the DataFrame
             grouped_frames_treshold["fingerprint"] = None
-        
+
             # Set the 'fingerprint' column values based on the corresponding index in result_list
             for index, fingerprint_value in enumerate(treshold_result_list, 1):
                 grouped_frames_treshold.at[index, "fingerprint"] = fingerprint_value
-        
+
             # Assuming your original DataFrame is named 'df'
             # First, we'll create a new column 'Binding_fingerprint_hbond'
             grouped_frames_treshold["Binding_fingerprint_treshold"] = ""
-        
+
             # Dictionary to keep track of encountered fingerprints and their corresponding labels
             treshold_fingerprint_dict = {}
-        
+
             # Counter to generate the labels (Hbond_Binding_1, Hbond_Binding_2, etc.)
             label_counter = 1
-        
+
             # Iterate through the rows and process the 'fingerprint' column
             for index, row in grouped_frames_treshold.iterrows():
                 fingerprint = tuple(row["fingerprint"])
-        
+
                 # Check if the fingerprint has been encountered before
                 if fingerprint in treshold_fingerprint_dict:
-                    grouped_frames_treshold.at[index, "Binding_fingerprint_treshold"] = treshold_fingerprint_dict[fingerprint]
+                    grouped_frames_treshold.at[index, "Binding_fingerprint_treshold"] = treshold_fingerprint_dict[
+                        fingerprint
+                    ]
                 else:
                     # Assign a new label if the fingerprint is new
                     label = f"Binding_Mode_{label_counter}"
                     treshold_fingerprint_dict[fingerprint] = label
                     grouped_frames_treshold.at[index, "Binding_fingerprint_treshold"] = label
                     label_counter += 1
-        
+
             # Group the DataFrame by the 'Binding_fingerprint_hbond' column and create the dictionary of the fingerprints
             fingerprint_dict = grouped_frames_treshold["Binding_fingerprint_treshold"].to_dict()
             combined_dict = {"all": []}
             for key, value in fingerprint_dict.items():
                 combined_dict["all"].append(value)
-        
+
             # Generate Markov state figures of the binding modes
             markov_analysis = MarkovChainAnalysis(min_transition)
             markov_analysis.generate_transition_graph(total_frames, combined_dict, fig_type)
             print(f"\033[1m{schema} bindig mode: markov state figure generated\033[0m")
-        
+
             # Get the top 10 nodes with the most occurrences
             node_occurrences = {node: combined_dict["all"].count(node) for node in set(combined_dict["all"])}
             top_10_nodes = sorted(node_occurrences, key=node_occurrences.get, reverse=True)[:10]
             top_10_nodes_with_occurrences = {node: node_occurrences[node] for node in top_10_nodes}
-        
+
             # Initialize an empty dictionary to store the result
             columns_with_value_1 = {}
-        
+
             for treshold, row_count in top_10_nodes_with_occurrences.items():
                 for i in range(1, row_count + 1):
                     # Get the row corresponding to the treshold value
-                    row = grouped_frames_treshold.loc[grouped_frames_treshold["Binding_fingerprint_treshold"] == treshold].iloc[
-                        i - 1
-                    ]
-        
+                    row = grouped_frames_treshold.loc[
+                        grouped_frames_treshold["Binding_fingerprint_treshold"] == treshold
+                    ].iloc[i - 1]
+
                     # Extract column names with value 1 in that row
                     columns_with_1 = row[row == 1].index.tolist()
-        
+
                     # Convert the list to a set to remove duplicates
                     columns_set = set(columns_with_1)
-        
+
                     # Add the columns to the dictionary under the corresponding threshold
                     if treshold not in columns_with_value_1:
                         columns_with_value_1[treshold] = set()
                     columns_with_value_1[treshold].update(columns_set)
-        
+
             # Generate an Figure for each of the binding modes with rdkit Drawer with the atoms interacting highlighted by colors
             try:
                 if peptide is None:
@@ -544,13 +551,15 @@ def main():
                             highlighted_pication,
                             highlighted_metal,
                         ) = interaction_processor.highlight_numbers(split_data, starting_idx=lig_index)
-        
+
                         # Generate a dictionary for hydrogen bond acceptors
                         hbond_acceptor_dict = interaction_processor.generate_interaction_dict(
                             "hbond_acceptor", highlighted_hbond_acceptor
                         )
                         # Generate a dictionary for hydrogen bond acceptors and donors
-                        hbond_both_dict = interaction_processor.generate_interaction_dict("hbond_both", highlighted_hbond_both)
+                        hbond_both_dict = interaction_processor.generate_interaction_dict(
+                            "hbond_both", highlighted_hbond_both
+                        )
                         # Generate a dictionary for hydrogen bond donors
                         hbond_donor_dict = interaction_processor.generate_interaction_dict(
                             "hbond_donor", highlighted_hbond_donor
@@ -564,7 +573,9 @@ def main():
                             "waterbridge", highlighted_waterbridge
                         )
                         # Generate a dictionary for pistacking
-                        pistacking_dict = interaction_processor.generate_interaction_dict("pistacking", highlighted_pistacking)
+                        pistacking_dict = interaction_processor.generate_interaction_dict(
+                            "pistacking", highlighted_pistacking
+                        )
                         # Generate a dictionary for halogen interactions
                         halogen_dict = interaction_processor.generate_interaction_dict("halogen", highlighted_halogen)
                         # Generate a dictionary for negative ionizables
@@ -572,10 +583,12 @@ def main():
                         # Generate a dictionary for negative ionizables
                         pi_dict = interaction_processor.generate_interaction_dict("pi", highlighted_pi)
                         # Generate a dictionary for pication
-                        pication_dict = interaction_processor.generate_interaction_dict("pication", highlighted_pication)
+                        pication_dict = interaction_processor.generate_interaction_dict(
+                            "pication", highlighted_pication
+                        )
                         # Generate a dictionary for metal interactions
                         metal_dict = interaction_processor.generate_interaction_dict("metal", highlighted_metal)
-        
+
                         # Call the function to update hbond_donor_dict with values from other dictionaries
                         update_dict(
                             hbond_donor_dict,
@@ -590,7 +603,7 @@ def main():
                             pication_dict,
                             metal_dict,
                         )
-        
+
                         # Convert the highlight_atoms to int type for rdkit drawer
                         highlight_atoms = [
                             int(x)
@@ -607,7 +620,7 @@ def main():
                             + highlighted_metal
                         ]
                         highlight_atoms = list(set(highlight_atoms))
-        
+
                         # Convert the RDKit molecule to SVG format with atom highlights
                         drawer = rdMolDraw2D.MolDraw2DSVG(600, 600)
                         drawer.DrawMolecule(
@@ -617,22 +630,22 @@ def main():
                         )
                         drawer.FinishDrawing()
                         svg = drawer.GetDrawingText().replace("svg:", "")
-        
+
                         # Save the SVG to a file
                         with open(f"{binding_mode}.svg", "w") as f:
                             f.write(svg)
-        
+
                         # Convert the svg to an png
                         cairosvg.svg2png(url=f"{binding_mode}.svg", write_to=f"{binding_mode}.png")
-        
+
                         # Generate the interactions legend and combine it with the ligand png
                         image_merger = FigureMerger(binding_mode, occurrence_percent, split_data, merged_image_paths)
                         merged_image_paths = image_merger.create_and_merge_images()
-        
+
                     # Create Figure with all Binding modes
                     figure_arranger = FigureArranger(merged_image_paths, "all_binding_modes_arranged.png")
                     figure_arranger.arranged_figure_generation()
-        
+
                     generator = LigandImageGenerator(
                         ligand,
                         complex_pdb,
@@ -644,9 +657,9 @@ def main():
                     print(f"\033[1m{schema} bindig mode: Binding mode figure generated\033[0m")
             except Exception:
                 print("Ligand could not be recognized, use the -l option")
-        
+
             df_all = pd.read_csv("df_all.csv")
-        
+
             pham_generator = PharmacophoreGenerator(df_all, ligand)
             # get the top 10 bindingmodes with the most occurrences
             binding_modes = grouped_frames_treshold["Binding_fingerprint_treshold"].str.split("\n")
@@ -663,8 +676,7 @@ def main():
             }
             if generate_representative_frame:
                 DM = rmsd_analyzer.calculate_distance_matrix(
-                    f"protein or nucleic or resname {ligand} or resname {special_ligand}",
-                    n_frames=md_len - 1
+                    f"protein or nucleic or resname {ligand} or resname {special_ligand}", n_frames=md_len - 1
                 )
                 modes_to_process = top_10_binding_modes.index
                 for mode in tqdm(modes_to_process):
@@ -693,7 +705,9 @@ def main():
                     trajsaver.save_frame(rep_frame, f"./Binding_Modes_Markov_States/{b_mode}.pdb")
                     if generate_pml:
                         filtered_df_all = df_all[df_all["FRAME"] == rep_frame]
-                        filtered_df_bindingmodes = grouped_frames_treshold[grouped_frames_treshold["FRAME"] == rep_frame]
+                        filtered_df_bindingmodes = grouped_frames_treshold[
+                            grouped_frames_treshold["FRAME"] == rep_frame
+                        ]
                         bindingmode_dict = {}
                         for index, row in filtered_df_bindingmodes.iterrows():
                             for column in filtered_df_bindingmodes.columns:
@@ -711,54 +725,54 @@ def main():
                                             }  # Initialize a nested dictionary for each key if not already present
                                         for index2, row2 in filtered_df_all.iterrows():
                                             if row2[column] == 1:
-                                                lig_xyz  = parse_xyz(row2["LIGCOO"])
+                                                lig_xyz = parse_xyz(row2["LIGCOO"])
                                                 prot_xyz = parse_xyz(row2["PROTCOO"])
 
                                                 if lig_xyz is None or prot_xyz is None:
                                                     continue
-                                                
+
                                                 bindingmode_dict[column]["LIGCOO"].append(lig_xyz)
                                                 bindingmode_dict[column]["PROTCOO"].append(prot_xyz)
-                                                
+
                         pham_generator.generate_bindingmode_pharmacophore(bindingmode_dict, b_mode)
-        
+
                 print(f"\033[1m {schema} bindig mode: Binding mode pdb files saved\033[0m")
-        
+
             waterbridge_barcodes = {}
             barcode_gen = BarcodeGenerator(df_all)
             interaction_types = barcode_gen.interactions
             for waterbridge_interaction in interaction_types["waterbridge"]:
                 barcode = barcode_gen.generate_barcode(waterbridge_interaction)
                 waterbridge_barcodes[waterbridge_interaction] = barcode
-        
+
             # Initialize BarcodePlotter
             barcode_plotter = BarcodePlotter(df_all)
-        
+
             for interaction_type, interaction_data in interaction_types.items():
                 barcode_plotter.plot_barcodes_grouped(interaction_data, interaction_type, fig_type)
-        
+
             barcode_plotter.plot_waterbridge_piechart(waterbridge_barcodes, interaction_types["waterbridge"], fig_type)
             print(f"\033[1m{schema} bindig mode: Barcodes generated\033[0m")
-        
+
             interacting_water_id_list = barcode_gen.interacting_water_ids(interaction_types["waterbridge"])
-        
+
             # dump interacting waters for visualization
             os.makedirs("Visualization", exist_ok=True)  # Create the folder if it doesn't exist
             with open("Visualization/interacting_waters.pkl", "wb") as f:
                 pickle.dump(interacting_water_id_list, f)
             trajsaver.save_interacting_waters_trajectory(interacting_water_id_list, "./Visualization/")
-        
+
             # save clouds for visualization with NGL
             with open("Visualization/clouds.json", "w") as f:
                 json.dump(pham_generator.clouds, f)
-        
+
             # generate poincloud pml for visualization
             if generate_pml:
                 pham_generator.generate_point_cloud_pml("point_cloud")
                 # generate combo pharmacophore of the md with each interaction as a single pharmacophore feature
                 pham_generator.generate_md_pharmacophore_cloudcenters("combopharm")
                 print(f"\033[1m {schema} bindig mode: Pharmacophores generated\033[0m")
-        
+
     print("\033[1mAnalysis is Finished.\033[0m")
 
     if stable_water_analysis:

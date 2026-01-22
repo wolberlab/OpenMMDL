@@ -151,7 +151,14 @@ def water_model_selection(water, forcefield_selection):
     return water_model
 
 
-def generate_forcefield(protein_ff, solvent_ff, add_membrane, smallMoleculeForceField=None, smallMoleculeForceFieldVersion=None, rdkit_mol=None):
+def generate_forcefield(
+    protein_ff,
+    solvent_ff,
+    add_membrane,
+    smallMoleculeForceField=None,
+    smallMoleculeForceFieldVersion=None,
+    rdkit_mol=None,
+):
     """
     Generate an OpenMM Forcefield object and register a small molecule.
 
@@ -195,7 +202,12 @@ def generate_forcefield(protein_ff, solvent_ff, add_membrane, smallMoleculeForce
 
 
 def generate_transitional_forcefield(
-    protein_ff, solvent_ff, add_membrane, smallMoleculeForceField=None, smallMoleculeForceFieldVersion=None, rdkit_mol=None
+    protein_ff,
+    solvent_ff,
+    add_membrane,
+    smallMoleculeForceField=None,
+    smallMoleculeForceFieldVersion=None,
+    rdkit_mol=None,
 ):
     """
     Generate an OpenMM transitional forcefield object with TIP3P water model for membrane building and register a small molecule.
@@ -218,7 +230,10 @@ def generate_transitional_forcefield(
         if protein_ff in old_amber:
             transitional_forcefield = app.ForceField(protein_ff, "tip3p.xml", "amber14/lipid17.xml")
         elif protein_ff == "amber19-all.xml":
-            transitional_forcefield = app.ForceField(protein_ff, "amber19/tip3p.xml",)
+            transitional_forcefield = app.ForceField(
+                protein_ff,
+                "amber19/tip3p.xml",
+            )
         else:
             transitional_forcefield = app.ForceField(protein_ff, "amber14/tip3p.xml")
     else:
@@ -229,13 +244,13 @@ def generate_transitional_forcefield(
         if smallMoleculeForceField == "gaff":
             gaff = GAFFTemplateGenerator(
                 molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True),
-                forcefield = smallMoleculeForceFieldVersion,
+                forcefield=smallMoleculeForceFieldVersion,
             )
             transitional_forcefield.registerTemplateGenerator(gaff.generator)
         elif smallMoleculeForceField == "smirnoff":
             smirnoff = SMIRNOFFTemplateGenerator(
                 molecules=Molecule.from_rdkit(rdkit_mol, allow_undefined_stereo=True),
-                forcefield = smallMoleculeForceFieldVersion,
+                forcefield=smallMoleculeForceFieldVersion,
             )
             transitional_forcefield.registerTemplateGenerator(smirnoff.generator)
 
