@@ -1078,6 +1078,9 @@ os.chdir(outputDir)"""
                 script.append("smallMoleculeForceField = '%s'" % session["smallMoleculeForceField"])
                 script.append("smallMoleculeForceFieldVersion = '%s'" % session["smallMoleculeForceFieldVersion"])
                 script.append("sanitization = %s" % session["ligandSanitization"])
+            elif session["sdfFile"] == "":
+                script.append("smallMoleculeForceField = None")
+                script.append("smallMoleculeForceFieldVersion = None")
             water = session["waterModel"]
     elif fileType == "amber":
         script.append("""####### Add the Amber Files in the Folder with this Script ####### \n""")

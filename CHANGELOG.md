@@ -26,6 +26,7 @@ talagayev, NDoering99
 - Addition of `CHARM2024` forcefield (2025-11-03, PR #163)
 
 ### Fixed
+- Fixed errors during only `protein` simulation (2026-01-22, PR #177)
 - Fixed errors during postprocessing in `post_md_conversion.py` (2026-01-21, PR #176)
 - Fixed 'warinings' import error for 'openmmdlsetup.py' (2026-01-18, PR #173)
 - Adjusted the water selection for `Amber19` (2025-12-08, PR #166)
