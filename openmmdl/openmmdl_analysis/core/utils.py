@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 from io import StringIO
 from Bio.PDB import PDBParser
@@ -185,3 +186,6 @@ def filter_and_parse_pdb(protein_pdb):
     structure = parser.get_structure("protein", pdb_buffer)
 
     return structure
+
+def extract_ints(token: str):
+    return [int(x) for x in re.findall(r"\d+", str(token))]

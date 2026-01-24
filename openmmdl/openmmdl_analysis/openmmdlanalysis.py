@@ -5,6 +5,7 @@ import re
 import pickle
 import sys
 import warnings
+import traceback
 
 import MDAnalysis as mda
 import cairosvg
@@ -201,6 +202,17 @@ def main():
         help="File type for the figures, default is png. Can be changed to all file types supported by matplotlib.",
         default="png",
     )
+    parser.add_argument(
+        "--interaction_package",
+        dest="interaction_package",
+        choices=["plip", "prolif"],
+        default="plip",
+        help=(
+            "Protein-ligand interaction engine. "
+            "'plip' uses PLIP for interaction calculation. "
+            "'prolif' uses ProLIF for interaction calculation."
+        ),
+    )
 
     pdb_md = None
     input_formats = [
@@ -392,7 +404,8 @@ def main():
         md_len = int(md_len) + 1
         print(f"\033[1mThe trajectory until frame {md_len - 1} will be analyzed\033[0m")
 
-    interaction_analysis = InteractionAnalyzer(pdb_md, dataframe, cpu_count, ligand, special_ligand, peptide, md_len)
+    interaction_package = args.interaction_package
+    interaction_analysis = InteractionAnalyzer(pdb_md, dataframe, cpu_count, ligand, special_ligand, peptide, md_len, interaction_package=interaction_package)
     interaction_list = interaction_analysis.interaction_list
     interaction_list.to_csv("missing_frames_filled.csv")
     interaction_list_raw = interaction_list.reset_index(drop=True)
@@ -520,8 +533,31 @@ def main():
 
             # Generate an Figure for each of the binding modes with rdkit Drawer with the atoms interacting highlighted by colors
             try:
+                binding_modes_dir = "Binding_Modes_Markov_States"
+                os.makedirs(binding_modes_dir, exist_ok=True)
                 if peptide is None:
-                    interaction_processor = FigureHighlighter(complex_pdb, lig_no_h_pdb)
+                    if interaction_package == "prolif":
+                        mapping_topology_file = topology
+                        interaction_processor = FigureHighlighter(
+                            complex_pdb,         # whatever you currently use for figure generation
+                            lig_no_h_pdb,
+                            ligand_name=ligand,
+                            mapping_topology_file=topology,
+                        )
+                        mda.Universe(mapping_topology_file).atoms.write(
+                            os.path.join(binding_modes_dir, "binding_mode_topology.pdb")
+                        )
+                    elif interaction_package == "plip":
+                        mapping_topology_file = complex_pdb
+                        interaction_processor = FigureHighlighter(
+                            complex_pdb,         # whatever you currently use for figure generation
+                            lig_no_h_pdb,
+                            ligand_name=ligand,
+                            mapping_topology_file=mapping_topology_file,
+                        )
+                        mda.Universe(mapping_topology_file).atoms.write(
+                            os.path.join(binding_modes_dir, "binding_mode_topology.pdb")
+                        )
                     matplotlib.use("Agg")
                     binding_site = {}
                     merged_image_paths = []
@@ -620,7 +656,24 @@ def main():
                         ]
                         highlight_atoms = list(set(highlight_atoms))
 
-                        # Convert the RDKit molecule to SVG format with atom highlights
+
+                        n_atoms = prepared_ligand.GetNumAtoms()
+
+                        highlight_atoms = [i for i in highlight_atoms if 0 <= i < n_atoms]
+
+                        # same for color dicts
+                        hbond_donor_dict = {k: v for k, v in hbond_donor_dict.items() if 0 <= k < n_atoms}
+                        hbond_acceptor_dict = {k: v for k, v in hbond_acceptor_dict.items() if 0 <= k < n_atoms}
+                        hbond_both_dict = {k: v for k, v in hbond_both_dict.items() if 0 <= k < n_atoms}
+                        hydrophobic_dict = {k: v for k, v in hydrophobic_dict.items() if 0 <= k < n_atoms}
+                        waterbridge_dict = {k: v for k, v in waterbridge_dict.items() if 0 <= k < n_atoms}
+                        pistacking_dict = {k: v for k, v in pistacking_dict.items() if 0 <= k < n_atoms}
+                        halogen_dict = {k: v for k, v in halogen_dict.items() if 0 <= k < n_atoms}
+                        ni_dict = {k: v for k, v in ni_dict.items() if 0 <= k < n_atoms}
+                        pi_dict = {k: v for k, v in pi_dict.items() if 0 <= k < n_atoms}
+                        pication_dict = {k: v for k, v in pication_dict.items() if 0 <= k < n_atoms}
+                        metal_dict = {k: v for k, v in metal_dict.items() if 0 <= k < n_atoms}
+
                         drawer = rdMolDraw2D.MolDraw2DSVG(600, 600)
                         drawer.DrawMolecule(
                             prepared_ligand,
@@ -656,6 +709,7 @@ def main():
                     print(f"\033[1m{schema} bindig mode: Binding mode figure generated\033[0m")
             except Exception:
                 print("Ligand could not be recognized, use the -l option")
+                traceback.print_exc()
 
             df_all = pd.read_csv("df_all.csv")
 

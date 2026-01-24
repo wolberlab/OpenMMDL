@@ -6,6 +6,7 @@ from plip.basic import config
 from plip.structure.preparation import PDBComplex
 from plip.exchange.report import BindingSiteReport
 from multiprocessing import Pool
+from typing import Dict, List, Tuple, Optional, Any
 
 config.KEEPMOD = True
 
@@ -33,6 +34,8 @@ class InteractionAnalyzer:
         Number of frames in the trajectory.
     interaction_list : pd.DataFrame
         DataFrame storing the extracted interactions across the trajectory.
+    interaction_package : str
+        The interaction package used for calulating the interactions 
     """
 
     def __init__(
@@ -44,6 +47,7 @@ class InteractionAnalyzer:
         special_ligand,
         peptide,
         md_len,
+        interaction_package,
     ):
         self.pdb_md = pdb_md
         self.dataframe = dataframe
@@ -52,7 +56,31 @@ class InteractionAnalyzer:
         self.special = special_ligand
         self.peptide = peptide
         self.md_len = md_len
-        self.interaction_list = self._process_trajectory()
+        self.interaction_package = interaction_package
+        if self.interaction_package == "plip":
+            self.interaction_list = self._process_trajectory_plip()
+        elif self.interaction_package == "prolif":
+            self.interaction_list = self._process_trajectory_prolif()
+        else:
+            raise ValueError(
+                f"Unknown interaction_package={self.interaction_package!r}. Expected 'plip' or 'prolif'."
+            )
+
+    def _resolve_atoms_from_indices(atomgroup, parent_indices):
+        """"Map ProLIF parent_indices (AtomGroup-local) to MDAnalysis Atom IDs and positions."""
+        if parent_indices is None:
+            return []
+        # ProLIF parent_indices are relative to the AtomGroup passed to ProLIF :contentReference[oaicite:5]{index=5}
+        resolved = []
+        for i in parent_indices:
+            try:
+                resolved.append(int(atomgroup[int(i)].id))
+            except Exception:
+                continue
+        return resolved
+
+    def _fmt_xyz(xyz):
+        return f"({float(xyz[0])}, {float(xyz[1])}, {float(xyz[2])})"
 
     def _retrieve_plip_interactions(self, pdb_file, lig_name):
         """
@@ -428,7 +456,7 @@ class InteractionAnalyzer:
 
         return df
 
-    def _process_trajectory(self):
+    def _process_trajectory_plip(self):
         """
         Process protein-ligand trajectory with multiple CPUs in parallel.
 
@@ -484,4 +512,465 @@ class InteractionAnalyzer:
 
         print("\033[1mProtein-ligand trajectory processed\033[0m")
 
+        return interaction_list
+
+    # -------------------------
+    # ProLIF helpers (NEW)
+    # -------------------------
+    _PROLIF_BASE_COLUMNS = [
+        "FRAME",
+        "INTERACTION",
+        "RESTYPE",
+        "RESNR",
+        "RESCHAIN",
+        "RESTYPE_LIG",
+        "RESNR_LIG",
+        "PROTCOO",
+        "LIGCOO",
+        "LOCATION",
+        "PROTISDON",
+        "DONORIDX",
+        "ACCEPTORIDX",
+        "DONOR_IDX",
+        "ACCEPTOR_IDX",
+        "WATER_IDX",
+        "PROTISPOS",
+        "LIGCARBONIDX",
+        "LIG_GROUP",
+        "LIG_IDX_LIST",
+        "PROT_IDX_LIST",
+        "DON_IDX",
+        "DONORTYPE",
+        "TARGET_IDX",
+        "TARGETCOO",
+        "METAL_TYPE",
+        "COORDINATION",
+    ]
+
+    @staticmethod
+    def _element_upper(atom) -> str:
+        el = getattr(atom, "element", None)
+        if el and str(el).strip():
+            return str(el).strip().upper()
+        name = getattr(atom, "name", "") or ""
+        return (name[0].upper() if name else "X")
+
+    @classmethod
+    def _pick_point_atom(cls, atoms, prefer_elements=None):
+        """Pick a representative atom for coordinates/IDX fields.
+        - Prefer non-H
+        - Optionally prefer a set of elements (e.g., halogens)
+        """
+        if atoms is None or len(atoms) == 0:
+            return None
+        prefer_elements = set(e.upper() for e in (prefer_elements or []))
+
+        # prefer specific elements first (non-H)
+        if prefer_elements:
+            for a in atoms:
+                el = cls._element_upper(a)
+                if el in prefer_elements and el != "H":
+                    return a
+
+        # otherwise first heavy atom
+        for a in atoms:
+            if cls._element_upper(a) != "H":
+                return a
+
+        # fallback
+        return atoms[0]
+
+    def _atoms_from_indices(self, idxs, selection: mda.AtomGroup) -> mda.AtomGroup:
+        """Resolve ProLIF indices to an AtomGroup.
+        Prefer interpreting indices as Universe atom indices; fallback to selection-local indices.
+        """
+        if not idxs:
+            return self.pdb_md.atoms[[]]
+
+        try:
+            idx_list = [int(i) for i in idxs]
+        except Exception:
+            return self.pdb_md.atoms[[]]
+
+        # Try Universe indices first
+        try:
+            atoms_u = self.pdb_md.atoms[idx_list]
+            # sanity: should be subset of selection for ligand/protein endpoints
+            if set(atoms_u.indices).issubset(set(selection.indices)):
+                return atoms_u
+        except Exception:
+            pass
+
+        # Fallback: selection-local indexing
+        try:
+            return selection[idx_list]
+        except Exception:
+            return self.pdb_md.atoms[[]]
+
+    def _ensure_topology_for_prolif(self, ligand_ag: mda.core.groups.AtomGroup, protein_ag: mda.core.groups.AtomGroup) -> None:
+        """Best-effort preparation of MDAnalysis AtomGroups for ProLIF.
+
+        ProLIF relies on RDKit conversion through MDAnalysis. For typical MD trajectories, this usually works out-of-the-box
+        because bonds/types are present in the topology. For PDB-based topologies (or stripped topologies), bond
+        information and/or elements can be missing, which can lead to ProLIF returning no interactions.
+
+        We follow ProLIF troubleshooting guidance: ensure elements exist and guess bonds when absent.
+        """
+        # Ensure elements are present (required by bond guessing and RDKit conversion in many cases)
+        try:
+            elems = getattr(self.pdb_md.atoms, "elements", None)
+            if elems is None or any((e is None or str(e).strip() == "") for e in elems):
+                from MDAnalysis.topology.guessers import guess_types
+
+                self.pdb_md.add_TopologyAttr("elements", guess_types(self.pdb_md.atoms.names))
+        except Exception:
+            # Don't hard-fail: some topologies provide elements as a non-iterable proxy
+            pass
+
+        # Guess bonds on the specific selections if missing
+        for ag, label in ((ligand_ag, "ligand"), (protein_ag, "protein")):
+            try:
+                # AtomGroup.bonds is present when Universe has bond topology
+                if not hasattr(ag, "bonds") or len(ag.bonds) == 0:
+                    ag.guess_bonds()
+            except Exception as e:
+                # Fallback: try Universe-level guessing (MDAnalysis versions differ)
+                try:
+                    self.pdb_md.guess_TopologyAttrs(to_guess=["bonds"], force_guess=["bonds"])
+                except Exception:
+                    print(f"Warning: could not guess bonds for {label} selection ({e}). ProLIF may produce no interactions.")
+
+        try:
+            self.pdb_md.atoms.guess_bonds()
+        except Exception:
+            pass
+
+    def _infer_water_resnames(self) -> List[str]:
+        """Best-effort inference of water residue names when 'water' selection finds nothing."""
+        candidates = set()
+        for res in self.pdb_md.residues:
+            try:
+                if res.atoms.n_atoms > 6:
+                    continue
+                elems = [self._element_upper(a) for a in res.atoms]
+                if "O" in elems and ("H" in elems or elems.count("O") == 1):
+                    candidates.add(str(res.resname))
+            except Exception:
+                continue
+        return sorted(candidates)
+
+    def _select_water_ag(self, ligand_ag, pocket_ag, order: int) -> Optional[mda.AtomGroup]:
+        """Create a water AtomGroup suitable for ProLIF WaterBridge."""
+        # ProLIF tutorial uses ~8 Å for order 1 and recommends increasing for higher order. :contentReference[oaicite:4]{index=4}
+        water_cutoff = 8.0 + 2.0 * max(0, int(order) - 1)
+
+        # 1) try MDAnalysis 'water' selection keyword
+        sel = f"water and byres around {water_cutoff} (group ligand or group pocket)"
+        try:
+            wat = self.pdb_md.select_atoms(
+                sel, ligand=ligand_ag, pocket=pocket_ag, updating=True
+            )
+            if len(wat) > 0:
+                return wat
+        except Exception:
+            pass
+
+        # 2) fallback: infer resnames
+        resnames = self._infer_water_resnames()
+        if not resnames:
+            return None
+        sel = f"resname {' '.join(resnames)} and byres around {water_cutoff} (group ligand or group pocket)"
+        try:
+            wat = self.pdb_md.select_atoms(
+                sel, ligand=ligand_ag, pocket=pocket_ag, updating=True
+            )
+            if len(wat) > 0:
+                return wat
+        except Exception:
+            pass
+        try:
+            print("Debug: unique resnames (first 30):", sorted(set(self.pdb_md.atoms.resnames))[:30])
+        except Exception:
+            pass
+        return None
+
+
+    @staticmethod
+    def _coord_str(xyz) -> str:
+        if xyz is None:
+            return "skip"
+        return f"({float(xyz[0]):.3f}, {float(xyz[1]):.3f}, {float(xyz[2]):.3f})"
+
+    def _residue_fields(self, residue_obj) -> Tuple[str, str, str]:
+        """Extract (RESTYPE, RESNR, RESCHAIN) from a ProLIF residue identifier."""
+        if residue_obj is None:
+            return "skip", "skip", "skip"
+
+        # ProLIF ResidueId typically has name/number/chain
+        for name_attr in ("name", "resname", "resn"):
+            if hasattr(residue_obj, name_attr):
+                restype = getattr(residue_obj, name_attr)
+                break
+        else:
+            restype = "skip"
+
+        for num_attr in ("number", "resid", "resnum", "resnr"):
+            if hasattr(residue_obj, num_attr):
+                resnr = getattr(residue_obj, num_attr)
+                break
+        else:
+            resnr = "skip"
+
+        for chain_attr in ("chain", "chainID", "segid"):
+            if hasattr(residue_obj, chain_attr):
+                reschain = getattr(residue_obj, chain_attr)
+                break
+        else:
+            reschain = "skip"
+
+        return str(restype), str(resnr), str(reschain)
+
+
+    def _process_trajectory_prolif(self) -> pd.DataFrame:
+        """Run ProLIF on the trajectory and convert results to the OpenMMDL row schema."""
+        try:
+            import prolif as plf
+        except Exception as e:
+            raise ImportError(
+                "interaction_engine='prolif' requested but ProLIF is not installed. "
+                "Install it with: pip install prolif==2.1.0"
+            ) from e
+
+        if self.special is not None:
+            raise NotImplementedError(
+                "interaction_engine='prolif' is currently not supported together with special_ligand. "
+                "Use interaction_engine='plip' for special_ligand."
+            )
+
+        # ---- selections ----
+        if self.peptide is None:
+            lig_sel = f"resname {self.lig_name}"
+            ligand_ag = self.pdb_md.select_atoms(lig_sel)
+
+            # ProLIF tutorial recommends selecting a pocket around the ligand (no updating=True). :contentReference[oaicite:8]{index=8}
+            base = "protein or nucleic" if getattr(config, "DNARECEPTOR", False) else "protein"
+            protein_ag = self.pdb_md.select_atoms(
+                f"({base}) and byres around 12 group ligand",
+                ligand=ligand_ag,
+            )
+        else:
+            # peptide treated as ligand chain; pocket = rest of protein
+            ligand_ag = self.pdb_md.select_atoms(f"chainID {self.peptide}")
+            base = "protein or nucleic" if getattr(config, "DNARECEPTOR", False) else "protein"
+            protein_ag = self.pdb_md.select_atoms(f"({base}) and not chainID {self.peptide}")
+
+        if len(ligand_ag) == 0:
+            raise ValueError(f"ProLIF: ligand selection returned 0 atoms: {lig_sel}")
+        if len(protein_ag) == 0:
+            # fallback to full protein if pocket selection is empty
+            base = "protein or nucleic" if getattr(config, "DNARECEPTOR", False) else "protein"
+            protein_ag = self.pdb_md.select_atoms(base)
+
+        self._ensure_topology_for_prolif(ligand_ag, protein_ag)
+
+        # ---- interactions ----
+        prolif_interactions = [
+            "Hydrophobic",
+            "HBDonor",
+            "HBAcceptor",
+            "PiStacking",
+            "CationPi",
+            "PiCation",
+            "Cationic",
+            "Anionic",
+            "XBDonor",
+            "XBAcceptor",
+            "WaterBridge",
+        ]
+
+        # WaterBridge requires explicit water parameter, and order=3 is supported as per docs. :contentReference[oaicite:9]{index=9}
+        WATER_BRIDGE_ORDER = 3
+        water_ag = self._select_water_ag(ligand_ag, protein_ag, WATER_BRIDGE_ORDER)
+        parameters = {}
+        if water_ag is not None and len(water_ag) > 0:
+            parameters["WaterBridge"] = {"water": water_ag, "order": WATER_BRIDGE_ORDER}
+        else:
+            print("\033[33mWarning: WaterBridge disabled (no water atoms selected).\033[0m")
+            prolif_interactions = [x for x in prolif_interactions if x != "WaterBridge"]
+
+        fp = plf.Fingerprint(prolif_interactions, count=True, parameters=(parameters or None))
+
+        # OpenMMDL historically skips frame 0
+        traj = self.pdb_md.trajectory[1:self.md_len]
+        fp.run(traj, ligand_ag, protein_ag, n_jobs=self.num_processes, progress=True)
+
+        # ---- convert to OpenMMDL schema ----
+        rows: List[Dict[str, Any]] = []
+
+        # robust extraction: iterate InteractionData objects as in ProLIF docs. :contentReference[oaicite:10]{index=10}
+        for frame_key, ifp in (getattr(fp, "ifp", {}) or {}).items():
+            try:
+                frame = int(frame_key)
+            except Exception:
+                continue
+            if frame < 1 or frame >= self.md_len:
+                continue
+
+            # ensure coordinates correspond to this frame
+            try:
+                self.pdb_md.trajectory[frame]
+            except Exception:
+                pass
+
+            for interaction_data in ifp.interactions():
+                meta = interaction_data.metadata or {}
+                idx_block = meta.get("parent_indices") or meta.get("indices") or {}
+
+                lig_atoms = self._atoms_from_indices(idx_block.get("ligand"), ligand_ag)
+                prot_atoms = self._atoms_from_indices(idx_block.get("protein"), protein_ag)
+
+                lig_point = self._pick_point_atom(lig_atoms)
+                prot_point = self._pick_point_atom(prot_atoms)
+
+                restype, resnr, reschain = self._residue_fields(getattr(interaction_data, "protein", None))
+                lig_restype, lig_resnr, _lig_chain = self._residue_fields(getattr(interaction_data, "ligand", None))
+
+                row = {c: "skip" for c in self._PROLIF_BASE_COLUMNS}
+                row["TARGETCOO"] = 0
+                row.update(
+                    {
+                        "FRAME": frame,
+                        "RESTYPE": restype,
+                        "RESNR": int(resnr),
+                        "RESCHAIN": str(reschain),
+                        "RESTYPE_LIG": str(lig_restype),
+                        "RESNR_LIG": str(lig_resnr),
+                        "LIGCOO": self._coord_str(lig_point.position if lig_point is not None else None),
+                        "PROTCOO": self._coord_str(prot_point.position if prot_point is not None else None),
+                    }
+                )
+
+                name = str(interaction_data.interaction)
+
+                # indices as PDB serial IDs (Atom.id), consistent with OpenMMDL downstream int() casts
+                lig_ids = [int(a.id) for a in lig_atoms] if len(lig_atoms) else []
+                prot_ids = [int(a.id) for a in prot_atoms] if len(prot_atoms) else []
+
+                if name == "Hydrophobic":
+                    row["INTERACTION"] = "hydrophobic"
+                    if lig_point is not None:
+                        row["LIGCARBONIDX"] = int(lig_point.id)
+
+                elif name in ("HBDonor", "HBAcceptor"):
+                    row["INTERACTION"] = "hbond"
+                    if name == "HBAcceptor":
+                        # ligand acceptor, protein donor
+                        row["PROTISDON"] = True
+                        if prot_point is not None:
+                            row["DONORIDX"] = int(prot_point.id)
+                        if lig_point is not None:
+                            row["ACCEPTORIDX"] = int(lig_point.id)
+                    else:
+                        # ligand donor, protein acceptor
+                        row["PROTISDON"] = False
+                        if lig_point is not None:
+                            row["DONORIDX"] = int(lig_point.id)
+                        if prot_point is not None:
+                            row["ACCEPTORIDX"] = int(prot_point.id)
+
+                elif name == "PiStacking":
+                    row["INTERACTION"] = "pistacking"
+                    if lig_ids:
+                        row["LIG_IDX_LIST"] = ",".join(map(str, lig_ids))
+                    if prot_ids:
+                        row["PROT_IDX_LIST"] = ",".join(map(str, prot_ids))
+
+                elif name in ("CationPi", "PiCation"):
+                    row["INTERACTION"] = "pication"
+                    row["LIG_GROUP"] = "cation" if name == "CationPi" else "pi"
+                    if lig_ids:
+                        row["LIG_IDX_LIST"] = ",".join(map(str, lig_ids))
+                    if prot_ids:
+                        row["PROT_IDX_LIST"] = ",".join(map(str, prot_ids))
+
+                elif name in ("Cationic", "Anionic"):
+                    row["INTERACTION"] = "saltbridge"
+                    row["PROTISPOS"] = True if name == "Anionic" else False
+                    row["LIG_GROUP"] = "anion" if name == "Anionic" else "cation"
+                    if lig_ids:
+                        row["LIG_IDX_LIST"] = ",".join(map(str, lig_ids))
+                    if prot_ids:
+                        row["PROT_IDX_LIST"] = ",".join(map(str, prot_ids))
+
+                elif name in ("XBDonor", "XBAcceptor"):
+                    row["INTERACTION"] = "halogen"
+                    # prefer actual halogen element for donor
+                    hal = self._pick_point_atom(lig_atoms, prefer_elements={"F", "CL", "BR", "I"})
+                    if hal is not None:
+                        row["DON_IDX"] = int(hal.id)
+                        row["DONORTYPE"] = self._element_upper(hal)
+                    if prot_point is not None:
+                        row["TARGET_IDX"] = int(prot_point.id)
+
+                elif name == "WaterBridge":
+                    row["INTERACTION"] = "waterbridge"
+
+                    # metadata contains roles + water residue identifiers :contentReference[oaicite:11]{index=11}
+                    protein_role = str(meta.get("protein_role", ""))
+                    ligand_role = str(meta.get("ligand_role", ""))
+
+                    # Map to the boolean expected by BindingModeProcesser (it assumes exactly one endpoint "donor"):
+                    if protein_role == "HBDonor":
+                        row["PROTISDON"] = True
+                    elif ligand_role == "HBDonor":
+                        row["PROTISDON"] = False
+                    else:
+                        # e.g. both acceptors: water is donor; choose acceptor labelling (PROTISDON=True)
+                        row["PROTISDON"] = True
+
+                    water_res = meta.get("water_residues") or ()
+                    if water_res:
+                        try:
+                            row["WATER_IDX"] = int(getattr(water_res[0], "number", "skip"))
+                        except Exception:
+                            row["WATER_IDX"] = "skip"
+
+                    # Endpoint indices for OpenMMDL naming
+                    if row["PROTISDON"]:
+                        if prot_point is not None:
+                            row["DONOR_IDX"] = int(prot_point.id)
+                        if lig_point is not None:
+                            row["ACCEPTOR_IDX"] = int(lig_point.id)
+                    else:
+                        if lig_point is not None:
+                            row["DONOR_IDX"] = int(lig_point.id)
+                        if prot_point is not None:
+                            row["ACCEPTOR_IDX"] = int(prot_point.id)
+
+                else:
+                    # not mapped → ignore
+                    continue
+
+                rows.append(row)
+
+        # Always return stable schema
+        interaction_list = pd.DataFrame.from_records(rows, columns=self._PROLIF_BASE_COLUMNS)
+
+        # Ensure Prot_partner exists (BindingModeProcesser expects it in residue schema)
+        # Mirror PLIP path
+        if not interaction_list.empty:
+            interaction_list["Prot_partner"] = (
+                interaction_list["RESNR"].astype(str)
+                + interaction_list["RESTYPE"].astype(str)
+                + interaction_list["RESCHAIN"].astype(str)
+            )
+        else:
+            # create the column even if empty
+            interaction_list["Prot_partner"] = pd.Series(dtype="object")
+
+        # Fill missing frames (will also fill Prot_partner with 'skip' for missing frames)
+        interaction_list = self._fill_missing_frames(interaction_list)
+
+        # keep OpenMMDL behavior: write gathered interactions
+        interaction_list.to_csv("interactions_gathered.csv", index=False)
         return interaction_list
