@@ -12,6 +12,7 @@ test_data_directory = Path(
 test_data_directory_files = Path("openmmdl/tests/data/in")
 lig_no_h = test_data_directory_files / "lig_no_h.pdb"
 complex = test_data_directory_files / "complex.pdb"
+ligand_name = 'UNK'
 smi_file = test_data_directory_files / "lig_no_h.smi"
 current_directory = os.getcwd()
 output_path = "all_binding_modes_arranged.png"
@@ -33,7 +34,7 @@ shutil.copy(str(complex), ".")
 )
 
 def test_split_interaction_data(input_data, expected_output):
-    interaction = FigureHighlighter(complex, lig_no_h)
+    interaction = FigureHighlighter(complex, lig_no_h, ligand_name)
     result = interaction.split_interaction_data(input_data)
     assert result == expected_output
 
@@ -43,7 +44,7 @@ def test_generate_interaction_dict():
     interaction_type = "hydrophobic"
     keys = [1, 2, 3]
     expected_result = {1: (1.0, 1.0, 0.0), 2: (1.0, 1.0, 0.0), 3: (1.0, 1.0, 0.0)}
-    interaction = FigureHighlighter(complex, lig_no_h)
+    interaction = FigureHighlighter(complex, lig_no_h, ligand_name)
     result = interaction.generate_interaction_dict(interaction_type, keys)
     assert result == expected_result
 
