@@ -8,10 +8,10 @@ from plip.exchange.report import BindingSiteReport
 from multiprocessing import Pool
 from typing import Dict, List, Tuple, Optional, Any
 
-config.KEEPMOD = True
-
-
 from openmmdl.openmmdl_analysis.core.utils import coord_str
+
+
+config.KEEPMOD = True
 
 
 class InteractionAnalyzer:

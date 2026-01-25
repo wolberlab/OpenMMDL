@@ -2,11 +2,9 @@ import cairosvg
 import MDAnalysis as mda
 from rdkit import Chem
 from rdkit.Chem import AllChem, Draw
-
-import os
 from collections import defaultdict
 
-from openmmdl.openmmdl_analysis.core.utils import extract_ints, coord_str
+from openmmdl.openmmdl_analysis.core.utils import extract_ints
 
 
 class FigureHighlighter:
@@ -329,12 +327,10 @@ class FigureHighlighter:
             elif interaction_type == "metal":
                 # safest: take first ligand index we can extract from tokens
                 found = None
-                found_tok = None
                 for tok in tokens:
                     idxs = list(self._tok_to_ligidxs(tok))
                     if idxs:
                         found = idxs[0]
-                        found_tok = tok
                         break
                 if found is not None:
                     highlighted_metal.add(found)
