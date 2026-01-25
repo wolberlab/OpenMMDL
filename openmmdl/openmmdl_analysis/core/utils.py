@@ -188,4 +188,61 @@ def filter_and_parse_pdb(protein_pdb):
     return structure
 
 def extract_ints(token: str):
+    """
+    Extract all integer substrings from a token.
+
+    This utility parses the input `token` (after coercion to `str`) and returns all
+    digit runs (``\\d+``) converted to Python integers.
+
+    Parameters
+    ----------
+    token : str
+        Input token to parse. Any object is accepted in practice because it is coerced
+        to `str` before extraction.
+
+    Returns
+    -------
+    list of int
+        All integers found in the token, in left-to-right order. If no digits are
+        present, an empty list is returned.
+
+    Examples
+    --------
+    >>> extract_ints("A12_B034")
+    [12, 34]
+    >>> extract_ints("no_digits")
+    []
+    >>> extract_ints(105)
+    [105]
+    """
     return [int(x) for x in re.findall(r"\d+", str(token))]
+
+def coord_str(xyz) -> str:
+    """
+    Format a 3D coordinate triplet as a fixed-precision string.
+
+    Parameters
+    ----------
+    xyz : array_like of shape (3,) or None
+        A 3-element coordinate (x, y, z). If None, the coordinate is treated as missing.
+
+    Returns
+    -------
+    str
+        Coordinate formatted as ``"(x, y, z)"`` with 3 decimal places, or the literal
+        string ``"skip"`` if `xyz` is None.
+
+    Notes
+    -----
+    Values are converted to `float` prior to formatting.
+
+    Examples
+    --------
+    >>> coord_str([1, 2.34567, -0.1])
+    '(1.000, 2.346, -0.100)'
+    >>> coord_str(None)
+    'skip'
+    """
+    if xyz is None:
+        return "skip"
+    return f"({float(xyz[0]):.3f}, {float(xyz[1]):.3f}, {float(xyz[2]):.3f})"

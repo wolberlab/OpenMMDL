@@ -6,7 +6,7 @@ from rdkit.Chem import AllChem, Draw
 import os
 from collections import defaultdict
 
-from openmmdl.openmmdl_analysis.core.utils import extract_ints
+from openmmdl.openmmdl_analysis.core.utils import extract_ints, coord_str
 
 
 class FigureHighlighter:
@@ -19,15 +19,41 @@ class FigureHighlighter:
         Path to the protein-ligand complex PDB file.
     ligand_no_h_pdb_file : str
         Path to the ligand PDB file without hydrogens.
+    ligand_name : str
+        Residue name of the ligand in the complex topology (e.g., "LIG").
     complex : mda.Universe
-        MDAnalysis Universe object of the protein-ligand complex.
-    ligand_no_h : mda.Universe
-        MDAnalysis Universe object of the ligand without hydrogens.
-    lig_noh : mda.AtomGroup
-        AtomGroup of all atoms in the ligand without hydrogens.
+        MDAnalysis Universe object of the protein-ligand complex used for drawing/selection.
+    map_u : mda.Universe
+        MDAnalysis Universe used to interpret atom codes produced by external interaction tools
+        (e.g., ProLIF/PLIP). This universe must match the topology used to generate those codes.
     """
-
     def __init__(self, complex_pdb_file, ligand_no_h_pdb_file, ligand_name, mapping_topology_file=None):
+        """
+        Construct a FigureHighlighter and precompute ligand heavy-atom index mappings.
+
+        This initializer loads two MDAnalysis universes:
+
+        1. `self.complex` is used for selection and drawing. It may be reduced/renumbered
+           depending on downstream processing.
+        2. `self.map_u` is used to interpret external atom codes (e.g., ProLIF topology-based
+           indices or PDB serial IDs). It **must** correspond to the topology used to generate
+           the interaction annotations you later parse.
+
+        To support robust decoding of interaction tokens, the initializer builds several
+        mapping tables from *ligand heavy atoms* (excluding hydrogens) in `self.map_u`.
+
+        Parameters
+        ----------
+        complex_pdb_file : str
+            Path to the protein-ligand complex PDB file used for selection/drawing.
+        ligand_no_h_pdb_file : str
+            Path to a ligand-only PDB file without hydrogens (used in separate drawing steps).
+        ligand_name : str
+            Residue name identifying the ligand in the complex topology.
+        mapping_topology_file : str or None, optional
+            Path to a topology file that matches the interaction-tool topology (e.g., ProLIF
+            topology). If None, `complex_pdb_file` is used.
+        """
         self.complex_pdb_file = complex_pdb_file
         self.ligand_no_h_pdb_file = ligand_no_h_pdb_file
         self.ligand_name = ligand_name
@@ -54,48 +80,30 @@ class FigureHighlighter:
             # If duplicates exist, keep the first and optionally warn
             self._name_to_ligidx[name] = idxs[0]
 
-    def _build_code_to_ligidx(self):
-        """
-        Build mapping from various "codes" (Atom.index+1, Atom.id, Atom.serial if present)
-        to ligand-local heavy-atom indices (0..n_heavy-1), which should match RDKit
-        indices after RemoveAllHs on a ligand RDKit mol created from the same selection.
-        """
-        lig_heavy = self.complex.select_atoms(
-            f"resname {self.ligand_name} and not name H*"
-        )
-
-        code_to_ligidx = {}
-        for lig_idx, a in enumerate(lig_heavy):
-            candidates = set()
-
-            # Common ProLIF-style identifiers
-            try:
-                candidates.add(int(a.index) + 1)  # global 1-based index
-            except Exception:
-                pass
-            try:
-                candidates.add(int(a.id))         # topology id (often PDB serial, but not always)
-            except Exception:
-                pass
-            # Some topologies expose serial explicitly
-            if hasattr(a, "serial"):
-                try:
-                    candidates.add(int(a.serial))
-                except Exception:
-                    pass
-
-            for c in candidates:
-                code_to_ligidx[c] = lig_idx
-
-        return code_to_ligidx
-
-    def _lig_index_from_complex_atom_id(self, atom_code):
-        try:
-            return self._code_to_ligidx.get(int(atom_code))
-        except Exception:
-            return None
-
     def _tok_to_ligidxs(self, tok: str):
+        """
+        Convert a single interaction token into ligand-local heavy-atom indices.
+
+        Tokens extracted from interaction strings may represent:
+        - interaction labels (e.g., "Donor", "Acceptor", "PI", "NI", "Cation"), which do not map
+          to atoms and therefore return an empty list; or
+        - atom identifiers, which may be either:
+          - atom names (e.g., "C2", "N7") commonly emitted by PLIP-like tools; or
+          - numeric codes (e.g., atom serial IDs, global indices), from which integers are
+            extracted and resolved against multiple lookup strategies.
+
+        Parameters
+        ----------
+        tok : str
+            A token potentially containing an atom identifier, optionally with punctuation
+            (commas/semicolons), or an interaction label.
+
+        Returns
+        -------
+        list of int
+            Ligand-local heavy atom indices in the range ``[0, n_heavy-1]``. Returns an empty
+            list when the token does not correspond to a ligand atom or cannot be resolved.
+        """
         t = tok.strip(",;")
         tl = t.lower()
         if tl in ("donor", "acceptor", "pi", "ni", "cation", "anion", "positive", "negative"):
@@ -112,9 +120,32 @@ class FigureHighlighter:
             idx = self._lig_index_from_complex_code(atom_id)
             if idx is not None:
                 out.append(idx)
+
         return out
 
     def _lig_index_from_complex_code(self, code_int: int):
+        """
+        Resolve an external atom code to a ligand-local heavy-atom index.
+
+        Interaction tools and pipelines may encode atom references in various ways:
+        - topology atom IDs (e.g., PDB serial numbers as `Atom.id`)
+        - MDAnalysis global indices (`Atom.index`, 0-based)
+        - 1-based indices (common in external tools)
+        - mixed encodings depending on topology
+
+        This function attempts multiple strategies against the *mapping universe* (`self.map_u`)
+        and returns the corresponding ligand-local heavy-atom index.
+
+        Parameters
+        ----------
+        code_int : int
+            An integer atom code from an interaction annotation.
+
+        Returns
+        -------
+        int or None
+            Ligand-local heavy atom index (0-based) if resolved; otherwise None.
+        """
         # 1) Direct lookups in mapping universe ligand atoms
         if code_int in self._id_to_ligidx:
             return self._id_to_ligidx[code_int]
@@ -171,13 +202,39 @@ class FigureHighlighter:
 
     def highlight_numbers(self, split_data, starting_idx):
         """
-        Parse split interaction strings and return per-interaction-type ligand-local
-        heavy-atom indices (0..n_heavy-1) suitable for RDKit highlighting.
+        Parse split interaction strings and return ligand heavy-atom indices by interaction type.
 
-        IMPORTANT:
-        - This version assumes self._tok_to_ligidxs(tok) returns ligand indices.
-        - Therefore we MUST NOT call _lig_index_from_complex_code() again inside this method
-        (that was the double-mapping bug that turned valid codes into 0..24 and then None).
+        This function interprets interaction annotations (already split into whitespace-delimited
+        tokens) and accumulates ligand-local heavy-atom indices suitable for RDKit highlighting.
+
+        Parameters
+        ----------
+        split_data : list of str
+            Interaction strings of the form::
+
+                "<PROT_PARTNER> <TOKENS...> <INTERACTION_TYPE>"
+
+            where `<TOKENS...>` may contain atom identifiers (atom names or numeric codes)
+            and optional labels depending on the interaction type.
+        starting_idx : int
+            Starting index offset used in older implementations.
+
+        Returns
+        -------
+        tuple of list of int
+            A tuple containing sorted ligand-local heavy atom indices for:
+
+            1. hbond donor atoms
+            2. hbond acceptor atoms
+            3. hbond atoms that are both donor and acceptor (overlap)
+            4. hydrophobic interaction atoms
+            5. water bridge interaction atoms
+            6. pi-stacking interaction atoms
+            7. halogen bond interaction atoms
+            8. salt-bridge NI atoms
+            9. salt-bridge PI atoms
+            10. pi-cation interaction atoms
+            11. metal coordination atoms
         """
         highlighted_hbond_acceptor = set()
         highlighted_hbond_donor = set()
@@ -357,7 +414,6 @@ class LigandImageGenerator:
     fig_type : str
         Type of image to generate. Can be "svg" or "png".
     """
-
     def __init__(
         self,
         ligand_name,
@@ -366,6 +422,25 @@ class LigandImageGenerator:
         output_svg_filename,
         fig_type="svg",
     ):
+        """
+        Initialize a ligand 2D depiction generator.
+
+        Parameters
+        ----------
+        ligand_name : str
+            Residue name used to select the ligand from the complex topology (e.g., ``"LIG"``).
+        complex_pdb_file : str
+            Path to the protein-ligand complex PDB file from which the ligand is selected and
+            converted to an RDKit molecule.
+        ligand_no_h_pdb_file : str
+            Path to a ligand-only PDB file without hydrogens. This structure is used to
+            correlate atom indices and names with the ligand extracted from the complex.
+        output_svg_filename : str
+            Output filename for the generated SVG depiction. Typically ends with ``.svg``.
+        fig_type : {"svg", "png"}, optional
+            Output image format. If ``"png"``, the SVG is written first and then converted to
+            PNG using CairoSVG. Default is ``"svg"``.
+        """
         self.ligand_name = ligand_name
         self.complex_pdb_file = complex_pdb_file
         self.ligand_no_h_pdb_file = ligand_no_h_pdb_file
