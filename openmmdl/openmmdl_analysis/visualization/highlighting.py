@@ -27,6 +27,7 @@ class FigureHighlighter:
         MDAnalysis Universe used to interpret atom codes produced by external interaction tools
         (e.g., ProLIF/PLIP). This universe must match the topology used to generate those codes.
     """
+
     def __init__(self, complex_pdb_file, ligand_no_h_pdb_file, ligand_name, mapping_topology_file=None):
         """
         Construct a FigureHighlighter and precompute ligand heavy-atom index mappings.
@@ -361,7 +362,6 @@ class FigureHighlighter:
             sorted(highlighted_metal),
         )
 
-
     def generate_interaction_dict(self, interaction_type, keys):
         """
         Generates a dictionary of interaction RGB color model based on the provided interaction type.
@@ -414,6 +414,7 @@ class LigandImageGenerator:
     fig_type : str
         Type of image to generate. Can be "svg" or "png".
     """
+
     def __init__(
         self,
         ligand_name,

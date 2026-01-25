@@ -405,7 +405,9 @@ def main():
         print(f"\033[1mThe trajectory until frame {md_len - 1} will be analyzed\033[0m")
 
     interaction_package = args.interaction_package
-    interaction_analysis = InteractionAnalyzer(pdb_md, dataframe, cpu_count, ligand, special_ligand, peptide, md_len, interaction_package=interaction_package)
+    interaction_analysis = InteractionAnalyzer(
+        pdb_md, dataframe, cpu_count, ligand, special_ligand, peptide, md_len, interaction_package=interaction_package
+    )
     interaction_list = interaction_analysis.interaction_list
     interaction_list.to_csv("missing_frames_filled.csv")
     interaction_list_raw = interaction_list.reset_index(drop=True)
@@ -539,7 +541,7 @@ def main():
                     if interaction_package == "prolif":
                         mapping_topology_file = topology
                         interaction_processor = FigureHighlighter(
-                            complex_pdb,         # whatever you currently use for figure generation
+                            complex_pdb,  # whatever you currently use for figure generation
                             lig_no_h_pdb,
                             ligand_name=ligand,
                             mapping_topology_file=topology,
@@ -550,7 +552,7 @@ def main():
                     elif interaction_package == "plip":
                         mapping_topology_file = complex_pdb
                         interaction_processor = FigureHighlighter(
-                            complex_pdb,         # whatever you currently use for figure generation
+                            complex_pdb,  # whatever you currently use for figure generation
                             lig_no_h_pdb,
                             ligand_name=ligand,
                             mapping_topology_file=mapping_topology_file,
@@ -655,7 +657,6 @@ def main():
                             + highlighted_metal
                         ]
                         highlight_atoms = list(set(highlight_atoms))
-
 
                         n_atoms = prepared_ligand.GetNumAtoms()
 

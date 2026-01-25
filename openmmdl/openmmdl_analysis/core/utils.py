@@ -187,6 +187,7 @@ def filter_and_parse_pdb(protein_pdb):
 
     return structure
 
+
 def extract_ints(token: str):
     """
     Extract all integer substrings from a token.
@@ -216,6 +217,7 @@ def extract_ints(token: str):
     [105]
     """
     return [int(x) for x in re.findall(r"\d+", str(token))]
+
 
 def coord_str(xyz) -> str:
     """

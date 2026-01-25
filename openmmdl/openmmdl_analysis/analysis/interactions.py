@@ -13,6 +13,7 @@ config.KEEPMOD = True
 
 from openmmdl.openmmdl_analysis.core.utils import coord_str
 
+
 class InteractionAnalyzer:
     """
     Analyzes molecular interactions between a protein and a ligand/peptide
@@ -37,7 +38,7 @@ class InteractionAnalyzer:
     interaction_list : pd.DataFrame
         DataFrame storing the extracted interactions across the trajectory.
     interaction_package : str
-        The interaction package used for calulating the interactions 
+        The interaction package used for calulating the interactions
     """
 
     def __init__(
@@ -102,9 +103,7 @@ class InteractionAnalyzer:
         elif self.interaction_package == "prolif":
             self.interaction_list = self._process_trajectory_prolif()
         else:
-            raise ValueError(
-                f"Unknown interaction_package={self.interaction_package!r}. Expected 'plip' or 'prolif'."
-            )
+            raise ValueError(f"Unknown interaction_package={self.interaction_package!r}. Expected 'plip' or 'prolif'.")
 
     def _retrieve_plip_interactions(self, pdb_file, lig_name):
         """
@@ -591,7 +590,7 @@ class InteractionAnalyzer:
         if el and str(el).strip():
             return str(el).strip().upper()
         name = getattr(atom, "name", "") or ""
-        return (name[0].upper() if name else "X")
+        return name[0].upper() if name else "X"
 
     @classmethod
     def _pick_point_atom(cls, atoms, prefer_elements=None):
@@ -686,7 +685,9 @@ class InteractionAnalyzer:
         except Exception:
             return self.pdb_md.atoms[[]]
 
-    def _ensure_topology_for_prolif(self, ligand_ag: mda.core.groups.AtomGroup, protein_ag: mda.core.groups.AtomGroup) -> None:
+    def _ensure_topology_for_prolif(
+        self, ligand_ag: mda.core.groups.AtomGroup, protein_ag: mda.core.groups.AtomGroup
+    ) -> None:
         """
         Best-effort preparation of topology information required by ProLIF.
 
@@ -731,7 +732,9 @@ class InteractionAnalyzer:
                 try:
                     self.pdb_md.guess_TopologyAttrs(to_guess=["bonds"], force_guess=["bonds"])
                 except Exception:
-                    print(f"Warning: could not guess bonds for {label} selection ({e}). ProLIF may produce no interactions.")
+                    print(
+                        f"Warning: could not guess bonds for {label} selection ({e}). ProLIF may produce no interactions."
+                    )
 
         try:
             self.pdb_md.atoms.guess_bonds()
@@ -794,9 +797,7 @@ class InteractionAnalyzer:
         # 1) try MDAnalysis 'water' selection keyword
         sel = f"water and byres around {water_cutoff} (group ligand or group pocket)"
         try:
-            wat = self.pdb_md.select_atoms(
-                sel, ligand=ligand_ag, pocket=pocket_ag, updating=True
-            )
+            wat = self.pdb_md.select_atoms(sel, ligand=ligand_ag, pocket=pocket_ag, updating=True)
             if len(wat) > 0:
                 return wat
         except Exception:
@@ -808,9 +809,7 @@ class InteractionAnalyzer:
             return None
         sel = f"resname {' '.join(resnames)} and byres around {water_cutoff} (group ligand or group pocket)"
         try:
-            wat = self.pdb_md.select_atoms(
-                sel, ligand=ligand_ag, pocket=pocket_ag, updating=True
-            )
+            wat = self.pdb_md.select_atoms(sel, ligand=ligand_ag, pocket=pocket_ag, updating=True)
             if len(wat) > 0:
                 return wat
         except Exception:
@@ -871,7 +870,6 @@ class InteractionAnalyzer:
             reschain = "skip"
 
         return str(restype), str(resnr), str(reschain)
-
 
     def _process_trajectory_prolif(self) -> pd.DataFrame:
         """
@@ -967,7 +965,7 @@ class InteractionAnalyzer:
         fp = plf.Fingerprint(prolif_interactions, count=True, parameters=(parameters or None))
 
         # OpenMMDL historically skips frame 0
-        traj = self.pdb_md.trajectory[1:self.md_len]
+        traj = self.pdb_md.trajectory[1 : self.md_len]
         fp.run(traj, ligand_ag, protein_ag, n_jobs=self.num_processes, progress=True)
 
         # ---- convert to OpenMMDL schema ----
