@@ -21,6 +21,7 @@ The rules for this file:
 talagayev, NDoering99
 
 ### Added
+- Addition of `ProLIF` option for interaction calculation (2026-01-26, PR#179)
 - Addition of two `protein` and `residue` interaction in binding modes (2026-01-19, PR#170)
 - Addition of force field version selection for `GAFF` & `SMINROFF` (2025-12-15, PR #169)
 - Addition of `CHARM2024` forcefield (2025-11-03, PR #163)
