@@ -34,3 +34,5 @@ dependencies:
   # - package_name=version
 
   # Include the dependencies from requirements.txt
+  - pip:
+      - prolif>=2.1.0

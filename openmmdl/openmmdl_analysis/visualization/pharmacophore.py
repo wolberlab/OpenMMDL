@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 
 COORD_RE = re.compile(r"\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)")
 
+
 class PharmacophoreGenerator:
     """
     A class for generating pharmacophore features from molecular dynamics (MD) interaction data.
@@ -538,7 +539,7 @@ class PharmacophoreGenerator:
 
     def _generate_pharmacophore_centers(self, interactions):
         pharmacophore = {}
-    
+
         for interaction in interactions:
             # Only rows where this interaction occurs
             if interaction not in self.df_all.columns:
@@ -546,10 +547,10 @@ class PharmacophoreGenerator:
             df_hits = self.df_all[self.df_all[interaction] == 1]
             if df_hits.empty:
                 continue
-    
+
             counter = 0
             sum_x = sum_y = sum_z = 0.0
-    
+
             for _, row in df_hits.iterrows():
                 m = COORD_RE.search(str(row.get("LIGCOO", "")))
                 if not m:
@@ -559,45 +560,44 @@ class PharmacophoreGenerator:
                 sum_y += y
                 sum_z += z
                 counter += 1
-    
+
             # Guard against division by zero (no parseable coords)
             if counter == 0:
                 continue
-    
+
             pharmacophore[interaction] = [
                 round(sum_x / counter, 3),
                 round(sum_y / counter, 3),
                 round(sum_z / counter, 3),
             ]
-    
-        return pharmacophore
 
+        return pharmacophore
 
     def _generate_pharmacophore_vectors(self, interactions):
         pharmacophore = {}
-    
+
         for interaction in interactions:
             if interaction not in self.df_all.columns:
                 continue
             df_hits = self.df_all[self.df_all[interaction] == 1]
             if df_hits.empty:
                 continue
-    
+
             counter = 0
             sum_x = sum_y = sum_z = 0.0
             sum_a = sum_b = sum_c = 0.0
-    
+
             for _, row in df_hits.iterrows():
                 lig_m = COORD_RE.search(str(row.get("LIGCOO", "")))
                 prot_m = COORD_RE.search(str(row.get("PROTCOO", "")))
-    
+
                 # Only count frames where BOTH ends are available
                 if not lig_m or not prot_m:
                     continue
-    
+
                 x, y, z = map(float, lig_m.groups())
                 a, b, c = map(float, prot_m.groups())
-    
+
                 sum_x += x
                 sum_y += y
                 sum_z += z
@@ -605,17 +605,16 @@ class PharmacophoreGenerator:
                 sum_b += b
                 sum_c += c
                 counter += 1
-    
+
             if counter == 0:
                 continue
-    
+
             pharmacophore[interaction] = [
                 [round(sum_x / counter, 3), round(sum_y / counter, 3), round(sum_z / counter, 3)],
                 [round(sum_a / counter, 3), round(sum_b / counter, 3), round(sum_c / counter, 3)],
             ]
-    
-        return pharmacophore
 
+        return pharmacophore
 
     def _generate_pharmacophore_centers_all_points(self, interactions):
         """

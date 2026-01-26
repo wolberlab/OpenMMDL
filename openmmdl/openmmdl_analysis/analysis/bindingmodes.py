@@ -91,7 +91,7 @@ class BindingModeProcesser:
                     interaction = row["INTERACTION"]
                     ring_found = False
                     # Concatenate the values to form a unique column name
-                    for ligand_ring in (self.ligand_rings or []):
+                    for ligand_ring in self.ligand_rings or []:
                         if ligcarbonidx in ligand_ring:
                             numbers_as_strings = [str(ligcarbonidx) for ligcarbonidx in ligand_ring]
                             # Create the name with numbers separated by underscores
@@ -395,7 +395,9 @@ class BindingModeProcesser:
                                     parts = col.split("_")
                                     prot_partner = parts[0]
                                     interaction = parts[-1]
-                                    condition = (row["Prot_partner"] == prot_partner) & (row["INTERACTION"] == interaction)
+                                    condition = (row["Prot_partner"] == prot_partner) & (
+                                        row["INTERACTION"] == interaction
+                                    )
                                     df.at[index, col] = 1 if condition else 0
                                 else:
                                     continue
@@ -520,7 +522,9 @@ class BindingModeProcesser:
                                     parts = col.split("_")
                                     prot_partner = parts[0]
                                     interaction = parts[-1]
-                                    condition = (row["Prot_partner"] == prot_partner) & (row["INTERACTION"] == interaction)
+                                    condition = (row["Prot_partner"] == prot_partner) & (
+                                        row["INTERACTION"] == interaction
+                                    )
                                     df.at[index, col] = 1 if condition else 0
                                 else:
                                     continue
@@ -634,13 +638,13 @@ class BindingModeProcesser:
         for col in unique_data.values():
             if col not in df.columns:
                 df[col] = 0
-    
+
         for idx, row in df.iterrows():
             if row["INTERACTION"] == "skip":
                 continue
-    
+
             col_name = self._row_to_colname(row, prot_partner="ligand")
-    
+
             if col_name in unique_data:
                 df.at[idx, col_name] = 1
 
@@ -652,7 +656,7 @@ class BindingModeProcesser:
         interaction = row["INTERACTION"]
         if interaction == "skip":
             return "skip"
-    
+
         # -----------------------------
         # Small-molecule ligand case
         # -----------------------------
@@ -660,19 +664,19 @@ class BindingModeProcesser:
             if interaction == "hydrophobic":
                 ligcarbonidx = int(row["LIGCARBONIDX"])
                 ring_found = False
-    
+
                 # ligcarbonidx might be str/int depending on upstream; keep behavior consistent
-                for ligand_ring in (self.ligand_rings or []):
+                for ligand_ring in self.ligand_rings or []:
                     if ligcarbonidx in ligand_ring:
                         name_with_numbers = "_".join(str(x) for x in ligand_ring)
                         ring_found = True
                         if self.schema != "residue":
                             return f"ligand_{name_with_numbers}_{interaction}"
                         return f"{prot_partner}_{name_with_numbers}_{interaction}"
-                            
+
                 if not ring_found:
                     return f"{prot_partner}_{int(row['LIGCARBONIDX'])}_{interaction}"
-    
+
             elif interaction == "hbond":
                 if row["PROTISDON"]:
                     ligcarbonidx = int(row["ACCEPTORIDX"])
@@ -681,12 +685,12 @@ class BindingModeProcesser:
                     ligcarbonidx = int(row["DONORIDX"])
                     type_ = "Donor"
                 return f"{prot_partner}_{ligcarbonidx}_{type_}_{interaction}"
-    
+
             elif interaction == "halogen":
                 ligcarbonidx = int(row["DON_IDX"])
                 halogen = row["DONORTYPE"]
                 return f"{prot_partner}_{ligcarbonidx}_{halogen}_{interaction}"
-    
+
             elif interaction == "waterbridge":
                 if row["PROTISDON"]:
                     ligcarbonidx = int(row["ACCEPTOR_IDX"])
@@ -695,72 +699,72 @@ class BindingModeProcesser:
                     ligcarbonidx = int(row["DONOR_IDX"])
                     type_ = "Donor"
                 return f"{prot_partner}_{ligcarbonidx}_{type_}_{interaction}"
-    
+
             elif interaction == "pistacking":
                 ligidx = row["LIG_IDX_LIST"]  # keep commas (downstream highlighter expects them)
                 return f"{prot_partner}_{ligidx}_{interaction}"
-    
+
             elif interaction == "pication":
                 ligidx = str(row["LIG_IDX_LIST"])
                 ligtype = row["LIG_GROUP"]
                 col_name = f"{prot_partner}_{ligidx}_{ligtype}_{interaction}"
                 return col_name.replace(",", "_")  # MUST match _gather_interactions
-    
+
             elif interaction == "saltbridge":
                 ligidx = row["LIG_IDX_LIST"]  # keep commas
                 lig_group = row["LIG_GROUP"]
                 type_ = "NI" if row["PROTISPOS"] else "PI"
                 return f"{prot_partner}_{ligidx}_{lig_group}_{type_}_{interaction}"
-    
+
             elif interaction == "metal":
                 special_ligand = row["RESTYPE_LIG"]
                 ligcarbonidx = int(row["TARGET_IDX"])
                 metal_type = row["METAL_TYPE"]
                 coordination = row["COORDINATION"]
                 return f"{special_ligand}_{ligcarbonidx}_{metal_type}_{coordination}_{interaction}"
-    
+
             return "skip"
-    
+
         # -----------------------------
         # Peptide ligand case
         # -----------------------------
         peptide_partner = str(row["RESNR_LIG"]) + row["RESTYPE_LIG"]
-    
+
         if interaction == "hydrophobic":
             return f"{prot_partner}_{peptide_partner}_{interaction}"
-    
+
         elif interaction == "hbond":
             type_ = "Acceptor" if row["PROTISDON"] else "Donor"
             return f"{prot_partner}_{peptide_partner}_{type_}_{interaction}"
-    
+
         elif interaction == "halogen":
             halogen = row["DONORTYPE"]
             return f"{prot_partner}_{peptide_partner}_{halogen}_{interaction}"
-    
+
         elif interaction == "waterbridge":
             type_ = "Acceptor" if row["PROTISDON"] else "Donor"
             return f"{prot_partner}_{peptide_partner}_{type_}_{interaction}"
-    
+
         elif interaction == "pistacking":
             return f"{prot_partner}_{peptide_partner}_{interaction}"
-    
+
         elif interaction == "pication":
             ligidx = peptide_partner
             ligtype = row["RESTYPE_LIG"]
             col_name = f"{prot_partner}_{ligidx}_{ligtype}_{interaction}"
             return col_name.replace(",", "_")
-    
+
         elif interaction == "saltbridge":
             ligidx = peptide_partner
             lig_group = row["RESTYPE_LIG"]
             type_ = "NI" if row["PROTISPOS"] else "PI"
             return f"{prot_partner}_{ligidx}_{lig_group}_{type_}_{interaction}"
-    
+
         elif interaction == "metal":
             special_ligand = row["RESTYPE_LIG"]
             ligcarbonidx = peptide_partner
             metal_type = row["METAL_TYPE"]
             coordination = row["COORDINATION"]
             return f"{special_ligand}_{ligcarbonidx}_{metal_type}_{coordination}_{interaction}"
-    
+
         return "skip"
