@@ -1,5 +1,5 @@
 import pytest
-from openmmdl.openmmdl_analysis.core.utils import update_dict, update_values
+from openmmdl.openmmdl_analysis.core.utils import update_dict, update_values, extract_ints, coord_str
 
 
 def test_update_dict():
@@ -20,3 +20,17 @@ def test_update_dict():
     target_dict = {1: "1", 2: "2"}
     update_dict(target_dict)  # No source dictionaries provided
     assert target_dict == {1: "1", 2: "2"}
+
+
+def test_extract_ints_basic_and_leading_zeros():
+    assert extract_ints("A12_B034") == [12, 34]
+
+
+def test_extract_ints_no_digits_and_non_string():
+    assert extract_ints("no_digits") == []
+    assert extract_ints(105) == [105]
+
+
+def test_coord_str_formats_and_skip():
+    assert coord_str([1, 2.34567, -0.1]) == "(1.000, 2.346, -0.100)"
+    assert coord_str(None) == "skip"
