@@ -30,9 +30,6 @@ dependencies:
   - mdonatello
   - numba>=0.59.1
   - jupyter
+  - prolif>=2.1.0
   # Add any additional runtime dependencies from pyproject.toml here
   # - package_name=version
-
-  # Include the dependencies from requirements.txt
-  - pip:
-      - prolif
