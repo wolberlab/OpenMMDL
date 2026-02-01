@@ -13,7 +13,7 @@ OpenMMDL @ Molecular Design Lab
 | **Style**          | [![Code style: black][badge_black]][url_black]|
 | **Linting**        | [![ruff][badge_ruff]][url_ruff]|
 | **Dependencies**   | [![rdkit][badge_rdkit]][url_rdkit] [![mdanalysis][badge_mda]][url_mda]|
-| **License**        | [![License: GPL v2][badge_license]][url_license]|
+| **License**        | [![License: MIT][badge_license]][url_license]|
 
 
 Interface for easy setup and analysis of molecular dynamic (MD) simulations of
