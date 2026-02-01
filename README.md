@@ -13,13 +13,13 @@ OpenMMDL @ Molecular Design Lab
 | **Style**          | [![Code style: black][badge_black]][url_black]|
 | **Linting**        | [![ruff][badge_ruff]][url_ruff]|
 | **Dependencies**   | [![rdkit][badge_rdkit]][url_rdkit] [![mdanalysis][badge_mda]][url_mda]|
-| **License**        | [![License: GPL v2][badge_license]][url_license]|
+| **License**        | [![License: MIT][badge_license]][url_license]|
 
 
 Interface for easy setup and analysis of molecular dynamic (MD) simulations of
 protein-ligand complexes with **OpenMM**
 
-http://openmmdl.readthedocs.io/
+📖 Documentation: http://openmmdl.readthedocs.io/
 
 ## Installation via conda-forge
 
@@ -65,7 +65,7 @@ be easily installed on a separate environment using conda (we recommend
 using miniconda):
 
     cd OpenMMDL
-    conda create -n openmmdl -c conda-forge --file requirements.txt
+    conda env create -f environment.yml -n openmmdl
 
 After installation, activate the conda environment:
 
@@ -173,6 +173,8 @@ Start the analysis with the following Inputs:
 
 --figure = File type for the figures, default is png. Can be changed to all file types supported by matplotlib.
 
+--interaction_package = The package used to calculate protein-ligand interactions. The default is PLIP. Alternatively, ProLIF can be used.
+
 #### Command line example with default values
 
     openmmdl analysis -t {path/to/topology} -d {path/to/trajectory} -n {Ligand_name}
@@ -239,7 +241,7 @@ This Project is based on the
 [url_latest_release]: https://github.com/wolberlab/openmmdl/releases
 [url_ci_cd]: https://github.com/wolberlab/OpenMMDL/actions/workflows/CI-CD.yml
 [url_codeql]: https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml
-[url_docs]: https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml
+[url_docs]: https://openmmdl.readthedocs.io/en/stable/
 [url_codecov]: https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml
 [url_conda_forge]: https://anaconda.org/conda-forge/openmmdl
 [url_rdkit]: https://www.rdkit.org/
