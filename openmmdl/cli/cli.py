@@ -5,6 +5,8 @@ import importlib
 import sys
 from typing import Dict, List
 
+from openmmdl import __version__
+
 COMMANDS: Dict[str, tuple[str, str]] = {
     "setup": (
         "openmmdl.openmmdl_setup.openmmdlsetup:main",
@@ -26,6 +28,7 @@ COMMANDS: Dict[str, tuple[str, str]] = {
 
 
 HELP_ALIASES = {"--help", "-h", "help", "-help"}
+VERSION_ALIASES = {"--version", "-V", "version"}
 
 
 def _build_top_parser() -> argparse.ArgumentParser:
@@ -35,6 +38,13 @@ def _build_top_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
+    parser.add_argument(
+        "--version",
+        "-V",
+        action="store_true",
+        help="Print OpenMMDL version and exit.",
+    )
+    
     # We add subparsers only so argparse prints a clean command list in help.
     sub = parser.add_subparsers(dest="command", metavar="<command>")
     for name, (_, short_help) in COMMANDS.items():
@@ -101,11 +111,16 @@ def main(argv: List[str] | None = None) -> int:
 
     argv = _normalize_help_tokens(argv)
 
+    # Top-level version
+    if argv and argv[0] in VERSION_ALIASES:
+        sys.stdout.write(f"{__version__}\n")
+        return 0
+
     # Top-level help
     if not argv or argv[0] in HELP_ALIASES:
         _build_top_parser().print_help()
         return 0
-
+    
     command = argv[0]
     if command not in COMMANDS:
         sys.stderr.write(f"Unknown command: {command!r}\n\n")
