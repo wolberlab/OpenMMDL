@@ -19,7 +19,7 @@ OpenMMDL @ Molecular Design Lab
 Interface for easy setup and analysis of molecular dynamic (MD) simulations of
 protein-ligand complexes with **OpenMM**
 
-http://openmmdl.readthedocs.io/
+📖 Documentation: http://openmmdl.readthedocs.io/
 
 ## Installation via conda-forge
 
@@ -65,7 +65,7 @@ be easily installed on a separate environment using conda (we recommend
 using miniconda):
 
     cd OpenMMDL
-    conda create -n openmmdl -c conda-forge --file requirements.txt
+    conda env create -f environment.yml -n openmmdl
 
 After installation, activate the conda environment:
 
@@ -172,6 +172,8 @@ Start the analysis with the following Inputs:
 --watereps = the EPS of the clustering part during the water analysis. will only result in something if "-w True" is added. Accepts float (in Angstrom).
 
 --figure = File type for the figures, default is png. Can be changed to all file types supported by matplotlib.
+
+--interaction_package = The package used to calculate protein-ligand interactions. The default is PLIP. Alternatively, ProLIF can be used.
 
 #### Command line example with default values
 
