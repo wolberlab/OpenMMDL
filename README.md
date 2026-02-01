@@ -239,7 +239,7 @@ This Project is based on the
 [url_latest_release]: https://github.com/wolberlab/openmmdl/releases
 [url_ci_cd]: https://github.com/wolberlab/OpenMMDL/actions/workflows/CI-CD.yml
 [url_codeql]: https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml
-[url_docs]: https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml
+[url_docs]: https://openmmdl.readthedocs.io/en/stable/
 [url_codecov]: https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml
 [url_conda_forge]: https://anaconda.org/conda-forge/openmmdl
 [url_rdkit]: https://www.rdkit.org/
