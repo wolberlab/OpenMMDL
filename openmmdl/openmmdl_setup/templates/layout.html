@@ -76,6 +76,77 @@
                 setTimeout(function() {animateSpinner()}, 1000)
             }
         </script>
+        <script>
+            /* File drag & drop */
+            (function() {
+                function wire(zone) {
+                    var inputId = zone.getAttribute('data-file-input');
+                    if (!inputId) return;
+                    var input = document.getElementById(inputId);
+                    if (!input) return;
+
+                    function setDrag(active) {
+                        if (active) zone.classList.add('is-dragover');
+                        else zone.classList.remove('is-dragover');
+                    }
+
+                    // Click anywhere on the widget to open the file picker.
+                    zone.addEventListener('click', function(e) {
+                        if (input.disabled) return;
+                        // Avoid double-triggering when clicking the native Browse label.
+                        if (e.target && (e.target.tagName === 'INPUT')) return;
+                        input.click();
+                    });
+
+                    zone.addEventListener('dragenter', function(e) {
+                        if (input.disabled) return;
+                        e.preventDefault();
+                        setDrag(true);
+                    });
+
+                    zone.addEventListener('dragover', function(e) {
+                        if (input.disabled) return;
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'copy';
+                        setDrag(true);
+                    });
+
+                    zone.addEventListener('dragleave', function(e) {
+                        setDrag(false);
+                    });
+
+                    zone.addEventListener('drop', function(e) {
+                        if (input.disabled) return;
+                        e.preventDefault();
+                        setDrag(false);
+
+                        var files = (e.dataTransfer && e.dataTransfer.files) ? e.dataTransfer.files : null;
+                        if (!files || files.length === 0) return;
+
+                        // Respect single-file inputs.
+                        if (!input.multiple && files.length > 1) {
+                            var dt = new DataTransfer();
+                            dt.items.add(files[0]);
+                            input.files = dt.files;
+                        } else {
+                            input.files = files;
+                        }
+
+                        // Trigger existing onchange handlers (optionChanged()).
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+                }
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    var zones = document.querySelectorAll('.om-filedrop[data-file-input]');
+                    for (var i = 0; i < zones.length; i++) wire(zones[i]);
+                });
+
+                // Prevent the browser from navigating away when dropping files outside dropzones.
+                window.addEventListener('dragover', function(e) { e.preventDefault(); });
+                window.addEventListener('drop', function(e) { e.preventDefault(); });
+            })();
+        </script>    
     </head>
     <body>
         <div class="container-fluid om-shell">

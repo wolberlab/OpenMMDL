@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 
 {% macro fileinput(id) %}
-<div class="input-group">
+<div class="input-group om-filedrop" data-file-input="{{ id }}">
     <label class="btn btn-default btn-file input-group-addon">
         Browse... <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" {{'disabled' if disabled else ''}} onchange="optionChanged()" />
     </label>
-    <span id="{{ id }}_label" class="form-control" />
+    <span id="{{ id }}_label" class="form-control om-filedrop-label"></span>
 </div>
 {% endmacro %}
 

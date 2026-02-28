@@ -15,6 +15,18 @@ The rules for this file:
     * YYYY-MM-DD date format (following ISO 8601)
   * accompany each entry with github issue/PR number (Issue #xyz)
 -->
+## Version 1.X.X
+
+### Authors
+talagayev
+
+### Added
+- Added Drag & Drop option for file upload in `OpenMMDL Setup` (2026-02-28, PR#187)
+
+### Fixed
+
+### Changed
+
 ## Version 1.2.0
 
 ### Authors
