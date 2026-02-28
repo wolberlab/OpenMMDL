@@ -422,3 +422,12 @@ pre code { color: inherit; }
   font-size: 13px;
   color: #475569;
 }
+
+.om-filedrop { cursor: pointer; }
+.om-filedrop .om-filedrop-label:empty::before {
+  content: "Drag & drop file here";
+  color: #94a3b8;
+}
+.om-filedrop.is-dragover .om-filedrop-label {
+  box-shadow: 0 0 0 2px rgba(15,23,42,0.25);
+}

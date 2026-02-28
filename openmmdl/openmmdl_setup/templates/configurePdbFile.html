@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 
 {% macro fileinput(id) %}
-    <div class="input-group">
+    <div class="input-group om-filedrop" data-file-input="{{ id }}">
         <label class="btn btn-default btn-file input-group-addon">
             <span title="Select File"style=" font-weight: 700;">Browse... </span>
             <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" onchange="optionChanged()"/>
         </label>
-        <span id="{{ id }}_label" class="form-control"/>
+        <span id="{{ id }}_label" class="form-control om-filedrop-label"></span>
     </div>
 {% endmacro %}
 

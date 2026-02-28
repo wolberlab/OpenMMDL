@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 {% block title %}Prepare Amber Files{% endblock %}
 
-{% macro fileinput(id, title) %}
-<div class="input-group">
+{% macro fileinput(id, title="") %}
+<div class="input-group om-filedrop" data-file-input="{{ id }}">
     <label class="btn btn-default btn-file input-group-addon" >
         Browse... <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" onchange="optionChanged()" />
     </label>
-    <span id="{{ id }}_label" class="form-control" style="overflow: hidden;overflow-wrap: anywhere;" title="{{title}}"/>
+    <span id="{{ id }}_label" class="form-control om-filedrop-label" style="overflow: hidden; overflow-wrap: anywhere;" title="{{ title }}"></span>
 </div>
 {% endmacro %}
 
@@ -53,7 +53,7 @@
           <div id="protOptions">
             <div class="form-group">
               <div class="row">
-                <div class="col-lg-4" style="padding-left: 30px">
+                <div class="col-lg-6" style="padding-left: 30px">
                   <label for="protLabel"> Receptor File (.pdb) </label>
                   {{ fileinput('protFile') }}
                 </div>
