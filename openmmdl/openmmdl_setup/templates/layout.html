@@ -76,6 +76,23 @@
                 setTimeout(function() {animateSpinner()}, 1000)
             }
         </script>
+
+        <script>
+            // Back button helper: use browser history when the referrer is same-origin; otherwise fall back.
+            function omGoBack(fallbackUrl) {
+                try {
+                    if (document.referrer) {
+                        var refOrigin = new URL(document.referrer).origin;
+                        if (refOrigin === window.location.origin) {
+                            window.history.back();
+                            return;
+                        }
+                    }
+                } catch (e) {}
+                window.location.href = fallbackUrl;
+            }
+        </script>
+
         <script>
             /* File drag & drop */
             (function() {

@@ -504,10 +504,14 @@
 
     <div class="col-md-7">
       <div class="form-group">
+
+        <button type="button" class="btn btn-default btn-back-red"
+          onclick="window.location.href='{{ url_for('selectFiles', type='amber') }}'">Back</button>
+
         <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('downloadAmberBashScript')}}')"
           title="Save the script.  To run the simulation, put the script in the directory containing the input files and execute it.">Save Script</button>
         
-        <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('showSimulationOptions')}}')"
+          <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('showSimulationOptions')}}')"
           title="Run the script and save the output in the current working directory, and continue to the simulations configuration.">Continue</button>
         {% if 'cleanup' in session and session['cleanup'] == 'yes' %}
         {% endif %}

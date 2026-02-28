@@ -678,6 +678,23 @@ def getCurrentStructure():
     PDBFile.writeFile(fixer.topology, fixer.positions, pdb)
     return pdb.getvalue()
 
+@app.route("/showSelectChains")
+def showSelectChainsPage():
+    global fixer
+    try:
+        file_list = uploadedFiles.get("originalFile") or uploadedFiles.get("file")
+        if not file_list:
+            return showSelectFileType()
+        file, name = file_list[0]
+        file.seek(0, 0)
+        session["pdbType"] = _guessFileFormat(file, name)
+        # OpenMMDL setup currently only instantiates PDBFixer from pdbfile.
+        fixer = PDBFixer(pdbfile=file)
+        return showSelectChains()
+    except Exception:
+        app.logger.error("Error displaying select chains page", exc_info=True)
+        return showSelectFileType()
+
 
 def showSelectChains():
     chains = []
@@ -792,6 +809,7 @@ def addHeavyAtoms():
     return showAddHydrogens()
 
 
+@app.route("/showAddHydrogens")
 def showAddHydrogens():
     unitCell = fixer.topology.getUnitCellDimensions()
     if unitCell is not None:

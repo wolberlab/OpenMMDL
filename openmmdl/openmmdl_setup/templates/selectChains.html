@@ -30,6 +30,8 @@ This PDB file contains {{ chains|length }} chains.  Select which ones to include
         <option value="none">Delete all heterogens</option>
     </select>
     <p/>
+    <button type="button" class="btn btn-default btn-back-red"
+            onclick="window.location.href='{{ url_for('selectFiles', type='pdb') }}'">Back</button>
     <input type="submit" value="Continue" id="continue" class="btn"/>
     </div>
     <div class="col-md-6" id="viewport" style="width:500px; height:500px">

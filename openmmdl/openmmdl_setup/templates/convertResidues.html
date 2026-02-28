@@ -23,6 +23,7 @@ This PDB file contains non-standard residues.  Do you want to convert them to st
         <button type="button" id="start" class="btn btn-default" onclick="setCheckboxes(true)">Select All</button>
         <button type="button" id="start" class="btn btn-default" onclick="setCheckboxes(false)">Select None</button>
     </div>
+    <button type="button" class="btn btn-default btn-back-red" onclick="omGoBack('{{ url_for('showSelectFileType') }}')">Back</button>
     <input type="submit" value="Continue" id="continue" class="btn"/>
 </form>
 
