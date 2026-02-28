@@ -14,6 +14,8 @@ The following residues are missing heavy atoms, which will be added.
             </tr>
         {% endfor %}
     </table>
+    <input type="button" value="Back" class="btn btn-default btn-back-red"
+           onclick="window.location.href='{{ url_for('showSelectChainsPage') }}'"/>
     <input type="button" value="Continue" class="btn" onclick="submitWithSpinner('form')"/>
 </form>
 {% endblock %}

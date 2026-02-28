@@ -324,6 +324,21 @@
     </div>
     <div class="col-md-8">
         <div class="form-group">
+            {# Back target depends on workflow #}
+            {% if session.get('fileType') == 'pdb' %}
+                {% set back_url = url_for('showAddHydrogens') %}
+            {% elif session.get('fileType') == 'amber' %}
+                {% if session.get('has_files') == 'yes' %}
+                    {% set back_url = url_for('selectFiles', type='amber') %}
+                {% else %}
+                    {% set back_url = url_for('showAmberOptions') %}
+                {% endif %}
+            {% else %}
+                {% set back_url = url_for('showSelectFileType') %}
+            {% endif %}
+
+            <button type="button" class="btn btn-default btn-back-red" onclick="window.location.href='{{ back_url }}'">Back</button>
+
             {% if display_save_script %}
             <button type="button" class="btn btn-default" onclick="window.open('{{ url_for('downloadScript')}}')"
                 title="Save the script.  To run the simulation, put the script in the directory containing the input files and execute it.">Save Script</button>
