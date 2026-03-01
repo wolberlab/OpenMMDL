@@ -21,6 +21,7 @@ The rules for this file:
 talagayev
 
 ### Added
+- Added extensions in `OpenMMDL Setup` (2026-03-01, PR#189)
 - Added `Back` button in `OpenMMDL Setup` (2026-02-28, PR#188)
 - Added Drag & Drop option for file upload in `OpenMMDL Setup` (2026-02-28, PR#187)
 

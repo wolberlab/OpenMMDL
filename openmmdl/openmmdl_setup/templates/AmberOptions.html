@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 {% block title %}Prepare Amber Files{% endblock %}
 
-{% macro fileinput(id, title="") %}
+{% macro fileinput(id, title="", accept="") %}
 <div class="input-group om-filedrop" data-file-input="{{ id }}">
     <label class="btn btn-default btn-file input-group-addon" >
-        Browse... <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" onchange="optionChanged()" />
+        Browse... <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" {% if accept %}accept="{{ accept }}"{% endif %} onchange="if (omValidateFileInput(this)) optionChanged()" />
     </label>
     <span id="{{ id }}_label" class="form-control om-filedrop-label" style="overflow: hidden; overflow-wrap: anywhere;" title="{{ title }}"></span>
 </div>
@@ -55,7 +55,7 @@
               <div class="row">
                 <div class="col-lg-6" style="padding-left: 30px">
                   <label for="protLabel"> Receptor File (.pdb) </label>
-                  {{ fileinput('protFile') }}
+                  {{ fileinput('protFile', accept='.pdb') }}
                 </div>
 
                 <div class="col-lg-4" >
@@ -93,9 +93,9 @@
           <div id="dnaOptions">
             <div class="form-group">
               <div class="row">
-                <div class="col-lg-4" style="padding-left: 30px">
+                <div class="col-lg-6" style="padding-left: 30px">
                   <label for="dnaFile"> Receptor File (.pdb) </label>
-                  {{ fileinput('dnaFile') }}
+                  {{ fileinput('dnaFile', accept='.pdb') }}
                 </div>
           
                 <div class="col-lg-4">
@@ -126,9 +126,9 @@
           <div id="rnaOptions">
             <div class="form-group">
               <div class="row">
-                <div class="col-lg-4" style="padding-left: 30px">
+                <div class="col-lg-6" style="padding-left: 30px">
                   <label for="rnaFile"> Receptor File (.pdb) </label>
-                  {{ fileinput('rnaFile') }}
+                  {{ fileinput('rnaFile', accept='.pdb') }}
                 </div>
           
                 <div class="col-lg-4">
@@ -162,9 +162,9 @@
           <div id="carboOptions">
             <div class="form-group">
               <div class="row">
-                <div class="col-lg-4" style="padding-left: 30px">
+                <div class="col-lg-6" style="padding-left: 30px">
                   <label for="carboFile"> Receptor File (.pdb) </label>
-                  {{ fileinput('carboFile') }}
+                  {{ fileinput('carboFile', accept='.pdb') }}
                 </div>
           
                 <div class="col-lg-4">
@@ -205,7 +205,7 @@
                 <div class="col-lg-6">
                   <div class="form-group">
                     <label for="nmLigFile1">PDB/SDF File</label>
-                    {{ fileinput('nmLigFile') }}
+                    {{ fileinput('nmLigFile', accept='.sdf,.pdb') }}
                   </div>
 
                   <div class="form-group">
@@ -268,17 +268,17 @@
                 <div class="col-lg-12">
                   <div class="form-group">
                     <label for="spLigFile1" class=" control-label col-md-3">PDB File</label>
-                    <div class="col-md-9" style="margin-bottom: 15px">{{ fileinput('spLigFile', 'As the special ligand usually comes with receptor from RCSB website, here we would ask the user to submit it only in pdb format.') }}</div>
+                    <div class="col-md-9" style="margin-bottom: 15px">{{ fileinput('spLigFile', 'As the special ligand usually comes with receptor from RCSB website, here we would ask the user to submit it only in pdb format.', accept='.pdb') }}</div>
                   </div>
 
                   <div class="form-group">
                     <label for="prepcFile1" class="control-label col-md-3">Prepc File</label>
-                    <div class="col-md-9" style="margin-bottom: 15px" >{{ fileinput('prepcFile') }}</div>
+                    <div class="col-md-9" style="margin-bottom: 15px" >{{ fileinput('prepcFile', accept='.prepc') }}</div>
                   </div>
 
                   <div class="form-group">
                     <label for="frcmodFile1" class="control-label col-md-3">Frcmod File</label>
-                    <div class="col-md-9" style="margin-bottom: 15px">{{ fileinput('frcmodFile') }}</div>
+                    <div class="col-md-9" style="margin-bottom: 15px">{{ fileinput('frcmodFile', accept='.frcmod') }}</div>
                   </div>
                 </div>
                 
