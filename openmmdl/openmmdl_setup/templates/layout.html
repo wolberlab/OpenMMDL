@@ -94,6 +94,64 @@
         </script>
 
         <script>
+            // File extension validation based on <input accept="..."> (works for Browse + drag&drop).
+            function omParseAcceptExts(accept) {
+                if (!accept) return [];
+                return accept.split(',')
+                    .map(function(s){ return (s || '').trim().toLowerCase(); })
+                    .filter(function(s){ return s && s[0] === '.'; });
+            }
+
+            function omNameMatchesExt(name, exts) {
+                var n = (name || '').toLowerCase();
+                for (var i = 0; i < exts.length; i++) {
+                    if (n.endsWith(exts[i])) return true;
+                }
+                return false;
+            }
+
+            function omClearFileInput(input) {
+                try { input.value = ''; } catch (e) {}
+                // Clear label if present.
+                var lbl = document.getElementById(input.id + "_label");
+                if (lbl) lbl.textContent = "";
+            }
+
+            // Called by onchange in templates. Return true if OK; false if rejected and cleared.
+            function omValidateFileInput(input) {
+                var allowed = omParseAcceptExts(input.getAttribute('accept'));
+                if (!allowed.length) return true; // no restriction
+                if (!input.files || input.files.length === 0) return true;
+
+                for (var i = 0; i < input.files.length; i++) {
+                    var f = input.files[i];
+                    if (!omNameMatchesExt(f.name, allowed)) {
+                        alert("Invalid file type: " + f.name + "\nAllowed: " + allowed.join(', '));
+                        omClearFileInput(input);
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            // Used by drag&drop to keep only acceptable files (or reject entirely if none acceptable).
+            function omFilterFilesForInput(input, files) {
+                var allowed = omParseAcceptExts(input.getAttribute('accept'));
+                if (!allowed.length) return Array.prototype.slice.call(files);
+                var kept = [];
+                for (var i = 0; i < files.length; i++) {
+                    if (omNameMatchesExt(files[i].name, allowed)) kept.push(files[i]);
+                }
+                if (!kept.length) {
+                    alert("Invalid file type.\nAllowed: " + allowed.join(', '));
+                    return null;
+                }
+                if (!input.multiple && kept.length > 1) kept = [kept[0]];
+                return kept;
+            }
+        </script>
+
+        <script>
             /* File drag & drop */
             (function() {
                 function wire(zone) {
@@ -140,14 +198,12 @@
                         var files = (e.dataTransfer && e.dataTransfer.files) ? e.dataTransfer.files : null;
                         if (!files || files.length === 0) return;
 
-                        // Respect single-file inputs.
-                        if (!input.multiple && files.length > 1) {
-                            var dt = new DataTransfer();
-                            dt.items.add(files[0]);
-                            input.files = dt.files;
-                        } else {
-                            input.files = files;
-                        }
+                        var filtered = omFilterFilesForInput(input, files);
+                        if (!filtered || filtered.length === 0) return;
+
+                        var dt = new DataTransfer();
+                        for (var i = 0; i < filtered.length; i++) dt.items.add(filtered[i]);
+                        input.files = dt.files;
 
                         // Trigger existing onchange handlers (optionChanged()).
                         input.dispatchEvent(new Event('change', { bubbles: true }));

@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 
-{% macro fileinput(id) %}
+{% macro fileinput(id, accept="") %}
     <div class="input-group om-filedrop" data-file-input="{{ id }}">
         <label class="btn btn-default btn-file input-group-addon">
             <span title="Select File"style=" font-weight: 700;">Browse... </span>
-            <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" onchange="optionChanged()"/>
+            <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" {% if accept %}accept="{{ accept }}"{% endif %} onchange="if (omValidateFileInput(this)) optionChanged()"/>
         </label>
         <span id="{{ id }}_label" class="form-control om-filedrop-label"></span>
     </div>
@@ -21,7 +21,7 @@ Select the pdb input file and options for how to model it.
 <form method="post" enctype="multipart/form-data" action="{{ url_for('configureFiles') }}" class="form-horizontal">
     <div class="form-group">
     <label for="filename" class="control-label col-md-2">PDB File</label>
-        <div class="col-md-10">{{ fileinput('file') }}</div>
+        <div class="col-md-10">{{ fileinput('file', accept='.pdb') }}</div>
     </div>
     <div class="form-group">
     <label for="forcefield" class="control-label col-md-2">Force Field</label>
@@ -45,7 +45,7 @@ Select the pdb input file and options for how to model it.
     </p>
     <div class="form-group">
     <label for="filename" class="control-label col-md-2">Ligand File</label>
-        <div class="col-md-10" title="The supported formats are SDF, MOL and MOL2"> {{fileinput('sdfFile') }}</div>
+        <div class="col-md-10" title="The supported formats are SDF, MOL and MOL2"> {{ fileinput('sdfFile', accept='.sdf,.mol,.mol2') }}</div>
     </div>
     <div class="form-group">
     <label for="smallMoleculeForceField" class="control-label col-md-2">Small Molecule Force Field</label>
