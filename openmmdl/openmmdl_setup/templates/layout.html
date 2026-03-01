@@ -165,10 +165,20 @@
                         else zone.classList.remove('is-dragover');
                     }
 
+                    function clickedBrowseLabel(target) {
+                        while (target && target !== zone) {
+                            if (target.tagName === 'LABEL' && target.classList && target.classList.contains('btn-file')) return true;
+                            target = target.parentElement;
+                        }
+                        return false;
+                    }
+
                     // Click anywhere on the widget to open the file picker.
                     zone.addEventListener('click', function(e) {
                         if (input.disabled) return;
-                        // Avoid double-triggering when clicking the native Browse label.
+                        // The Browse control is a <label> that already forwards clicks to the hidden file input.
+                        // Calling input.click() here as well can open the picker twice.
+                        if (clickedBrowseLabel(e.target)) return;
                         if (e.target && (e.target.tagName === 'INPUT')) return;
                         input.click();
                     });

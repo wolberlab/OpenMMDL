@@ -26,6 +26,7 @@ talagayev
 - Added Drag & Drop option for file upload in `OpenMMDL Setup` (2026-02-28, PR#187)
 
 ### Fixed
+- Fixed double click bug in `OpenMMDL Setup` (2026-03-01, PR#190)
 
 ### Changed
 
