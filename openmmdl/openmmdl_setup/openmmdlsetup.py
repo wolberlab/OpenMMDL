@@ -1073,6 +1073,7 @@ os.chdir(outputDir)"""
     script.append("import pdbfixer")
     script.append("import sys")
     script.append("import os")
+    script.append("import parmed as pmd")
     script.append("import shutil")
     if session["openmmdl_analysis"] == "Yes":
         script.append("import subprocess")
@@ -1117,6 +1118,7 @@ os.chdir(outputDir)"""
             else:
                 spLigName = None
 
+            script.append(f"ligand_name = {repr(nmLigName) if nmLigName else 'None'}")
         elif session["has_files"] == "no":
             script.append("prmtop_file = 'system.%s.prmtop'" % session["water_ff"])
             script.append("inpcrd_file = 'system.%s.inpcrd' " % session["water_ff"])
@@ -1419,6 +1421,20 @@ positions = modeller.positions  """
                 hmrOptions,
             )
         )
+    script.append("""
+try:
+    struct = pmd.openmm.load_topology(topology, system, positions)
+
+    if 'ligand_name' in globals() and ligand_name:
+        lig = struct[f':{ligand_name}']
+        lig.save(f'ligand_{ligand_name}_pc.mol2', overwrite=True)
+        print(f"Wrote ligand with partial charges 'ligand_{ligand_name}_pc.mol2'.")
+    else:
+        print("No ligand_name set; skipping MOL2 export (Amber uploaded prmtop needs resname input).")
+except Exception as e:
+    print(f"Skipping write out of partial charge molecule due to error: {e}")
+"""
+    )
     if ensemble == "npt":
         script.append("system.addForce(MonteCarloBarostat(pressure, temperature, barostatInterval))")
     script.append("integrator = LangevinMiddleIntegrator(temperature, friction, dt)")
