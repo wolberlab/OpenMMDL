@@ -42,6 +42,7 @@ from openmmdl.openmmdl_simulation.scripts.protein_ligand_prep import (
     merge_protein_and_ligand,
     water_padding_solvent_builder,
     water_absolute_solvent_builder,
+    write_ligand_with_partial_charges,
     membrane_builder,
     water_conversion,
 )
@@ -134,6 +135,60 @@ def test_merge_protein_and_ligand():
     )
     assert complex_topology is not None
     assert complex_positions is not None
+
+def test_write_ligand_with_partial_charges():
+    class FakeLigand:
+        def __init__(self):
+            self.saved = None
+
+        def save(self, path, overwrite=False):
+            self.saved = (path, overwrite)
+
+    class FakeStruct:
+        def __init__(self, ligand):
+            self.ligand = ligand
+
+        def __getitem__(self, key):
+            assert key == ":UNK"
+            return self.ligand
+
+    class FakeOpenMM:
+        def __init__(self, ligand):
+            self.ligand = ligand
+
+        def load_topology(self, topology, system, positions):
+            assert topology == "topology"
+            assert system == "system"
+            assert positions == "positions"
+            return FakeStruct(self.ligand)
+
+    class FakeParmEd:
+        def __init__(self, ligand):
+            self.openmm = FakeOpenMM(ligand)
+
+    fake_ligand = FakeLigand()
+    fake_parmed = FakeParmEd(fake_ligand)
+
+    output = write_ligand_with_partial_charges(
+        "topology",
+        "system",
+        "positions",
+        ligand_name="UNK",
+        parmed_module=fake_parmed,
+    )
+
+    assert output == "UNK_pc.mol2"
+    assert fake_ligand.saved == ("UNK_pc.mol2", True)
+
+
+def test_write_ligand_with_partial_charges_without_name():
+    output = write_ligand_with_partial_charges(
+        "topology",
+        "system",
+        "positions",
+        ligand_name=None,
+    )
+    assert output is None
 
 
 def test_water_padding_solvent_builder():

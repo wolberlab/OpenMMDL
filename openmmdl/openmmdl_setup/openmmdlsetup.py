@@ -1081,7 +1081,6 @@ os.chdir(outputDir)"""
     script.append("import pdbfixer")
     script.append("import sys")
     script.append("import os")
-    script.append("import parmed as pmd")
     script.append("import shutil")
     if session["openmmdl_analysis"] == "Yes":
         script.append("import subprocess")
@@ -1429,20 +1428,7 @@ positions = modeller.positions  """
                 hmrOptions,
             )
         )
-    script.append("""
-try:
-    struct = pmd.openmm.load_topology(topology, system, positions)
-
-    if 'ligand_name' in globals() and ligand_name:
-        lig = struct[f':{ligand_name}']
-        lig.save(f'{ligand_name}_pc.mol2', overwrite=True)
-        print(f"Wrote ligand with partial charges '{ligand_name}_pc.mol2'.")
-    else:
-        print("No ligand_name set; skipping MOL2 export (Amber uploaded prmtop needs resname input).")
-except Exception as e:
-    print(f"Skipping write out of partial charge molecule due to error: {e}")
-"""
-    )
+    script.append("write_ligand_with_partial_charges(topology, system, positions, ligand_name=globals().get('ligand_name'))")
     if ensemble == "npt":
         script.append("system.addForce(MonteCarloBarostat(pressure, temperature, barostatInterval))")
     script.append("integrator = LangevinMiddleIntegrator(temperature, friction, dt)")
