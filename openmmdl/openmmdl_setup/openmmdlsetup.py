@@ -1061,7 +1061,7 @@ os.chdir(outputDir)"""
         "from openmmdl.openmmdl_simulation.scripts.forcefield_water import ff_selection, water_forcefield_selection, water_model_selection, generate_forcefield, generate_transitional_forcefield"
     )
     script.append(
-        "from openmmdl.openmmdl_simulation.scripts.protein_ligand_prep import prepare_ligand, rdkit_to_openmm, merge_protein_and_ligand, water_padding_solvent_builder, water_absolute_solvent_builder, membrane_builder, water_conversion"
+        "from openmmdl.openmmdl_simulation.scripts.protein_ligand_prep import prepare_ligand, rdkit_to_openmm, merge_protein_and_ligand, water_padding_solvent_builder, water_absolute_solvent_builder, membrane_builder, water_conversion, write_ligand_with_partial_charges"
     )
     script.append(
         "from openmmdl.openmmdl_simulation.scripts.post_md_conversions import mdtraj_conversion, MDanalysis_conversion"
