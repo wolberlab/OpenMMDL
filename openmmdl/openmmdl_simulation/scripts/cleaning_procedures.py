@@ -1,3 +1,4 @@
+import glob
 import os
 import shutil
 from typing import List
@@ -96,6 +97,13 @@ def post_md_file_movement(protein_name: str, prmtop: str = None, inpcrd: str = N
             copy_file(lig, "Input_Files")
             copy_file(lig, "Final_Output/All_Atoms")
             copy_file(lig, "Final_Output/Prot_Lig")
+
+    # Copy ligand partial-charge MOL2 exports (if generated)
+    for mol2 in glob.glob("ligand_*_pc.mol2"):
+        copy_file(mol2, "Input_Files")
+        # Optional convenience copies:
+        copy_file(mol2, "Final_Output/All_Atoms")
+        copy_file(mol2, "Final_Output/Prot_Lig")
 
     copy_file(protein_name, "Input_Files")
     copy_file(prmtop, "Input_Files") if prmtop else None

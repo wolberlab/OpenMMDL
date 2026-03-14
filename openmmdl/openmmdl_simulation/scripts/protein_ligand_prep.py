@@ -1,5 +1,6 @@
 import mdtraj as md
 import numpy as np
+import parmed as pmd
 import simtk.openmm.app as app
 from rdkit import Chem
 from openff.toolkit.topology import Molecule
@@ -121,6 +122,38 @@ def merge_protein_and_ligand(protein, ligand):
     complex_positions[len(protein.positions) :] = ligand.positions  # add ligand positions
 
     return complex_topology, complex_positions
+
+
+def write_ligand_with_partial_charges(topology, system, positions, ligand_name=None, output_file=None):
+    """Write the ligand with assigned partial charges to a MOL2 file.
+
+    Args:
+        topology: OpenMM topology of the simulated system.
+        system: OpenMM system containing the parametrized ligand.
+        positions: OpenMM positions for the system.
+        ligand_name (str, optional): Ligand residue name used for ParmEd selection.
+        output_file (str, optional): Target MOL2 file path. Defaults to ``{ligand_name}_pc.mol2``.
+
+    Returns:
+        str | None: Path to the written MOL2 file, or ``None`` if export was skipped.
+    """
+    if not ligand_name:
+        print("No ligand_name set; skipping MOL2 export (Amber uploaded prmtop needs resname input).")
+        return None
+
+    if output_file is None:
+        output_file = f"{ligand_name}_pc.mol2"
+
+    try:
+        struct = pmd.openmm.load_topology(topology, system, positions)
+        lig = struct[f":{ligand_name}"]
+        lig.save(output_file, overwrite=True)
+        print(f"Wrote ligand with partial charges '{output_file}'.")
+        return output_file
+    except Exception as e:
+        print(f"Skipping write out of partial charge molecule due to error: {e}")
+        return None
+
 
 
 def water_padding_solvent_builder(

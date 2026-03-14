@@ -20,6 +20,7 @@ from werkzeug.utils import secure_filename
 import datetime
 import shutil
 import sys
+from pathlib import Path
 import tempfile
 import threading
 import time
@@ -409,6 +410,10 @@ def createAmberBashScript():
         a_script.append(
             "antechamber -fi pdb -fo prepc -i ${nmLigFile}_amber.pdb -o ${nmLigFile}.prepc -c ${charge_method} -at ${lig_ff} -nc ${charge_value} -pf y"
         )
+        a_script.append("## Write out the ligand with partial charge information via `antechamber`")
+        a_script.append(
+            "antechamber -fi pdb -fo prepc -i ${nmLigFile}_amber.pdb -o ${nmLigFile}_pc.mol2 -c ${charge_method} -at ${lig_ff} -nc ${charge_value} -pf y"
+        )
         a_script.append("parmchk2 -f prepc -i ${nmLigFile}.prepc -o ${nmLigFile}.frcmod\n")
         a_script.append("## Rename ligand pdb")
         a_script.append("antechamber -i ${nmLigFile}.prepc -fi prepc -o rename_${nmLigFile}.pdb -fo pdb\n")
@@ -651,7 +656,7 @@ def createAmberBashScript():
     return "\n".join(a_script)
 
 
-def extractLigName(LigFileName):
+def extractLigName(lig_file_name):
     """
     Extract the ligand name from the pdb file as a string, which is the fourth column of the first line in the pdb file.
     This string can be used for openmmdl_analysis in later function `createScript`.
@@ -661,12 +666,15 @@ def extractLigName(LigFileName):
     LigFile: the tuple that stores both the buffered file and its name, uploadedFiles['nmLigFile'][0][1]
     """
 
-    if LigFileName[-4:] == ".sdf":
-        LigName = "UNL"
-    elif LigFileName[-4:] == ".pdb":
-        LigName = LigFileName[:-4]
+    path = Path(lig_file_name)
+    ext = path.suffix.lower()
 
-    return LigName
+    if ext == ".sdf":
+        return "UNL"
+    if ext == ".pdb":
+        return path.stem
+
+    return path.stem
 
 
 ########################################################################################################################
@@ -1117,6 +1125,7 @@ os.chdir(outputDir)"""
             else:
                 spLigName = None
 
+            script.append(f"ligand_name = {repr(nmLigName) if nmLigName else 'None'}")
         elif session["has_files"] == "no":
             script.append("prmtop_file = 'system.%s.prmtop'" % session["water_ff"])
             script.append("inpcrd_file = 'system.%s.inpcrd' " % session["water_ff"])
@@ -1419,6 +1428,7 @@ positions = modeller.positions  """
                 hmrOptions,
             )
         )
+    script.append("write_ligand_with_partial_charges(topology, system, positions, ligand_name=globals().get('ligand_name'))")
     if ensemble == "npt":
         script.append("system.addForce(MonteCarloBarostat(pressure, temperature, barostatInterval))")
     script.append("integrator = LangevinMiddleIntegrator(temperature, friction, dt)")
