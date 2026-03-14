@@ -136,49 +136,36 @@ def test_merge_protein_and_ligand():
     assert complex_topology is not None
     assert complex_positions is not None
 
-def test_write_ligand_with_partial_charges():
-    class FakeLigand:
-        def __init__(self):
-            self.saved = None
+def test_write_ligand_with_partial_charges(tmp_path):
+    system = forcefield.createSystem(complex_topology)
 
-        def save(self, path, overwrite=False):
-            self.saved = (path, overwrite)
-
-    class FakeStruct:
-        def __init__(self, ligand):
-            self.ligand = ligand
-
-        def __getitem__(self, key):
-            assert key == ":UNK"
-            return self.ligand
-
-    class FakeOpenMM:
-        def __init__(self, ligand):
-            self.ligand = ligand
-
-        def load_topology(self, topology, system, positions):
-            assert topology == "topology"
-            assert system == "system"
-            assert positions == "positions"
-            return FakeStruct(self.ligand)
-
-    class FakeParmEd:
-        def __init__(self, ligand):
-            self.openmm = FakeOpenMM(ligand)
-
-    fake_ligand = FakeLigand()
-    fake_parmed = FakeParmEd(fake_ligand)
+    output_file = tmp_path / f"{ligand_name}_pc.mol2"
 
     output = write_ligand_with_partial_charges(
-        "topology",
-        "system",
-        "positions",
-        ligand_name="UNK",
-        parmed_module=fake_parmed,
+        complex_topology,
+        system,
+        complex_positions,
+        ligand_name=ligand_name,
+        output_file=str(output_file),
     )
 
-    assert output == "UNK_pc.mol2"
-    assert fake_ligand.saved == ("UNK_pc.mol2", True)
+    assert output == str(output_file)
+    assert output_file.exists()
+    assert output_file.stat().st_size > 0
+
+
+def test_write_ligand_with_partial_charges_without_name():
+    system = forcefield.createSystem(complex_topology)
+
+    output = write_ligand_with_partial_charges(
+        complex_topology,
+        system,
+        complex_positions,
+        ligand_name=None,
+    )
+
+    assert output is None
+
 
 
 def test_write_ligand_with_partial_charges_without_name():
