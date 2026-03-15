@@ -7,7 +7,7 @@ from openmmdl.openmmdl_simulation.scripts.export import (
 
 
 TEST_DIR = Path(__file__).resolve().parent
-DATA_DIR = TEST_DIR / "data"
+DATA_DIR = TEST_DIR / "data/in"
 
 PROTEIN_FILE = DATA_DIR / "6b73.pdb"
 LIGAND_FILE = DATA_DIR / "CVV.sdf"
