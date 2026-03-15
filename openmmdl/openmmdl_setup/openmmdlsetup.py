@@ -15,15 +15,20 @@ from flask import (
     render_template,
     make_response,
     send_file,
+    jsonify,
 )
 from werkzeug.utils import secure_filename
 import datetime
+import os
+
+import openmm.app as omm_app
 import shutil
 import sys
 from pathlib import Path
 import tempfile
 import threading
 import time
+import traceback
 import webbrowser
 import zipfile
 import warnings
@@ -46,6 +51,16 @@ uploadedFiles = {}
 fixer = None
 scriptOutput = None
 simulationProcess = None
+exportPreparationState = {
+    "status": "idle",
+    "message": "",
+    "zip_path": None,
+    "written_files": [],
+    "work_dir": None,
+    "log_path": None,
+    "error_details": "",
+}
+exportPreparationLock = threading.Lock()
 
 
 def saveUploadedFiles():
@@ -58,6 +73,235 @@ def saveUploadedFiles():
             filelist.append((temp, secure_filename(file.filename)))
         uploadedFiles[key] = filelist
 
+
+def snapshotUploadedFiles():
+    snapshot = {}
+    for key, filelist in uploadedFiles.items():
+        snapshot[key] = []
+        for file, name in filelist:
+            file.seek(0, 0)
+            snapshot[key].append((file.read(), name))
+    return snapshot
+
+
+def resetExportPreparationState():
+    with exportPreparationLock:
+        exportPreparationState["status"] = "idle"
+        exportPreparationState["message"] = ""
+        exportPreparationState["zip_path"] = None
+        exportPreparationState["written_files"] = []
+        exportPreparationState["work_dir"] = None
+        exportPreparationState["log_path"] = None
+        exportPreparationState["error_details"] = ""
+
+
+def to_bool(value):
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    return str(value).strip().lower() in ("true", "1", "yes", "on")
+
+
+def buildExportJobConfig():
+    constraints_key = session.get("constraints", "hbonds")
+    constraints_map = {
+        "none": None,
+        "water": None,
+        "hbonds": omm_app.HBonds,
+        "allbonds": omm_app.AllBonds,
+    }
+
+    protein_filename = uploadedFiles["file"][0][1] if uploadedFiles.get("file") else None
+    ligand_filename = session.get("sdfFile", "") or None
+
+    water_model = session.get("waterModel", "")
+    if water_model in ("", "None", None):
+        water_model = None
+
+    nonbonded_method = session.get("nonbondedMethod", "PME")
+    nonbonded_cutoff = None if nonbonded_method == "NoCutoff" else float(session.get("cutoff", 1.0))
+    ewald_error_tolerance = None if nonbonded_method != "PME" else float(session.get("ewaldTol", 0.0005))
+
+    config = {
+        "protein": protein_filename,
+        "ligand": ligand_filename,
+        "ligand_name": "UNK" if ligand_filename else None,
+        "ligand_minimization": to_bool(session.get("ligandMinimization", False)),
+        "ligand_sanitization": to_bool(session.get("ligandSanitization", False)),
+        "forcefield": session.get("forcefield", ""),
+        "water_model": water_model,
+        "use_solvent": bool(session.get("solvent", False)),
+        "add_membrane": bool(session.get("add_membrane", False)),
+        "small_molecule_forcefield": session.get("smallMoleculeForceField", "") or None,
+        "small_molecule_forcefield_version": session.get("smallMoleculeForceFieldVersion", "") or None,
+        "nonbonded_method": nonbonded_method,
+        "nonbonded_cutoff": nonbonded_cutoff,
+        "ewald_error_tolerance": ewald_error_tolerance,
+        "constraints": None,
+        "rigid_water": False,
+        "hydrogen_mass": None,
+        "output_prefix": "prepared_system",
+    }
+
+    if config["use_solvent"]:
+        if config["add_membrane"]:
+            config.update(
+                {
+                    "membrane_lipid_type": session.get("lipidType", ""),
+                    "membrane_padding": float(session.get("membrane_padding", 1.0)),
+                    "membrane_ionicstrength": float(session.get("membrane_ionicstrength", 0.15)),
+                    "membrane_positive_ion": session.get("membrane_positive", "Na+"),
+                    "membrane_negative_ion": session.get("membrane_negative", "Cl-"),
+                }
+            )
+        else:
+            if session.get("water_padding", False):
+                config.update(
+                    {
+                        "water_box_mode": "Buffer",
+                        "water_box_shape": session.get("water_boxShape", "cube"),
+                        "water_padding_distance": float(session.get("water_padding_distance", 1.0)),
+                    }
+                )
+            else:
+                config.update(
+                    {
+                        "water_box_mode": "Absolute",
+                        "water_box_x": float(session.get("box_x", 3.0)),
+                        "water_box_y": float(session.get("box_y", 3.0)),
+                        "water_box_z": float(session.get("box_z", 3.0)),
+                    }
+                )
+
+            config.update(
+                {
+                    "water_ionicstrength": float(session.get("water_ionicstrength", 0.15)),
+                    "water_positive_ion": session.get("water_positive", "Na+"),
+                    "water_negative_ion": session.get("water_negative", "Cl-"),
+                }
+            )
+
+    return config
+
+
+def writeUploadedSnapshotToDirectory(uploaded_snapshot, work_dir):
+    written_names = set()
+    for _, filelist in uploaded_snapshot.items():
+        for file_bytes, name in filelist:
+            if not name or name in written_names:
+                continue
+            target = os.path.join(work_dir, name)
+            with open(target, "wb") as handle:
+                handle.write(file_bytes)
+            written_names.add(name)
+
+
+def prepareExportFilesJob(job_config, uploaded_snapshot, selected_formats):
+    work_dir = tempfile.mkdtemp(prefix="openmmdl_export_")
+    zip_path = os.path.join(work_dir, "openmmdl_prepared_exports.zip")
+    log_path = os.path.join(work_dir, "prepare_export.log")
+
+    try:
+        updateExportPreparationState(
+            status="running",
+            message="Preparing files in the background...",
+            zip_path=None,
+            written_files=[],
+            work_dir=work_dir,
+        )
+
+        writeUploadedSnapshotToDirectory(uploaded_snapshot, work_dir)
+
+        config = dict(job_config)
+        if config.get("protein"):
+            config["protein"] = os.path.join(work_dir, config["protein"])
+        if config.get("ligand"):
+            config["ligand"] = os.path.join(work_dir, config["ligand"])
+
+        # Change this import if your module filename is different.
+        from openmmdl.openmmdl_simulation.scripts.export import (
+            PreparedSystemBuilder,
+            PreparedSystemExporter,
+        )
+
+        with open(log_path, "w") as log_handle:
+            log_handle.write("Starting export preparation job.\n")
+            log_handle.write(f"Selected formats: {', '.join(selected_formats)}\n")
+            log_handle.write(f"Working directory: {work_dir}\n\n")
+
+            builder = PreparedSystemBuilder(config)
+            topology, system, positions = builder.build()
+            log_handle.write("Prepared system build complete.\n")
+
+            exporter = PreparedSystemExporter(
+                topology=topology,
+                system=system,
+                positions=positions,
+                output_prefix=config.get("output_prefix", "prepared_system"),
+                output_dir=work_dir,
+            )
+            written_paths = exporter.export_selected(selected_formats)
+
+            written_files = uniquifyPreserveOrder([os.path.basename(path) for path in written_paths])
+
+            log_handle.write("Export writeout complete.\n")
+            for filename in written_files:
+                log_handle.write(f"{filename}\n")
+
+        with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
+            archive.write(log_path, arcname="prepare_export.log")
+            for filename in written_files:
+                full_path = os.path.join(work_dir, filename)
+                if os.path.exists(full_path):
+                    archive.write(full_path, arcname=filename)
+
+        updateExportPreparationState(
+            status="ready",
+            message="Prepared files are ready. You can now click Save Files.",
+            zip_path=zip_path,
+            written_files=written_files,
+            work_dir=work_dir,
+        )
+
+    except Exception:
+        error_text = traceback.format_exc()
+        try:
+            with open(log_path, "a") as log_handle:
+                log_handle.write("\n[ERROR]\n")
+                log_handle.write(error_text)
+        except Exception:
+            pass
+
+        updateExportPreparationState(
+            status="error",
+            message="Export preparation failed. You can download the backend log below.",
+            zip_path=None,
+            written_files=[],
+            work_dir=work_dir,
+            log_path=log_path,
+            error_details=error_text,
+        )
+
+
+def uniquifyPreserveOrder(items):
+    seen = set()
+    output = []
+    for item in items:
+        if item not in seen:
+            seen.add(item)
+            output.append(item)
+    return output
+
+
+def updateExportPreparationState(**kwargs):
+    with exportPreparationLock:
+        exportPreparationState.update(kwargs)
+
+
+def getExportPreparationState():
+    with exportPreparationLock:
+        return dict(exportPreparationState)
 
 @app.route("/headerControls")
 def headerControls():
@@ -78,7 +322,9 @@ def showSelectFileType():
 
 @app.route("/selectFiles")
 def selectFiles():
-    session["fileType"] = request.args.get("type", "")  # get the value of `type` from the url
+    session["fileType"] = request.args.get("type", "")
+    if session["fileType"] == "pdb":
+        return showSelectPdbWorkflow()
     return showConfigureFiles()
 
 
@@ -86,7 +332,10 @@ def showConfigureFiles():
     try:
         fileType = session["fileType"]
         if fileType == "pdb":
-            return render_template("configurePdbFile.html")
+            return render_template(
+                "configurePdbFile.html",
+                workflow_mode=session.get("workflowMode", "simulation"),
+            )
         elif fileType == "amber":
             return render_template("configureAmberFiles.html")
     except Exception:
@@ -94,6 +343,18 @@ def showConfigureFiles():
     # The file type is invalid, so send them back to the select file type page.
     return showSelectFileType()
 
+
+@app.route("/selectPdbWorkflow")
+def showSelectPdbWorkflow():
+    return render_template(
+        "selectPdbWorkflow.html",
+        workflow_mode=session.get("workflowMode", "simulation"),
+    )
+
+@app.route("/setPdbWorkflow", methods=["POST"])
+def setPdbWorkflow():
+    session["workflowMode"] = request.form.get("workflowMode", "simulation")
+    return showConfigureFiles()
 
 #################################################################################################
 @app.route("/configureFiles", methods=["POST"])
@@ -108,6 +369,9 @@ def configureFiles():
         session["ml_forcefield"] = request.form.get("ml_forcefield", "")
         session["waterModel"] = request.form.get("waterModel", "")
         session["smallMoleculeForceField"] = request.form.get("smallMoleculeForceField", "")
+        session["smallMoleculeForceFieldConstraintMode"] = request.form.get(
+            "smallMoleculeForceFieldConstraintMode", ""
+        )
         smallMoleculeFF = session["smallMoleculeForceField"]
         if smallMoleculeFF == "smirnoff":
             session["smallMoleculeForceFieldVersion"] = request.form.get("openffVersion", "")
@@ -885,7 +1149,214 @@ def addHydrogens():
         prefix = name[:dotIndex]
         suffix = name[dotIndex:]
     uploadedFiles["file"] = [(temp, prefix + "-processed_openMMDL" + suffix)]
+
+    if session.get("workflowMode", "simulation") == "export":
+        resetExportPreparationState()
+        return showExportOptions()
     return showSimulationOptions()
+
+
+def buildExportSummary():
+    source_name = ""
+    processed_name = ""
+
+    if uploadedFiles.get("originalFile"):
+        source_name = uploadedFiles["originalFile"][0][1]
+    elif uploadedFiles.get("file"):
+        source_name = uploadedFiles["file"][0][1]
+
+    if uploadedFiles.get("file"):
+        processed_name = uploadedFiles["file"][0][1]
+
+    ligand_name = session.get("sdfFile", "")
+    ligand_label = ligand_name if ligand_name else "No ligand file provided"
+
+    small_molecule_ff_raw = session.get("smallMoleculeForceField", "") or "None"
+    if small_molecule_ff_raw.lower() == "smirnoff":
+        small_molecule_ff = "SMIRNOFF"
+    else:
+        small_molecule_ff = small_molecule_ff_raw
+
+    small_molecule_ff_version = session.get("smallMoleculeForceFieldVersion", "") or "None"
+    small_molecule_ff_constraint_mode = (
+        session.get("smallMoleculeForceFieldConstraintMode", "") or "Not set"
+    )
+
+    if session.get("solvent"):
+        if session.get("add_membrane"):
+            env_label = "Membrane"
+            env_detail = (
+                f"Lipid: {session.get('lipidType', 'N/A')}, "
+                f"padding: {session.get('membrane_padding', 'N/A')} nm"
+            )
+            positive_ion = session.get("membrane_positive", "N/A")
+            negative_ion = session.get("membrane_negative", "N/A")
+            ionic_strength = f"{session.get('membrane_ionicstrength', 'N/A')} M"
+        else:
+            env_label = "Water box"
+            if session.get("water_padding"):
+                env_detail = (
+                    f"Shape: {session.get('water_boxShape', 'N/A')}, "
+                    f"padding: {session.get('water_padding_distance', 'N/A')} nm"
+                )
+            else:
+                env_detail = (
+                    f"Absolute box: "
+                    f"{session.get('box_x', 'N/A')} x "
+                    f"{session.get('box_y', 'N/A')} x "
+                    f"{session.get('box_z', 'N/A')} nm"
+                )
+            positive_ion = session.get("water_positive", "N/A")
+            negative_ion = session.get("water_negative", "N/A")
+            ionic_strength = f"{session.get('water_ionicstrength', 'N/A')} M"
+    else:
+        env_label = "No explicit solvent"
+        env_detail = "Vacuum / no added water box or membrane"
+        positive_ion = "None"
+        negative_ion = "None"
+        ionic_strength = "None"
+
+    return [
+        ("Input structure", source_name or "Not available"),
+        ("Ligand file", ligand_label),
+        ("Prepared structure", processed_name or "Not available"),
+        ("Main force field", session.get("forcefield", "") or "Not set"),
+        ("Water model", session.get("waterModel", "") or "None"),
+        ("Small molecule force field", small_molecule_ff),
+        ("Small molecule force field version", small_molecule_ff_version),
+        ("Small molecule FF constraints", small_molecule_ff_constraint_mode),
+        ("Ligand minimization", session.get("ligandMinimization", "") or "Not set"),
+        ("Ligand sanitization", session.get("ligandSanitization", "") or "Not set"),
+        ("Environment", env_label),
+        ("Environment details", env_detail),
+        ("Positive ion", positive_ion),
+        ("Negative ion", negative_ion),
+        ("Ionic strength", ionic_strength),
+    ]
+
+def getAvailableExportFormats():
+    return [
+        {
+            "key": "processed_pdb",
+            "title": "Processed PDB / mmCIF",
+            "description": "Prepared structure coordinates after cleanup and system preparation.",
+        },
+        {
+            "key": "amber",
+            "title": "Amber topology + coordinates",
+            "description": "Write .prmtop and .inpcrd for Amber / AmberTools workflows.",
+        },
+        {
+            "key": "gromacs",
+            "title": "GROMACS topology + coordinates",
+            "description": "Write .top and .gro for GROMACS workflows.",
+        },
+        {
+            "key": "psf",
+            "title": "PSF + coordinates",
+            "description": "Write .psf plus coordinates for CHARMM / NAMD-style workflows.",
+        },
+        {
+            "key": "openmm_xml",
+            "title": "OpenMM XML",
+            "description": "Write serialized OpenMM system/integrator objects for reuse in OpenMM.",
+        },
+    ]
+
+def renderExportOptions(status_message=None):
+    export_state = getExportPreparationState()
+    return render_template(
+        "exportOptions.html",
+        summary_rows=buildExportSummary(),
+        selected_export_formats=session.get("exportFormats", []),
+        export_formats=getAvailableExportFormats(),
+        status_message=status_message,
+        export_status=export_state["status"],
+        export_ready=(export_state["status"] == "ready"),
+        export_backend_message=export_state["message"],
+        export_log_available=bool(export_state.get("log_path")),
+        export_error_details=export_state.get("error_details", ""),
+    )
+
+@app.route("/showExportOptions")
+def showExportOptions():
+    return renderExportOptions()
+
+@app.route("/exportPreparationStatus")
+def exportPreparationStatus():
+    export_state = getExportPreparationState()
+    return jsonify(
+        {
+            "status": export_state["status"],
+            "message": export_state["message"],
+            "ready": export_state["status"] == "ready",
+            "written_files": export_state["written_files"],
+        }
+    )
+
+@app.route("/downloadExportPreparationLog")
+def downloadExportPreparationLog():
+    export_state = getExportPreparationState()
+    log_path = export_state.get("log_path")
+
+    if not log_path or not os.path.exists(log_path):
+        return make_response("No export log is available.", 404)
+
+    return send_file(
+        log_path,
+        mimetype="text/plain",
+        as_attachment=True,
+        download_name="prepare_export.log",
+        max_age=0,
+    )
+
+@app.route("/setExportOptions", methods=["POST"])
+def setExportOptions():
+    selected_formats = request.form.getlist("exportFormats")
+    session["exportFormats"] = selected_formats
+    action = request.form.get("action", "")
+
+    if action == "prepare":
+        if not selected_formats:
+            return renderExportOptions("Please select at least one export format.")
+
+        export_state = getExportPreparationState()
+        if export_state["status"] == "running":
+            return renderExportOptions("Export preparation is already running.")
+
+        job_config = buildExportJobConfig()
+        uploaded_snapshot = snapshotUploadedFiles()
+
+        updateExportPreparationState(
+            status="running",
+            message="Preparing files in the background...",
+            zip_path=None,
+            written_files=[],
+            work_dir=None,
+        )
+
+        threading.Thread(
+            target=prepareExportFilesJob,
+            args=(job_config, uploaded_snapshot, selected_formats),
+            daemon=True,
+        ).start()
+
+        return renderExportOptions("Preparing files in the background...")
+
+    elif action == "save":
+        export_state = getExportPreparationState()
+        if export_state["status"] != "ready" or not export_state["zip_path"]:
+            return renderExportOptions("Files are not ready yet. Please click Prepare Files first.")
+
+        return send_file(
+            export_state["zip_path"],
+            mimetype="application/zip",
+            as_attachment=True,
+            download_name="openmmdl_prepared_exports.zip",
+            max_age=0,
+        )
+
+    return renderExportOptions("No action selected.")
 
 
 @app.route("/showSimulationOptions")

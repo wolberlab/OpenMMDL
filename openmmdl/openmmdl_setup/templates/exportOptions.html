@@ -1,0 +1,172 @@
+{% extends "layout.html" %}
+{% block title %}Export Options{% endblock %}
+
+{% block body %}
+<form method="post" action="{{ url_for('setExportOptions') }}" id="exportOptionsForm">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><strong>Select export formats</strong></div>
+                <div class="panel-body">
+                    <p>
+                        Choose which prepared files should be written for use in other
+                        molecular simulation workflows.
+                    </p>
+
+                    {% for fmt in export_formats %}
+                    <div class="checkbox" style="margin-bottom: 14px;">
+                        <label>
+                            <input type="checkbox"
+                                   name="exportFormats"
+                                   value="{{ fmt.key }}"
+                                   {% if fmt.key in selected_export_formats %}checked{% endif %}>
+                            <strong>{{ fmt.title }}</strong><br>
+                            <span style="font-weight: normal;">{{ fmt.description }}</span>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading"><strong>Notes</strong></div>
+                <div class="panel-body">
+                    <ul style="margin-bottom: 0;">
+                        <li>Amber export writes <code>.prmtop</code> and <code>.inpcrd</code>.</li>
+                        <li>GROMACS export writes <code>.top</code> and <code>.gro</code>.</li>
+                        <li>PSF export writes <code>.psf</code> and companion coordinates.</li>
+                        <li>OpenMM XML writes serialized OpenMM objects for reuse in OpenMM workflows.</li>
+                        <li>Engine-specific run settings such as GROMACS <code>.mdp</code> files are not generated here.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><strong>Preparation summary</strong></div>
+                <div class="panel-body">
+                    <table class="table table-striped table-condensed">
+                        <tbody>
+                            {% for label, value in summary_rows %}
+                            <tr>
+                                <th style="width: 42%;">{{ label }}</th>
+                                <td>{{ value }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading"><strong>Export status</strong></div>
+                <div class="panel-body">
+                    <div id="export-status-text">
+                        {% if status_message %}
+                            {{ status_message }}
+                        {% elif export_backend_message %}
+                            {{ export_backend_message }}
+                        {% else %}
+                            Files have not been prepared yet.
+                        {% endif %}
+                    </div>
+
+                    {% if export_log_available %}
+                    <div style="margin-top: 12px;">
+                        <a class="btn btn-default btn-sm" href="{{ url_for('downloadExportPreparationLog') }}">
+                            Download backend log
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    {% if export_error_details %}
+                    <pre style="margin-top:12px; max-height:300px; overflow:auto; white-space:pre-wrap;">{{ export_error_details }}</pre>
+                    {% endif %}
+
+                    <div id="export-written-files" style="margin-top: 12px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="om-footer-actions" style="margin-top: 20px;">
+        <button type="button"
+                class="btn btn-default btn-back-red"
+                onclick="window.location.href='{{ url_for('showAddHydrogens') }}'">
+            Back
+        </button>
+
+        <button type="submit"
+                name="action"
+                value="prepare"
+                class="btn btn-primary"
+                id="prepare-files-btn">
+            Prepare Files
+        </button>
+
+        <button type="submit"
+                name="action"
+                value="save"
+                class="btn btn-success"
+                id="save-files-btn"
+                {% if not export_ready %}disabled{% endif %}>
+            Save Files
+        </button>
+    </div>
+</form>
+
+<script>
+(function () {
+    const statusText = document.getElementById("export-status-text");
+    const saveBtn = document.getElementById("save-files-btn");
+    const prepareBtn = document.getElementById("prepare-files-btn");
+    const writtenFiles = document.getElementById("export-written-files");
+
+    function renderFiles(files) {
+        if (!files || files.length === 0) {
+            writtenFiles.innerHTML = "";
+            return;
+        }
+
+        let html = "<strong>Prepared files:</strong><ul style='margin-top:8px; margin-bottom:0;'>";
+        for (const file of files) {
+            html += "<li>" + file + "</li>";
+        }
+        html += "</ul>";
+        writtenFiles.innerHTML = html;
+    }
+
+    function pollStatus() {
+        fetch("/exportPreparationStatus")
+            .then(response => response.json())
+            .then(data => {
+                if (data.message && statusText) {
+                    statusText.textContent = data.message;
+                }
+
+                if (writtenFiles) {
+                    renderFiles(data.written_files);
+                }
+
+                if (data.status === "running") {
+                    prepareBtn.disabled = true;
+                    saveBtn.disabled = true;
+                } else if (data.status === "ready") {
+                    prepareBtn.disabled = false;
+                    saveBtn.disabled = false;
+                } else {
+                    prepareBtn.disabled = false;
+                    saveBtn.disabled = true;
+                }
+            })
+            .catch(() => {
+                // keep current UI state if polling temporarily fails
+            });
+    }
+
+    pollStatus();
+    setInterval(pollStatus, 2000);
+})();
+</script>
+{% endblock %}
