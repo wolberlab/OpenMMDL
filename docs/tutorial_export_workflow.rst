@@ -57,6 +57,8 @@ At this stage, the same preparation steps used for the normal **OpenMMDL Simulat
    :figwidth: 725px
    :align: center
 
+Here we also select the parts of the input structure that we want to keep. **Note**: If you have a ligand in the input structure, deselct the ligand during this step, since the ligand from the **SDF** or **MOL** file is used during the protein-ligand complex generation.
+
 Selecting the Environment
 -------------------------
 
