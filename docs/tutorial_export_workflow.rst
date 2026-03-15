@@ -25,7 +25,7 @@ Selecting the Input Type
 
 After starting the setup interface, select the **PDB File** option.
 
-.. figure:: /_static/images/tutorials/Export_Workflow/File_Selection.png
+.. figure:: /_static/images/tutorials/PDB_Path/Selectfiletype.png
    :figwidth: 725px
    :align: center
 
@@ -47,11 +47,15 @@ Preparing the Input Structure
 
 In the next step, choose the protein PDB file and, if required, the ligand SDF file. The preferred force field, water model, and small molecule force field can also be selected here.
 
-.. figure:: /_static/images/tutorials/Export_Workflow/Protein_Selection.png
+.. figure:: /_static/images/tutorials/Export_Workflow/File_Selection.png
    :figwidth: 725px
    :align: center
 
 At this stage, the same preparation steps used for the normal **OpenMMDL Simulation** route are available. This ensures that the structure cleanup and system preparation are performed consistently before exporting the files.
+
+.. figure:: /_static/images/tutorials/Export_Workflow/Protein_Selection.png
+   :figwidth: 725px
+   :align: center
 
 Selecting the Environment
 -------------------------
