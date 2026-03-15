@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from openmmdl.openmmdl_simulation.scripts.export import (
     PreparedSystemBuilder,
     PreparedSystemExporter,
@@ -13,6 +15,7 @@ PROTEIN_FILE = DATA_DIR / "6b73.pdb"
 LIGAND_FILE = DATA_DIR / "CVV.sdf"
 
 
+@pytest.fixture(scope="session")
 def protein_only_config():
     return {
         "protein": str(PROTEIN_FILE),
@@ -42,6 +45,7 @@ def protein_only_config():
     }
 
 
+@pytest.fixture(scope="session")
 def protein_ligand_config():
     return {
         "protein": str(PROTEIN_FILE),
@@ -71,14 +75,25 @@ def protein_ligand_config():
     }
 
 
+@pytest.fixture(scope="session")
+def protein_only_system(protein_only_config):
+    builder = PreparedSystemBuilder(protein_only_config)
+    return builder.build()
+
+
+@pytest.fixture(scope="session")
+def protein_ligand_system(protein_ligand_config):
+    builder = PreparedSystemBuilder(protein_ligand_config)
+    return builder.build()
+
+
 def test_input_files_exist():
     assert PROTEIN_FILE.exists(), f"Missing test protein file: {PROTEIN_FILE}"
     assert LIGAND_FILE.exists(), f"Missing test ligand file: {LIGAND_FILE}"
 
 
-def test_builder_builds_protein_only_system():
-    builder = PreparedSystemBuilder(protein_only_config())
-    topology, system, positions = builder.build()
+def test_builder_builds_protein_only_system(protein_only_system):
+    topology, system, positions = protein_only_system
 
     assert topology is not None
     assert system is not None
@@ -86,9 +101,8 @@ def test_builder_builds_protein_only_system():
     assert topology.getNumAtoms() > 0
 
 
-def test_builder_builds_protein_ligand_system():
-    builder = PreparedSystemBuilder(protein_ligand_config())
-    topology, system, positions = builder.build()
+def test_builder_builds_protein_ligand_system(protein_ligand_system):
+    topology, system, positions = protein_ligand_system
 
     assert topology is not None
     assert system is not None
@@ -96,9 +110,8 @@ def test_builder_builds_protein_ligand_system():
     assert topology.getNumAtoms() > 0
 
 
-def test_export_processed_pdb_and_xml(tmp_path):
-    builder = PreparedSystemBuilder(protein_ligand_config())
-    topology, system, positions = builder.build()
+def test_export_processed_pdb_and_xml(protein_ligand_system, tmp_path):
+    topology, system, positions = protein_ligand_system
 
     exporter = PreparedSystemExporter(
         topology=topology,
@@ -122,9 +135,8 @@ def test_export_processed_pdb_and_xml(tmp_path):
         assert path.stat().st_size > 0
 
 
-def test_export_amber(tmp_path):
-    builder = PreparedSystemBuilder(protein_ligand_config())
-    topology, system, positions = builder.build()
+def test_export_amber(protein_ligand_system, tmp_path):
+    topology, system, positions = protein_ligand_system
 
     exporter = PreparedSystemExporter(
         topology=topology,
@@ -148,9 +160,8 @@ def test_export_amber(tmp_path):
         assert path.stat().st_size > 0
 
 
-def test_export_gromacs(tmp_path):
-    builder = PreparedSystemBuilder(protein_ligand_config())
-    topology, system, positions = builder.build()
+def test_export_gromacs(protein_ligand_system, tmp_path):
+    topology, system, positions = protein_ligand_system
 
     exporter = PreparedSystemExporter(
         topology=topology,
@@ -174,9 +185,8 @@ def test_export_gromacs(tmp_path):
         assert path.stat().st_size > 0
 
 
-def test_export_psf(tmp_path):
-    builder = PreparedSystemBuilder(protein_ligand_config())
-    topology, system, positions = builder.build()
+def test_export_psf(protein_ligand_system, tmp_path):
+    topology, system, positions = protein_ligand_system
 
     exporter = PreparedSystemExporter(
         topology=topology,
