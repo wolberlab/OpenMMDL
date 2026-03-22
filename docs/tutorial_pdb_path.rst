@@ -45,6 +45,20 @@ This will open the OpenMMDL-Setup, which you can use for the creation of the inp
 
 Here We select the PDB File Option and press continue.
 
+Selecting the Workflow
+----------------------
+
+After choosing the PDB path, the next page allows the user to choose between the standard **OpenMMDL Simulation** workflow and the **Export Workflow**.
+
+.. figure:: /_static/images/tutorials/Export_Workflow/Workflow_Selection.png
+   :figwidth: 725px
+   :align: center
+
+To prepare files for use in another molecular dynamics workflow, select the **Run in OpenMMDL Simulation** option.
+
+
+Preparing the Input Structure
+-----------------------------
 
 This leads us to the next page, where we can see the selection of the PDB and SDF File of the protein and ligand respectively.
 

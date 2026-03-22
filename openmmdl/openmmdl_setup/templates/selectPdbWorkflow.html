@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block title %}Select PDB Workflow{% endblock %}
+{% block body %}
+
+<div class="om-hero">
+    <h2 class="om-hero-title">Choose the PDB workflow</h2>
+    <div class="om-hero-sub">
+        You selected a PDB / mmCIF input. Choose whether you want to continue into
+        OpenMMDL Simulation or prepare the system for export into another workflow.
+    </div>
+</div>
+
+<form method="post" action="{{ url_for('setPdbWorkflow') }}" class="om-choice-form">
+    <div class="row om-choice-grid">
+        <div class="col-md-6">
+            <button type="submit"
+                    name="workflowMode"
+                    value="simulation"
+                    class="om-choice-card"
+                    style="text-align:left;">
+                <div class="om-choice-content">
+                    <div class="om-choice-title">Run in OpenMMDL Simulation</div>
+                    <div class="om-choice-desc">
+                        Prepare the system and continue to simulation setup and execution inside OpenMMDL.
+                    </div>
+                </div>
+            </button>
+        </div>
+
+        <div class="col-md-6">
+            <button type="submit"
+                    name="workflowMode"
+                    value="export"
+                    class="om-choice-card"
+                    style="text-align:left;">
+                <div class="om-choice-content">
+                    <div class="om-choice-title">Prepare and Export for Other Workflows</div>
+                    <div class="om-choice-desc">
+                        Prepare the system and export files for use in external simulation workflows and formats.
+                    </div>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <div class="om-footer-actions">
+        <button type="button"
+                class="btn btn-default btn-back-red"
+                onclick="window.location.href='{{ url_for('showSelectFileType') }}'">
+            Back
+        </button>
+    </div>
+</form>
+
+{% endblock %}
