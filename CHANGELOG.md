@@ -21,6 +21,7 @@ The rules for this file:
 talagayev
 
 ### Added
+- Added `Export` workflow responsible for writing out files for other MD workflows (2026-03-22, PR#192)
 - Added write out of ligand in `mol2` with partial charges during `OpenMMDL Simulation` (2026-03-14, PR#191)
 - Added extensions in `OpenMMDL Setup` (2026-03-01, PR#189)
 - Added `Back` button in `OpenMMDL Setup` (2026-02-28, PR#188)
