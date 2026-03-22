@@ -40,7 +40,7 @@ After choosing the PDB path, the next page allows the user to choose between the
    :figwidth: 725px
    :align: center
 
-To prepare files for use in another molecular dynamics workflow, select the **Export Workflow** option.
+To prepare files for use in another molecular dynamics workflow, select the **Prepare and Export for Other Workflows** option.
 
 Preparing the Input Structure
 -----------------------------
