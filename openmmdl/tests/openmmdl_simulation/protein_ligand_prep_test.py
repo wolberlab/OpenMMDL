@@ -42,6 +42,7 @@ from openmmdl.openmmdl_simulation.scripts.protein_ligand_prep import (
     merge_protein_and_ligand,
     water_padding_solvent_builder,
     water_absolute_solvent_builder,
+    write_ligand_with_partial_charges,
     membrane_builder,
     water_conversion,
 )
@@ -134,6 +135,47 @@ def test_merge_protein_and_ligand():
     )
     assert complex_topology is not None
     assert complex_positions is not None
+
+def test_write_ligand_with_partial_charges(tmp_path):
+    system = forcefield.createSystem(complex_topology)
+
+    output_file = tmp_path / f"{ligand_name}_pc.mol2"
+
+    output = write_ligand_with_partial_charges(
+        complex_topology,
+        system,
+        complex_positions,
+        ligand_name=ligand_name,
+        output_file=str(output_file),
+    )
+
+    assert output == str(output_file)
+    assert output_file.exists()
+    assert output_file.stat().st_size > 0
+
+
+def test_write_ligand_with_partial_charges_without_name():
+    system = forcefield.createSystem(complex_topology)
+
+    output = write_ligand_with_partial_charges(
+        complex_topology,
+        system,
+        complex_positions,
+        ligand_name=None,
+    )
+
+    assert output is None
+
+
+
+def test_write_ligand_with_partial_charges_without_name():
+    output = write_ligand_with_partial_charges(
+        "topology",
+        "system",
+        "positions",
+        ligand_name=None,
+    )
+    assert output is None
 
 
 def test_water_padding_solvent_builder():

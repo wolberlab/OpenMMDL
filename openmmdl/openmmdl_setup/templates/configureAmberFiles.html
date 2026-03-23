@@ -39,7 +39,7 @@
 
     <!---For Ligands-->
     <div class="form-group" style="margin-left:100px">
-        <p>Optional: If the above system contains ligands and you want to conduct MD post-analysis using OpenMMDL, please fill in the name of the ligand in the `prmtop` file below.</p>
+        <p>Optional: If this system has ligands and you want to export one with partial charges or run OpenMMDL Analysis, enter the ligand name in the prmtop file below.</p>
     </div>
 
     <!--normal ligand-->
@@ -80,6 +80,9 @@
             <input type="radio" name="has_files" value="no" onchange="optionChanged()" />
             No, </label> I want to prepare them here.
         </div>
+
+    <div style="margin-top: 20px;"></div>
+
     <button type="button" class="btn btn-default btn-back-red"
             onclick="window.location.href='{{ url_for('showSelectFileType') }}'">Back</button>
     <input type="submit" value="Continue" id="continue" class="btn" disabled="true" />
