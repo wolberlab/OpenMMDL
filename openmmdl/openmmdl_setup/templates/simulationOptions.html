@@ -37,8 +37,11 @@
             {{ textfield('sim_length', 'The total length of the simulation in ns.') }}
             </div>
             <div class="form-group">
-            <label for="equilibration_length">Equilibration Length (ns)</label>
-            {{ textfield('equilibration_length', 'The length of the equilibration in ns.') }}
+            <label for="equilibration">Equilibration Length (ns)</label>
+            {{ choice('equilibration', 'Select the minimization and equilibration strategy.', [
+                ('minimization_and_equilibration', 'Minimization and Equilibration', 'Perform both energy minimization and equilibration protocoll'),
+                ('only_minimization', 'Only Minimization', 'Perform only energy minimization'),
+                ('no_minimization', 'No Minimization', 'Skip minimization and proceed directly to simulation')]) }}
             </div>
             <div class="form-group">
             <label for="platform">Platform</label>

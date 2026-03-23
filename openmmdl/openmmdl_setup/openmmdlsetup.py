@@ -975,7 +975,7 @@ def configureDefaultOptions():
     session["hmrMass"] = "1.5"
     session["dt"] = "0.002"
     session["sim_length"] = "50"
-    session["equilibration_length"] = "0.5"
+    session["equilibration"] = "minimization_and_equilibration"
     session["temperature"] = "300"
     session["friction"] = "1.0"
     session["pressure"] = "1.0"
@@ -1071,6 +1071,8 @@ os.chdir(outputDir)"""
     script.append("from simtk.openmm import Vec3")
     script.append("import simtk.openmm as mm")
     script.append("import pdbfixer")
+    script.append("import numpy as np")
+    script.append("from openmmtools.utils.equilibration import run_gentle_equilibration")
     script.append("import sys")
     script.append("import os")
     script.append("import shutil")
@@ -1255,8 +1257,6 @@ os.chdir(outputDir)"""
     )
     if session["restart_checkpoint"] == "yes":
         script.append("restart_step = %s" % session["restart_step"])
-    script.append("equilibration_length = %s" % session["equilibration_length"])
-    script.append("equilibrationSteps = int(equilibration_length / step_time * 1000)")
     script.append("platform = Platform.getPlatformByName('%s')" % session["platform"])
     if session["platform"] in ("CUDA", "OpenCL"):
         script.append("platformProperties = {'Precision': '%s'}" % session["precision"])
@@ -1369,7 +1369,8 @@ if add_membrane:
     if model_water == 'tip4pew' or model_water == 'tip5p':
         water_conversion(model_water, modeller, protein)
 topology = modeller.topology
-positions = modeller.positions """
+positions = modeller.positions
+positions_for_equil = np.array(positions.value_in_unit(unit.nanometers)) * unit.nanometers """
             )
         elif session["sdfFile"] != "":
             script.append(
@@ -1386,7 +1387,8 @@ if add_membrane:
     if model_water == 'tip4pew' or model_water == 'tip5p':
         water_conversion(model_water, modeller, protein)
 topology = modeller.topology
-positions = modeller.positions  """
+positions = modeller.positions  
+positions_for_equil = np.array(positions.value_in_unit(unit.nanometers)) * unit.nanometers """
             )
     elif fileType == "amber":
         script.append("topology = prmtop.topology")
@@ -1419,16 +1421,8 @@ positions = modeller.positions  """
                 hmrOptions,
             )
         )
-    if ensemble == "npt":
-        script.append("system.addForce(MonteCarloBarostat(pressure, temperature, barostatInterval))")
-    script.append("integrator = LangevinMiddleIntegrator(temperature, friction, dt)")
-    if constraints != "none":
-        script.append("integrator.setConstraintTolerance(constraintTolerance)")
-    script.append(
-        "simulation = app.Simulation(topology, system, integrator, platform%s)"
-        % (", platformProperties" if session["platform"] in ("CUDA", "OpenCL") else "")
-    )
-    script.append("simulation.context.setPositions(positions)")
+    
+
     if fileType == "amber":
         script.append("if inpcrd.boxVectors is not None:")
         script.append("    simulation.context.setPeriodicBoxVectors(*inpcrd.boxVectors)")
@@ -1450,41 +1444,124 @@ positions = modeller.positions  """
         script.extend(_xml_script_segment("integrator", session["integratorXmlFilename"]))
 
     # Minimize and equilibrate
+    if session["equilibration"] != "no_minimization":
+        script.append("\n# Minimize and Equilibrate\n")
+        if fileType == "pdb":
+            script.append("""
+equil_output = f"Equilibration_{protein}.pdb"
+                          """)
+        elif fileType == "amber":
+            script.append("""
+equil_output = f"Equilibration_{prmtop_file[:-7]}.pdb"
+                          """)
+        if session["equilibration"] == "only_minimization":
+            script.append("print('Performing only energy minimization...')")
+            script.append("""
+stages = [
+    {
+        # Minimize with full protein restraint.
+        "EOM": "minimize",
+        "n_steps": 10000,
+        "temperature": temperature,
+        "ensemble": None,
+        "restraint_selection": "protein and not type H",
+        "force_constant": 4.0,
+        "collision_rate": 1,
+        "timestep": 2 * unit.femtoseconds,
+    }]
+""")
+        elif session["equilibration"] == "minimization_and_equilibration":
+            script.append("print('Performing minimization and equilibration...')")
+            script.append("""
+stages = [
+    {
+        # Minimize with full protein restraint.
+        "EOM": "minimize",
+        "n_steps": 10000,
+        "temperature": temperature,
+        "ensemble": None,
+        "restraint_selection": "protein and not type H",
+        "force_constant": 4.0,
+        "collision_rate": 1,
+        "timestep": 2 * unit.femtoseconds,
+    },
+    {
+        # Heat from 100 K to 300 K under NVT.
+        # High collision rate damps velocity chaos during heating.
+        "EOM": "MD_interpolate",
+        "n_steps": 50000,
+        "temperature": 100 * unit.kelvin,
+        "temperature_end": temperature,
+        "ensemble": "NVT",
+        "restraint_selection": "protein and not type H",
+        "force_constant": 4.0,
+        "collision_rate": 10,
+        "timestep": 2 * unit.femtoseconds,
+    },
+    {
+        # NPT, full protein restraint.
+        # Box volume and membrane area start adjusting.
+        "EOM": "MD",
+        "n_steps": 62500,
+        "temperature": temperature,
+        "ensemble": "NPT",
+        "restraint_selection": "protein and not type H",
+        "force_constant": 4.0,
+        "collision_rate": 5,
+        "timestep": 2 * unit.femtoseconds,
+    },
+    {
+        # NPT, backbone only at half FC.
+        "EOM": "MD",
+        "n_steps": 62500,
+        "temperature": temperature,
+        "ensemble": "NPT",
+        "restraint_selection": "protein and backbone and not type H",
+        "force_constant": 4.0 / 2,
+        "collision_rate": 2,
+        "timestep": 2 * unit.femtoseconds,
+    },
+    {
+        # NPT, backbone very loose.
+        "EOM": "MD",
+        "n_steps": 250000,
+        "temperature": temperature,
+        "ensemble": "NPT",
+        "restraint_selection": "protein and backbone and not type H",
+        "force_constant": 4.0 / 10,
+        "collision_rate": 1,
+        "timestep": 2 * unit.femtoseconds,
+    },
+]
+            """)
+        script.append(
+            "run_gentle_equilibration("
+        )
+        script.append(
+            "    topology,"
+        )
+        script.append(
+            "    positions_for_equil,"
+        )
+        script.append(
+            "    system,"
+        )
+        script.append(
+            "    stages,"
+        )
+        script.append(
+            "    equil_output,"
+        )
+        script.append(
+            "    platform_name = '%s',"
+            % (session["platform"])
+        )
+        script.append(
+            ")"
+        )
 
-    script.append("\n# Minimize and Equilibrate\n")
-    script.append("print('Performing energy minimization...')")
-    script.append("simulation.minimizeEnergy()")
-    if fileType == "pdb":
-        script.append(
-            """
-with open(f'Energyminimization_{protein}', 'w') as outfile:
-    PDBFile.writeFile(modeller.topology, modeller.positions, outfile)
-    """
-        )
-    elif fileType == "amber":
-        script.append(
-            """
-with open(f'Energyminimization_{prmtop_file[:-7]}.pdb', 'w') as outfile:
-    PDBFile.writeFile(prmtop.topology, inpcrd.positions, outfile)
-    """
-        )
-    script.append("print('Equilibrating...')")
-    script.append("simulation.context.setVelocitiesToTemperature(temperature)")
-    script.append("simulation.step(equilibrationSteps)")
-    if fileType == "pdb":
-        script.append(
-            """
-with open(f'Equilibration_{protein}', 'w') as outfile:
-    PDBFile.writeFile(modeller.topology, modeller.positions, outfile)
-    """
-        )
-    elif fileType == "amber":
-        script.append(
-            """
-with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
-    PDBFile.writeFile(prmtop.topology, inpcrd.positions, outfile)
-    """
-        )
+        
+    
     if session["restart_checkpoint"] == "yes":
         script.append("simulation.loadCheckpoint('%s')" % session["checkpointFilename"])
 
@@ -1492,6 +1569,16 @@ with open(f'Equilibration_{prmtop_file[:-7]}.pdb', 'w') as outfile:
 
     script.append("\n# Simulate\n")
     script.append("print('Simulating...')")
+    if ensemble == "npt":
+        script.append("system.addForce(MonteCarloBarostat(pressure, temperature, barostatInterval))")
+    script.append("integrator = LangevinMiddleIntegrator(temperature, friction, dt)")
+    if constraints != "none":
+        script.append("integrator.setConstraintTolerance(constraintTolerance)")
+    script.append(
+        "simulation = app.Simulation(topology, system, integrator, platform%s)"
+        % (", platformProperties" if session["platform"] in ("CUDA", "OpenCL") else "")
+    )
+    script.append("simulation.context.setPositions(positions)")
     if session["restart_checkpoint"] == "yes":
         if fileType == "pdb":
             script.append("simulation.reporters.append(PDBReporter(f'restart_output_{protein}', pdbInterval))")
