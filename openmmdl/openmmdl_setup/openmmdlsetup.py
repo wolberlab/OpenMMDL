@@ -1430,10 +1430,6 @@ positions_for_equil = np.array(positions.value_in_unit(unit.nanometers)) * unit.
                 hmrOptions,
             )
         )
-<<<<<<< HEAD
-    
-
-=======
     script.append("write_ligand_with_partial_charges(topology, system, positions, ligand_name=globals().get('ligand_name'))")
     if ensemble == "npt":
         script.append("system.addForce(MonteCarloBarostat(pressure, temperature, barostatInterval))")
