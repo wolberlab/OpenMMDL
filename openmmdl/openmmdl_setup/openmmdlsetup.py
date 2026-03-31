@@ -1441,7 +1441,6 @@ positions_for_equil = np.array(positions.value_in_unit(unit.nanometers)) * unit.
         % (", platformProperties" if session["platform"] in ("CUDA", "OpenCL") else "")
     )
     script.append("simulation.context.setPositions(positions)")
->>>>>>> upstream/main
     if fileType == "amber":
         script.append("if inpcrd.boxVectors is not None:")
         script.append("    simulation.context.setPeriodicBoxVectors(*inpcrd.boxVectors)")
