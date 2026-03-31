@@ -20,6 +20,7 @@ from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
 from tqdm import tqdm
 
+from openmmdl.utils.logging_utils import setup_logging
 from openmmdl.openmmdl_analysis.core.preprocessing import Preprocessing
 from openmmdl.openmmdl_analysis.analysis.rmsd import RMSDAnalyzer
 from openmmdl.openmmdl_analysis.analysis.interactions import InteractionAnalyzer
@@ -50,55 +51,6 @@ from openmmdl.openmmdl_analysis.core.utils import update_dict, update_values
 warnings.filterwarnings("ignore")
 logger = logging.getLogger(__name__)
 
-
-def setup_logging(verbose: bool = False) -> None:
-    console_formatter = logging.Formatter(
-        "%(levelname)s:%(name)s:%(message)s"
-        if verbose
-        else "%(levelname)s: %(message)s"
-    )
-    normal_file_formatter = logging.Formatter("%(levelname)s: %(message)s")
-    verbose_file_formatter = logging.Formatter(
-        "%(asctime)s | %(levelname)s | %(name)s | %(processName)s | %(message)s"
-    )
-
-    normal_logfile = os.path.join(os.getcwd(), "openmmdl_analysis.log")
-    verbose_logfile = os.path.join(os.getcwd(), "openmmdl_analysis_verbose.log")
-
-    # Root logger collects everything into the verbose logfile only
-    root_logger = logging.getLogger()
-    root_logger.handlers.clear()
-    root_logger.setLevel(logging.DEBUG)
-
-    verbose_file_handler = logging.FileHandler(verbose_logfile, mode="w")
-    verbose_file_handler.setLevel(logging.DEBUG)
-    verbose_file_handler.setFormatter(verbose_file_formatter)
-    root_logger.addHandler(verbose_file_handler)
-
-    # OpenMMDL logger writes clean output to console + normal logfile
-    app_logger = logging.getLogger("openmmdl")
-    app_logger.handlers.clear()
-    app_logger.setLevel(logging.DEBUG)
-
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG if verbose else logging.INFO)
-    console_handler.setFormatter(console_formatter)
-
-    normal_file_handler = logging.FileHandler(normal_logfile, mode="w")
-    normal_file_handler.setLevel(logging.INFO)
-    normal_file_handler.setFormatter(normal_file_formatter)
-
-    app_logger.addHandler(console_handler)
-    app_logger.addHandler(normal_file_handler)
-
-    # Let OpenMMDL logs also flow to root so they land in openmmdl_verbose.log
-    app_logger.propagate = True
-
-    # Keep dependency INFO chatter out of console/default logfile
-    logging.getLogger("MDAnalysis").setLevel(logging.INFO)
-    logging.getLogger("plip").setLevel(logging.INFO)
-    logging.getLogger("prolif").setLevel(logging.INFO)
-    logging.getLogger("matplotlib").setLevel(logging.WARNING)
 
 @contextmanager
 def pushd(path: str):
@@ -284,7 +236,11 @@ def main():
     run_root = os.getcwd()
 
     args = parser.parse_args()
-    setup_logging(args.verbose)
+    setup_logging(
+        verbose=args.verbose,
+        log_dir=os.getcwd(),
+        log_prefix="openmmdl",
+    )
     if input_formats[0] not in args.topology and input_formats[4] not in args.topology:
         logger.error("Topology is missing, try the absolute path")
     if (
