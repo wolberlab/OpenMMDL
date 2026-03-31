@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 import os
 import re
 import pickle
@@ -47,7 +48,57 @@ from openmmdl.openmmdl_analysis.core.utils import update_dict, update_values
 
 
 warnings.filterwarnings("ignore")
+logger = logging.getLogger(__name__)
 
+
+def setup_logging(verbose: bool = False) -> None:
+    console_formatter = logging.Formatter(
+        "%(levelname)s:%(name)s:%(message)s"
+        if verbose
+        else "%(levelname)s: %(message)s"
+    )
+    normal_file_formatter = logging.Formatter("%(levelname)s: %(message)s")
+    verbose_file_formatter = logging.Formatter(
+        "%(asctime)s | %(levelname)s | %(name)s | %(processName)s | %(message)s"
+    )
+
+    normal_logfile = os.path.join(os.getcwd(), "openmmdl_analysis.log")
+    verbose_logfile = os.path.join(os.getcwd(), "openmmdl_analysis_verbose.log")
+
+    # Root logger collects everything into the verbose logfile only
+    root_logger = logging.getLogger()
+    root_logger.handlers.clear()
+    root_logger.setLevel(logging.DEBUG)
+
+    verbose_file_handler = logging.FileHandler(verbose_logfile, mode="w")
+    verbose_file_handler.setLevel(logging.DEBUG)
+    verbose_file_handler.setFormatter(verbose_file_formatter)
+    root_logger.addHandler(verbose_file_handler)
+
+    # OpenMMDL logger writes clean output to console + normal logfile
+    app_logger = logging.getLogger("openmmdl")
+    app_logger.handlers.clear()
+    app_logger.setLevel(logging.DEBUG)
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG if verbose else logging.INFO)
+    console_handler.setFormatter(console_formatter)
+
+    normal_file_handler = logging.FileHandler(normal_logfile, mode="w")
+    normal_file_handler.setLevel(logging.INFO)
+    normal_file_handler.setFormatter(normal_file_formatter)
+
+    app_logger.addHandler(console_handler)
+    app_logger.addHandler(normal_file_handler)
+
+    # Let OpenMMDL logs also flow to root so they land in openmmdl_verbose.log
+    app_logger.propagate = True
+
+    # Keep dependency INFO chatter out of console/default logfile
+    logging.getLogger("MDAnalysis").setLevel(logging.INFO)
+    logging.getLogger("plip").setLevel(logging.INFO)
+    logging.getLogger("prolif").setLevel(logging.INFO)
+    logging.getLogger("matplotlib").setLevel(logging.WARNING)
 
 @contextmanager
 def pushd(path: str):
@@ -213,6 +264,11 @@ def main():
             "'prolif' uses ProLIF for interaction calculation."
         ),
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose logging with module names and debug messages.",
+    )
 
     pdb_md = None
     input_formats = [
@@ -228,24 +284,25 @@ def main():
     run_root = os.getcwd()
 
     args = parser.parse_args()
+    setup_logging(args.verbose)
     if input_formats[0] not in args.topology and input_formats[4] not in args.topology:
-        print("Topology is missing, try the absolute path")
+        logger.error("Topology is missing, try the absolute path")
     if (
         input_formats[1] not in args.trajectory
         and input_formats[5] not in args.trajectory
         and input_formats[6] not in args.trajectory
     ):
-        print("Trajectory is missing, try the absolute path")
+        logger.error("Trajectory is missing, try the absolute path")
     topology = os.path.abspath(args.topology)
     trajectory = os.path.abspath(args.trajectory)
 
     if args.ligand_name is None:
-        print("Ligand name is missing. Add the name of your ligand from your topology file")
+        logger.error("Ligand name is missing. Add the name of your ligand from your topology file")
         sys.exit(1)
     # set variables for analysis and preprocess input files
     # enable gromacs support and write topology and trajectory files
     if ".tpr" in args.topology and (".xtc" in args.trajectory or ".trr" in args.trajectory):
-        print("\033[1mGromacs format detected. Writing compatible file formats.\033[0m")
+        logger.info("\033[1mGromacs format detected. Writing compatible file formats.\033[0m")
         u = mda.Universe(topology, trajectory)
         with mda.Writer(trajectory, n_atoms=u.atoms.n_atoms) as W:
             first_frame_saved = False
@@ -263,7 +320,7 @@ def main():
 
     # The following is the current water analysis if no ligand is present.
     if not args.ligand_sdf and args.peptide is None and stable_water_analysis:
-        print("All analyses will be run which can be done without a ligand present")
+        logger.info("All analyses will be run which can be done without a ligand present")
         stable_water_analyser.stable_waters_pipeline()
         stable_water_analyser.analyze_protein_and_water_interaction(topology, "representative_waters.pdb", water_eps)
 
@@ -287,10 +344,10 @@ def main():
     preprocessor = Preprocessing()
 
     if reference is not None:
-        print("\033[1mPDB File residues are being renumbered\033[0m")
+        logger.info("\033[1mPDB File residues are being renumbered\033[0m")
         preprocessor.renumber_protein_residues(topology, reference, topology)
     preprocessor.process_pdb_file(topology)
-    print("\033[1mFiles are preprocessed\033[0m")
+    logger.info("\033[1mFiles are preprocessed\033[0m")
 
     if ligand_sdf is None:
         preprocessor.extract_and_save_ligand_as_sdf(topology, "./ligand_prepared.sdf", ligand)
@@ -326,8 +383,8 @@ def main():
         try:
             lig_rd_ring = lig_rd.GetRingInfo()
         except AttributeError:
-            print("\033[1mCould not get the ring information.\033[0m")
-            print("\033[1mTry to remove lone pairs prior to running an analysis!\033[0m")
+            logger.error("\033[1mCould not get the ring information.\033[0m")
+            logger.error("\033[1mTry to remove lone pairs prior to running an analysis!\033[0m")
             exit()
 
         # getting the index of the first atom of the ligand from the complex pdb
@@ -354,7 +411,7 @@ def main():
                                 updated_ring_2 = true_number
                                 current_ring.append(updated_ring_2)
             ligand_rings.append(current_ring)
-        print("\033[1mLigand ring data gathered\033[0m")
+        logger.info("\033[1mLigand ring data gathered\033[0m")
 
     if peptide is not None:
         ligand_rings = None
@@ -371,7 +428,7 @@ def main():
             pairwise_rmsd_prot, pairwise_rmsd_lig = rmsd_analyzer.rmsd_dist_frames(
                 fig_type, lig=f"{ligand}", nucleic=True
             )
-            print("\033[1mRMSD calculated\033[0m")
+            logger.info("\033[1mRMSD calculated\033[0m")
     elif peptide is not None:
         rmsd_analyzer.rmsd_for_atomgroups(
             fig_type,
@@ -380,7 +437,7 @@ def main():
         )
         if frame_rmsd != "No":
             pairwise_rmsd_prot, pairwise_rmsd_lig = rmsd_analyzer.rmsd_dist_frames(fig_type, lig=f"chainID {peptide}")
-            print("\033[1mRMSD calculated\033[0m")
+            logger.info("\033[1mRMSD calculated\033[0m")
     else:
         rmsd_analyzer.rmsd_for_atomgroups(
             fig_type,
@@ -389,7 +446,7 @@ def main():
         )
         if frame_rmsd != "No":
             pairwise_rmsd_prot, pairwise_rmsd_lig = rmsd_analyzer.rmsd_dist_frames(fig_type, lig=f"{ligand}")
-            print("\033[1mRMSD calculated\033[0m")
+            logger.info("\033[1mRMSD calculated\033[0m")
 
     if receptor_nucleic:
         config.DNARECEPTOR = True
@@ -399,10 +456,10 @@ def main():
     md_len = args.frames
     if md_len is None:
         md_len = len(pdb_md.trajectory)
-        print(f"\033[1mThe whole trajectory consisting of {len(pdb_md.trajectory) - 1} frames will be analyzed\033[0m")
+        logger.info(f"\033[1mThe whole trajectory consisting of {len(pdb_md.trajectory) - 1} frames will be analyzed\033[0m")
     else:
         md_len = int(md_len) + 1
-        print(f"\033[1mThe trajectory until frame {md_len - 1} will be analyzed\033[0m")
+        logger.info(f"\033[1mThe trajectory until frame {md_len - 1} will be analyzed\033[0m")
 
     interaction_package = args.interaction_package
     interaction_analysis = InteractionAnalyzer(
@@ -420,7 +477,7 @@ def main():
 
     for schema in ("residue", "ligand"):
         outdir = f"BindingModes_{schema}"
-        print(f"\033[1mRunning {schema} bindig mode analysis\033[0m")
+        logger.info(f"\033[1mRunning {schema} bindig mode analysis\033[0m")
 
         # IMPORTANT: fresh copy for each schema run
         interaction_list = interaction_list_raw.copy(deep=True)
@@ -505,7 +562,7 @@ def main():
             # Generate Markov state figures of the binding modes
             markov_analysis = MarkovChainAnalysis(min_transition)
             markov_analysis.generate_transition_graph(total_frames, combined_dict, fig_type)
-            print(f"\033[1m{schema} bindig mode: markov state figure generated\033[0m")
+            logger.info(f"\033[1m{schema} bindig mode: markov state figure generated\033[0m")
 
             # Get the top 10 nodes with the most occurrences
             node_occurrences = {node: combined_dict["all"].count(node) for node in set(combined_dict["all"])}
@@ -707,9 +764,9 @@ def main():
                         fig_type,
                     )
                     generator.generate_image()
-                    print(f"\033[1m{schema} bindig mode: Binding mode figure generated\033[0m")
+                    logger.info(f"\033[1m{schema} bindig mode: Binding mode figure generated\033[0m")
             except Exception:
-                print("Ligand could not be recognized, use the -l option")
+                logger.warning("Ligand could not be recognized, use the -l option")
                 traceback.print_exc()
 
             df_all = pd.read_csv("df_all.csv")
@@ -751,7 +808,7 @@ def main():
                     result_dict["Representative Frame"].append(representative_frame)
                 top_10_binding_modes_df = pd.DataFrame(result_dict)
                 top_10_binding_modes_df.to_csv("top_10_binding_modes.csv")
-                print(f"\033[1m{schema} bindig mode: found representative frame for each binding mode\033[0m")
+                logger.info(f"\033[1m{schema} bindig mode: found representative frame for each binding mode\033[0m")
                 # save bindingmode pdb and .pml
                 for index, row in top_10_binding_modes_df.iterrows():
                     b_mode = row["Binding Mode"]
@@ -790,7 +847,7 @@ def main():
 
                         pham_generator.generate_bindingmode_pharmacophore(bindingmode_dict, b_mode)
 
-                print(f"\033[1m {schema} bindig mode: Binding mode pdb files saved\033[0m")
+                logger.info(f"\033[1m {schema} bindig mode: Binding mode pdb files saved\033[0m")
 
             waterbridge_barcodes = {}
             barcode_gen = BarcodeGenerator(df_all)
@@ -806,7 +863,7 @@ def main():
                 barcode_plotter.plot_barcodes_grouped(interaction_data, interaction_type, fig_type)
 
             barcode_plotter.plot_waterbridge_piechart(waterbridge_barcodes, interaction_types["waterbridge"], fig_type)
-            print(f"\033[1m{schema} bindig mode: Barcodes generated\033[0m")
+            logger.info(f"\033[1m{schema} bindig mode: Barcodes generated\033[0m")
 
             interacting_water_id_list = barcode_gen.interacting_water_ids(interaction_types["waterbridge"])
 
@@ -825,9 +882,9 @@ def main():
                 pham_generator.generate_point_cloud_pml("point_cloud")
                 # generate combo pharmacophore of the md with each interaction as a single pharmacophore feature
                 pham_generator.generate_md_pharmacophore_cloudcenters("combopharm")
-                print(f"\033[1m {schema} bindig mode: Pharmacophores generated\033[0m")
+                logger.info(f"\033[1m {schema} bindig mode: Pharmacophores generated\033[0m")
 
-    print("\033[1mAnalysis is Finished.\033[0m")
+    logger.info("\033[1mAnalysis is Finished.\033[0m")
 
     if stable_water_analysis:
         stable_water_analyser.stable_waters_pipeline(topology, trajectory, water_eps)
