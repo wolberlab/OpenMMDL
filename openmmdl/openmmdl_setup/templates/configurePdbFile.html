@@ -93,6 +93,15 @@ Select the pdb input file and options for how to model it.
         <option value="True">Yes</option>
     </select></div>
     </div>
+    <div class="form-group">
+    <label for="highThroughputSimulation" class="control-label col-md-2">
+        <span style="font-weight: 700" title="Execute High Throughput Simulation and create simulation setups for each ligand in your SDF file">High Throughput Simulation</span>
+    </label>
+    <div class="col-md-10"><select name="highThroughputSimulation" id="highThroughputSimulation" class="form-control" title="Execute High Throughput Simulation" onchange="optionChanged()">
+        <option value="False" selected>No</option>
+        <option value="True">Yes</option>
+    </select></div>
+    </div>
     <br/>
     <button type="button" class="btn btn-default btn-back-red"
             onclick="window.location.href='{{ url_for('showSelectFileType') }}'">Back</button>

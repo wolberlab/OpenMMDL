@@ -18,9 +18,10 @@ The rules for this file:
 ## Version 1.X.X
 
 ### Authors
-talagayev
+talagayev, NDoering99
 
 ### Added
+- Added high throughput simulation option in `OpenMMDL Setup` (2026-04-01, PR#196)
 - Added write out of ligand in `mol2` with partial charges during `OpenMMDL Simulation` (2026-03-14, PR#191)
 - Added extensions in `OpenMMDL Setup` (2026-03-01, PR#189)
 - Added `Back` button in `OpenMMDL Setup` (2026-02-28, PR#188)
