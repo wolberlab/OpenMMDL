@@ -1,6 +1,10 @@
+import logging
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+
+
+logger = logging.getLogger(__name__)
 
 
 class BarcodeGenerator:
@@ -172,7 +176,7 @@ class BarcodePlotter:
             This function writes out a figure and does not return anything.
         """
         if not waterbridge_barcodes:
-            print("No Piecharts to plot.")
+            logger.info("No Piecharts to plot.")
             return
 
         os.makedirs("Barcodes/Waterbridge_Piecharts", exist_ok=True)
@@ -299,7 +303,7 @@ class BarcodePlotter:
             This function writes out a figure and does not return anything.
         """
         if not barcodes:
-            print("No barcodes to plot.")
+            logger.info("No barcodes to plot.")
             return
 
         num_plots = len(barcodes)

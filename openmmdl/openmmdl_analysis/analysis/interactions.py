@@ -1,3 +1,4 @@
+import logging
 import os
 import pandas as pd
 import MDAnalysis as mda
@@ -11,6 +12,7 @@ from typing import Dict, List, Tuple, Optional, Any
 from openmmdl.openmmdl_analysis.core.utils import coord_str
 
 
+logger = logging.getLogger(__name__)
 config.KEEPMOD = True
 
 
@@ -222,7 +224,7 @@ class InteractionAnalyzer:
         ]
 
         if interaction_type not in valid_types:
-            print("\033[1m!!! Wrong interaction type specified. Hbond is chosen by default!!!\033[0m\n")
+            logger.warning("\033[1m!!! Wrong interaction type specified. Hbond is chosen by default!!!\033[0m")
             interaction_type = "hbond"
 
         df = pd.DataFrame.from_records(
@@ -489,8 +491,8 @@ class InteractionAnalyzer:
             A DataFrame containing all the protein-ligand interaction data from the whole trajectory.
         """
         if self.dataframe is None:
-            print("\033[1mProcessing protein-ligand trajectory\033[0m")
-            print(f"\033[1mUsing {self.num_processes} CPUs\033[0m")
+            logger.info("\033[1mProcessing protein-ligand trajectory\033[0m")
+            logger.info(f"\033[1mUsing {self.num_processes} CPUs\033[0m")
 
             with Pool(processes=self.num_processes) as pool:
                 frame_args = [
@@ -521,7 +523,7 @@ class InteractionAnalyzer:
             interaction_list.to_csv("interactions_gathered.csv")
 
         elif self.dataframe is not None:
-            print(f"\033[1mGathering data from {self.dataframe}\033[0m")
+            logger.info(f"\033[1mGathering data from {self.dataframe}\033[0m")
             interaction_tmp = pd.read_csv(self.dataframe)
             interaction_list = interaction_tmp.drop(interaction_tmp.columns[0], axis=1)
 
@@ -533,7 +535,7 @@ class InteractionAnalyzer:
             interaction_list,
         )
 
-        print("\033[1mProtein-ligand trajectory processed\033[0m")
+        logger.info("\033[1mProtein-ligand trajectory processed\033[0m")
 
         return interaction_list
 
@@ -732,8 +734,8 @@ class InteractionAnalyzer:
                 try:
                     self.pdb_md.guess_TopologyAttrs(to_guess=["bonds"], force_guess=["bonds"])
                 except Exception:
-                    print(
-                        f"Warning: could not guess bonds for {label} selection ({e}). ProLIF may produce no interactions."
+                    logger.warning(
+                        f"Could not guess bonds for {label} selection ({e}). ProLIF may produce no interactions."
                     )
 
         try:
@@ -815,7 +817,7 @@ class InteractionAnalyzer:
         except Exception:
             pass
         try:
-            print("Debug: unique resnames (first 30):", sorted(set(self.pdb_md.atoms.resnames))[:30])
+            logger.debug("Unique resnames (first 30): %s", sorted(set(self.pdb_md.atoms.resnames))[:30])
         except Exception:
             pass
         return None
@@ -959,7 +961,7 @@ class InteractionAnalyzer:
         if water_ag is not None and len(water_ag) > 0:
             parameters["WaterBridge"] = {"water": water_ag, "order": WATER_BRIDGE_ORDER}
         else:
-            print("\033[33mWarning: WaterBridge disabled (no water atoms selected).\033[0m")
+            logger.warning("\033[33mWarning: WaterBridge disabled (no water atoms selected).\033[0m")
             prolif_interactions = [x for x in prolif_interactions if x != "WaterBridge"]
 
         fp = plf.Fingerprint(prolif_interactions, count=True, parameters=(parameters or None))

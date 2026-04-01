@@ -30,6 +30,7 @@ talagayev
 - Fixed double click bug in `OpenMMDL Setup` (2026-03-01, PR#190)
 
 ### Changed
+- Transition to `logging` in `OpenMMDL Analysis` (2026-03-31, PR#195)
 
 ## Version 1.2.0
 

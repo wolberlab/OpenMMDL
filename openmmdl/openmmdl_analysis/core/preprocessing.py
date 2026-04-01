@@ -1,7 +1,11 @@
+import logging
 import re
 import mdtraj as md
 import MDAnalysis as mda
 from rdkit.Chem import SDWriter
+
+
+logger = logging.getLogger(__name__)
 
 
 class Preprocessing:
@@ -164,7 +168,7 @@ class Preprocessing:
         ligand_atoms = u.select_atoms(f"resname {target_resname}")
 
         if len(ligand_atoms) == 0:
-            print(f"No ligand with residue name '{target_resname}' found in the PDB file.")
+            logger.warning(f"No ligand with residue name '{target_resname}' found in the PDB file.")
             return
 
         # Using RDKit Converter to get SDF File
