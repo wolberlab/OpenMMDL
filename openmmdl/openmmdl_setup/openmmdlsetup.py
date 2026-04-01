@@ -27,6 +27,7 @@ import time
 import webbrowser
 import zipfile
 import warnings
+from rdkit import Chem
 
 warnings.filterwarnings("ignore")
 
@@ -116,6 +117,7 @@ def configureFiles():
             session["smallMoleculeForceFieldVersion"] = request.form.get("gaffVersion", "")
         session["ligandMinimization"] = request.form.get("ligandMinimization", "")
         session["ligandSanitization"] = request.form.get("ligandSanitization", "")
+        session["highThroughputSimulation"] = request.form.get("highThroughputSimulation", "")
         session["sdfFile"] = uploadedFiles["sdfFile"][0][1]
         configureDefaultOptions()
         file, name = uploadedFiles["file"][0]
@@ -945,12 +947,59 @@ def downloadStructuralfiles():
 @app.route("/downloadPackage")
 def downloadPackage():
     temp = tempfile.NamedTemporaryFile()
-    with zipfile.ZipFile(temp, "w", zipfile.ZIP_DEFLATED) as zip:
-        zip.writestr("openmmdl_simulation/OpenMMDL_Simulation.py", createScript())
-        for key in uploadedFiles:
-            for file, name in uploadedFiles[key]:
-                file.seek(0, 0)
-                zip.writestr("openmmdl_simulation/%s" % name, file.read())
+    is_high_throughput = (
+        session.get("highThroughputSimulation") == "True"
+        and session.get("fileType") == "pdb"
+        and session.get("sdfFile", "") != ""
+    )
+
+    with zipfile.ZipFile(temp, "w", zipfile.ZIP_DEFLATED) as zf:
+        if is_high_throughput:
+            sdf_file_obj, sdf_name = uploadedFiles["sdfFile"][0]
+            sdf_file_obj.seek(0)
+            sdf_bytes = sdf_file_obj.read()
+
+            supplier = Chem.SDMolSupplier()
+            supplier.SetData(sdf_bytes.decode("utf-8"), removeHs=False)
+
+            pdb_name = uploadedFiles["file"][0][1]
+            pdb_file_obj = uploadedFiles["file"][0][0]
+            pdb_file_obj.seek(0)
+            zf.writestr("openmmdl_simulation/%s" % pdb_name, pdb_file_obj.read())
+
+            for key in uploadedFiles:
+                if key in ("file", "sdfFile"):
+                    continue
+                for file, name in uploadedFiles[key]:
+                    file.seek(0)
+                    zf.writestr("openmmdl_simulation/%s" % name, file.read())
+
+            for i, mol in enumerate(supplier):
+                if mol is None:
+                    continue
+                raw_name = mol.GetProp("_Name").strip() if mol.HasProp("_Name") and mol.GetProp("_Name").strip() else "ligand_%d" % i
+                mol_name = "".join(c if c.isalnum() or c in "_-" else "_" for c in raw_name)
+                folder = "openmmdl_simulation/%s" % mol_name
+                ligand_sdf_filename = "%s.sdf" % mol_name
+
+                sio = StringIO()
+                w = Chem.SDWriter(sio)
+                w.write(mol)
+                w.close()
+                zf.writestr("%s/%s" % (folder, ligand_sdf_filename), sio.getvalue())
+
+                script_content = createScript(
+                    ligand_sdf_override=ligand_sdf_filename,
+                    protein_path_override=pdb_name,
+                )
+                zf.writestr("%s/OpenMMDL_Simulation.py" % folder, script_content)
+        else:
+            zf.writestr("openmmdl_simulation/OpenMMDL_Simulation.py", createScript())
+            for key in uploadedFiles:
+                for file, name in uploadedFiles[key]:
+                    file.seek(0, 0)
+                    zf.writestr("openmmdl_simulation/%s" % name, file.read())
+
     temp.seek(0, 0)
     return send_file(temp, "application/zip", True, "openmmdl_simulation.zip", max_age=0)
 
@@ -1017,7 +1066,7 @@ def configureDefaultOptions():
     session["md_postprocessing"] = "True"
 
 
-def createScript(isInternal=False):
+def createScript(isInternal: bool = False, ligand_sdf_override: str | None = None, protein_path_override: str | None = None):
     script = []
 
     # If we are creating this script for internal use to run a simulation directly, add extra code at the top
@@ -1095,9 +1144,11 @@ os.chdir(outputDir)"""
         )
         pdbType = session["pdbType"]
         if pdbType == "pdb":
-            script.append('protein = "%s"' % uploadedFiles["file"][0][1])
+            pdb_path = protein_path_override if protein_path_override else uploadedFiles["file"][0][1]
+            script.append('protein = "%s"' % pdb_path)
             if session["sdfFile"] != "":
-                script.append("ligand = '%s'" % session["sdfFile"])
+                ligand_path = ligand_sdf_override if ligand_sdf_override else session["sdfFile"]
+                script.append("ligand = '%s'" % ligand_path)
                 script.append('ligand_name = "UNK"')
                 script.append("minimization = %s" % session["ligandMinimization"])
                 script.append("smallMoleculeForceField = '%s'" % session["smallMoleculeForceField"])
