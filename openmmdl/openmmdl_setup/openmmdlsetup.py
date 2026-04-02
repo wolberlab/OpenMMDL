@@ -1578,7 +1578,7 @@ stages = [
             ")"
         )
 
-        
+        script.append("positions = PDBFile(equil_output).positions")        
     
     if session["restart_checkpoint"] == "yes":
         script.append("simulation.loadCheckpoint('%s')" % session["checkpointFilename"])
@@ -1587,8 +1587,6 @@ stages = [
 
     script.append("\n# Simulate\n")
     script.append("print('Simulating...')")
-    if ensemble == "npt":
-        script.append("system.addForce(MonteCarloBarostat(pressure, temperature, barostatInterval))")
     script.append("integrator = LangevinMiddleIntegrator(temperature, friction, dt)")
     if constraints != "none":
         script.append("integrator.setConstraintTolerance(constraintTolerance)")
@@ -1645,7 +1643,7 @@ stages = [
     if session["md_postprocessing"] == "True":
         # mdtraj_conversion() and MDanalysis_conversion()
         if fileType == "pdb":
-            script.append("mdtraj_conversion(f'Equilibration_{protein}', '%s')" % session["mdtraj_output"])
+            script.append("mdtraj_conversion(equil_output, '%s')" % session["mdtraj_output"])
             if session["sdfFile"]:
                 if session["mdtraj_output"] != "mdtraj_gro_xtc":
                     script.append(
