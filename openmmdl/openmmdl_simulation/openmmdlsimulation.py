@@ -6,6 +6,8 @@ Perform Simulations of Protein-ligand complexes with OpenMM
 import argparse
 import os
 import shutil
+import subprocess
+import sys
 
 parser = argparse.ArgumentParser()
 
@@ -50,6 +52,16 @@ def main():
     parser.add_argument("-t", dest="topology", help="Protein Topology PDB/Amber File", required=True)
     parser.add_argument("-l", dest="ligand", help="SDF File of Ligand", default=None)
     parser.add_argument("-c", dest="coordinate", help="Amber coordinates file", default=None)
+    parser.add_argument(
+        "--failure-retries",
+        dest="failure_retries",
+        type=int,
+        default=10,
+        help=(
+            "Number of reruns if OpenMM fails with 'Particle coordinate is NaN' "
+            "(default: 10)"
+        ),
+    )
     input_formats = [".py", ".pdb", ".sdf", ".mol", ".prmtop", ".inpcrd"]
     args = parser.parse_args()
     if not os.path.exists(args.folder):
@@ -92,7 +104,49 @@ def main():
             else:
                 print("Wrong Format, don't forget the .inpcrd of the coordinate file")
         os.chdir(args.folder)
-        os.system("python3 *.py")
+
+        script_name = os.path.basename(args.script)
+        keep_files = {script_name, os.path.basename(args.topology)}
+
+        if args.ligand is not None:
+            keep_files.add(os.path.basename(args.ligand))
+        if args.coordinate is not None:
+            keep_files.add(os.path.basename(args.coordinate))
+
+        nan_message = "Particle coordinate is NaN"
+
+        for attempt in range(args.failure_retries + 1):
+            process = subprocess.Popen(
+                [sys.executable, "-u", script_name],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+            )
+
+            output_lines = []
+            for line in process.stdout:
+                print(line, end="")          # shows output live
+                output_lines.append(line)    # also stores it for error check
+
+            process.wait()
+            combined_output = "".join(output_lines)
+
+            if process.returncode == 0:
+                break
+
+            if nan_message not in combined_output or attempt == args.failure_retries:
+                raise SystemExit(process.returncode)
+
+            print(f"Detected OpenMM NaN error. Retrying ({attempt + 1}/{args.failure_retries})...")
+
+            for entry in os.listdir("."):
+                if entry not in keep_files:
+                    path = os.path.join(".", entry)
+                    if os.path.isdir(path):
+                        shutil.rmtree(path)
+                    else:
+                        os.remove(path)
 
 
 if __name__ == "__main__":
