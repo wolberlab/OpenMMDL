@@ -69,6 +69,7 @@ def MDanalysis_conversion(
     mda_output,
     output_selection,
     ligand_name=None,
+    ligand_names=None,
     special_ligname=None,
 ):
     """
@@ -77,6 +78,13 @@ def MDanalysis_conversion(
     After alignment: rewrap + reimage again to prevent PBC artifacts.
     """
 
+    if ligand_names is None:
+        ligand_names = [ligand_name] if ligand_name else []
+
+    ligand_names = [name for name in ligand_names if name]
+    if special_ligname:
+        ligand_names.append(special_ligname)
+
     def _safe_select(u, sel):
         try:
             return u.select_atoms(sel)
@@ -84,11 +92,7 @@ def MDanalysis_conversion(
             return u.atoms[0:0]
 
     def _ligand_group(u):
-        parts = []
-        if ligand_name:
-            parts.append(f"resname {ligand_name}")
-        if special_ligname:
-            parts.append(f"resname {special_ligname}")
+        parts = [f"resname {current_ligand_name}" for current_ligand_name in ligand_names]
         if not parts:
             return u.atoms[0:0]
         return _safe_select(u, " or ".join(parts))
@@ -299,10 +303,8 @@ def MDanalysis_conversion(
         # Protein+ligand
         if output_selection != "mda_all":
             prot_lig_sel = "protein"
-            if ligand_name:
-                prot_lig_sel += f" or resname {ligand_name}"
-            if special_ligname:
-                prot_lig_sel += f" or resname {special_ligname}"
+            for current_ligand_name in ligand_names:
+                prot_lig_sel += f" or resname {current_ligand_name}"
 
             prot_lig = _safe_select(u, prot_lig_sel)
             prot_lig.write("prot_lig_top.pdb")
@@ -355,10 +357,8 @@ def MDanalysis_conversion(
         # Protein+ligand
         if output_selection != "mda_all":
             prot_lig_sel = "protein"
-            if ligand_name:
-                prot_lig_sel += f" or resname {ligand_name}"
-            if special_ligname:
-                prot_lig_sel += f" or resname {special_ligname}"
+            for current_ligand_name in ligand_names:
+                prot_lig_sel += f" or resname {current_ligand_name}"
 
             prot_lig = _safe_select(u, prot_lig_sel)
             prot_lig.write("prot_lig_top.gro")
