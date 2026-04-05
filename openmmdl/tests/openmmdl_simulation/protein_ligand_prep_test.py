@@ -175,7 +175,7 @@ def test_write_ligand_with_partial_charges_without_name():
     )
     assert output is None
 
-def test_write_ligand_with_partial_charges_single_returns_string(...):
+def test_write_ligand_with_partial_charges_single_returns_string():
     output = write_ligand_with_partial_charges(
         topology, system, positions,
         ligand_name="UNK",
@@ -184,7 +184,7 @@ def test_write_ligand_with_partial_charges_single_returns_string(...):
     )
     assert output == str(output_file)
 
-def test_write_ligand_with_partial_charges_without_name_returns_none(...):
+def test_write_ligand_with_partial_charges_without_name_returns_none():
     output = write_ligand_with_partial_charges(
         topology, system, positions,
         ligand_name=None,
@@ -192,7 +192,7 @@ def test_write_ligand_with_partial_charges_without_name_returns_none(...):
     )
     assert output is None
 
-def test_write_ligand_with_partial_charges_without_name_returns_none(...):
+def test_write_ligand_with_partial_charges_without_name_returns_none():
     output = write_ligand_with_partial_charges(
         topology, system, positions,
         ligand_name=None,
