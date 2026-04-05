@@ -1,4 +1,7 @@
-from openmmdl.openmmdl_setup.openmmdlsetup import _normalize_resname, _resnames_are_unique
+from openmmdl.openmmdl_setup.openmmdlsetup import (
+    _normalize_resname,
+    _resnames_are_unique,
+)
 
 
 def test_normalize_resname_accepts_three_alnum_uppercase():
