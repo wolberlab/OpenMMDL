@@ -54,9 +54,11 @@ This leads us to the next page, where we can see the selection of the PDB and SD
    :align: center
 
 
-Go to the PDB File Browse button and select 5wyz.pdb in the folder. 
+Go to the PDB File Browse button and select 5wyz.pdb in the folder.
 
-Go to the SDF File Browse button and select the 5VF.sdf file in the folder.
+Select Single complex in Small Molecule Mode.
+
+Go to the Ligand File Browse button and select the 5VF.sdf file in the folder.
 
 The page should look like the page below.
 

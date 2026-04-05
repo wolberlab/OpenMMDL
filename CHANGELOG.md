@@ -15,12 +15,13 @@ The rules for this file:
     * YYYY-MM-DD date format (following ISO 8601)
   * accompany each entry with github issue/PR number (Issue #xyz)
 -->
-## Version 1.X.X
+## Version 1.3.0
 
 ### Authors
 talagayev, NDoering99
 
 ### Added
+- Added multiple ligand support in `OpenMMDL Simulation` (2026-04-05, PR#198)
 - Added flag for `OpenMMDL Simulation` restart when encoutering Nan error (2026-04-04, PR#197)
 - Added high throughput simulation option in `OpenMMDL Setup` (2026-04-01, PR#196)
 - Added write out of ligand in `mol2` with partial charges during `OpenMMDL Simulation` (2026-03-14, PR#191)
