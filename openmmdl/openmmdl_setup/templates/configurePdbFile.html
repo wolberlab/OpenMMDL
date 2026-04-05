@@ -45,19 +45,19 @@ Select the pdb input file and options for how to model it.
     </p>
     <div class="form-group">
     <label for="smallMoleculeMode" class="control-label col-md-2">Small Molecule Mode</label>
-    <div class="col-md-10"><select name="smallMoleculeMode" id="smallMoleculeMode" class="form-control" title="Choose whether to prepare a single complex, a pose library for high-throughput generation, or no small molecules" onchange="optionChanged()">
+    <div class="col-md-10"><select name="smallMoleculeMode" id="smallMoleculeMode" class="form-control" title="Choose whether to prepare a single complex, a multiple poses for high-throughput generation, or no small molecules" onchange="optionChanged()">
         <option value="none" selected>No small molecules</option>
         <option value="single">Single complex</option>
-        <option value="library">Pose library / high-throughput</option>
+        <option value="library">High-throughput / Multiple poses</option>
     </select></div>
     </div>
     <div id="variableLigandSection" hidden>
         <div class="form-group">
-        <label for="filename" class="control-label col-md-2">Variable Ligand File</label>
-            <div class="col-md-10" title="For single complex mode upload one SDF, MOL or MOL2. For pose library mode upload one multi-entry SDF."> {{ fileinput('sdfFile', accept='.sdf,.mol,.mol2') }}</div>
+        <label for="filename" class="control-label col-md-2">Ligand File</label>
+            <div class="col-md-10" title="For single complex mode upload one SDF, MOL or MOL2. For high-throughput mode upload one multi-entry SDF."> {{ fileinput('sdfFile', accept='.sdf,.mol,.mol2') }}</div>
         </div>
         <div class="form-group">
-            <label for="sdfResname" class="control-label col-md-2">Variable Ligand Code</label>
+            <label for="sdfResname" class="control-label col-md-2">Topology Code</label>
             <div class="col-md-10">
                 <input
                     type="text"
@@ -77,11 +77,11 @@ Select the pdb input file and options for how to model it.
     </div>
     <div id="companionSection" hidden>
         <div class="form-group">
-            <label class="control-label col-md-2">Fixed Companion Molecules</label>
+            <label class="control-label col-md-2">Additional Molecules</label>
             <div class="col-md-10">
                 <div id="companionFilesContainer"></div>
-                <button type="button" class="btn btn-default" onclick="addCompanionRow()">+ Add companion molecule</button>
-                <p class="help-block" style="margin-top: 8px;">Each companion molecule is included in every generated system. Use one file per molecule. Default codes are L01, L02, L03, ...</p>
+                <button type="button" class="btn btn-default" onclick="addCompanionRow()">+ Add additional molecule</button>
+                <p class="help-block" style="margin-top: 8px;">Each additional molecule is included in every generated system. Use one file per molecule. Default codes are L01, L02, L03, ...</p>
                 <p id="resnameDuplicateWarning" class="help-block om-resname-warning" style="display: none;">
                     Ligand topology codes must be unique. Please change duplicate values before continuing.
                 </p>
@@ -136,7 +136,7 @@ Select the pdb input file and options for how to model it.
     </div>
     <div id="highThroughputHint" class="form-group" hidden>
     <label class="control-label col-md-2">High Throughput</label>
-    <div class="col-md-10"><p class="form-control-static">One simulation setup will be generated per entry in the variable ligand SDF.</p></div>
+    <div class="col-md-10"><p class="form-control-static">One simulation setup will be generated per entry in the ligand SDF.</p></div>
     </div>
     <br/>
     <button type="button" class="btn btn-default btn-back-red"
