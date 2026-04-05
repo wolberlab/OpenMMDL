@@ -167,6 +167,8 @@ def write_ligand_with_partial_charges(topology, system, positions, ligand_name=N
             lig.save(current_output_file, overwrite=True)
             print(f"Wrote ligand with partial charges '{current_output_file}'.")
             written_files.append(current_output_file)
+        if len(written_files) == 1:
+            return written_files[0]
         return written_files
     except Exception as e:
         print(f"Skipping write out of partial charge molecule due to error: {e}")
