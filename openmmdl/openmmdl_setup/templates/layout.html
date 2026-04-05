@@ -155,19 +155,23 @@
             /* File drag & drop */
             (function() {
                 function wire(zone) {
+                    if (zone.getAttribute('data-filedrop-wired') === 'true') return;
                     var inputId = zone.getAttribute('data-file-input');
                     if (!inputId) return;
                     var input = document.getElementById(inputId);
                     if (!input) return;
+                    zone.setAttribute('data-filedrop-wired', 'true');
 
                     function setDrag(active) {
                         if (active) zone.classList.add('is-dragover');
                         else zone.classList.remove('is-dragover');
                     }
 
-                    function clickedBrowseLabel(target) {
+                    function clickedNativeControl(target) {
                         while (target && target !== zone) {
                             if (target.tagName === 'LABEL' && target.classList && target.classList.contains('btn-file')) return true;
+                            if (target.tagName === 'BUTTON') return true;
+                            if (target.classList && target.classList.contains('input-group-btn')) return true;
                             target = target.parentElement;
                         }
                         return false;
@@ -178,7 +182,7 @@
                         if (input.disabled) return;
                         // The Browse control is a <label> that already forwards clicks to the hidden file input.
                         // Calling input.click() here as well can open the picker twice.
-                        if (clickedBrowseLabel(e.target)) return;
+                        if (clickedNativeControl(e.target)) return;
                         if (e.target && (e.target.tagName === 'INPUT')) return;
                         input.click();
                     });
@@ -219,6 +223,8 @@
                         input.dispatchEvent(new Event('change', { bubbles: true }));
                     });
                 }
+
+                window.omWireFileDrop = wire;
 
                 document.addEventListener('DOMContentLoaded', function() {
                     var zones = document.querySelectorAll('.om-filedrop[data-file-input]');
@@ -277,4 +283,6 @@
         </div>
     </body>
 </html>
+
+
 
