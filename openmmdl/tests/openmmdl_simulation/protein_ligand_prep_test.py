@@ -111,9 +111,8 @@ modeller = app.Modeller(complex_topology, complex_positions)
 
 @pytest.fixture
 def ligand_charge_test_system():
-    # reuse the exact setup you already use in test_write_ligand_with_partial_charges
-    # and return topology, system, positions
-    return topology, system, positions
+    system = forcefield.createSystem(complex_topology)
+    return complex_topology, system, complex_positions
 
 # Test the prepare_ligand function
 def test_prepare_ligand():
@@ -170,15 +169,6 @@ def test_write_ligand_with_partial_charges_without_name():
         ligand_name=None,
     )
 
-    assert output is None
-
-def test_write_ligand_with_partial_charges_without_name():
-    output = write_ligand_with_partial_charges(
-        "topology",
-        "system",
-        "positions",
-        ligand_name=None,
-    )
     assert output is None
 
 def test_write_ligand_with_partial_charges_single_returns_string(
