@@ -166,8 +166,6 @@ def test_write_ligand_with_partial_charges_without_name():
 
     assert output is None
 
-
-
 def test_write_ligand_with_partial_charges_without_name():
     output = write_ligand_with_partial_charges(
         "topology",
@@ -177,6 +175,30 @@ def test_write_ligand_with_partial_charges_without_name():
     )
     assert output is None
 
+def test_write_ligand_with_partial_charges_single_returns_string(...):
+    output = write_ligand_with_partial_charges(
+        topology, system, positions,
+        ligand_name="UNK",
+        ligand_names=["UNK"],
+        output_file=str(output_file),
+    )
+    assert output == str(output_file)
+
+def test_write_ligand_with_partial_charges_without_name_returns_none(...):
+    output = write_ligand_with_partial_charges(
+        topology, system, positions,
+        ligand_name=None,
+        ligand_names=[],
+    )
+    assert output is None
+
+def test_write_ligand_with_partial_charges_without_name_returns_none(...):
+    output = write_ligand_with_partial_charges(
+        topology, system, positions,
+        ligand_name=None,
+        ligand_names=[],
+    )
+    assert output is None
 
 def test_water_padding_solvent_builder():
     protein_buffer_solved = water_padding_solvent_builder(
