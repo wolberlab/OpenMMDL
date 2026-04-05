@@ -1,3 +1,4 @@
+import os
 import mdtraj as md
 import numpy as np
 import parmed as pmd
@@ -82,6 +83,11 @@ def rdkit_to_openmm(rdkit_mol, name):
     # convert from OpenFF to OpenMM
     off_mol_topology = off_mol.to_topology()
     mol_topology = off_mol_topology.to_openmm()
+
+    for chain in mol_topology.chains():
+        for residue in chain.residues():
+            residue.name = name
+
     new_mol_positions = []
 
     # convert units from Ångström to Nanometers
@@ -124,32 +130,44 @@ def merge_protein_and_ligand(protein, ligand):
     return complex_topology, complex_positions
 
 
-def write_ligand_with_partial_charges(topology, system, positions, ligand_name=None, output_file=None):
-    """Write the ligand with assigned partial charges to a MOL2 file.
+def write_ligand_with_partial_charges(topology, system, positions, ligand_name=None, ligand_names=None, ligand_files=None, output_file=None):
+    """Write one or more ligands with assigned partial charges to MOL2 files."""
+    if ligand_names is None:
+        ligand_names = [ligand_name] if ligand_name else []
 
-    Args:
-        topology: OpenMM topology of the simulated system.
-        system: OpenMM system containing the parametrized ligand.
-        positions: OpenMM positions for the system.
-        ligand_name (str, optional): Ligand residue name used for ParmEd selection.
-        output_file (str, optional): Target MOL2 file path. Defaults to ``{ligand_name}_pc.mol2``.
-
-    Returns:
-        str | None: Path to the written MOL2 file, or ``None`` if export was skipped.
-    """
-    if not ligand_name:
+    if not ligand_names:
         print("No ligand_name set; skipping MOL2 export (Amber uploaded prmtop needs resname input).")
         return None
 
-    if output_file is None:
-        output_file = f"{ligand_name}_pc.mol2"
+    written_files = []
 
     try:
         struct = pmd.openmm.load_topology(topology, system, positions)
-        lig = struct[f":{ligand_name}"]
-        lig.save(output_file, overwrite=True)
-        print(f"Wrote ligand with partial charges '{output_file}'.")
-        return output_file
+        fallback_residues = [
+            res for res in struct.residues
+            if res.name not in {"HOH", "WAT", "NA", "CL", "K", "CA", "MG"}
+        ][-len(ligand_names):]
+        for current_ligand_name in ligand_names:
+            lig = struct[f":{current_ligand_name}"]
+            if len(lig.atoms) == 0:
+                lig = None
+                if fallback_residues:
+                    residue = fallback_residues.pop(0)
+                    lig = struct[f":{residue.idx + 1}"]
+                if lig is None or len(lig.atoms) == 0:
+                    raise ValueError(f"Could not locate ligand residue '{current_ligand_name}' in topology.")
+
+            if output_file and len(ligand_names) == 1:
+                current_output_file = output_file
+            elif ligand_files and len(written_files) < len(ligand_files):
+                stem = os.path.splitext(os.path.basename(ligand_files[len(written_files)]))[0]
+                current_output_file = f"{stem}_pc.mol2"
+            else:
+                current_output_file = f"{current_ligand_name}_pc.mol2"
+            lig.save(current_output_file, overwrite=True)
+            print(f"Wrote ligand with partial charges '{current_output_file}'.")
+            written_files.append(current_output_file)
+        return written_files
     except Exception as e:
         print(f"Skipping write out of partial charge molecule due to error: {e}")
         return None
@@ -403,3 +421,4 @@ def water_conversion(model_water, modeller_pre_conversion, protein_name):
         PDBFile.writeFile(modeller.topology, modeller.positions, outfile)
 
     return modeller
+
