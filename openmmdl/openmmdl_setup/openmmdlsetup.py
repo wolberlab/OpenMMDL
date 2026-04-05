@@ -1026,6 +1026,8 @@ def downloadPackage():
         else:
             zf.writestr("openmmdl_simulation/OpenMMDL_Simulation.py", createScript())
             for key in uploadedFiles:
+                if key == "originalFile":
+                    continue
                 for file, name in uploadedFiles[key]:
                     file.seek(0, 0)
                     zf.writestr("openmmdl_simulation/%s" % name, file.read())
