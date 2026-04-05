@@ -1,5 +1,4 @@
 """
-mmdl_simulation.py
 Perform Simulations of Protein-ligand complexes with OpenMM
 """
 
@@ -50,7 +49,15 @@ def main():
         required=True,
     )
     parser.add_argument("-t", dest="topology", help="Protein Topology PDB/Amber File", required=True)
-    parser.add_argument("-l", dest="ligand", help="SDF File of Ligand", default=None)
+    parser.add_argument(
+        "-l",
+        "--ligand",
+        dest="ligands",
+        action="append",
+        nargs="+",
+        help="Ligand/cofactor/additional-molecule file(s) in SDF, MOL or MOL2 format. Repeat -l or pass multiple files after one -l.",
+        default=None,
+    )
     parser.add_argument("-c", dest="coordinate", help="Amber coordinates file", default=None)
     parser.add_argument(
         "--failure-retries",
@@ -62,8 +69,14 @@ def main():
             "(default: 10)"
         ),
     )
-    input_formats = [".py", ".pdb", ".sdf", ".mol", ".prmtop", ".inpcrd"]
+    input_formats = [".py", ".pdb", ".sdf", ".mol", ".prmtop", ".inpcrd", ".mol2"]
     args = parser.parse_args()
+
+    ligand_files = []
+    if args.ligands is not None:
+        for group in args.ligands:
+            ligand_files.extend(group)
+
     if not os.path.exists(args.folder):
         os.mkdir(args.folder)
     else:
@@ -87,14 +100,14 @@ def main():
                 print("Wrong topology file path, try the absolute path")
         else:
             print("Wrong Format, don't forget the .pdb/.prmtop of the file")
-        if args.ligand is not None:
-            if input_formats[2] in args.ligand or input_formats[3] in args.ligand:
-                if os.path.exists(args.ligand):
-                    shutil.copy(args.ligand, args.folder)
+        for ligand_file in ligand_files:
+            if any(ligand_file.endswith(ext) for ext in (input_formats[2], input_formats[3], input_formats[6])):
+                if os.path.exists(ligand_file):
+                    shutil.copy(ligand_file, args.folder)
                 else:
-                    print("Wrong ligand file path, try the absolute path")
+                    print(f"Wrong ligand file path, try the absolute path: {ligand_file}")
             else:
-                print("Wrong Format, don't forget the .sdf of the ligand file")
+                print(f"Wrong ligand format for {ligand_file}, use .sdf, .mol or .mol2")
         if args.coordinate is not None:
             if input_formats[5] in args.coordinate:
                 if os.path.exists(args.coordinate):
@@ -108,8 +121,8 @@ def main():
         script_name = os.path.basename(args.script)
         keep_files = {script_name, os.path.basename(args.topology)}
 
-        if args.ligand is not None:
-            keep_files.add(os.path.basename(args.ligand))
+        for ligand_file in ligand_files:
+            keep_files.add(os.path.basename(ligand_file))
         if args.coordinate is not None:
             keep_files.add(os.path.basename(args.coordinate))
 
@@ -151,3 +164,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
