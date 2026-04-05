@@ -1,7 +1,12 @@
+import logging
+
 from openmmdl.openmmdl_analysis.core.utils import (
     combine_subdict_values,
     remove_duplicate_values,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class BindingModeProcesser:
@@ -267,7 +272,7 @@ class BindingModeProcesser:
                     unique_columns_rings_grouped[frame_value][index] = col_name
                     # Add the column name and its value to the dictionary
                     unique_columns_rings[index] = col_name
-        print("\033[1minteraction partners generated\033[0m")
+        logger.info("\033[1minteraction partners generated\033[0m")
 
         return unique_columns_rings_grouped
 

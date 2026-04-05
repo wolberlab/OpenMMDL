@@ -27,6 +27,7 @@ import time
 import webbrowser
 import zipfile
 import warnings
+from rdkit import Chem
 
 warnings.filterwarnings("ignore")
 
@@ -47,16 +48,26 @@ fixer = None
 scriptOutput = None
 simulationProcess = None
 
+def _normalize_resname(value, default):
+    cleaned = "".join(ch for ch in (value or "").upper() if ch.isalnum())[:3]
+    return cleaned if len(cleaned) == 3 else default
+
+def _resnames_are_unique(names):
+    filtered = [name for name in names if name]
+    return len(filtered) == len(set(filtered))
 
 def saveUploadedFiles():
     uploadedFiles.clear()
     for key in request.files:
         filelist = []
         for file in request.files.getlist(key):
+            if file.filename == "":
+                continue
             temp = tempfile.TemporaryFile()
             shutil.copyfileobj(file, temp)
             filelist.append((temp, secure_filename(file.filename)))
-        uploadedFiles[key] = filelist
+        if filelist:
+            uploadedFiles[key] = filelist
 
 
 @app.route("/headerControls")
@@ -116,7 +127,19 @@ def configureFiles():
             session["smallMoleculeForceFieldVersion"] = request.form.get("gaffVersion", "")
         session["ligandMinimization"] = request.form.get("ligandMinimization", "")
         session["ligandSanitization"] = request.form.get("ligandSanitization", "")
-        session["sdfFile"] = uploadedFiles["sdfFile"][0][1]
+        session["smallMoleculeMode"] = request.form.get("smallMoleculeMode", "none")
+        session["highThroughputSimulation"] = "True" if session["smallMoleculeMode"] == "library" else "False"
+        session["sdfFile"] = uploadedFiles["sdfFile"][0][1] if "sdfFile" in uploadedFiles else ""
+        session["companionFiles"] = [name for _, name in uploadedFiles.get("companionFile", [])]
+        session["sdfResname"] = _normalize_resname(request.form.get("sdfResname", ""), "UNK")
+        raw_companion_resnames = request.form.getlist("companionResname")
+        session["companionResnames"] = [
+            _normalize_resname(raw_companion_resnames[i] if i < len(raw_companion_resnames) else "", f"L{i+1:02d}")
+            for i in range(len(session["companionFiles"]))
+        ]
+        all_resnames = ([session["sdfResname"]] if session["sdfFile"] else []) + session["companionResnames"]
+        if not _resnames_are_unique(all_resnames):
+            raise ValueError("Ligand topology codes must be unique.")
         configureDefaultOptions()
         file, name = uploadedFiles["file"][0]
         file.seek(0, 0)
@@ -168,10 +191,11 @@ def showAmberOptions():
 def setAmberOptions():
     for key in request.form:
         session[key] = request.form[key]
+
+    saveUploadedFiles()
+
     ######## Receptor ########
-    session["rcpType"] = request.form.get(
-        "rcpType", ""
-    )  # store the value of rcpType in session, e.g. protRcp, dnaRcp, rnaRcp, carboRcp
+    session["rcpType"] = request.form.get("rcpType", "")
     session["prot_ff"] = request.form.get("prot_ff", "")
     session["other_prot_ff_input"] = request.form.get("other_prot_ff_input", "")
     session["dna_ff"] = request.form.get("dna_ff", "")
@@ -180,24 +204,20 @@ def setAmberOptions():
     session["other_rna_ff_input"] = request.form.get("other_rna_ff_input", "")
     session["carbo_ff"] = request.form.get("carbo_ff", "")
     session["other_carbo_ff_input"] = request.form.get("other_carbo_ff_input", "")
-    # save uploaded pdb file for receptor
+
     rcpType = session["rcpType"]
     if rcpType == "protRcp":
-        if "protFile" not in request.files or request.files["protFile"].filename == "":
-            showAmberOptions()
-        saveUploadedFiles()
+        if "protFile" not in uploadedFiles:
+            return "# Upload a protein receptor PDB file to generate the AMBER setup script.\n"
     elif rcpType == "dnaRcp":
-        if "dnaFile" not in request.files or request.files["dnaFile"].filename == "":
-            showAmberOptions()
-        saveUploadedFiles()
+        if "dnaFile" not in uploadedFiles:
+            return "# Upload a DNA receptor PDB file to generate the AMBER setup script.\n"
     elif rcpType == "rnaRcp":
-        if "rnaFile" not in request.files or request.files["rnaFile"].filename == "":
-            showAmberOptions()
-        saveUploadedFiles()
+        if "rnaFile" not in uploadedFiles:
+            return "# Upload an RNA receptor PDB file to generate the AMBER setup script.\n"
     elif rcpType == "carboRcp":
-        if "carboFile" not in request.files or request.files["carboFile"].filename == "":
-            showAmberOptions()
-        saveUploadedFiles()
+        if "carboFile" not in uploadedFiles:
+            return "# Upload a carbohydrate receptor PDB file to generate the AMBER setup script.\n"
 
     ######## Ligand ########
     session["nmLig"] = "nmLig" in request.form  # store whether the nmLig checkbox is checked, e.g. True or False
@@ -205,22 +225,13 @@ def setAmberOptions():
     # save uploaded pdb or sdf file for ligand
     ## for normal ligand
     if session["nmLig"]:
-        if "nmLigFile" not in request.files or request.files["nmLigFile"].filename == "":
-            showAmberOptions()
-        saveUploadedFiles()
+        if "nmLigFile" not in uploadedFiles:
+            return "# Upload a normal ligand PDB/SDF file to generate the AMBER setup script.\n"
 
     ## for special ligand
     if session["spLig"]:
-        if (
-            "spLigFile" not in request.files
-            or request.files["spLigFile"].filename == ""
-            or "prepcFile" not in request.files
-            or request.files["prepcFile"].filename == ""
-            or "frcmodFile" not in request.files
-            or request.files["frcmodFile"].filename == ""
-        ):
-            showAmberOptions()
-        saveUploadedFiles()
+        if "spLigFile" not in uploadedFiles or "prepcFile" not in uploadedFiles or "frcmodFile" not in uploadedFiles:
+            return "# Upload the special ligand PDB file plus matching PREPC and FRCMOD files to generate the AMBER setup script.\n"
 
     ######## Add Water/Membrane ########
     session["addType"] = request.form.get("addType", "")
@@ -281,6 +292,27 @@ def configureDefaultAmberOptions():
 
 
 def createAmberBashScript():
+    rcpType = session.get("rcpType", "")
+    receptor_key_map = {
+        "protRcp": "protFile",
+        "dnaRcp": "dnaFile",
+        "rnaRcp": "rnaFile",
+        "carboRcp": "carboFile",
+    }
+    receptor_key = receptor_key_map.get(rcpType)
+    if receptor_key is None or receptor_key not in uploadedFiles:
+        return "# Upload a receptor PDB file to generate the AMBER setup script.\n"
+
+    if session.get("nmLig") and "nmLigFile" not in uploadedFiles:
+        return "# Upload a normal ligand PDB/SDF file to generate the AMBER setup script.\n"
+
+    if session.get("spLig") and (
+        "spLigFile" not in uploadedFiles
+        or "prepcFile" not in uploadedFiles
+        or "frcmodFile" not in uploadedFiles
+    ):
+        return "# Upload the special ligand PDB file plus matching PREPC and FRCMOD files to generate the AMBER setup script.\n"
+
     a_script = []
     a_script.append("# This script was generated by OpenMMDL-Setup on %s.\n" % datetime.date.today())
     a_script.append(
@@ -945,12 +977,61 @@ def downloadStructuralfiles():
 @app.route("/downloadPackage")
 def downloadPackage():
     temp = tempfile.NamedTemporaryFile()
-    with zipfile.ZipFile(temp, "w", zipfile.ZIP_DEFLATED) as zip:
-        zip.writestr("openmmdl_simulation/OpenMMDL_Simulation.py", createScript())
-        for key in uploadedFiles:
-            for file, name in uploadedFiles[key]:
-                file.seek(0, 0)
-                zip.writestr("openmmdl_simulation/%s" % name, file.read())
+    is_high_throughput = (
+        session.get("smallMoleculeMode") == "library"
+        and session.get("fileType") == "pdb"
+        and session.get("sdfFile", "") != ""
+    )
+
+    with zipfile.ZipFile(temp, "w", zipfile.ZIP_DEFLATED) as zf:
+        if is_high_throughput:
+            sdf_file_obj, sdf_name = uploadedFiles["sdfFile"][0]
+            sdf_file_obj.seek(0)
+            sdf_bytes = sdf_file_obj.read()
+
+            supplier = Chem.SDMolSupplier()
+            supplier.SetData(sdf_bytes.decode("utf-8"), removeHs=False)
+
+            pdb_name = uploadedFiles["file"][0][1]
+            pdb_file_obj = uploadedFiles["file"][0][0]
+            pdb_file_obj.seek(0)
+            zf.writestr("openmmdl_simulation/%s" % pdb_name, pdb_file_obj.read())
+
+            companion_files = uploadedFiles.get("companionFile", [])
+
+            for i, mol in enumerate(supplier):
+                if mol is None:
+                    continue
+                raw_name = mol.GetProp("_Name").strip() if mol.HasProp("_Name") and mol.GetProp("_Name").strip() else "ligand_%d" % i
+                mol_name = "".join(c if c.isalnum() or c in "_-" else "_" for c in raw_name)
+                folder = "openmmdl_simulation/%s" % mol_name
+                ligand_sdf_filename = "%s.sdf" % mol_name
+
+                sio = StringIO()
+                w = Chem.SDWriter(sio)
+                w.write(mol)
+                w.close()
+                zf.writestr("%s/%s" % (folder, ligand_sdf_filename), sio.getvalue())
+                for companion_file_obj, companion_name in companion_files:
+                    companion_file_obj.seek(0)
+                    zf.writestr("%s/%s" % (folder, companion_name), companion_file_obj.read())
+
+                script_content = createScript(
+                    ligand_sdf_override=ligand_sdf_filename,
+                    protein_path_override=pdb_name,
+                    companion_files_override=[name for _, name in companion_files],
+                    companion_resnames_override=session.get("companionResnames", []),
+                )
+                zf.writestr("%s/OpenMMDL_Simulation.py" % folder, script_content)
+        else:
+            zf.writestr("openmmdl_simulation/OpenMMDL_Simulation.py", createScript())
+            for key in uploadedFiles:
+                if key == "originalFile":
+                    continue
+                for file, name in uploadedFiles[key]:
+                    file.seek(0, 0)
+                    zf.writestr("openmmdl_simulation/%s" % name, file.read())
+
     temp.seek(0, 0)
     return send_file(temp, "application/zip", True, "openmmdl_simulation.zip", max_age=0)
 
@@ -1016,8 +1097,7 @@ def configureDefaultOptions():
     session["rmsd"] = "True"
     session["md_postprocessing"] = "True"
 
-
-def createScript(isInternal=False):
+def createScript(isInternal: bool = False, ligand_sdf_override: str | None = None, protein_path_override: str | None = None, companion_files_override: list[str] | None = None, companion_resnames_override: list[str] | None = None):
     script = []
 
     # If we are creating this script for internal use to run a simulation directly, add extra code at the top
@@ -1090,6 +1170,7 @@ os.chdir(outputDir)"""
     # Input files
     script.append("\n# Input Files")
     fileType = session["fileType"]
+    has_pdb_ligands = bool(session.get("sdfFile") or session.get("companionFiles"))
     if fileType == "pdb":
         script.append("""############# Ligand and Protein Data ###################""")
         script.append(
@@ -1097,15 +1178,29 @@ os.chdir(outputDir)"""
         )
         pdbType = session["pdbType"]
         if pdbType == "pdb":
-            script.append('protein = "%s"' % uploadedFiles["file"][0][1])
-            if session["sdfFile"] != "":
-                script.append("ligand = '%s'" % session["sdfFile"])
-                script.append('ligand_name = "UNK"')
+            pdb_path = protein_path_override if protein_path_override else uploadedFiles["file"][0][1]
+            script.append('protein = "%s"' % pdb_path)
+            if has_pdb_ligands:
+                ligand_paths = []
+                if session["sdfFile"] != "":
+                    ligand_paths.append(ligand_sdf_override if ligand_sdf_override else session["sdfFile"])
+                ligand_paths.extend(companion_files_override if companion_files_override is not None else session.get("companionFiles", []))
+                ligand_names = []
+                if session["sdfFile"] != "":
+                    ligand_names.append(session.get("sdfResname", "UNK"))
+                companion_resnames = companion_resnames_override if companion_resnames_override is not None else session.get("companionResnames", [])
+                expected_companion_count = len(ligand_paths) - len(ligand_names)
+                for i in range(expected_companion_count):
+                    ligand_names.append(companion_resnames[i] if i < len(companion_resnames) else f"L{i+1:02d}")
+                script.append("ligands = %r" % ligand_paths)
+                script.append("ligand_names = %r" % ligand_names)
+                script.append("ligand = ligands[0]")
+                script.append("ligand_name = ligand_names[0]")
                 script.append("minimization = %s" % session["ligandMinimization"])
                 script.append("smallMoleculeForceField = '%s'" % session["smallMoleculeForceField"])
                 script.append("smallMoleculeForceFieldVersion = '%s'" % session["smallMoleculeForceFieldVersion"])
                 script.append("sanitization = %s" % session["ligandSanitization"])
-            elif session["sdfFile"] == "":
+            elif not has_pdb_ligands:
                 script.append("smallMoleculeForceField = None")
                 script.append("smallMoleculeForceFieldVersion = None")
             water = session["waterModel"]
@@ -1330,24 +1425,31 @@ os.chdir(outputDir)"""
     # Prepare the simulation
 
     if fileType == "pdb":
-        if session["sdfFile"] != "":
+        if has_pdb_ligands:
             script.append(
                 """
-print("Preparing MD Simulation with ligand")
-ligand_prepared = prepare_ligand(ligand,minimize_molecule=minimization)
-omm_ligand = rdkit_to_openmm(ligand_prepared, ligand_name)
+print("Preparing MD Simulation with ligand(s)")
 protein_pdb = pdbfixer.PDBFixer(str(protein))
+prepared_ligands = [
+    prepare_ligand(ligand_file, sanitization=sanitization, minimize_molecule=minimization)
+    for ligand_file in ligands
+]
 forcefield_selected = ff_selection(ff)
 water_selected = water_forcefield_selection(water=water,forcefield_selection=ff_selection(ff))
 model_water = water_model_selection(water=water,forcefield_selection=ff_selection(ff))
 print("Forcefield and Water Model Selected")
 if add_membrane:
-    transitional_forcefield = generate_transitional_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=ligand_prepared)
-forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=ligand_prepared)
-complex_topology, complex_positions = merge_protein_and_ligand(protein_pdb, omm_ligand)
+    transitional_forcefield = generate_transitional_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=prepared_ligands)
+forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=prepared_ligands)
+complex_modeller = app.Modeller(protein_pdb.topology, protein_pdb.positions)
+for ligand_prepared, ligand_name in zip(prepared_ligands, ligand_names):
+    omm_ligand = rdkit_to_openmm(ligand_prepared, ligand_name)
+    complex_modeller.add(omm_ligand.topology, omm_ligand.positions)
+complex_topology = complex_modeller.topology
+complex_positions = complex_modeller.positions
 print("Complex topology has", complex_topology.getNumAtoms(), "atoms.")     """
             )
-        elif session["sdfFile"] == "":
+        elif not has_pdb_ligands:
             script.append(
                 """
 protein_pdb = PDBFile(protein)     
@@ -1362,7 +1464,7 @@ else:
 if add_membrane:
         transitional_forcefield = generate_transitional_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=None)     """
             )
-        if session["sdfFile"] == "":
+        if not has_pdb_ligands:
             script.append(
                 """
 forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=None)        
@@ -1381,7 +1483,7 @@ topology = modeller.topology
 positions = modeller.positions
 positions_for_equil = np.array(positions.value_in_unit(unit.nanometers)) * unit.nanometers """
             )
-        elif session["sdfFile"] != "":
+        elif has_pdb_ligands:
             script.append(
                 """
 modeller = app.Modeller(complex_topology, complex_positions)
@@ -1430,7 +1532,7 @@ positions_for_equil = np.array(positions.value_in_unit(unit.nanometers)) * unit.
                 hmrOptions,
             )
         )
-    script.append("write_ligand_with_partial_charges(topology, system, positions, ligand_name=globals().get('ligand_name'))")
+    script.append("write_ligand_with_partial_charges(topology, system, positions, ligand_name=globals().get('ligand_name'), ligand_names=globals().get('ligand_names'), ligand_files=globals().get('ligands'))")
     if ensemble == "npt":
         script.append("system.addForce(MonteCarloBarostat(pressure, temperature, barostatInterval))")
     script.append("integrator = LangevinMiddleIntegrator(temperature, friction, dt)")
@@ -1643,19 +1745,19 @@ stages = [
     if session["md_postprocessing"] == "True":
         # mdtraj_conversion() and MDanalysis_conversion()
         if fileType == "pdb":
-            script.append("mdtraj_conversion(equil_output, '%s')" % session["mdtraj_output"])
-            if session["sdfFile"]:
+            script.append("mdtraj_conversion(f'Equilibration_{protein}', '%s')" % session["mdtraj_output"])
+            if has_pdb_ligands:
                 if session["mdtraj_output"] != "mdtraj_gro_xtc":
                     script.append(
-                        "MDanalysis_conversion('centered_old_coordinates_top.pdb', 'centered_old_coordinates.dcd', mda_output='%s', output_selection='%s', ligand_name='UNK')"
+                        "MDanalysis_conversion('centered_old_coordinates_top.pdb', 'centered_old_coordinates.dcd', mda_output='%s', output_selection='%s', ligand_names=globals().get('ligand_names'))"
                         % (session["mda_output"], session["mda_selection"])
                     )
                 elif session["mdtraj_output"] == "mdtraj_gro_xtc":
                     script.append(
-                        "MDanalysis_conversion('centered_old_coordinates_top.gro', 'centered_old_coordinates.xtc', mda_output='%s', output_selection='%s', ligand_name='UNK')"
+                        "MDanalysis_conversion('centered_old_coordinates_top.gro', 'centered_old_coordinates.xtc', mda_output='%s', output_selection='%s', ligand_names=globals().get('ligand_names'))"
                         % (session["mda_output"], session["mda_selection"])
                     )
-            elif session["sdfFile"] == "":
+            elif not has_pdb_ligands:
                 if session["mdtraj_output"] != "mdtraj_gro_xtc":
                     script.append(
                         "MDanalysis_conversion('centered_old_coordinates_top.pdb', 'centered_old_coordinates.dcd', mda_output='%s', output_selection='%s')"
@@ -1728,9 +1830,9 @@ stages = [
 
     # post_md_file_movement()
     if fileType == "pdb":
-        if session["sdfFile"]:
-            script.append("post_md_file_movement(protein,ligands=[ligand])")
-        elif session["sdfFile"] == "":
+        if has_pdb_ligands:
+            script.append("post_md_file_movement(protein, ligands=globals().get('ligands'))")
+        elif not has_pdb_ligands:
             script.append("post_md_file_movement(protein)")
     elif fileType == "amber":
         if (
@@ -1757,34 +1859,25 @@ stages = [
 
     # session[openmmdl_analysis]
     if session["openmmdl_analysis"] == "Yes":
+        script.append("analysis_jobs = []")
         if session["mdtraj_output"] != "mdtraj_gro_xtc":
             top_ext = ".pdb"
             traj_ext = ".dcd"
         elif session["mdtraj_output"] == "mdtraj_gro_xtc":
             top_ext = ".gro"
             traj_ext = ".xtc"
+        if fileType == "pdb" and has_pdb_ligands:
+            script.append("analysis_special_flags = ''.join(f\" -s {name}\" for name in ligand_names[1:])")
         # session[analysis_selection] == 'analysis_all'
         if session["analysis_selection"] == "analysis_all":
-            script.append("os.chdir('Final_Output/All_Atoms')")
             if fileType == "pdb":
-                if session["sdfFile"]:
+                if has_pdb_ligands:
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s -w %s --watereps %s' "
-                        % (
-                            top_ext,
-                            traj_ext,
-                            session["sdfFile"],
-                            session["binding_mode"],
-                            session["min_transition"],
-                            session["rmsd_diff"],
-                            session["pml_generation"],
-                            session["stable_water"],
-                            session["wc_distance"],
-                        )
+                        f"analysis_jobs.append(('Final_Output/All_Atoms', f'openmmdl_analysis -t centered_top{top_ext} -d centered_traj{traj_ext} -l {{ligands[0]}} -n {{ligand_names[0]}}{{analysis_special_flags}} -b {session['binding_mode']} -m {session['min_transition']} -r {session['rmsd_diff']} -p {session['pml_generation']} -w {session['stable_water']} --watereps {session['wc_distance']}'))"
                     )
-                elif session["sdfFile"] == "":
+                elif not has_pdb_ligands:
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1799,7 +1892,7 @@ stages = [
             elif fileType == "amber":
                 if not session["nmLig"] and not session["spLig"]:
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1813,7 +1906,7 @@ stages = [
                     )
                 elif session["nmLig"] and not session["spLig"]:
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1828,7 +1921,7 @@ stages = [
                     )
                 elif session["nmLig"] and session["spLig"]:
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1844,26 +1937,14 @@ stages = [
                     )
         # session[analysis_selection] == 'analysis_prot'
         elif session["analysis_selection"] == "analysis_prot_lig":
-            script.append("os.chdir('Final_Output/Prot_Lig')")
             if fileType == "pdb":
-                if session["sdfFile"]:
+                if has_pdb_ligands:
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s -w %s --watereps %s' "
-                        % (
-                            top_ext,
-                            traj_ext,
-                            session["sdfFile"],
-                            session["binding_mode"],
-                            session["min_transition"],
-                            session["rmsd_diff"],
-                            session["pml_generation"],
-                            session["stable_water"],
-                            session["wc_distance"],
-                        )
+                        f"analysis_jobs.append(('Final_Output/Prot_Lig', f'openmmdl_analysis -t prot_lig_top{top_ext} -d prot_lig_traj{traj_ext} -l {{ligands[0]}} -n {{ligand_names[0]}}{{analysis_special_flags}} -b {session['binding_mode']} -m {session['min_transition']} -r {session['rmsd_diff']} -p {session['pml_generation']} -w {session['stable_water']} --watereps {session['wc_distance']}'))"
                     )
-                elif session["sdfFile"] == "":
+                elif not has_pdb_ligands:
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1878,7 +1959,7 @@ stages = [
             elif fileType == "amber":
                 if not session["nmLig"] and not session["spLig"]:
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1892,7 +1973,7 @@ stages = [
                     )
                 elif session["nmLig"] and not session["spLig"]:
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1907,7 +1988,7 @@ stages = [
                     )
                 elif session["nmLig"] and session["spLig"]:
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1924,40 +2005,16 @@ stages = [
         # session[analysis_selection] == 'analysis_all_prot'
         elif session["analysis_selection"] == "analysis_all_prot_lig":
             if fileType == "pdb":
-                script.append("os.chdir('Final_Output/All_Atoms')")
-                if session["sdfFile"]:
+                if has_pdb_ligands:
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s -w %s --watereps %s' "
-                        % (
-                            top_ext,
-                            traj_ext,
-                            session["sdfFile"],
-                            session["binding_mode"],
-                            session["min_transition"],
-                            session["rmsd_diff"],
-                            session["pml_generation"],
-                            session["stable_water"],
-                            session["wc_distance"],
-                        )
+                        f"analysis_jobs.append(('Final_Output/All_Atoms', f'openmmdl_analysis -t centered_top{top_ext} -d centered_traj{traj_ext} -l {{ligands[0]}} -n {{ligand_names[0]}}{{analysis_special_flags}} -b {session['binding_mode']} -m {session['min_transition']} -r {session['rmsd_diff']} -p {session['pml_generation']} -w {session['stable_water']} --watereps {session['wc_distance']}'))"
                     )
-                    script.append("os.chdir('../Prot_Lig')")
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -l %s -n UNK -b %s -m %s -r %s -p %s -w %s --watereps %s' "
-                        % (
-                            top_ext,
-                            traj_ext,
-                            session["sdfFile"],
-                            session["binding_mode"],
-                            session["min_transition"],
-                            session["rmsd_diff"],
-                            session["pml_generation"],
-                            session["stable_water"],
-                            session["wc_distance"],
-                        )
+                        f"analysis_jobs.append(('Final_Output/Prot_Lig', f'openmmdl_analysis -t prot_lig_top{top_ext} -d prot_lig_traj{traj_ext} -l {{ligands[0]}} -n {{ligand_names[0]}}{{analysis_special_flags}} -b {session['binding_mode']} -m {session['min_transition']} -r {session['rmsd_diff']} -p {session['pml_generation']} -w {session['stable_water']} --watereps {session['wc_distance']}'))"
                     )
-                elif session["sdfFile"] == "":
+                elif not has_pdb_ligands:
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1969,9 +2026,8 @@ stages = [
                             session["wc_distance"],
                         )
                     )
-                    script.append("os.chdir('../Prot_Lig')")
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1984,10 +2040,9 @@ stages = [
                         )
                     )
             elif fileType == "amber":
-                script.append("os.chdir('Final_Output/All_Atoms')")
                 if not session["nmLig"] and not session["spLig"]:
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1999,9 +2054,8 @@ stages = [
                             session["wc_distance"],
                         )
                     )
-                    script.append("os.chdir('../Prot_Lig')")
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -2015,7 +2069,7 @@ stages = [
                     )
                 elif session["nmLig"] and not session["spLig"]:
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -2028,9 +2082,8 @@ stages = [
                             session["wc_distance"],
                         )
                     )
-                    script.append("os.chdir('../Prot_Lig')")
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -2045,7 +2098,7 @@ stages = [
                     )
                 elif session["nmLig"] and session["spLig"]:
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -2059,9 +2112,8 @@ stages = [
                             session["wc_distance"],
                         )
                     )
-                    script.append("os.chdir('../Prot_Lig')")
                     script.append(
-                        "analysis_run_command = 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s' "
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -2075,6 +2127,14 @@ stages = [
                             session["wc_distance"],
                         )
                     )
+        script.append("for analysis_dir, analysis_run_command in analysis_jobs:")
+        script.append("    old_cwd = os.getcwd()")
+        script.append("    os.chdir(analysis_dir)")
+        script.append("    try:")
+        script.append("        print(f'Running analysis: {analysis_run_command}')")
+        script.append("        subprocess.run(analysis_run_command, shell=True, check=True)")
+        script.append("    finally:")
+        script.append("        os.chdir(old_cwd)")
 
     return "\n".join(script)
 

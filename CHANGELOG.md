@@ -15,12 +15,15 @@ The rules for this file:
     * YYYY-MM-DD date format (following ISO 8601)
   * accompany each entry with github issue/PR number (Issue #xyz)
 -->
-## Version 1.X.X
+## Version 1.3.0
 
 ### Authors
-talagayev
+talagayev, NDoering99
 
 ### Added
+- Added multiple ligand support in `OpenMMDL Simulation` (2026-04-05, PR#198)
+- Added flag for `OpenMMDL Simulation` restart when encoutering Nan error (2026-04-04, PR#197)
+- Added high throughput simulation option in `OpenMMDL Setup` (2026-04-01, PR#196)
 - Added write out of ligand in `mol2` with partial charges during `OpenMMDL Simulation` (2026-03-14, PR#191)
 - Added extensions in `OpenMMDL Setup` (2026-03-01, PR#189)
 - Added `Back` button in `OpenMMDL Setup` (2026-02-28, PR#188)
@@ -30,6 +33,8 @@ talagayev
 - Fixed double click bug in `OpenMMDL Setup` (2026-03-01, PR#190)
 
 ### Changed
+- Removed the saving of the original uploaded PDB file in `OpenMMDL Setup` (2026-04-05, PR#199)
+- Transition to `logging` in `OpenMMDL Analysis` (2026-03-31, PR#195)
 
 ## Version 1.2.0
 

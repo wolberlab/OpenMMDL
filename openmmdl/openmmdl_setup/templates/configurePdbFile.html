@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 
-{% macro fileinput(id, accept="") %}
+{% macro fileinput(id, accept="", multiple=false) %}
     <div class="input-group om-filedrop" data-file-input="{{ id }}">
         <label class="btn btn-default btn-file input-group-addon">
             <span title="Select File"style=" font-weight: 700;">Browse... </span>
-            <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" {% if accept %}accept="{{ accept }}"{% endif %} onchange="if (omValidateFileInput(this)) optionChanged()"/>
+            <input type="file" name="{{ id }}" id="{{ id }}" style="display: none" {% if accept %}accept="{{ accept }}"{% endif %} {% if multiple %}multiple{% endif %} onchange="if (omValidateFileInput(this)) optionChanged()"/>
         </label>
         <span id="{{ id }}_label" class="form-control om-filedrop-label"></span>
     </div>
@@ -41,11 +41,52 @@ Select the pdb input file and options for how to model it.
         <div class="col-md-10"><select name="waterModel" id="waterModel" class="form-control" title="TIP3P, TIP3P-FB and SPC/E are the most tested water models in OpenMMDL "></select></div>
     </div>
     <p>
-    Optional : Add ligand SDF file to the MD simulation (Default: No ligand)
+    Optional: configure small molecules for a single complex or for a pose library workflow.
     </p>
     <div class="form-group">
-    <label for="filename" class="control-label col-md-2">Ligand File</label>
-        <div class="col-md-10" title="The supported formats are SDF, MOL and MOL2"> {{ fileinput('sdfFile', accept='.sdf,.mol,.mol2') }}</div>
+    <label for="smallMoleculeMode" class="control-label col-md-2">Small Molecule Mode</label>
+    <div class="col-md-10"><select name="smallMoleculeMode" id="smallMoleculeMode" class="form-control" title="Choose whether to prepare a single complex, a multiple poses for high-throughput generation, or no small molecules" onchange="optionChanged()">
+        <option value="none" selected>No small molecules</option>
+        <option value="single">Single complex</option>
+        <option value="library">High-throughput / Multiple poses</option>
+    </select></div>
+    </div>
+    <div id="variableLigandSection" hidden>
+        <div class="form-group">
+        <label for="filename" class="control-label col-md-2">Ligand File</label>
+            <div class="col-md-10" title="For single complex mode upload one SDF, MOL or MOL2. For high-throughput mode upload one multi-entry SDF."> {{ fileinput('sdfFile', accept='.sdf,.mol,.mol2') }}</div>
+        </div>
+        <div class="form-group">
+            <label for="sdfResname" class="control-label col-md-2">Topology Code</label>
+            <div class="col-md-10">
+                <input
+                    type="text"
+                    name="sdfResname"
+                    id="sdfResname"
+                    class="form-control om-resname-input"
+                    value="UNK"
+                    data-default-resname="UNK"
+                    maxlength="3"
+                    pattern="[A-Z0-9]{3}"
+                    oninput="updateResnameInput(this, 'UNK')"
+                    onblur="updateResnameInput(this, 'UNK', true)"
+                />
+                <p class="help-block">Topology residue code. Use exactly 3 uppercase letters or digits. Default: UNK.</p>
+            </div>
+        </div>
+    </div>
+    <div id="companionSection" hidden>
+        <div class="form-group">
+            <label class="control-label col-md-2">Additional Molecules</label>
+            <div class="col-md-10">
+                <div id="companionFilesContainer"></div>
+                <button type="button" class="btn btn-default" onclick="addCompanionRow()">+ Add additional molecule</button>
+                <p class="help-block" style="margin-top: 8px;">Each additional molecule is included in every generated system. Use one file per molecule. Default codes are L01, L02, L03, ...</p>
+                <p id="resnameDuplicateWarning" class="help-block om-resname-warning" style="display: none;">
+                    Ligand topology codes must be unique. Please change duplicate values before continuing.
+                </p>
+            </div>
+        </div>
     </div>
     <div class="form-group">
     <label for="smallMoleculeForceField" class="control-label col-md-2">Small Molecule Force Field</label>
@@ -92,6 +133,10 @@ Select the pdb input file and options for how to model it.
         <option value="False" selected>No</option>
         <option value="True">Yes</option>
     </select></div>
+    </div>
+    <div id="highThroughputHint" class="form-group" hidden>
+    <label class="control-label col-md-2">High Throughput</label>
+    <div class="col-md-10"><p class="form-control-static">One simulation setup will be generated per entry in the ligand SDF.</p></div>
     </div>
     <br/>
     <button type="button" class="btn btn-default btn-back-red"
@@ -177,6 +222,88 @@ var amoebaWaterModels = [
         ["Explicit", "Explicit", true],
         ["Implicit", "Implicit", false]
 ]
+
+var companionRowCount = 0;
+
+function defaultCompanionResname(index) {
+    return `L${String(index).padStart(2, "0")}`;
+}
+
+function sanitizeResnameValue(value) {
+    return (value || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 3);
+}
+
+function updateResnameInput(input, fallback, finalize=false) {
+    input.value = sanitizeResnameValue(input.value);
+    if (finalize && input.value.length === 0)
+        input.value = fallback;
+    input.setCustomValidity(input.value.length === 3 ? "" : "Use exactly 3 uppercase letters or digits.");
+}
+
+function companionRowHtml(index) {
+    const defaultCode = defaultCompanionResname(index);
+    return `
+        <div class="om-companion-block" data-companion-row="${index}" style="margin-bottom: 8px;">
+            <div class="om-companion-row">
+                <div class="input-group om-filedrop om-companion-upload" data-file-input="companionFile_${index}">
+                    <label class="btn btn-default btn-file input-group-addon">
+                        <span title="Select File" style="font-weight: 700;">Browse...</span>
+                        <input type="file" name="companionFile" id="companionFile_${index}" style="display: none" accept=".sdf,.mol,.mol2" onchange="if (omValidateFileInput(this)) optionChanged()"/>
+                    </label>
+                    <span id="companionFile_${index}_label" class="form-control om-filedrop-label"></span>
+                </div>
+                <button type="button" class="btn btn-default om-companion-remove-btn" onclick="removeCompanionRow(${index})">Remove</button>
+            </div>
+            <div class="om-resname-row">
+                <label for="companionResname_${index}" class="om-resname-label">Topology code</label>
+                <input
+                    type="text"
+                    name="companionResname"
+                    id="companionResname_${index}"
+                    class="form-control om-resname-input"
+                    value="${defaultCode}"
+                    data-default-resname="${defaultCode}"
+                    maxlength="3"
+                    pattern="[A-Z0-9]{3}"
+                    oninput="updateResnameInput(this, '${defaultCode}')"
+                    onblur="updateResnameInput(this, '${defaultCode}', true)"
+                />
+                <span class="help-block om-resname-help">3 uppercase letters or digits</span>
+            </div>
+        </div>`;
+}
+
+function syncCompanionRowHeights() {
+    let rows = document.querySelectorAll(".om-companion-row");
+    for (let i = 0; i < rows.length; i++) {
+        let upload = rows[i].querySelector(".om-companion-upload");
+        let removeBtn = rows[i].querySelector(".om-companion-remove-btn");
+        if (!upload || !removeBtn) continue;
+
+        removeBtn.style.height = "";
+        let h = Math.round(upload.getBoundingClientRect().height);
+        if (h > 0)
+            removeBtn.style.height = h + "px";
+    }
+}
+
+function addCompanionRow() {
+    companionRowCount += 1;
+    document.getElementById("companionFilesContainer").insertAdjacentHTML("beforeend", companionRowHtml(companionRowCount));
+    var upload = document.querySelector(`[data-file-input="companionFile_${companionRowCount}"]`);
+    if (upload && window.omWireFileDrop) window.omWireFileDrop(upload);
+    syncCompanionRowHeights();
+    optionChanged();
+}
+
+function removeCompanionRow(index) {
+    let row = document.querySelector(`[data-companion-row="${index}"]`);
+    if (row)
+        row.remove();
+    syncCompanionRowHeights();
+    optionChanged();
+}
+
 
 function optionChanged() {
     // Update UI elements.
@@ -358,17 +485,83 @@ function optionChanged() {
     }
 
     // -------------------------
+    // Small molecule mode UI
+    // -------------------------
+    smallMoleculeMode = document.getElementById("smallMoleculeMode").value;
+    variableLigandSection = document.getElementById("variableLigandSection");
+    companionSection = document.getElementById("companionSection");
+    highThroughputHint = document.getElementById("highThroughputHint");
+
+    if (smallMoleculeMode == "none") {
+        variableLigandSection.hidden = true;
+        companionSection.hidden = true;
+        highThroughputHint.hidden = true;
+    } else if (smallMoleculeMode == "single") {
+        variableLigandSection.hidden = false;
+        companionSection.hidden = false;
+        highThroughputHint.hidden = true;
+    } else {
+        variableLigandSection.hidden = false;
+        companionSection.hidden = false;
+        highThroughputHint.hidden = false;
+    }
+
+
+    // -------------------------
     // File labels + submit state
     // -------------------------
     files = document.getElementById("file").files;
     sdfFile = document.getElementById("sdfFile").files;
+    companionInputs = document.querySelectorAll('input[name="companionFile"]');
 
     document.getElementById("file_label").textContent = (files.length == 0 ? "" : files[0].name);
     document.getElementById("sdfFile_label").textContent = (sdfFile.length == 0 ? "" : sdfFile[0].name);
 
-    document.getElementById('continue').disabled = !document.getElementById("file").value;
+    for (i = 0; i < companionInputs.length; i++) {
+        label = document.getElementById(companionInputs[i].id + "_label");
+        if (label)
+            label.textContent = (companionInputs[i].files.length == 0 ? "" : companionInputs[i].files[0].name);
+    }
+
+    syncCompanionRowHeights();
+    resnameInputs = document.querySelectorAll(".om-resname-input");
+    invalidResnames = false;
+    duplicateResnames = false;
+    visibleCodes = [];
+    codeCounts = {};
+
+    for (i = 0; i < resnameInputs.length; i++) {
+        fallback = resnameInputs[i].getAttribute("data-default-resname") || "UNK";
+        updateResnameInput(resnameInputs[i], fallback, false);
+        resnameInputs[i].classList.remove("om-resname-duplicate");
+
+        if (resnameInputs[i].offsetParent !== null) {
+            if (resnameInputs[i].value.length !== 3)
+                invalidResnames = true;
+            else
+                visibleCodes.push(resnameInputs[i].value);
+        }
+    }
+
+    for (i = 0; i < visibleCodes.length; i++) {
+        codeCounts[visibleCodes[i]] = (codeCounts[visibleCodes[i]] || 0) + 1;
+    }
+
+    for (i = 0; i < resnameInputs.length; i++) {
+        if (resnameInputs[i].offsetParent !== null && resnameInputs[i].value.length === 3 && codeCounts[resnameInputs[i].value] > 1) {
+            duplicateResnames = true;
+            resnameInputs[i].classList.add("om-resname-duplicate");
+        }
+    }
+
+    duplicateWarning = document.getElementById("resnameDuplicateWarning");
+    if (duplicateWarning)
+        duplicateWarning.style.display = duplicateResnames ? "block" : "none";
+
+    document.getElementById('continue').disabled = !document.getElementById("file").value || invalidResnames || duplicateResnames;
 }
 
 optionChanged();
 </script>
 {% endblock %}
+

@@ -1,11 +1,12 @@
 """
-mmdl_simulation.py
 Perform Simulations of Protein-ligand complexes with OpenMM
 """
 
 import argparse
 import os
 import shutil
+import subprocess
+import sys
 
 parser = argparse.ArgumentParser()
 
@@ -48,10 +49,34 @@ def main():
         required=True,
     )
     parser.add_argument("-t", dest="topology", help="Protein Topology PDB/Amber File", required=True)
-    parser.add_argument("-l", dest="ligand", help="SDF File of Ligand", default=None)
+    parser.add_argument(
+        "-l",
+        "--ligand",
+        dest="ligands",
+        action="append",
+        nargs="+",
+        help="Ligand/cofactor/additional-molecule file(s) in SDF, MOL or MOL2 format. Repeat -l or pass multiple files after one -l.",
+        default=None,
+    )
     parser.add_argument("-c", dest="coordinate", help="Amber coordinates file", default=None)
-    input_formats = [".py", ".pdb", ".sdf", ".mol", ".prmtop", ".inpcrd"]
+    parser.add_argument(
+        "--failure-retries",
+        dest="failure_retries",
+        type=int,
+        default=10,
+        help=(
+            "Number of reruns if OpenMM fails with 'Particle coordinate is NaN' "
+            "(default: 10)"
+        ),
+    )
+    input_formats = [".py", ".pdb", ".sdf", ".mol", ".prmtop", ".inpcrd", ".mol2"]
     args = parser.parse_args()
+
+    ligand_files = []
+    if args.ligands is not None:
+        for group in args.ligands:
+            ligand_files.extend(group)
+
     if not os.path.exists(args.folder):
         os.mkdir(args.folder)
     else:
@@ -75,14 +100,14 @@ def main():
                 print("Wrong topology file path, try the absolute path")
         else:
             print("Wrong Format, don't forget the .pdb/.prmtop of the file")
-        if args.ligand is not None:
-            if input_formats[2] in args.ligand or input_formats[3] in args.ligand:
-                if os.path.exists(args.ligand):
-                    shutil.copy(args.ligand, args.folder)
+        for ligand_file in ligand_files:
+            if any(ligand_file.endswith(ext) for ext in (input_formats[2], input_formats[3], input_formats[6])):
+                if os.path.exists(ligand_file):
+                    shutil.copy(ligand_file, args.folder)
                 else:
-                    print("Wrong ligand file path, try the absolute path")
+                    print(f"Wrong ligand file path, try the absolute path: {ligand_file}")
             else:
-                print("Wrong Format, don't forget the .sdf of the ligand file")
+                print(f"Wrong ligand format for {ligand_file}, use .sdf, .mol or .mol2")
         if args.coordinate is not None:
             if input_formats[5] in args.coordinate:
                 if os.path.exists(args.coordinate):
@@ -92,8 +117,51 @@ def main():
             else:
                 print("Wrong Format, don't forget the .inpcrd of the coordinate file")
         os.chdir(args.folder)
-        os.system("python3 *.py")
+
+        script_name = os.path.basename(args.script)
+        keep_files = {script_name, os.path.basename(args.topology)}
+
+        for ligand_file in ligand_files:
+            keep_files.add(os.path.basename(ligand_file))
+        if args.coordinate is not None:
+            keep_files.add(os.path.basename(args.coordinate))
+
+        nan_message = "Particle coordinate is NaN"
+
+        for attempt in range(args.failure_retries + 1):
+            process = subprocess.Popen(
+                [sys.executable, "-u", script_name],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+            )
+
+            output_lines = []
+            for line in process.stdout:
+                print(line, end="")          # shows output live
+                output_lines.append(line)    # also stores it for error check
+
+            process.wait()
+            combined_output = "".join(output_lines)
+
+            if process.returncode == 0:
+                break
+
+            if nan_message not in combined_output or attempt == args.failure_retries:
+                raise SystemExit(process.returncode)
+
+            print(f"Detected OpenMM NaN error. Retrying ({attempt + 1}/{args.failure_retries})...")
+
+            for entry in os.listdir("."):
+                if entry not in keep_files:
+                    path = os.path.join(".", entry)
+                    if os.path.isdir(path):
+                        shutil.rmtree(path)
+                    else:
+                        os.remove(path)
 
 
 if __name__ == "__main__":
     main()
+

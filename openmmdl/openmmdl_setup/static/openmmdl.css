@@ -452,11 +452,106 @@ pre code { color: inherit; }
   color: #475569;
 }
 
-.om-filedrop { cursor: pointer; }
+.om-filedrop {
+  cursor: pointer;
+  width: 100%;
+}
+
+.om-filedrop .om-filedrop-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.om-companion-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+}
+
+.om-companion-upload {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.om-companion-upload .input-group-addon,
+.om-companion-upload .om-filedrop-label,
+.om-companion-remove-btn {
+  height: 33px;
+  line-height: 15px;
+}
+
+.om-companion-upload .input-group-addon {
+  display: table-cell;
+  vertical-align: middle;
+  padding: 8px 14px;
+}
+
+.om-companion-upload .om-filedrop-label {
+  border-radius: 0 10px 10px 0;
+}
+
+.om-companion-remove-btn {
+  flex: 0 0 auto;
+  min-width: 120px;
+  white-space: nowrap;
+  border-radius: 10px;
+  margin: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.om-companion-block {
+  margin-bottom: 8px;
+}
+
+.om-resname-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.om-resname-label {
+  margin: 0;
+  min-width: 96px;
+  font-weight: 600;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.om-resname-input {
+  max-width: 120px;
+  text-transform: uppercase;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.om-resname-help {
+  margin: 0;
+  color: #64748b;
+}
+
+.om-resname-warning {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.om-resname-input.om-resname-duplicate {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.12);
+}
+
 .om-filedrop .om-filedrop-label:empty::before {
   content: "Drag & drop file here";
   color: #94a3b8;
+  position: relative;
+  top: 2px;
 }
+
 .om-filedrop.is-dragover .om-filedrop-label {
   box-shadow: 0 0 0 2px rgba(15,23,42,0.25);
 }

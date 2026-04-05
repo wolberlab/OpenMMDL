@@ -109,6 +109,11 @@ complex_topology, complex_positions = merge_protein_and_ligand(protein_pdb, omm_
 modeller = app.Modeller(complex_topology, complex_positions)
 
 
+@pytest.fixture
+def ligand_charge_test_system():
+    system = forcefield.createSystem(complex_topology)
+    return complex_topology, system, complex_positions
+
 # Test the prepare_ligand function
 def test_prepare_ligand():
     # Test the function with the sample ligand file.
@@ -166,17 +171,37 @@ def test_write_ligand_with_partial_charges_without_name():
 
     assert output is None
 
+def test_write_ligand_with_partial_charges_single_returns_string(
+    ligand_charge_test_system, tmp_path
+):
+    topology, system, positions = ligand_charge_test_system
+    output_file = tmp_path / "UNK_pc.mol2"
 
-
-def test_write_ligand_with_partial_charges_without_name():
     output = write_ligand_with_partial_charges(
-        "topology",
-        "system",
-        "positions",
-        ligand_name=None,
+        topology,
+        system,
+        positions,
+        ligand_name="UNK",
+        ligand_names=["UNK"],
+        output_file=str(output_file),
     )
-    assert output is None
 
+    assert output == str(output_file)
+
+def test_write_ligand_with_partial_charges_without_name_returns_none(
+    ligand_charge_test_system,
+):
+    topology, system, positions = ligand_charge_test_system
+
+    output = write_ligand_with_partial_charges(
+        topology,
+        system,
+        positions,
+        ligand_name=None,
+        ligand_names=[],
+    )
+
+    assert output is None
 
 def test_water_padding_solvent_builder():
     protein_buffer_solved = water_padding_solvent_builder(

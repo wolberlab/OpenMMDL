@@ -1,3 +1,4 @@
+import logging
 import os
 import numpy as np
 import pandas as pd
@@ -6,6 +7,10 @@ from tqdm import tqdm
 from sklearn.cluster import DBSCAN
 
 from openmmdl.openmmdl_analysis.core.utils import read_pdb_as_dataframe, filter_and_parse_pdb
+
+
+logger = logging.getLogger(__name__)
+
 
 
 class StableWaters:
@@ -115,7 +120,7 @@ class StableWaters:
                     os.path.join(subdirectory_path, "interacting_residues.csv"),
                     index=False,
                 )
-                print(f"Exported interacting_residues.csv in {subdirectory_path}")
+                logger.info(f"Exported interacting_residues.csv in {subdirectory_path}")
 
     def _trace_waters(self, output_directory):
         """
@@ -240,8 +245,7 @@ class StableWaters:
 
             output_sub_directory = os.path.join(output_directory, f"clusterSize{min_samples}")
             os.makedirs(output_sub_directory, exist_ok=True)
-            print("cluster_eps:")
-            print(cluster_eps)
+            logger.info("cluster_eps: %s", cluster_eps)
             self._write_pdb_clusters_and_representatives(clustered_waters, min_samples, output_sub_directory)
 
     def _write_pdb_clusters_and_representatives(self, clustered_waters, min_samples, output_sub_directory):
@@ -264,8 +268,7 @@ class StableWaters:
         """
         atom_counter = 1
         pdb_file_counter = 1
-        print("minsamples:")
-        print(min_samples)
+        logger.info("minsamples: %s", min_samples)
         os.makedirs(output_sub_directory, exist_ok=True)
         with pd.option_context("display.max_rows", None):  # Temporarily set display options
             for label, cluster in clustered_waters.groupby("Cluster_Label"):
@@ -281,7 +284,7 @@ class StableWaters:
                 output_filename = os.path.join(output_sub_directory, f"cluster_{label}.pdb")
                 with open(output_filename, "w") as pdb_file:
                     pdb_file.write("".join(pdb_lines))
-                    print(f"Cluster {label} written")
+                    logger.info(f"Cluster {label} written")
 
                 pdb_file_counter += 1
 

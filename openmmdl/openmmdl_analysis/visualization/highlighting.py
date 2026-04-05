@@ -1,10 +1,14 @@
 import cairosvg
+import logging
 import MDAnalysis as mda
 from rdkit import Chem
 from rdkit.Chem import AllChem, Draw
 from collections import defaultdict
 
 from openmmdl.openmmdl_analysis.core.utils import extract_ints
+
+
+logger = logging.getLogger(__name__)
 
 
 class FigureHighlighter:
@@ -504,7 +508,7 @@ class LigandImageGenerator:
             if self.fig_type == "png":
                 png_filename = self.output_svg_filename.replace(".svg", ".png")
                 cairosvg.svg2png(url=self.output_svg_filename, write_to=png_filename)
-                print(f"PNG image saved as: {png_filename}")
+                logger.info(f"PNG image saved as: {png_filename}")
 
         except Exception as e:
-            print(f"Error: {e}")
+            logger.error(f"Error: {e}")

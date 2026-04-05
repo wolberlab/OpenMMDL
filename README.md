@@ -110,7 +110,7 @@ Start the simulation with the following Inputs:
 -s = Python script from the setup including the path
 
 #### Optional:
--l = SDF file of the ligand, if the ligand was selected during OpenMMDL
+-l = SDF file of the ligands, if the ligands was selected during OpenMMDL
 Setup. The SDF file name should be consistent with the input in the setup
 
 -c = Coordinates file of Amber
