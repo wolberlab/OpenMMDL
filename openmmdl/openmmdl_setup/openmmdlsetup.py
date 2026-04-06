@@ -1568,7 +1568,7 @@ positions_for_equil = np.array(positions.value_in_unit(unit.nanometers)) * unit.
         script.append("\n# Minimize and Equilibrate\n")
         if fileType == "pdb":
             script.append("""
-equil_output = f"Equilibration_{protein}.pdb"
+equil_output = f"Equilibration_{os.path.splitext(os.path.basename(protein))[0]}.pdb"
                           """)
         elif fileType == "amber":
             script.append("""
