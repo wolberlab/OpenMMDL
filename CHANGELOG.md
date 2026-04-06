@@ -21,6 +21,7 @@ The rules for this file:
 talagayev, NDoering99
 
 ### Added
+- Added equilibration protocol to `OpenMMDL Simulation` (2026-04-07, PR#194)
 - Added multiple ligand support in `OpenMMDL Simulation` (2026-04-05, PR#198)
 - Added flag for `OpenMMDL Simulation` restart when encoutering Nan error (2026-04-04, PR#197)
 - Added high throughput simulation option in `OpenMMDL Setup` (2026-04-01, PR#196)
