@@ -4,7 +4,7 @@ import shutil
 from typing import List
 
 
-def cleanup_post_md_workspace():
+def cleanup_post_md():
     """Remove intermediate folders after outputs have been organized.
 
     Keeps only the copied input files and final outputs.
