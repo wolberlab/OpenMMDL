@@ -65,6 +65,24 @@ def pushd(path: str):
 
 _FLOAT_RE = re.compile(r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?")
 
+_TRUE_BOOL_VALUES = {"1", "true", "t", "yes", "y", "on"}
+_FALSE_BOOL_VALUES = {"0", "false", "f", "no", "n", "off"}
+
+
+def parse_bool_flag(value):
+    """Parse flexible CLI boolean values like true/false, yes/no, y/n, 1/0."""
+    if isinstance(value, bool):
+        return value
+
+    normalized_value = str(value).strip().lower()
+    if normalized_value in _TRUE_BOOL_VALUES:
+        return True
+    if normalized_value in _FALSE_BOOL_VALUES:
+        return False
+
+    raise argparse.ArgumentTypeError(
+        "Boolean value expected. Use one of: true/false, yes/no, y/n, 1/0, on/off."
+    )
 
 def parse_xyz(val):
     """
@@ -148,20 +166,23 @@ def main():
     parser.add_argument(
         "-p",
         dest="generate_pml",
-        help="Generate .pml files for pharmacophore visualization",
+        help="Generate .pml files for pharmacophore visualization (accepts true/false, yes/no, y/n)",
         default=False,
+        type=parse_bool_flag,
     )
     parser.add_argument(
         "-r",
         dest="frame_rmsd",
-        help='RMSD Difference between frames calculation type "True" to use it default is False,',
-        default="No",
+        help="Calculate RMSD differences between frames (accepts true/false, yes/no, y/n)",
+        default=False,
+        type=parse_bool_flag,
     )
     parser.add_argument(
         "-nuc",
         dest="receptor_nucleic",
-        help="Treat nucleic acids as receptor",
+        help="Treat nucleic acids as receptor (accepts true/false, yes/no, y/n)",
         default=False,
+        type=parse_bool_flag,
     )
     parser.add_argument(
         "-s",
@@ -184,14 +205,16 @@ def main():
     parser.add_argument(
         "-w",
         dest="stable_water_analysis",
-        help="Should stable water analysis be performed? True or False",
+        help="Should stable water analysis be performed? (accepts true/false, yes/no, y/n)",
         default=False,
+        type=parse_bool_flag,
     )
     parser.add_argument(
         "-rep",
         dest="representative_frame",
-        help="Calculate the representative frame for each binding mode. Defaults to False",
+        help="Calculate the representative frame for each binding mode (accepts true/false, yes/no, y/n)",
         default=False,
+        type=parse_bool_flag,
     )
     parser.add_argument(
         "--watereps",
@@ -270,7 +293,7 @@ def main():
                 W.write(u.atoms)
         pdb_md = mda.Universe(topology, trajectory)
     water_eps = float(args.water_eps)
-    stable_water_analysis = bool(args.stable_water_analysis)
+    stable_water_analysis = args.stable_water_analysis
     if stable_water_analysis:
         stable_water_analyser = StableWaters(trajectory, topology, water_eps)
 
@@ -290,8 +313,8 @@ def main():
     dataframe = args.dataframe
     min_transition = int(args.min_transition)
     cpu_count = int(args.cpu_count)
-    generate_pml = bool(args.generate_pml)
-    receptor_nucleic = bool(args.receptor_nucleic)
+    generate_pml = args.generate_pml
+    receptor_nucleic = args.receptor_nucleic
     special_ligand = args.special_ligand
     reference = args.reference
     peptide = args.peptide
@@ -380,7 +403,7 @@ def main():
             selection1="nucleicbackbone",
             selection2=["nucleic", f"resname {ligand}"],
         )
-        if frame_rmsd != "No":
+        if frame_rmsd:
             pairwise_rmsd_prot, pairwise_rmsd_lig = rmsd_analyzer.rmsd_dist_frames(
                 fig_type, lig=f"{ligand}", nucleic=True
             )
@@ -391,7 +414,7 @@ def main():
             selection1="backbone",
             selection2=["protein", f"chainID {peptide}"],
         )
-        if frame_rmsd != "No":
+        if frame_rmsd:
             pairwise_rmsd_prot, pairwise_rmsd_lig = rmsd_analyzer.rmsd_dist_frames(fig_type, lig=f"chainID {peptide}")
             logger.info("\033[1mRMSD calculated\033[0m")
     else:
@@ -400,7 +423,7 @@ def main():
             selection1="backbone",
             selection2=["protein", f"resname {ligand}"],
         )
-        if frame_rmsd != "No":
+        if frame_rmsd:
             pairwise_rmsd_prot, pairwise_rmsd_lig = rmsd_analyzer.rmsd_dist_frames(fig_type, lig=f"{ligand}")
             logger.info("\033[1mRMSD calculated\033[0m")
 

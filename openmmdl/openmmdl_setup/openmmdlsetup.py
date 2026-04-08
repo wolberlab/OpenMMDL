@@ -423,7 +423,7 @@ def createAmberBashScript():
             )
         elif nmLigFile[-4:] == ".pdb":
             a_script.append(
-                "obabel ${nmLigFile}.pdb -O ${nmLigFile}.sdf -p # convert to sdf file for openmmdl_analysis, -p: add hydrogens appropriate for pH7.4"
+                "obabel ${nmLigFile}.pdb -O ${nmLigFile}.sdf -p # convert to sdf file for openmmdl analysis, -p: add hydrogens appropriate for pH7.4"
             )
 
         a_script.append(
@@ -691,7 +691,7 @@ def createAmberBashScript():
 def extractLigName(lig_file_name):
     """
     Extract the ligand name from the pdb file as a string, which is the fourth column of the first line in the pdb file.
-    This string can be used for openmmdl_analysis in later function `createScript`.
+    This string can be used for openmmdl analysis in later function `createScript`.
 
     Params:
     -------
@@ -1873,11 +1873,11 @@ stages = [
             if fileType == "pdb":
                 if has_pdb_ligands:
                     script.append(
-                        f"analysis_jobs.append(('Final_Output/All_Atoms', f'openmmdl_analysis -t centered_top{top_ext} -d centered_traj{traj_ext} -l {{ligands[0]}} -n {{ligand_names[0]}}{{analysis_special_flags}} -b {session['binding_mode']} -m {session['min_transition']} -r {session['rmsd_diff']} -p {session['pml_generation']} -w {session['stable_water']} --watereps {session['wc_distance']}'))"
+                        f"analysis_jobs.append(('Final_Output/All_Atoms', f'openmmdl analysis -t centered_top{top_ext} -d centered_traj{traj_ext} -l {{ligands[0]}} -n {{ligand_names[0]}}{{analysis_special_flags}} -b {session['binding_mode']} -m {session['min_transition']} -r {session['rmsd_diff']} -p {session['pml_generation']} -w {session['stable_water']} --watereps {session['wc_distance']}'))"
                     )
                 elif not has_pdb_ligands:
                     script.append(
-                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1892,7 +1892,7 @@ stages = [
             elif fileType == "amber":
                 if not session["nmLig"] and not session["spLig"]:
                     script.append(
-                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1906,7 +1906,7 @@ stages = [
                     )
                 elif session["nmLig"] and not session["spLig"]:
                     script.append(
-                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl analysis -t centered_top%s -d centered_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1921,7 +1921,7 @@ stages = [
                     )
                 elif session["nmLig"] and session["spLig"]:
                     script.append(
-                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl analysis -t centered_top%s -d centered_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1940,11 +1940,11 @@ stages = [
             if fileType == "pdb":
                 if has_pdb_ligands:
                     script.append(
-                        f"analysis_jobs.append(('Final_Output/Prot_Lig', f'openmmdl_analysis -t prot_lig_top{top_ext} -d prot_lig_traj{traj_ext} -l {{ligands[0]}} -n {{ligand_names[0]}}{{analysis_special_flags}} -b {session['binding_mode']} -m {session['min_transition']} -r {session['rmsd_diff']} -p {session['pml_generation']} -w {session['stable_water']} --watereps {session['wc_distance']}'))"
+                        f"analysis_jobs.append(('Final_Output/Prot_Lig', f'openmmdl analysis -t prot_lig_top{top_ext} -d prot_lig_traj{traj_ext} -l {{ligands[0]}} -n {{ligand_names[0]}}{{analysis_special_flags}} -b {session['binding_mode']} -m {session['min_transition']} -r {session['rmsd_diff']} -p {session['pml_generation']} -w {session['stable_water']} --watereps {session['wc_distance']}'))"
                     )
                 elif not has_pdb_ligands:
                     script.append(
-                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1959,7 +1959,7 @@ stages = [
             elif fileType == "amber":
                 if not session["nmLig"] and not session["spLig"]:
                     script.append(
-                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1973,7 +1973,7 @@ stages = [
                     )
                 elif session["nmLig"] and not session["spLig"]:
                     script.append(
-                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -1988,7 +1988,7 @@ stages = [
                     )
                 elif session["nmLig"] and session["spLig"]:
                     script.append(
-                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -2007,14 +2007,14 @@ stages = [
             if fileType == "pdb":
                 if has_pdb_ligands:
                     script.append(
-                        f"analysis_jobs.append(('Final_Output/All_Atoms', f'openmmdl_analysis -t centered_top{top_ext} -d centered_traj{traj_ext} -l {{ligands[0]}} -n {{ligand_names[0]}}{{analysis_special_flags}} -b {session['binding_mode']} -m {session['min_transition']} -r {session['rmsd_diff']} -p {session['pml_generation']} -w {session['stable_water']} --watereps {session['wc_distance']}'))"
+                        f"analysis_jobs.append(('Final_Output/All_Atoms', f'openmmdl analysis -t centered_top{top_ext} -d centered_traj{traj_ext} -l {{ligands[0]}} -n {{ligand_names[0]}}{{analysis_special_flags}} -b {session['binding_mode']} -m {session['min_transition']} -r {session['rmsd_diff']} -p {session['pml_generation']} -w {session['stable_water']} --watereps {session['wc_distance']}'))"
                     )
                     script.append(
-                        f"analysis_jobs.append(('Final_Output/Prot_Lig', f'openmmdl_analysis -t prot_lig_top{top_ext} -d prot_lig_traj{traj_ext} -l {{ligands[0]}} -n {{ligand_names[0]}}{{analysis_special_flags}} -b {session['binding_mode']} -m {session['min_transition']} -r {session['rmsd_diff']} -p {session['pml_generation']} -w {session['stable_water']} --watereps {session['wc_distance']}'))"
+                        f"analysis_jobs.append(('Final_Output/Prot_Lig', f'openmmdl analysis -t prot_lig_top{top_ext} -d prot_lig_traj{traj_ext} -l {{ligands[0]}} -n {{ligand_names[0]}}{{analysis_special_flags}} -b {session['binding_mode']} -m {session['min_transition']} -r {session['rmsd_diff']} -p {session['pml_generation']} -w {session['stable_water']} --watereps {session['wc_distance']}'))"
                     )
                 elif not has_pdb_ligands:
                     script.append(
-                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -2027,7 +2027,7 @@ stages = [
                         )
                     )
                     script.append(
-                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -2042,7 +2042,7 @@ stages = [
             elif fileType == "amber":
                 if not session["nmLig"] and not session["spLig"]:
                     script.append(
-                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl analysis -t centered_top%s -d centered_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -2055,7 +2055,7 @@ stages = [
                         )
                     )
                     script.append(
-                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl analysis -t prot_lig_top%s -d prot_lig_traj%s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -2069,7 +2069,7 @@ stages = [
                     )
                 elif session["nmLig"] and not session["spLig"]:
                     script.append(
-                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl analysis -t centered_top%s -d centered_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -2083,7 +2083,7 @@ stages = [
                         )
                     )
                     script.append(
-                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -2098,7 +2098,7 @@ stages = [
                     )
                 elif session["nmLig"] and session["spLig"]:
                     script.append(
-                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl_analysis -t centered_top%s -d centered_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/All_Atoms', 'openmmdl analysis -t centered_top%s -d centered_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
@@ -2113,7 +2113,7 @@ stages = [
                         )
                     )
                     script.append(
-                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl_analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
+                        "analysis_jobs.append(('Final_Output/Prot_Lig', 'openmmdl analysis -t prot_lig_top%s -d prot_lig_traj%s -n %s -s %s -b %s -m %s -r %s -p %s -w %s --watereps %s'))"
                         % (
                             top_ext,
                             traj_ext,
