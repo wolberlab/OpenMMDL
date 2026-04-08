@@ -4,22 +4,15 @@ import shutil
 from typing import List
 
 
-def cleanup(protein_name):
-    """Cleans up the PDB Reporter Output File and MDTraj Files of the performed simulation.
+def cleanup_post_md_workspace():
+    """Remove intermediate folders after outputs have been organized.
 
-    Args:
-        protein_name (str): Name of the protein PDB.
-
-    Returns:
-        None
+    Keeps only the copied input files and final outputs.
     """
-    print("Cleaning Up :)")
-    try:
-        os.remove(f"output_{protein_name}")
-        os.remove("centered_old_coordinates.pdb")
-        os.remove("centered_old_coordinates.dcd")
-    except FileNotFoundError:
-        print("One or more files not found. Cleanup skipped.")
+    print("Removing intermediate postprocessing folders :)")
+    for directory in ("MD_Files", "MD_Postprocessing", "Checkpoints"):
+        if os.path.exists(directory):
+            shutil.rmtree(directory)
     print("Cleanup is done.")
 
 
