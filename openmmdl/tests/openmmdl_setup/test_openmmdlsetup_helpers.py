@@ -1,3 +1,5 @@
+from flask import session
+
 from openmmdl.openmmdl_setup.openmmdlsetup import (
     app,
     configureDefaultOptions,
