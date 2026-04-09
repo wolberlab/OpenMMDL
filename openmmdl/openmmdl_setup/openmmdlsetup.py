@@ -1041,7 +1041,7 @@ def configureDefaultOptions():
     implicitWater = False
     session["restart_checkpoint"] = "no"
     session["mdtraj_output"] = "mdtraj_pdb_dcd"
-    session["mdtraj_removal"] = "False"
+    session["cleanup"] = "False"
     session["mda_output"] = "mda_pdb_dcd"
     session["mda_selection"] = "mda_prot_lig_all"
     session["openmmdl_analysis"] = "No"
@@ -1147,7 +1147,7 @@ os.chdir(outputDir)"""
         "from openmmdl.openmmdl_simulation.scripts.post_md_conversions import mdtraj_conversion, MDanalysis_conversion"
     )
     script.append(
-        "from openmmdl.openmmdl_simulation.scripts.cleaning_procedures import cleanup, create_directory_if_not_exists, copy_file, organize_files, post_md_file_movement \n"
+        "from openmmdl.openmmdl_simulation.scripts.cleaning_procedures import cleanup_post_md, create_directory_if_not_exists, copy_file, organize_files, post_md_file_movement \n"
     )
 
     script.append("import simtk.openmm.app as app")
@@ -1821,12 +1821,6 @@ stages = [
                             f"'{spLigName}'",
                         )
                     )
-        # cleanup()
-        if session["mdtraj_removal"] == "True":
-            if fileType == "pdb":
-                script.append("cleanup(f'{protein}')")
-            elif fileType == "amber":
-                script.append("cleanup(f'{prmtop_file}')")
 
     # post_md_file_movement()
     if fileType == "pdb":
@@ -1856,6 +1850,12 @@ stages = [
                     "post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file, ligands=['%s', '%s'])"
                     % (nmLigFileName, spLigFileName)
                 )
+
+    if (
+        session["md_postprocessing"] == "True"
+        and session.get("cleanup", "False") == "True"
+    ):
+        script.append("cleanup_post_md_workspace()")
 
     # session[openmmdl_analysis]
     if session["openmmdl_analysis"] == "Yes":
