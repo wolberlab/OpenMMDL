@@ -42,4 +42,4 @@ def test_configure_default_options_sets_postprocessing_defaults():
         configureDefaultOptions()
 
         assert session["mda_selection"] == "mda_prot_lig_all"
-        assert session["remove_postprocessing_intermediates"] == "False"
+        assert session["cleanup"] == "False"
