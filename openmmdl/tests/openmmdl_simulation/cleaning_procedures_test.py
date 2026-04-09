@@ -6,7 +6,7 @@ from unittest.mock import patch
 import pytest
 
 from openmmdl.openmmdl_simulation.scripts.cleaning_procedures import (
-    cleanup_post_md_workspace,
+    cleanup_post_md,
     copy_file,
     create_directory_if_not_exists,
     organize_files,
@@ -19,7 +19,7 @@ def test_directory_path():
     return "test_directory"
 
 
-def test_cleanup_post_md_workspace(tmp_path):
+def test_cleanup_post_md(tmp_path):
     original_cwd = Path.cwd()
     try:
         os.chdir(tmp_path)
@@ -30,7 +30,7 @@ def test_cleanup_post_md_workspace(tmp_path):
         Path("Input_Files").mkdir()
         Path("Final_Output").mkdir()
 
-        cleanup_post_md_workspace()
+        cleanup_post_md()
 
         assert not Path("MD_Files").exists()
         assert not Path("MD_Postprocessing").exists()
