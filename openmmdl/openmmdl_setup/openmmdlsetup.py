@@ -1164,6 +1164,7 @@ os.chdir(outputDir)"""
     script.append("import sys")
     script.append("import os")
     script.append("import shutil")
+    script.append("import gc")
     if session["openmmdl_analysis"] == "Yes":
         script.append("import subprocess")
 
@@ -1741,6 +1742,10 @@ stages = [
         lines = [line.format(filename=session["finalStateFilename"]) for line in state_script]
         script.extend(lines)
 
+    script.append("close_reporters(simulation)")
+    script.append("del simulation")
+    script.append("gc.collect()")
+    
     # session[md_postprocessing]
     if session["md_postprocessing"] == "True":
         # mdtraj_conversion() and MDanalysis_conversion()
