@@ -1,3 +1,4 @@
+import gc
 import os
 import numpy as np
 import mdtraj as md
@@ -7,6 +8,16 @@ from MDAnalysis.analysis import align
 from MDAnalysis import transformations as trans
 from MDAnalysis.lib import distances
 
+def _close_mda_objects(*objs):
+    for obj in objs:
+        if obj is None:
+            continue
+        traj = getattr(obj, "trajectory", None)
+        if traj is not None and hasattr(traj, "close"):
+            try:
+                traj.close()
+            except Exception:
+                pass
 
 def mdtraj_conversion(pdb_file, mdtraj_output):
     """
@@ -289,13 +300,15 @@ def MDanalysis_conversion(
             mob = mda.Universe("centered_top.pdb", "centered_traj_unaligned.dcd")
             tmp = "centered_traj_aligned_tmp.dcd"
 
-            align.AlignTraj(
+            aln = align.AlignTraj(
                 mob,
                 ref,
                 select="protein and name CA",
                 weights="mass",
                 filename=tmp,
-            ).run()
+            )
+            aln.run()
+            del aln
 
             _rewrap_after_alignment("centered_top.pdb", tmp, "centered_traj.dcd", "all")
             os.remove(tmp)
@@ -317,13 +330,15 @@ def MDanalysis_conversion(
             mob = mda.Universe("prot_lig_top.pdb", "prot_lig_traj_unaligned.dcd")
             tmp = "prot_lig_traj_aligned_tmp.dcd"
 
-            align.AlignTraj(
+            aln = align.AlignTraj(
                 mob,
                 ref,
                 select="protein and name CA",
                 weights="mass",
                 filename=tmp,
-            ).run()
+            )
+            aln.run()
+            del aln
 
             _rewrap_after_alignment("prot_lig_top.pdb", tmp, "prot_lig_traj.dcd", prot_lig_sel)
             os.remove(tmp)
@@ -343,13 +358,15 @@ def MDanalysis_conversion(
             mob = mda.Universe("centered_top.gro", "centered_traj_unaligned.xtc")
             tmp = "centered_traj_aligned_tmp.xtc"
 
-            align.AlignTraj(
+            aln = align.AlignTraj(
                 mob,
                 ref,
                 select="protein and name CA",
                 weights="mass",
                 filename=tmp,
-            ).run()
+            )
+            aln.run()
+            del aln
 
             _rewrap_after_alignment("centered_top.gro", tmp, "centered_traj.xtc", "all")
             os.remove(tmp)
@@ -371,13 +388,26 @@ def MDanalysis_conversion(
             mob = mda.Universe("prot_lig_top.gro", "prot_lig_traj_unaligned.xtc")
             tmp = "prot_lig_traj_aligned_tmp.xtc"
 
-            align.AlignTraj(
+            aln = align.AlignTraj(
                 mob,
                 ref,
                 select="protein and name CA",
                 weights="mass",
                 filename=tmp,
-            ).run()
+            )
+            aln.run()
+            del aln
 
             _rewrap_after_alignment("prot_lig_top.gro", tmp, "prot_lig_traj.xtc", prot_lig_sel)
             os.remove(tmp)
+
+    _close_mda_objects(
+        locals().get("u"),
+        locals().get("u2"),
+        locals().get("ref"),
+        locals().get("mob"),
+    )
+    for name in ("u", "u2", "ref", "mob", "all_atoms", "prot_lig"):
+        if name in locals():
+            del locals()[name]
+    gc.collect()
