@@ -1,8 +1,22 @@
 import glob
 import os
 import shutil
+import time
 from typing import List
 
+
+def _safe_rmtree(path: str, retries: int = 5, delay: float = 0.2):
+    """Retry rmtree to tolerate transient directory-not-empty races."""
+    for attempt in range(retries):
+        if not os.path.exists(path):
+            return
+        try:
+            shutil.rmtree(path)
+            return
+        except OSError as exc:
+            if exc.errno != 39 or attempt == retries - 1:
+                raise
+            time.sleep(delay)
 
 def cleanup_post_md():
     """Remove intermediate folders after outputs have been organized.
@@ -12,7 +26,7 @@ def cleanup_post_md():
     print("Removing intermediate postprocessing folders :)")
     for directory in ("MD_Files", "MD_Postprocessing", "Checkpoints"):
         if os.path.exists(directory):
-            shutil.rmtree(directory)
+            _safe_rmtree(directory)
     print("Cleanup is done.")
 
 
@@ -61,7 +75,13 @@ def organize_files(source, destination):
             os.rename(file, os.path.join(destination, os.path.basename(file)))
 
 
-def post_md_file_movement(protein_name: str, prmtop: str = None, inpcrd: str = None, ligands: List[str] = None):
+def post_md_file_movement(
+    protein_name: str,
+    prmtop: str = None,
+    inpcrd: str = None,
+    ligands: List[str] = None,
+    mda_selection: str = "mda_prot_lig_all",
+):
     """Organizes and moves the files after the MD simulation to their respective directories.
 
     Args:
@@ -81,22 +101,33 @@ def post_md_file_movement(protein_name: str, prmtop: str = None, inpcrd: str = N
     create_directory_if_not_exists("MD_Files/MD_Output")
     create_directory_if_not_exists("MD_Postprocessing")
     create_directory_if_not_exists("Final_Output")
-    create_directory_if_not_exists("Final_Output/All_Atoms")
-    create_directory_if_not_exists("Final_Output/Prot_Lig")
+
+    write_all_atoms = mda_selection in ("mda_prot_lig_all", "mda_all")
+    write_prot_lig = mda_selection in ("mda_prot_lig_all", "mda_prot_lig")
+
+    if write_all_atoms:
+        create_directory_if_not_exists("Final_Output/All_Atoms")
+    if write_prot_lig:
+        create_directory_if_not_exists("Final_Output/Prot_Lig")
+    
     create_directory_if_not_exists("Checkpoints")
     # Move input files
     if ligands:
         for lig in ligands:
             copy_file(lig, "Input_Files")
-            copy_file(lig, "Final_Output/All_Atoms")
-            copy_file(lig, "Final_Output/Prot_Lig")
+            if write_all_atoms:
+                copy_file(lig, "Final_Output/All_Atoms")
+            if write_prot_lig:
+                copy_file(lig, "Final_Output/Prot_Lig")
 
     # Copy ligand partial-charge MOL2 exports (if generated)
     for mol2 in glob.glob("ligand_*_pc.mol2"):
         copy_file(mol2, "Input_Files")
         # Optional convenience copies:
-        copy_file(mol2, "Final_Output/All_Atoms")
-        copy_file(mol2, "Final_Output/Prot_Lig")
+        if write_all_atoms:
+            copy_file(mol2, "Final_Output/All_Atoms")
+        if write_prot_lig:
+            copy_file(mol2, "Final_Output/Prot_Lig")
 
     copy_file(protein_name, "Input_Files")
     copy_file(prmtop, "Input_Files") if prmtop else None
@@ -140,24 +171,26 @@ def post_md_file_movement(protein_name: str, prmtop: str = None, inpcrd: str = N
         ],
         "MD_Postprocessing",
     )
-    organize_files(
-        [
-            "centered_top.pdb",
-            "centered_traj.dcd",
-            "centered_top.gro",
-            "centered_traj.xtc",
-        ],
-        "Final_Output/All_Atoms",
-    )
-    organize_files(
-        [
-            "prot_lig_top.pdb",
-            "prot_lig_traj.dcd",
-            "prot_lig_top.gro",
-            "prot_lig_traj.xtc",
-        ],
-        "Final_Output/Prot_Lig",
-    )
+    if write_all_atoms:
+        organize_files(
+            [
+                "centered_top.pdb",
+                "centered_traj.dcd",
+                "centered_top.gro",
+                "centered_traj.xtc",
+            ],
+            "Final_Output/All_Atoms",
+        )
+    if write_prot_lig:
+        organize_files(
+            [
+                "prot_lig_top.pdb",
+                "prot_lig_traj.dcd",
+                "prot_lig_top.gro",
+                "prot_lig_traj.xtc",
+            ],
+            "Final_Output/Prot_Lig",
+        )
 
     # Organize checkpoint files
     organize_files(
