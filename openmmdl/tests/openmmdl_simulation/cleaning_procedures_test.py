@@ -1,12 +1,16 @@
+import errno
 import os
 import shutil
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
+import openmmdl.openmmdl_simulation.scripts.cleaning_procedures as cleaning_procedures
 from openmmdl.openmmdl_simulation.scripts.cleaning_procedures import (
     cleanup_post_md,
+    close_reporters,
     copy_file,
     create_directory_if_not_exists,
     organize_files,
@@ -18,6 +22,26 @@ from openmmdl.openmmdl_simulation.scripts.cleaning_procedures import (
 def test_directory_path():
     return "test_directory"
 
+
+class DummyReporter:
+    def __init__(self, handle=None, attr="_out", close_raises=False):
+        self.close_called = 0
+        self._close_raises = close_raises
+        if attr is not None:
+            setattr(self, attr, handle)
+
+    def close(self):
+        self.close_called += 1
+        if self._close_raises:
+            raise RuntimeError("close failed")
+        handle = getattr(self, "_out", None)
+        if handle is not None and hasattr(handle, "close"):
+            handle.close()
+
+
+class DummySimulation:
+    def __init__(self, reporters):
+        self.reporters = reporters
 
 def test_cleanup_post_md(tmp_path):
     original_cwd = Path.cwd()
@@ -40,6 +64,32 @@ def test_cleanup_post_md(tmp_path):
     finally:
         os.chdir(original_cwd)
 
+def test_cleanup_post_md_retries_busy_directory(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+
+    Path("MD_Files").mkdir()
+    Path("MD_Postprocessing").mkdir()
+    Path("Checkpoints").mkdir()
+
+    real_rmtree = shutil.rmtree
+    calls = {"MD_Postprocessing": 0}
+
+    def flaky_rmtree(path):
+        if path == "MD_Postprocessing":
+            calls["MD_Postprocessing"] += 1
+            if calls["MD_Postprocessing"] == 1:
+                raise OSError(errno.EBUSY, "Device or resource busy")
+        real_rmtree(path)
+
+    monkeypatch.setattr(cleaning_procedures.shutil, "rmtree", flaky_rmtree)
+    monkeypatch.setattr(cleaning_procedures.time, "sleep", lambda *_: None)
+
+    cleanup_post_md()
+
+    assert calls["MD_Postprocessing"] == 2
+    assert not Path("MD_Files").exists()
+    assert not Path("MD_Postprocessing").exists()
+    assert not Path("Checkpoints").exists()
 
 def test_create_directory_if_not_exists(test_directory_path):
     create_directory_if_not_exists(test_directory_path)
@@ -67,6 +117,14 @@ def test_copy_file(mock_copy, mock_exists):
 
 
 @patch("os.path.exists")
+@patch("shutil.copy")
+def test_copy_file_skips_none_source(mock_copy, mock_exists):
+    copy_file(None, "destination_directory")
+
+    mock_exists.assert_not_called()
+    mock_copy.assert_not_called()
+
+@patch("os.path.exists")
 @patch("os.rename")
 def test_organize_files(mock_rename, mock_exists):
     source = ["file1.txt", "file2.txt", "file3.txt"]
@@ -81,6 +139,25 @@ def test_organize_files(mock_rename, mock_exists):
     mock_rename.assert_any_call("file2.txt", os.path.join(destination, "file2.txt"))
     mock_rename.assert_any_call("file3.txt", os.path.join(destination, "file3.txt"))
 
+
+def test_close_reporters_closes_file_handles_and_keeps_stdout(tmp_path):
+    direct_file = open(tmp_path / "direct.log", "w")
+    fallback_file = open(tmp_path / "fallback.log", "w")
+
+    direct_reporter = DummyReporter(direct_file, attr="_out", close_raises=False)
+    fallback_reporter = DummyReporter(fallback_file, attr="file", close_raises=True)
+    stdout_reporter = DummyReporter(sys.stdout, attr="_out", close_raises=False)
+
+    simulation = DummySimulation(
+        [direct_reporter, fallback_reporter, stdout_reporter]
+    )
+
+    close_reporters(simulation)
+
+    assert direct_file.closed
+    assert fallback_file.closed
+    assert stdout_reporter.close_called == 0
+    assert simulation.reporters == []
 
 def test_post_md_file_movement(tmp_path):
     original_cwd = Path.cwd()
@@ -128,6 +205,7 @@ def test_post_md_file_movement(tmp_path):
             str(prmtop),
             str(inpcrd),
             [str(ligand)],
+            mda_selection="mda_prot_lig_all",
         )
 
         input_files_dir = Path("Input_Files")
@@ -156,6 +234,53 @@ def test_post_md_file_movement(tmp_path):
     finally:
         os.chdir(original_cwd)
 
+
+def test_post_md_file_movement_all_atoms_only(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+
+    Path("protein.pdb").write_text("protein\n")
+    Path("ligand.sdf").write_text("ligand\n")
+    Path("centered_top.pdb").write_text("all atoms pdb\n")
+    Path("centered_traj.dcd").write_text("all atoms dcd\n")
+    Path("centered_old_coordinates_top.pdb").write_text("old pdb\n")
+    Path("checkpoint.chk").write_text("checkpoint\n")
+
+    post_md_file_movement(
+        "protein.pdb",
+        ligands=["ligand.sdf"],
+        mda_selection="mda_all",
+    )
+
+    assert Path("Final_Output/All_Atoms").exists()
+    assert not Path("Final_Output/Prot_Lig").exists()
+    assert Path("Final_Output/All_Atoms/ligand.sdf").exists()
+    assert Path("Final_Output/All_Atoms/centered_top.pdb").exists()
+    assert Path("MD_Postprocessing/centered_old_coordinates_top.pdb").exists()
+    assert Path("Checkpoints/checkpoint.chk").exists()
+
+
+def test_post_md_file_movement_prot_lig_only(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+
+    Path("protein.pdb").write_text("protein\n")
+    Path("ligand.sdf").write_text("ligand\n")
+    Path("prot_lig_top.pdb").write_text("prot lig pdb\n")
+    Path("prot_lig_traj.dcd").write_text("prot lig dcd\n")
+    Path("centered_old_coordinates_top.pdb").write_text("old pdb\n")
+    Path("checkpoint.chk").write_text("checkpoint\n")
+
+    post_md_file_movement(
+        "protein.pdb",
+        ligands=["ligand.sdf"],
+        mda_selection="mda_prot_lig",
+    )
+
+    assert Path("Final_Output/Prot_Lig").exists()
+    assert not Path("Final_Output/All_Atoms").exists()
+    assert Path("Final_Output/Prot_Lig/ligand.sdf").exists()
+    assert Path("Final_Output/Prot_Lig/prot_lig_top.pdb").exists()
+    assert Path("MD_Postprocessing/centered_old_coordinates_top.pdb").exists()
+    assert Path("Checkpoints/checkpoint.chk").exists()
 
 if __name__ == "__main__":
     pytest.main()
