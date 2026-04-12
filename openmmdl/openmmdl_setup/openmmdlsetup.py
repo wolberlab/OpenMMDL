@@ -1041,7 +1041,7 @@ def configureDefaultOptions():
     implicitWater = False
     session["restart_checkpoint"] = "no"
     session["mdtraj_output"] = "mdtraj_pdb_dcd"
-    session["mdtraj_removal"] = "False"
+    session["cleanup"] = "False"
     session["mda_output"] = "mda_pdb_dcd"
     session["mda_selection"] = "mda_prot_lig_all"
     session["openmmdl_analysis"] = "No"
@@ -1147,7 +1147,7 @@ os.chdir(outputDir)"""
         "from openmmdl.openmmdl_simulation.scripts.post_md_conversions import mdtraj_conversion, MDanalysis_conversion"
     )
     script.append(
-        "from openmmdl.openmmdl_simulation.scripts.cleaning_procedures import cleanup, create_directory_if_not_exists, copy_file, organize_files, post_md_file_movement \n"
+        "from openmmdl.openmmdl_simulation.scripts.cleaning_procedures import cleanup_post_md, close_reporters, create_directory_if_not_exists, copy_file, organize_files, post_md_file_movement \n"
     )
 
     script.append("import simtk.openmm.app as app")
@@ -1164,6 +1164,7 @@ os.chdir(outputDir)"""
     script.append("import sys")
     script.append("import os")
     script.append("import shutil")
+    script.append("import gc")
     if session["openmmdl_analysis"] == "Yes":
         script.append("import subprocess")
 
@@ -1741,6 +1742,10 @@ stages = [
         lines = [line.format(filename=session["finalStateFilename"]) for line in state_script]
         script.extend(lines)
 
+    script.append("close_reporters(simulation)")
+    script.append("del simulation")
+    script.append("gc.collect()")
+    
     # session[md_postprocessing]
     if session["md_postprocessing"] == "True":
         # mdtraj_conversion() and MDanalysis_conversion()
@@ -1821,30 +1826,24 @@ stages = [
                             f"'{spLigName}'",
                         )
                     )
-        # cleanup()
-        if session["mdtraj_removal"] == "True":
-            if fileType == "pdb":
-                script.append("cleanup(f'{protein}')")
-            elif fileType == "amber":
-                script.append("cleanup(f'{prmtop_file}')")
 
     # post_md_file_movement()
     if fileType == "pdb":
         if has_pdb_ligands:
-            script.append("post_md_file_movement(protein, ligands=globals().get('ligands'))")
+            script.append("post_md_file_movement(protein, ligands=globals().get('ligands'), mda_selection='%s')" % session["mda_selection"])
         elif not has_pdb_ligands:
-            script.append("post_md_file_movement(protein)")
+            script.append("post_md_file_movement(protein, mda_selection='%s')" % session["mda_selection"])
     elif fileType == "amber":
         if (
             session["has_files"] == "yes"
         ):  # In this case, no ligand file will be uploaded, thus not neccessary to assign value to argument `ligands`
             script.append(
-                "post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file)"
+                "post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file, mda_selection='%s')" % session["mda_selection"]
             )
         elif session["has_files"] == "no":
             if not session["nmLig"] and not session["spLig"]:
                 script.append(
-                    "post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file)"
+                    "post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file, mda_selection='%s')" % session["mda_selection"]
                 )
             elif session["nmLig"] and not session["spLig"]:
                 script.append(
@@ -1853,9 +1852,15 @@ stages = [
                 )
             elif session["nmLig"] and session["spLig"]:
                 script.append(
-                    "post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file, ligands=['%s', '%s'])"
-                    % (nmLigFileName, spLigFileName)
+                    "post_md_file_movement(protein_name=f'{prmtop_file[:-7]}.pdb', prmtop=prmtop_file, inpcrd=inpcrd_file, ligands=['%s', '%s'], mda_selection='%s')"
+                    % (nmLigFileName, spLigFileName, session["mda_selection"])
                 )
+
+    if (
+        session["md_postprocessing"] == "True"
+        and session.get("cleanup", "False") == "True"
+    ):
+        script.append("cleanup_post_md()")
 
     # session[openmmdl_analysis]
     if session["openmmdl_analysis"] == "Yes":

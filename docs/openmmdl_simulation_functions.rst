@@ -6,14 +6,11 @@ This page displays all the functions of **OpenMMDL Simulation**.
 openmmdl_simulation.scripts.cleaning_procedures
 ------------------------------
 
-.. py:function:: cleanup(protein_name)
+.. py:function:: cleanup_post_md()
     
-    Cleans up the PDB Reporter Output File and MDTraj Files of the performed simulation.
+    Removes intermediate folders after outputs have been organized.
     
-    :param str protein_name: Name of the protein PDB.
-
-    :returns: None.
-    :rtype: None
+    Keeps only the copied input files and final outputs.
    
 
 .. py:function:: create_directory_if_not_exists(directory_path)

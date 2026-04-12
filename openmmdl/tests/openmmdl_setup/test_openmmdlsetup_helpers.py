@@ -1,4 +1,8 @@
+from flask import session
+
 from openmmdl.openmmdl_setup.openmmdlsetup import (
+    app,
+    configureDefaultOptions,
     _normalize_resname,
     _resnames_are_unique,
 )
@@ -29,3 +33,13 @@ def test_resnames_are_unique_true_for_unique_names():
 def test_resnames_are_unique_false_for_duplicates():
     assert _resnames_are_unique(["UNK", "UNK", "L02"]) is False
     assert _resnames_are_unique(["L01", "L02", "L01"]) is False
+
+def test_configure_default_options_sets_postprocessing_defaults():
+    with app.test_request_context("/"):
+        session["fileType"] = "pdb"
+        session["waterModel"] = "explicit"
+
+        configureDefaultOptions()
+
+        assert session["mda_selection"] == "mda_prot_lig_all"
+        assert session["cleanup"] == "False"

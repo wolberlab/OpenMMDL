@@ -35,6 +35,7 @@ talagayev, NDoering99
 - Fixed double click bug in `OpenMMDL Setup` (2026-03-01, PR#190)
 
 ### Changed
+- Adjusted Cleanup option to remove all intermediate files in `OpenMMDL Simulation` (2026-04-12, PR#201)
 - Removed the saving of the original uploaded PDB file in `OpenMMDL Setup` (2026-04-05, PR#199)
 - Transition to `logging` in `OpenMMDL Analysis` (2026-03-31, PR#195)
 
