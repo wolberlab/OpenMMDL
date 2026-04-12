@@ -23,7 +23,7 @@
    :caption: User guide:
 
    installation
-   changelog
+   releases
    citation
    faq
 
