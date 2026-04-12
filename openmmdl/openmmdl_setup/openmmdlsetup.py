@@ -1147,7 +1147,7 @@ os.chdir(outputDir)"""
         "from openmmdl.openmmdl_simulation.scripts.post_md_conversions import mdtraj_conversion, MDanalysis_conversion"
     )
     script.append(
-        "from openmmdl.openmmdl_simulation.scripts.cleaning_procedures import cleanup_post_md, create_directory_if_not_exists, copy_file, organize_files, post_md_file_movement \n"
+        "from openmmdl.openmmdl_simulation.scripts.cleaning_procedures import cleanup_post_md, close_reporters, create_directory_if_not_exists, copy_file, organize_files, post_md_file_movement \n"
     )
 
     script.append("import simtk.openmm.app as app")
