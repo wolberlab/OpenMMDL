@@ -27,10 +27,10 @@ dependencies = [
 
 ]
 
-# Update the urls once the hosting is set up.
-#[project.urls]
-#"Source" = "https://github.com/<username>/openmmdlanalysis/"
-#"Documentation" = "https://openmmdlanalysis.readthedocs.io/"
+[project.urls]
+"Source" = "https://github.com/wolberlab/OpenMMDL"
+"Documentation" = "https://openmmdl.readthedocs.io/en/latest/"
+"Issues" = "https://github.com/wolberlab/OpenMMDL/issues"
 
 [project.optional-dependencies]
 test = [
