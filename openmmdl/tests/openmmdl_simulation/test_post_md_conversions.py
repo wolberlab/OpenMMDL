@@ -5,6 +5,7 @@ from pathlib import Path
 import mdtraj as md
 
 from openmmdl.openmmdl_simulation.scripts.post_md_conversions import (
+    _close_mda_objects,
     mdtraj_conversion,
     MDanalysis_conversion,
 )
@@ -14,6 +15,32 @@ pdb_file = "0_unk_hoh.pdb"
 dcd_file = "trajectory.dcd"
 ligand_name = "UNK"
 
+
+class DummyTrajectory:
+    def __init__(self):
+        self.closed = False
+
+    def close(self):
+        self.closed = True
+
+
+class DummyUniverse:
+    def __init__(self, with_close=True):
+        if with_close:
+            self.trajectory = DummyTrajectory()
+        else:
+            self.trajectory = object()
+
+def test_close_mda_objects():
+    u = DummyUniverse()
+    ref = DummyUniverse()
+    no_close = DummyUniverse(with_close=False)
+    no_traj = type("NoTrajectoryObject", (), {})()
+
+    _close_mda_objects(u, ref, no_close, no_traj, None)
+
+    assert u.trajectory.closed is True
+    assert ref.trajectory.closed is True
 
 def test_mdtraj_conversion():
     original_cwd = os.getcwd()
