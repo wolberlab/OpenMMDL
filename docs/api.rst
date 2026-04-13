@@ -8,4 +8,4 @@ This page links to the currently maintained function reference pages.
    :caption: API reference:
 
    openmmdl_simulation_functions
-   openmmdl_analysis_functionslization
+   openmmdl_analysis_functions
