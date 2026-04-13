@@ -65,4 +65,4 @@ substantial code refactoring.
 * Added a ``Dockerfile`` and Docker installation path.
 * Added the citation page in the documentation.
 * Refactored ``OpenMMDL Analysis`` into clearer analysis, core, and
-+  visualization sections.
+  visualization sections.
