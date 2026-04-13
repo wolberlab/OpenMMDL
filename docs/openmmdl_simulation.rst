@@ -28,8 +28,9 @@ Optional:
 
 .. code-block:: text
 
-    -l = SDF file of the ligand. The SDF file name should be consistent with the input in OpenMMDL Setup
+    -l = Ligand/cofactor/additional-molecule file(s) in SDF, MOL or MOL2 format. Repeat -l or pass multiple files after one -l.
     -c = Coordinates file of Amber
+    --failure-retries = Number of reruns if OpenMM fails with "Particle coordinate is NaN"
 
 Application
 ------------------------------
@@ -40,6 +41,16 @@ An example of how a command line of **OpenMMDL Simulation** should look is:
 
     openmmdl simulation -f {path/to/folder_name} -t {path/to/topology} -s {path/to/script} -l {path/to/ligand}
 
+For systems with multiple ligands or cofactors, ``-l`` can be repeated or
+followed by multiple files in one call.
+
+.. code-block:: text
+
+    openmmdl simulation -f {path/to/folder_name} -t {path/to/topology} -s {path/to/script} -l {path/to/ligand1} {path/to/ligand2}
+
+If a simulation exits with the OpenMM error ``Particle coordinate is NaN``,
+**OpenMMDL Simulation** can automatically retry the run while keeping the
+original input files, with the default being 5 retries.
 
 For help during the usage of **OpenMMDL Simulation** use the following command line:
 
@@ -63,7 +74,14 @@ There are two Systems prepared for the testing of the simulation.
 
     openmmdl simulation -f 5wyz_testing_simulation -t ~/OpenMMDL/openmmdl_simulation/testing_sytems/5wyz_solvent/5wyz-moe-processed_openMMDL.pdb -s ~/OpenMMDL/openmmdl_simulation/testing_sytems/5wyz_solvent/5wyz_simulation.py -l  ~/OpenMMDL/openmmdl_simulation/testing_sytems/5wyz_solvent/5VF.sdf
 
-Each of the command lines should generate a folder, where the script and the input data will be moved and further perform a MD simulation and postprocessing of the systems.
+Each of the command lines should generate a folder where the script and input
+data are copied before running the MD simulation and postprocessing of the
+system.
+
+The generated simulation scripts now include an equilibration stage before the
+production simulation. The final postprocessing layout depends on the selected
+MDAnalysis output mode and may create either ``Final_Output/All_Atoms``,
+``Final_Output/Prot_Lig``, or both.
 
 Running OpenMMDL Simulation using slurm
 ------------------------------
