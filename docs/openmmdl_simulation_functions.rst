@@ -14,6 +14,17 @@ openmmdl_simulation.scripts.cleaning_procedures
 
 
 .. py:function:: close_reporters(simulation)
+    
+    Close file-backed reporters attached to an OpenMM simulation without
+    closing ``sys.stdout`` or ``sys.stderr``.
+    
+    :param simulation: OpenMM simulation object with reporters attached.
+
+    :returns: None.
+    :rtype: None
+
+
+.. py:function:: close_reporters(simulation)
 
     Closes file-backed reporters attached to an OpenMM simulation without
     closing ``sys.stdout`` or ``sys.stderr``.
@@ -64,7 +75,7 @@ openmmdl_simulation.scripts.cleaning_procedures
     :param prmtop: Path to the AMBER topology file.
     :param inpcrd: Path to the AMBER coordinate file.
     :param ligands: List of paths to the ligand files.
-    :param str mda_selection: Which MDAnalysis outputs were requested. Supported values are ``mda_all``, ``mda_prot_lig``, and ``mda_prot_lig_all``.
+    :param str mda_selection: Selection of the MDAnalysis output layout. Supported values are ``mda_all``, ``mda_prot_lig``, and ``mda_prot_lig_all``.
     :type prmtop: Optional [str]
     :type inpcrd: Optional [str]
     :type ligands: Optional [List[str]]
