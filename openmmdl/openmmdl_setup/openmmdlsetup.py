@@ -1247,21 +1247,6 @@ os.chdir(outputDir)"""
         script.append("prmtop = AmberPrmtopFile(prmtop_file)")
         script.append("inpcrd = AmberInpcrdFile(inpcrd_file)")
 
-        ##################### For debugging #################################
-        # print all key-value pairs in session
-        # print(f"session is {session}")
-        print(f"fileType is {fileType}")
-        print(f"session['has_files'] is {session['has_files']}")
-        print(f"session['nmLig'] is {session['nmLig']}")
-        print(f"session['spLig'] is {session['spLig']}")
-        print(f"nmLigName is {nmLigName}")
-        print(f"spLigName is {spLigName}")
-        # print(f"nmLigFileName is {nmLigFileName}")
-        # print(f"nmLigName is {nmLigName}")
-        # print(f"spLigFileName is {spLigFileName}")
-        # print(f"spLigName is {spLigName}")
-        ######################################################################
-
     if fileType == "pdb":
         script.append("""\n############# Forcefield, Water and Membrane Model Selection ###################\n""")
         script.append("ff = '%s'" % session["forcefield"])
