@@ -60,7 +60,7 @@ Open a new terminal and clone this repository
 
 #### Install all required dependencies in a separate environment
 
-**OpenMMDL** is written in Python 3.10 and uses several packages, which can
+**OpenMMDL** supports Python 3.11-3.12 and uses several packages, which can
 be easily installed on a separate environment using conda (we recommend
 using miniconda):
 
@@ -242,7 +242,7 @@ This Project is based on the
 [url_ci_cd]: https://github.com/wolberlab/OpenMMDL/actions/workflows/CI-CD.yml
 [url_codeql]: https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml
 [url_docs]: https://openmmdl.readthedocs.io/en/stable/
-[url_codecov]: https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml
+[url_codecov]: https://codecov.io/gh/talagayev/OpenMMDL
 [url_conda_forge]: https://anaconda.org/conda-forge/openmmdl
 [url_rdkit]: https://www.rdkit.org/
 [url_mda]: https://www.mdanalysis.org
