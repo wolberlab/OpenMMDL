@@ -4,7 +4,7 @@
 The **OpenMMDL Simulation** script creates output folders and files during and after the simulation.
 
 The following list contains a detailed overview of the folders and files:
-The Optional files are highlighted with an *asterisk**
+Optional files are highlighted with an *asterisk*.
 
 Input Files
 ------------------------------
@@ -62,7 +62,7 @@ MD Files
      - Prepared PDB file without solvent or membrane.
    * - solvent_padding_protein_name.pdb*
      - Prepared PDB file with padding solvent.
-   * - solvent_absoulte_protein_name.pdb*
+   * - solvent_absolute_protein_name.pdb*
      - Prepared PDB file with absolute solvent.
    * - membrane_protein_name.pdb*
      - Prepared PDB file with membrane.
