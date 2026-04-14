@@ -11,7 +11,29 @@ openmmdl_simulation.scripts.cleaning_procedures
     Removes intermediate folders after outputs have been organized.
     
     Keeps only the copied input files and final outputs.
-   
+
+
+.. py:function:: close_reporters(simulation)
+    
+    Close file-backed reporters attached to an OpenMM simulation without
+    closing ``sys.stdout`` or ``sys.stderr``.
+    
+    :param simulation: OpenMM simulation object with reporters attached.
+
+    :returns: None.
+    :rtype: None
+
+
+.. py:function:: close_reporters(simulation)
+
+    Closes file-backed reporters attached to an OpenMM simulation without
+    closing ``sys.stdout`` or ``sys.stderr``.
+
+    :param simulation: OpenMM simulation object with reporters attached.
+
+    :returns: None.
+    :rtype: None
+
 
 .. py:function:: create_directory_if_not_exists(directory_path)
     
@@ -45,9 +67,7 @@ openmmdl_simulation.scripts.cleaning_procedures
     :rtype: None
 
 
-
-
-.. py:function:: post_md_file_movement(protein_name: str, prmtop: str = None, inpcrd: str = None, ligands: List[str] = None)
+.. py:function:: post_md_file_movement(protein_name: str, prmtop: str = None, inpcrd: str = None, ligands: List[str] = None, mda_selection: str = "mda_prot_lig_all")
     
     Organizes and moves the files after the MD simulation to their respective directories.
     
@@ -55,6 +75,7 @@ openmmdl_simulation.scripts.cleaning_procedures
     :param prmtop: Path to the AMBER topology file.
     :param inpcrd: Path to the AMBER coordinate file.
     :param ligands: List of paths to the ligand files.
+    :param str mda_selection: Selection of the MDAnalysis output layout. Supported values are ``mda_all``, ``mda_prot_lig``, and ``mda_prot_lig_all``.
     :type prmtop: Optional [str]
     :type inpcrd: Optional [str]
     :type ligands: Optional [List[str]]

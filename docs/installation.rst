@@ -14,7 +14,7 @@ Installation via conda-forge
 
 Installation via repository
 ------------------------------
-**OpenMMDL** can be installed through the cloning of the repository and the installation of the required packages listed in *environment.yml* or *requirements.txt*
+**OpenMMDL** can be installed from the repository by creating the conda environment defined in *environment.yml*.
 
 The first step of the installation of **OpenMMDL** on your device consists in the cloning of **OpenMMDL** to your home directory.
 This can be achieved by using the following command lines:
@@ -24,12 +24,12 @@ This can be achieved by using the following command lines:
     cd ~
     git clone https://github.com/wolberlab/OpenMMDL
 
-**OpenMMDL** is written in Python 3.10 and uses several packages, which can be easily installed on a separate environment using conda (we recommend using miniconda):
+**OpenMMDL** supports Python 3.11-3.12 and uses several packages, which can be installed in a separate conda environment (we recommend miniconda):
 
 .. code-block:: text
 
     cd OpenMMDL
-    conda create -n openmmdl -c conda-forge --file requirements.txt
+    conda env create -f environment.yml -n openmmdl
 
 After installation, activate the conda environment:
 

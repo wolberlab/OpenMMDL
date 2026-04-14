@@ -4,7 +4,7 @@
 The **OpenMMDL Simulation** script creates output folders and files during and after the simulation.
 
 The following list contains a detailed overview of the folders and files:
-The Optional files are highlighted with an *asterisk**
+Optional files are highlighted with an *asterisk*.
 
 Input Files
 ------------------------------
@@ -22,6 +22,10 @@ Input Files
      - Protein PDB file that served as the input for the MD simulation.
    * - ligand_name.sdf*
      - Ligand SDF file that served as the input for the MD simulation.
+   * - ligand_name.mol / ligand_name.mol2*
+     - Additional ligand or cofactor files that served as input for the MD simulation.
+   * - ligand_*_pc.mol2*
+     - Ligand MOL2 files written with partial charges for downstream analysis and inspection.
 
 Checkpoints
 ------------------------------
@@ -58,7 +62,7 @@ MD Files
      - Prepared PDB file without solvent or membrane.
    * - solvent_padding_protein_name.pdb*
      - Prepared PDB file with padding solvent.
-   * - solvent_absoulte_protein_name.pdb*
+   * - solvent_absolute_protein_name.pdb*
      - Prepared PDB file with absolute solvent.
    * - membrane_protein_name.pdb*
      - Prepared PDB file with membrane.
@@ -120,7 +124,9 @@ MD Postprocessing
      
 Final Output
 ------------------------------
-**Final Output**: A folder that contains the final files after the MD simulation, ready to be analyzed. This folder contains 2 subfolders.
+**Final Output**: A folder that contains the final files after the MD simulation, ready to be analyzed.
+Depending on the selected MDAnalysis output mode, this folder may contain
+``All_Atoms``, ``Prot_Lig``, or both subfolders.
 
 1. *All Atoms*: Folder that contains the centered topology files of all atoms with new coordinates according to the center of mass.
 
@@ -138,7 +144,10 @@ Final Output
      - Trajectory file of the aligned centered protein in DCD format with all atoms and new coordinates.
    * - centered_traj.xtc*
      - Trajectory file of the aligned centered protein in XTC format with all atoms and new coordinates.
-
+   * - ligand_name.sdf / ligand_name.mol / ligand_name.mol2*
+     - Ligand and cofactor input files copied into the final all-atoms output folder.
+   * - ligand_*_pc.mol2*
+     - Ligand MOL2 files with partial charges copied into the final all-atoms output folder.
 
 
 2. *Prot Lig*: Folder that contains the centered topology files of only the protein and ligand atoms with new coordinates according to the center of mass.
@@ -160,3 +169,7 @@ Final Output
      - Trajectory file of the centered protein in DCD format with only protein and ligand atoms and new coordinates.
    * - prot_lig_traj.xtc*
      - Trajectory file of the centered protein in XTC format with only protein and ligand atoms and new coordinates.
+   * - ligand_name.sdf / ligand_name.mol / ligand_name.mol2*
+     - Ligand and cofactor input files copied into the final protein-ligand output folder.
+   * - ligand_*_pc.mol2*
+     - Ligand MOL2 files with partial charges copied into the final protein-ligand output folder.

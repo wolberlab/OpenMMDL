@@ -17,6 +17,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath(".."))
+from openmmdl._version import __version__
 
 
 # -- Project information -----------------------------------------------------
@@ -29,9 +30,9 @@ copyright = (
 author = "Valerij Talagayev & Yu Chen"
 
 # The short X.Y version
-version = ""
+version = ".".join(__version__.split(".")[:2])
 # The full version, including alpha/beta/rc tags
-release = ""
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------

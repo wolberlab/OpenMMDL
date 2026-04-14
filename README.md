@@ -60,7 +60,7 @@ Open a new terminal and clone this repository
 
 #### Install all required dependencies in a separate environment
 
-**OpenMMDL** is written in Python 3.10 and uses several packages, which can
+**OpenMMDL** supports Python 3.11-3.12 and uses several packages, which can
 be easily installed on a separate environment using conda (we recommend
 using miniconda):
 
@@ -77,7 +77,7 @@ After installation, activate the conda environment:
 
 ## OpenMMDL Setup
 
-**OpenMMDL Setup** will allow you to prepare the files needed to perform a  protein-ligand complex MD simulation with **OpenMM**.
+**OpenMMDL Setup** will allow you to prepare the files needed to perform a protein-ligand complex MD simulation with **OpenMM**.
 
 ### Usage
 
@@ -110,15 +110,28 @@ Start the simulation with the following Inputs:
 -s = Python script from the setup including the path
 
 #### Optional:
--l = SDF file of the ligands, if the ligands was selected during OpenMMDL
-Setup. The SDF file name should be consistent with the input in the setup
+-l = Ligand/cofactor/additional-molecule file(s) in SDF, MOL or MOL2 format.
+Repeat -l or pass multiple files after one -l.
 
 -c = Coordinates file of Amber
 
+--failure-retries = Number of reruns if OpenMM fails with "Particle coordinate is NaN"
 
 #### Command line example with ligand
 
     openmmdl simulation -f {path/to/folder_name} -t {path/to/topology} -s {path/to/script} -l {path/to/ligand}
+
+#### Command line example with multiple ligands
+
+    openmmdl simulation -f {path/to/folder_name} -t {path/to/topology} -s {path/to/script} -l {path/to/ligand1} {path/to/ligand2}
+
+If a simulation exits with the OpenMM error ``Particle coordinate is NaN``,
+**OpenMMDL Simulation** can automatically retry the run while keeping the
+original input files.
+
+The final postprocessing layout depends on the selected MDAnalysis output mode
+and may create either ``Final_Output/All_Atoms``, ``Final_Output/Prot_Lig``,
+or both.
 
 ## OpenMMDL Analysis
 
@@ -242,7 +255,7 @@ This Project is based on the
 [url_ci_cd]: https://github.com/wolberlab/OpenMMDL/actions/workflows/CI-CD.yml
 [url_codeql]: https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml
 [url_docs]: https://openmmdl.readthedocs.io/en/stable/
-[url_codecov]: https://github.com/wolberlab/OpenMMDL/actions/workflows/codeql.yml
+[url_codecov]: https://codecov.io/gh/talagayev/OpenMMDL
 [url_conda_forge]: https://anaconda.org/conda-forge/openmmdl
 [url_rdkit]: https://www.rdkit.org/
 [url_mda]: https://www.mdanalysis.org
