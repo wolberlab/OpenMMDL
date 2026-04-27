@@ -15,6 +15,18 @@ The rules for this file:
     * YYYY-MM-DD date format (following ISO 8601)
   * accompany each entry with github issue/PR number (Issue #xyz)
 -->
+## Version X.X.X
+
+### Authors
+talagayev
+
+### Added
+
+### Fixed
+- Fixed `OPC` water recognition error (2026-04-28, PR#203)
+
+### Changed
+
 ## Version 1.3.0
 
 ### Authors

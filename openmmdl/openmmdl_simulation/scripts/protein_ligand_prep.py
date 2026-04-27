@@ -224,8 +224,10 @@ def water_padding_solvent_builder(
             ionicStrength=water_ionicstrength * unit.molar,
         )
     else:
-        if model_water == "tip4pfb":
+        if model_water in ("tip4pfb", "opc"):
             model_water = "tip4pew"
+        elif model_water == "opc3":
+            model_water = "tip3p"
         modeller.addSolvent(
             forcefield,
             model=model_water,
@@ -295,8 +297,10 @@ def water_absolute_solvent_builder(
             ionicStrength=water_ionicstrength * unit.molar,
         )
     else:
-        if model_water == "tip4pfb":
+        if model_water in ("tip4pfb", "opc"):
             model_water = "tip4pew"
+        elif model_water == "opc3":
+            model_water = "tip3p"
         modeller.addSolvent(
             forcefield,
             model=model_water,
@@ -423,4 +427,3 @@ def water_conversion(model_water, modeller_pre_conversion, protein_name):
         PDBFile.writeFile(modeller.topology, modeller.positions, outfile)
 
     return modeller
-

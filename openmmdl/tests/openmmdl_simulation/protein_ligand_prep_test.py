@@ -237,6 +237,156 @@ def test_water_absolute_solvent_builder():
     )
     assert protein_absolute_solved is not None
 
+def test_water_padding_solvent_builder_opc():
+    opc_ff = "AMBER19"
+    opc_water = "OPC"
+    opc_forcefield_selected = ff_selection(opc_ff)
+    opc_water_selected = water_forcefield_selection(
+        water=opc_water,
+        forcefield_selection=opc_forcefield_selected,
+    )
+    opc_model_water = water_model_selection(
+        water=opc_water,
+        forcefield_selection=opc_forcefield_selected,
+    )
+    opc_forcefield = generate_forcefield(
+        protein_ff=opc_forcefield_selected,
+        solvent_ff=opc_water_selected,
+        add_membrane=False,
+        rdkit_mol=ligand_prepared,
+        smallMoleculeForceField="gaff",
+        smallMoleculeForceFieldVersion="gaff-2.1",
+    )
+    opc_modeller = app.Modeller(complex_topology, complex_positions)
+
+    protein_buffer_solved = water_padding_solvent_builder(
+        opc_model_water,
+        opc_forcefield,
+        water_padding_distance,
+        protein_pdb,
+        opc_modeller,
+        water_positive_ion,
+        water_negative_ion,
+        water_ionicstrength,
+        protein,
+    )
+
+    assert protein_buffer_solved is not None
+
+
+def test_water_padding_solvent_builder_opc3():
+    opc3_ff = "AMBER19"
+    opc3_water = "OPC3"
+    opc3_forcefield_selected = ff_selection(opc3_ff)
+    opc3_water_selected = water_forcefield_selection(
+        water=opc3_water,
+        forcefield_selection=opc3_forcefield_selected,
+    )
+    opc3_model_water = water_model_selection(
+        water=opc3_water,
+        forcefield_selection=opc3_forcefield_selected,
+    )
+    opc3_forcefield = generate_forcefield(
+        protein_ff=opc3_forcefield_selected,
+        solvent_ff=opc3_water_selected,
+        add_membrane=False,
+        rdkit_mol=ligand_prepared,
+        smallMoleculeForceField="gaff",
+        smallMoleculeForceFieldVersion="gaff-2.1",
+    )
+    opc3_modeller = app.Modeller(complex_topology, complex_positions)
+
+    protein_buffer_solved = water_padding_solvent_builder(
+        opc3_model_water,
+        opc3_forcefield,
+        water_padding_distance,
+        protein_pdb,
+        opc3_modeller,
+        water_positive_ion,
+        water_negative_ion,
+        water_ionicstrength,
+        protein,
+    )
+
+    assert protein_buffer_solved is not None
+
+
+def test_water_absolute_solvent_builder_opc():
+    opc_ff = "AMBER19"
+    opc_water = "OPC"
+    opc_forcefield_selected = ff_selection(opc_ff)
+    opc_water_selected = water_forcefield_selection(
+        water=opc_water,
+        forcefield_selection=opc_forcefield_selected,
+    )
+    opc_model_water = water_model_selection(
+        water=opc_water,
+        forcefield_selection=opc_forcefield_selected,
+    )
+    opc_forcefield = generate_forcefield(
+        protein_ff=opc_forcefield_selected,
+        solvent_ff=opc_water_selected,
+        add_membrane=False,
+        rdkit_mol=ligand_prepared,
+        smallMoleculeForceField="gaff",
+        smallMoleculeForceFieldVersion="gaff-2.1",
+    )
+    opc_modeller = app.Modeller(complex_topology, complex_positions)
+
+    protein_absolute_solved = water_absolute_solvent_builder(
+        opc_model_water,
+        opc_forcefield,
+        water_box_x,
+        water_box_y,
+        water_box_z,
+        protein_pdb,
+        opc_modeller,
+        water_positive_ion,
+        water_negative_ion,
+        water_ionicstrength,
+        protein,
+    )
+
+    assert protein_absolute_solved is not None
+
+
+def test_water_absolute_solvent_builder_opc3():
+    opc3_ff = "AMBER19"
+    opc3_water = "OPC3"
+    opc3_forcefield_selected = ff_selection(opc3_ff)
+    opc3_water_selected = water_forcefield_selection(
+        water=opc3_water,
+        forcefield_selection=opc3_forcefield_selected,
+    )
+    opc3_model_water = water_model_selection(
+        water=opc3_water,
+        forcefield_selection=opc3_forcefield_selected,
+    )
+    opc3_forcefield = generate_forcefield(
+        protein_ff=opc3_forcefield_selected,
+        solvent_ff=opc3_water_selected,
+        add_membrane=False,
+        rdkit_mol=ligand_prepared,
+        smallMoleculeForceField="gaff",
+        smallMoleculeForceFieldVersion="gaff-2.1",
+    )
+    opc3_modeller = app.Modeller(complex_topology, complex_positions)
+
+    protein_absolute_solved = water_absolute_solvent_builder(
+        opc3_model_water,
+        opc3_forcefield,
+        water_box_x,
+        water_box_y,
+        water_box_z,
+        protein_pdb,
+        opc3_modeller,
+        water_positive_ion,
+        water_negative_ion,
+        water_ionicstrength,
+        protein,
+    )
+
+    assert protein_absolute_solved is not None
 
 if __name__ == "__main__":
     pytest.main()
