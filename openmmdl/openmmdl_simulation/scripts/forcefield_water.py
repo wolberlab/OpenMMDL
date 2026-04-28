@@ -126,6 +126,7 @@ def water_model_selection(water, forcefield_selection):
         "SPC/E": "spce",
         "TIP4P-Ew": "tip4pew",
         "TIP4P-FB": "tip4pfb",
+        "TIP5P": "tip5p",        
         "OPC": "opc",
         "OPC3": "opc3",
     }
