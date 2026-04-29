@@ -23,6 +23,7 @@ talagayev
 ### Added
 
 ### Fixed
+- Fixed remaining water type recognition errors (2026-04-29, PR#205)
 - Fixed `OPC` water recognition error (2026-04-28, PR#203)
 
 ### Changed
