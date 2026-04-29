@@ -180,14 +180,6 @@ def test_water_model_selection():
     assert water_model_selection("TIP5P", "amber99sbildn.xml") == "tip5p"
     assert water_model_selection("TIP5P", "amber03.xml") == "tip5p"
     assert water_model_selection("TIP5P", "amber10.xml") == "tip5p"
-    
-    assert water_model_selection("TIP5P", "amber99sb.xml") is None
-    assert water_model_selection("TIP5P", "amber99sbildn.xml") is None
-    assert water_model_selection("TIP5P", "amber03.xml") is None
-    assert water_model_selection("TIP5P", "amber10.xml") is None
-    assert (
-        water_model_selection("TIP5P", "amber14-all.xml") is None
-    )  # Missing in the initial version
 
     assert water_model_selection("TIP5P", "amber14-all.xml") is None
     assert water_model_selection("TIP5P", "amber19-all.xml") is None
