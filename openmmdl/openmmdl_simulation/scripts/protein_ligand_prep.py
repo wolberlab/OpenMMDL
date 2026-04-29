@@ -376,7 +376,26 @@ def membrane_builder(
                 ionicStrength=membrane_ionicstrength * unit.molar,
             )
         else:
-            if model_water == "tip4pew" or model_water == "tip5p":
+            virtual_site_membrane_waters = {
+                "tip4pew",
+                "tip4pfb",
+                "tip5p",
+                "opc",
+                "charmm_tip4pew",
+            }
+
+            convertible_waters = {
+                "tip4pew",
+            }
+
+            extra_particle_waters = {
+                "tip4pfb",
+                "opc",
+                "tip5p",
+                "charmm_tip4pew",
+            }
+
+            if model_water in virtual_site_membrane_waters:
                 modeller.addMembrane(
                     transitional_forcefield,
                     lipidType=membrane_lipid_type,
@@ -385,6 +404,12 @@ def membrane_builder(
                     negativeIon=membrane_negative_ion,
                     ionicStrength=membrane_ionicstrength * unit.molar,
                 )
+
+                if model_water in convertible_waters:
+                    modeller.convertWater(model_water)
+                elif model_water in extra_particle_waters:
+                    modeller.addExtraParticles(forcefield)
+
             else:
                 modeller.addMembrane(
                     forcefield,
@@ -427,3 +452,4 @@ def water_conversion(model_water, modeller_pre_conversion, protein_name):
         PDBFile.writeFile(modeller.topology, modeller.positions, outfile)
 
     return modeller
+

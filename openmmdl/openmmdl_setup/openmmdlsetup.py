@@ -1456,15 +1456,12 @@ if add_membrane:
 forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=None)        
 modeller = app.Modeller(protein_pdb.topology, protein_pdb.positions)
 if add_membrane:
-    membrane_builder(ff, model_water, forcefield, transitional_forcefield, protein_pdb, modeller, membrane_lipid_type, membrane_padding, membrane_positive_ion, membrane_negative_ion, membrane_ionicstrength, protein)
+    modeller = membrane_builder(ff, model_water, forcefield, transitional_forcefield, protein_pdb, modeller, membrane_lipid_type, membrane_padding, membrane_positive_ion, membrane_negative_ion, membrane_ionicstrength, protein)
 elif not add_membrane:
     if Water_Box == "Buffer":
-        water_padding_solvent_builder(model_water, forcefield, water_padding_distance, protein_pdb, modeller, water_positive_ion, water_negative_ion, water_ionicstrength, protein)
+        modeller = water_padding_solvent_builder(model_water, forcefield, water_padding_distance, protein_pdb, modeller, water_positive_ion, water_negative_ion, water_ionicstrength, protein)
     elif Water_Box == "Absolute":
-        water_absolute_solvent_builder(model_water, forcefield, water_box_x, water_box_y, water_box_z, protein_pdb, modeller, water_positive_ion, water_negative_ion, water_ionicstrength, protein)
-if add_membrane:
-    if model_water == 'tip4pew' or model_water == 'tip5p':
-        water_conversion(model_water, modeller, protein)
+        modeller = water_absolute_solvent_builder(model_water, forcefield, water_box_x, water_box_y, water_box_z, protein_pdb, modeller, water_positive_ion, water_negative_ion, water_ionicstrength, protein)
 topology = modeller.topology
 positions = modeller.positions
 positions_for_equil = np.array(positions.value_in_unit(unit.nanometers)) * unit.nanometers """
@@ -1474,15 +1471,12 @@ positions_for_equil = np.array(positions.value_in_unit(unit.nanometers)) * unit.
                 """
 modeller = app.Modeller(complex_topology, complex_positions)
 if add_membrane:
-    membrane_builder(ff, model_water, forcefield, transitional_forcefield, protein_pdb, modeller, membrane_lipid_type, membrane_padding, membrane_positive_ion, membrane_negative_ion, membrane_ionicstrength, protein)
+    modeller = membrane_builder(ff, model_water, forcefield, transitional_forcefield, protein_pdb, modeller, membrane_lipid_type, membrane_padding, membrane_positive_ion, membrane_negative_ion, membrane_ionicstrength, protein)
 elif not add_membrane:
     if Water_Box == "Buffer":
-        water_padding_solvent_builder(model_water, forcefield, water_padding_distance, protein_pdb, modeller, water_positive_ion, water_negative_ion, water_ionicstrength, protein)
+        modeller = water_padding_solvent_builder(model_water, forcefield, water_padding_distance, protein_pdb, modeller, water_positive_ion, water_negative_ion, water_ionicstrength, protein)
     elif Water_Box == "Absolute":
-        water_absolute_solvent_builder(model_water, forcefield, water_box_x, water_box_y, water_box_z, protein_pdb, modeller, water_positive_ion, water_negative_ion, water_ionicstrength, protein)  
-if add_membrane:
-    if model_water == 'tip4pew' or model_water == 'tip5p':
-        water_conversion(model_water, modeller, protein)
+        modeller = water_absolute_solvent_builder(model_water, forcefield, water_box_x, water_box_y, water_box_z, protein_pdb, modeller, water_positive_ion, water_negative_ion, water_ionicstrength, protein)
 topology = modeller.topology
 positions = modeller.positions  
 positions_for_equil = np.array(positions.value_in_unit(unit.nanometers)) * unit.nanometers """
@@ -2142,3 +2136,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
