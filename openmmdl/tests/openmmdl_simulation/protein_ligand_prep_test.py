@@ -417,13 +417,13 @@ class DummyModeller:
 
 def _run_membrane_builder(monkeypatch, tmp_path, model_water):
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr(protein_ligand_prep.PDBFile, "writeFile", lambda *args, **kwargs: None)
+    monkeypatch.setattr(membrane_builder.__globals__["PDBFile"], "writeFile", lambda *args, **kwargs: None)
 
     modeller = DummyModeller()
     forcefield = DummyForceField("final")
     transitional_forcefield = DummyForceField("transitional")
 
-    returned = protein_ligand_prep.membrane_builder(
+    returned = membrane_builder(
         ff="AMBER99SB",
         model_water=model_water,
         forcefield=forcefield,
