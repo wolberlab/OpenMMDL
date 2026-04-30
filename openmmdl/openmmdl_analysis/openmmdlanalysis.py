@@ -8,44 +8,50 @@ import sys
 import warnings
 import traceback
 
-import MDAnalysis as mda
-import cairosvg
-import matplotlib
-import pandas as pd
-import rdkit
-from contextlib import contextmanager
-from plip.basic import config
-from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem.Draw import rdMolDraw2D
-from tqdm import tqdm
+def _load_analysis_dependencies():
+    """Import heavy analysis dependencies only after argparse has handled --help."""
+    global mda, cairosvg, matplotlib, pd, rdkit
+    global config, Chem, AllChem, rdMolDraw2D, tqdm
+    global Preprocessing, RMSDAnalyzer, InteractionAnalyzer, BindingModeProcesser
+    global MarkovChainAnalysis
+    global FigureHighlighter, LigandImageGenerator
+    global FigureArranger, FigureMerger
+    global BarcodeGenerator, BarcodePlotter
+    global TrajectorySaver, PharmacophoreGenerator, StableWaters
+    global update_dict, update_values
 
-from openmmdl.utils.logging_utils import setup_logging
-from openmmdl.openmmdl_analysis.core.preprocessing import Preprocessing
-from openmmdl.openmmdl_analysis.analysis.rmsd import RMSDAnalyzer
-from openmmdl.openmmdl_analysis.analysis.interactions import InteractionAnalyzer
-from openmmdl.openmmdl_analysis.analysis.bindingmodes import BindingModeProcesser
-from openmmdl.openmmdl_analysis.analysis.markovchains import (
-    MarkovChainAnalysis,
-)
-from openmmdl.openmmdl_analysis.visualization.highlighting import (
-    FigureHighlighter,
-    LigandImageGenerator,
-)
-from openmmdl.openmmdl_analysis.visualization.figures import (
-    FigureArranger,
-    FigureMerger,
-)
-from openmmdl.openmmdl_analysis.visualization.barcodes import (
-    BarcodeGenerator,
-    BarcodePlotter,
-)
-from openmmdl.openmmdl_analysis.core.trajectories import TrajectorySaver
-from openmmdl.openmmdl_analysis.visualization.pharmacophore import (
-    PharmacophoreGenerator,
-)
-from openmmdl.openmmdl_analysis.analysis.wateranalysis import StableWaters
-from openmmdl.openmmdl_analysis.core.utils import update_dict, update_values
+    import MDAnalysis as mda
+    import cairosvg
+    import matplotlib
+    import pandas as pd
+    import rdkit
+    from plip.basic import config
+    from rdkit import Chem
+    from rdkit.Chem import AllChem
+    from rdkit.Chem.Draw import rdMolDraw2D
+    from tqdm import tqdm
+
+    from openmmdl.openmmdl_analysis.core.preprocessing import Preprocessing
+    from openmmdl.openmmdl_analysis.analysis.rmsd import RMSDAnalyzer
+    from openmmdl.openmmdl_analysis.analysis.interactions import InteractionAnalyzer
+    from openmmdl.openmmdl_analysis.analysis.bindingmodes import BindingModeProcesser
+    from openmmdl.openmmdl_analysis.analysis.markovchains import MarkovChainAnalysis
+    from openmmdl.openmmdl_analysis.visualization.highlighting import (
+        FigureHighlighter,
+        LigandImageGenerator,
+    )
+    from openmmdl.openmmdl_analysis.visualization.figures import (
+        FigureArranger,
+        FigureMerger,
+    )
+    from openmmdl.openmmdl_analysis.visualization.barcodes import (
+        BarcodeGenerator,
+        BarcodePlotter,
+    )
+    from openmmdl.openmmdl_analysis.core.trajectories import TrajectorySaver
+    from openmmdl.openmmdl_analysis.visualization.pharmacophore import PharmacophoreGenerator
+    from openmmdl.openmmdl_analysis.analysis.wateranalysis import StableWaters
+    from openmmdl.openmmdl_analysis.core.utils import update_dict, update_values
 
 
 warnings.filterwarnings("ignore")
@@ -259,6 +265,7 @@ def main():
     run_root = os.getcwd()
 
     args = parser.parse_args()
+    _load_analysis_dependencies()
     setup_logging(
         verbose=args.verbose,
         log_dir=os.getcwd(),
