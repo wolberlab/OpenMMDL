@@ -7,6 +7,7 @@ import pickle
 import sys
 import warnings
 import traceback
+from contextlib import contextmanager
 
 def _load_analysis_dependencies():
     """Import heavy analysis dependencies only after argparse has handled --help."""
