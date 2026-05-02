@@ -21,7 +21,7 @@ COMMANDS: Dict[str, tuple[str, str]] = {
         "Analyze an OpenMMDL MD trajectory",
     ),
     "visualization": (
-        "openmmdl.openmmdl_analysis.visualization.cli:main",
+        "openmmdl.openmmdl_visualization.cli:main",
         "Launch the visualization notebook",
     ),
 }

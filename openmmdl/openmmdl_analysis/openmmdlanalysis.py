@@ -9,6 +9,8 @@ import warnings
 import traceback
 from contextlib import contextmanager
 
+from openmmdl.utils.logging_utils import setup_logging
+
 def _load_analysis_dependencies():
     """Import heavy analysis dependencies only after argparse has handled --help."""
     global mda, cairosvg, matplotlib, pd, rdkit
@@ -751,6 +753,8 @@ def run_analysis(args) -> int:
     if stable_water_analysis:
         stable_water_analyser.stable_waters_pipeline(topology, trajectory, water_eps)
         stable_water_analyser.analyze_protein_and_water_interaction(topology, "representative_waters.pdb", water_eps)
+
+    return 0
 
 
 def main(argv=None) -> int:
