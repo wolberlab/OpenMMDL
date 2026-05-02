@@ -2123,15 +2123,17 @@ stages = [
     return "\n".join(script)
 
 
-def main():
-    def open_browser():
+def main(host="127.0.0.1", port=5000, open_browser=True):
+    def _open_browser():
         # Give the server a moment to start before opening the browser.
         time.sleep(1)
-        url = "http://127.0.0.1:5000"
+        url = f"http://{host}:{port}"
         webbrowser.open(url)
 
-    threading.Thread(target=open_browser).start()
-    app.run(debug=False)
+    if open_browser:
+        threading.Thread(target=_open_browser, daemon=True).start()
+
+    app.run(host=host, port=port, debug=False)
 
 
 if __name__ == "__main__":

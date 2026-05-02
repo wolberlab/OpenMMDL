@@ -137,3 +137,15 @@ def run_visualization():
     current_dir = os.getcwd()
     shutil.copyfile(notebook_path, f"{current_dir}/visualization.ipynb")
     subprocess.run(["jupyter", "notebook", "visualization.ipynb"])
+
+
+def main(argv=None) -> int:
+    from openmmdl.openmmdl_visualization.cli import build_parser
+
+    build_parser().parse_args(argv)
+    run_visualization()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
