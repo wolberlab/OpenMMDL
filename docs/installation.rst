@@ -45,6 +45,30 @@ Install the **OpenMMDL** package with the required entry points via pip:
 
 This should lead to the environment having now all the required packages and entry points for **OpenMMDL**.
 
+Checking the installation
+------------------------------
+
+After installing **OpenMMDL**, you can check whether the entry points
+and packages are available with:
+
+.. code-block:: text
+
+    openmmdl check
+
+This command prints the **OpenMMDL** version, Python version, platform information,
+and the availability of important dependencies such as **OpenMM**, **MDAnalysis**,
+**RDKit**, **ProLIF**, **PLIP**, **Flask**, and **NGLView**.
+
+For CI or scripted checks, use:
+
+.. code-block:: text
+
+    openmmdl check --strict
+
+With ``--strict``, the command exits with a non-zero return code if a required
+dependency is missing.
+
+
 Installation via Docker
 ------------------------------
 
