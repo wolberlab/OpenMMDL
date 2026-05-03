@@ -9,19 +9,19 @@ from openmmdl import __version__
 
 COMMANDS: Dict[str, tuple[str, str]] = {
     "setup": (
-        "openmmdl.openmmdl_setup.openmmdlsetup:main",
+        "openmmdl.openmmdl_setup.cli:main",
         "Start the OpenMMDL setup UI (prepare inputs for simulation)",
     ),
     "simulation": (
-        "openmmdl.openmmdl_simulation.openmmdlsimulation:main",
+        "openmmdl.openmmdl_simulation.cli:main",
         "Run OpenMM protein-ligand MD simulation",
     ),
     "analysis": (
-        "openmmdl.openmmdl_analysis.openmmdlanalysis:main",
+        "openmmdl.openmmdl_analysis.cli:main",
         "Analyze an OpenMMDL MD trajectory",
     ),
     "visualization": (
-        "openmmdl.openmmdl_analysis.visualization.visualization:run_visualization",
+        "openmmdl.openmmdl_visualization.cli:main",
         "Launch the visualization notebook",
     ),
 }

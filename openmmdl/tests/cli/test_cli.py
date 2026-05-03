@@ -1,5 +1,33 @@
+import pytest
+
 import openmmdl.cli.cli as cli
 
+
+def test_command_targets_use_cli_wrappers():
+    assert cli.COMMANDS["setup"][0] == "openmmdl.openmmdl_setup.cli:main"
+    assert cli.COMMANDS["simulation"][0] == "openmmdl.openmmdl_simulation.cli:main"
+    assert cli.COMMANDS["analysis"][0] == "openmmdl.openmmdl_analysis.cli:main"
+    assert cli.COMMANDS["visualization"][0] == "openmmdl.openmmdl_visualization.cli:main"
+
+
+@pytest.mark.parametrize(
+    ("command", "expected"),
+    [
+        ("setup", "Start the OpenMMDL setup UI"),
+        ("simulation", "Folder Name for MD Simulation"),
+        ("analysis", "Topology File after MD Simulation"),
+        ("visualization", "Launch the OpenMMDL visualization notebook"),
+    ],
+)
+
+def test_subcommand_help_works(command, expected, capsys):
+    rc = cli.main([command, "--help"])
+
+    captured = capsys.readouterr()
+    output = captured.out + captured.err
+
+    assert rc == 0
+    assert expected in output
 
 def test_main_without_args_prints_help_and_returns_0(capsys):
     rc = cli.main([])

@@ -7,45 +7,54 @@ import pickle
 import sys
 import warnings
 import traceback
-
-import MDAnalysis as mda
-import cairosvg
-import matplotlib
-import pandas as pd
-import rdkit
 from contextlib import contextmanager
-from plip.basic import config
-from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem.Draw import rdMolDraw2D
-from tqdm import tqdm
 
 from openmmdl.utils.logging_utils import setup_logging
-from openmmdl.openmmdl_analysis.core.preprocessing import Preprocessing
-from openmmdl.openmmdl_analysis.analysis.rmsd import RMSDAnalyzer
-from openmmdl.openmmdl_analysis.analysis.interactions import InteractionAnalyzer
-from openmmdl.openmmdl_analysis.analysis.bindingmodes import BindingModeProcesser
-from openmmdl.openmmdl_analysis.analysis.markovchains import (
-    MarkovChainAnalysis,
-)
-from openmmdl.openmmdl_analysis.visualization.highlighting import (
-    FigureHighlighter,
-    LigandImageGenerator,
-)
-from openmmdl.openmmdl_analysis.visualization.figures import (
-    FigureArranger,
-    FigureMerger,
-)
-from openmmdl.openmmdl_analysis.visualization.barcodes import (
-    BarcodeGenerator,
-    BarcodePlotter,
-)
-from openmmdl.openmmdl_analysis.core.trajectories import TrajectorySaver
-from openmmdl.openmmdl_analysis.visualization.pharmacophore import (
-    PharmacophoreGenerator,
-)
-from openmmdl.openmmdl_analysis.analysis.wateranalysis import StableWaters
-from openmmdl.openmmdl_analysis.core.utils import update_dict, update_values
+
+def _load_analysis_dependencies():
+    """Import heavy analysis dependencies only after argparse has handled --help."""
+    global mda, cairosvg, matplotlib, pd, rdkit
+    global config, Chem, AllChem, rdMolDraw2D, tqdm
+    global Preprocessing, RMSDAnalyzer, InteractionAnalyzer, BindingModeProcesser
+    global MarkovChainAnalysis
+    global FigureHighlighter, LigandImageGenerator
+    global FigureArranger, FigureMerger
+    global BarcodeGenerator, BarcodePlotter
+    global TrajectorySaver, PharmacophoreGenerator, StableWaters
+    global update_dict, update_values
+
+    import MDAnalysis as mda
+    import cairosvg
+    import matplotlib
+    import pandas as pd
+    import rdkit
+    from plip.basic import config
+    from rdkit import Chem
+    from rdkit.Chem import AllChem
+    from rdkit.Chem.Draw import rdMolDraw2D
+    from tqdm import tqdm
+
+    from openmmdl.openmmdl_analysis.core.preprocessing import Preprocessing
+    from openmmdl.openmmdl_analysis.analysis.rmsd import RMSDAnalyzer
+    from openmmdl.openmmdl_analysis.analysis.interactions import InteractionAnalyzer
+    from openmmdl.openmmdl_analysis.analysis.bindingmodes import BindingModeProcesser
+    from openmmdl.openmmdl_analysis.analysis.markovchains import MarkovChainAnalysis
+    from openmmdl.openmmdl_analysis.visualization.highlighting import (
+        FigureHighlighter,
+        LigandImageGenerator,
+    )
+    from openmmdl.openmmdl_analysis.visualization.figures import (
+        FigureArranger,
+        FigureMerger,
+    )
+    from openmmdl.openmmdl_analysis.visualization.barcodes import (
+        BarcodeGenerator,
+        BarcodePlotter,
+    )
+    from openmmdl.openmmdl_analysis.core.trajectories import TrajectorySaver
+    from openmmdl.openmmdl_analysis.visualization.pharmacophore import PharmacophoreGenerator
+    from openmmdl.openmmdl_analysis.analysis.wateranalysis import StableWaters
+    from openmmdl.openmmdl_analysis.core.utils import update_dict, update_values
 
 
 warnings.filterwarnings("ignore")
@@ -101,7 +110,7 @@ def parse_xyz(val):
     return [float(nums[0]), float(nums[1]), float(nums[2])]
 
 
-def main():
+def run_analysis(args) -> int:
     logo = "\n".join(
         [
             r"     ,-----.    .-------.     .-''-.  ,---.   .--.,---.    ,---.,---.    ,---. ______       .---.      ",
@@ -119,131 +128,6 @@ def main():
     )
     print(logo)
 
-    parser = argparse.ArgumentParser(
-        prog="openmmdl_analysis",
-        description=logo,
-        formatter_class=argparse.RawTextHelpFormatter,
-    )
-    parser.add_argument("-t", dest="topology", help="Topology File after MD Simulation", required=True)
-    parser.add_argument("-d", dest="trajectory", help="Trajectory File in DCD Format", required=True)
-    parser.add_argument(
-        "-n",
-        dest="ligand_name",
-        help="Ligand Name (3 Letter Code in PDB)",
-        default=None,
-    )
-    parser.add_argument("-l", dest="ligand_sdf", help="Ligand in SDF Format", default=None)
-    parser.add_argument(
-        "-b",
-        dest="binding",
-        help="Binding Mode Treshold for Binding Mode in %%",
-        default=40,
-    )
-    parser.add_argument(
-        "-df",
-        dest="dataframe",
-        help='Dataframe (use if the interactions were already calculated, default name would be "df_all.csv")',
-        default=None,
-    )
-    parser.add_argument(
-        "-f",
-        dest="frames",
-        help="final frame of the analysis (if you want to analyze only a certain part of the trajectory)",
-        default=None,
-    )
-    parser.add_argument(
-        "-m",
-        dest="min_transition",
-        help="Minimal Transition percentage for Markov State Model",
-        default=1,
-    )
-    parser.add_argument(
-        "-c",
-        dest="cpu_count",
-        help="cores, specify how many PC cores should be used, default is half of the PC cores",
-        default=os.cpu_count() // 2,
-    )
-    parser.add_argument(
-        "-p",
-        dest="generate_pml",
-        help="Generate .pml files for pharmacophore visualization (accepts true/false, yes/no, y/n)",
-        default=False,
-        type=parse_bool_flag,
-    )
-    parser.add_argument(
-        "-r",
-        dest="frame_rmsd",
-        help="Calculate RMSD differences between frames (accepts true/false, yes/no, y/n)",
-        default=False,
-        type=parse_bool_flag,
-    )
-    parser.add_argument(
-        "-nuc",
-        dest="receptor_nucleic",
-        help="Treat nucleic acids as receptor (accepts true/false, yes/no, y/n)",
-        default=False,
-        type=parse_bool_flag,
-    )
-    parser.add_argument(
-        "-s",
-        dest="special_ligand",
-        help="Calculate interactions with special ligands",
-        default=None,
-    )
-    parser.add_argument(
-        "-pep",
-        dest="peptide",
-        help="Calculate interactions with peptides. Give the peptides chain name as input. Defaults to None",
-        default=None,
-    )
-    parser.add_argument(
-        "-ref",
-        dest="reference",
-        help="Add a reference PDB to renumber the residue numbers",
-        default=None,
-    )
-    parser.add_argument(
-        "-w",
-        dest="stable_water_analysis",
-        help="Should stable water analysis be performed? (accepts true/false, yes/no, y/n)",
-        default=False,
-        type=parse_bool_flag,
-    )
-    parser.add_argument(
-        "-rep",
-        dest="representative_frame",
-        help="Calculate the representative frame for each binding mode (accepts true/false, yes/no, y/n)",
-        default=False,
-        type=parse_bool_flag,
-    )
-    parser.add_argument(
-        "--watereps",
-        dest="water_eps",
-        help="Set the Eps for clustering, this defines how big clusters can be spatially in Angstrom",
-        default=1.0,
-    )
-    parser.add_argument(
-        "--figure",
-        dest="figure_type",
-        help="File type for the figures, default is png. Can be changed to all file types supported by matplotlib.",
-        default="png",
-    )
-    parser.add_argument(
-        "--interaction_package",
-        dest="interaction_package",
-        choices=["plip", "prolif"],
-        default="plip",
-        help=(
-            "Protein-ligand interaction engine. "
-            "'plip' uses PLIP for interaction calculation. "
-            "'prolif' uses ProLIF for interaction calculation."
-        ),
-    )
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Enable verbose logging with module names and debug messages.",
-    )
 
     pdb_md = None
     input_formats = [
@@ -258,7 +142,8 @@ def main():
 
     run_root = os.getcwd()
 
-    args = parser.parse_args()
+    _load_analysis_dependencies()
+
     setup_logging(
         verbose=args.verbose,
         log_dir=os.getcwd(),
@@ -869,6 +754,14 @@ def main():
         stable_water_analyser.stable_waters_pipeline(topology, trajectory, water_eps)
         stable_water_analyser.analyze_protein_and_water_interaction(topology, "representative_waters.pdb", water_eps)
 
+    return 0
+
+
+def main(argv=None) -> int:
+    from openmmdl.openmmdl_analysis.cli import build_parser
+
+    args = build_parser().parse_args(argv)
+    return run_analysis(args)
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
