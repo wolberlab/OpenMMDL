@@ -75,6 +75,16 @@ After installation, activate the conda environment:
 
     pip install .
 
+## Check your installation
+
+After installing **OpenMMDL**, you can check whether the entry points
+and packages are available with:
+
+    openmmdl check
+
+This prints the OpenMMDL version, Python version, platform information, and the
+availability of important dependencies.
+
 ## OpenMMDL Setup
 
 **OpenMMDL Setup** will allow you to prepare the files needed to perform a protein-ligand complex MD simulation with **OpenMM**.

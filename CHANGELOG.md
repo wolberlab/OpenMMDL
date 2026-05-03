@@ -21,6 +21,7 @@ The rules for this file:
 talagayev
 
 ### Added
+- Added `openmmdl check` for testing correct installation (2026-05-03, PR#207)
 
 ### Fixed
 - Fixed remaining water type recognition errors (2026-04-29, PR#205)

@@ -24,6 +24,10 @@ COMMANDS: Dict[str, tuple[str, str]] = {
         "openmmdl.openmmdl_visualization.cli:main",
         "Launch the visualization notebook",
     ),
+    "check": (
+        "openmmdl.openmmdl_check.cli:main",
+        "Check the OpenMMDL installation and environment",
+    ),
 }
 
 

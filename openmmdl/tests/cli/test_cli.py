@@ -8,6 +8,7 @@ def test_command_targets_use_cli_wrappers():
     assert cli.COMMANDS["simulation"][0] == "openmmdl.openmmdl_simulation.cli:main"
     assert cli.COMMANDS["analysis"][0] == "openmmdl.openmmdl_analysis.cli:main"
     assert cli.COMMANDS["visualization"][0] == "openmmdl.openmmdl_visualization.cli:main"
+    assert cli.COMMANDS["check"][0] == "openmmdl.openmmdl_check.cli:main"
 
 
 @pytest.mark.parametrize(
@@ -17,6 +18,7 @@ def test_command_targets_use_cli_wrappers():
         ("simulation", "Folder Name for MD Simulation"),
         ("analysis", "Topology File after MD Simulation"),
         ("visualization", "Launch the OpenMMDL visualization notebook"),
+        ("check", "Check the OpenMMDL installation and runtime environment"),
     ],
 )
 
@@ -41,6 +43,7 @@ def test_main_without_args_prints_help_and_returns_0(capsys):
     assert "simulation" in output
     assert "setup" in output
     assert "visualization" in output
+    assert "check" in output
 
 
 def test_unknown_command_returns_2_and_prints_help(capsys):
