@@ -27,6 +27,7 @@ talagayev
 - Fixed `OPC` water recognition error (2026-04-28, PR#204)
 
 ### Changed
+- Changed imports to lightweight imports in `OpenMMDL Analysis` (2026-05-03, PR#206)
 
 ## Version 1.3.0
 
