@@ -103,6 +103,17 @@ the address displayed in the console window (e.g. http://127.0.0.1:5000).
 Download the processed PDB file and Python script, which will serve as input
 for the **OpenMMDL Simulation** script.
 
+### Interactive tutorial
+
+New users can click **Tutorials** in the Setup header to start a guided walkthrough
+that runs inside the interface. The **PDB small molecule** tutorial prepares the
+TLR8 dimer from PDB entry 5WYZ with both copies of its ligand: a panel on every
+page explains the current step, highlights the control to use, and can apply the
+expected choice with one click. The example files are available through the
+**Download files** button on the tutorial page. See the
+[Interactive Tutorials](https://openmmdl.readthedocs.io/en/latest/tutorials.html)
+page of the documentation for details.
+
 The Amber path additionally supports a **Glycoprotein** receptor mode for
 N-/O-glycosylated proteins. OpenMMDL detects sugar residues (NAG/NDG, BMA,
 MAN, FUC/FUL) by PDB residue name, renames them to GLYCAM-06j-1 conventions,

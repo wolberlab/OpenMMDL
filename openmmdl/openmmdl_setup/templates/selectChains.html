@@ -55,7 +55,9 @@ function optionChanged() {
         molStructure.clearRepresentations();
         {% for chain in chains %}
         if (checkboxes[{{ loop.index0 }}].checked) {
-            selection = ":"+String.fromCharCode({{ loop.index0+65 }})
+            // Select by the real chain ID. Hetero groups can share an ID with a polymer
+            // chain (e.g. a NAG listed under chain A), so split polymer and hetero rows.
+            selection = ":{{ chain[0] }} and {{ "polymer" if chain[2] in ('Protein', 'DNA', 'RNA') else "hetero" }}"
             if (heterogens == 'water')
                 selection += " and (protein or nucleic or water)"
             if (heterogens == 'none')

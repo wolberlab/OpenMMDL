@@ -54,10 +54,16 @@ simulation trajectories.
 
 .. toctree::
    :maxdepth: 1
+   :caption: Setup paths
+
+   pdb_path
+   amber_path
+
+.. toctree::
+   :maxdepth: 1
    :caption: Tutorials
-   
-   tutorial_pdb_path
-   tutorial_amber_path
+
+   tutorials
 
 
 .. toctree::

@@ -66,7 +66,7 @@ import shutil
 
 ligand_select = "yes"
 ligand_name = "UNK"
-ligand_sdf = "5VF.sdf"
+ligand_sdf = "7VF_B.sdf"
 
 minimize = False
 protein = "5wyz-moe-processed_openMMDL.pdb"

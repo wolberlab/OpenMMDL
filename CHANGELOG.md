@@ -21,6 +21,8 @@ The rules for this file:
 talagayev, MarvinTaterra
 
 ### Added
+- Added an interactive `PDB small molecule` tutorial inside `OpenMMDL Setup`
+  (2026-09-06, PR#213)
 - Added native glycoprotein support in `OpenMMDL Setup` AMBER path
   (2026-05-20, PR#210)
 - Added glycan-aware PBC imaging in `OpenMMDL Simulation`

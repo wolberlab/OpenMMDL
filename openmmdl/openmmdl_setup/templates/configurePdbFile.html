@@ -26,8 +26,8 @@ Select the pdb input file and options for how to model it.
     <div class="form-group">
     <label for="forcefield" class="control-label col-md-2">Force Field</label>
     <div class="col-md-10"><select name="forcefield" id="forcefield" class="form-control" title="CHARMM force field does not support ligands. Select Amber force fields for ligand-protein MD simulations" onchange="optionChanged()">
-        <option value="AMBER19" selected>AMBER19</option> 
-        <option value="AMBER14">AMBER14</option>
+        <option value="AMBER19">AMBER19</option>
+        <option value="AMBER14" selected>AMBER14</option>
         <option value="AMBER99SB">AMBER99SB</option>
         <option value="AMBER99SB-ILDN">AMBER99SB-ILDN</option>
         <option value="AMBER03">AMBER03</option>
@@ -80,7 +80,7 @@ Select the pdb input file and options for how to model it.
             <label class="control-label col-md-2">Additional Molecules</label>
             <div class="col-md-10">
                 <div id="companionFilesContainer"></div>
-                <button type="button" class="btn btn-default" onclick="addCompanionRow()">+ Add additional molecule</button>
+                <button type="button" id="addCompanionMolecule" class="btn btn-default" onclick="addCompanionRow()">+ Add additional molecule</button>
                 <p class="help-block" style="margin-top: 8px;">Each additional molecule is included in every generated system. Use one file per molecule. Default codes are L01, L02, L03, ...</p>
                 <p id="resnameDuplicateWarning" class="help-block om-resname-warning" style="display: none;">
                     Ligand topology codes must be unique. Please change duplicate values before continuing.
@@ -304,6 +304,7 @@ function removeCompanionRow(index) {
     optionChanged();
 }
 
+var lastForcefield = null;
 
 function optionChanged() {
     // Update UI elements.
@@ -314,10 +315,14 @@ function optionChanged() {
     forcefield = document.getElementById("forcefield").value;
     waterSelect = document.getElementById("waterModel");
 
+    forcefieldChanged = lastForcefield !== forcefield;
+
     // If you inject waterModel from the server, use it once; otherwise keep current selection
     currentWater = waterSelect.value;
     if (typeof waterModel !== "undefined" && waterModel) {
         currentWater = waterModel;
+    } else if (forcefield == "AMBER19" && forcefieldChanged) {
+        currentWater = "OPC3";
     }
 
     if (forcefield == 'CHARMMPOLAR2019')
@@ -362,6 +367,7 @@ function optionChanged() {
         waterModel = "";
     }
 
+    lastForcefield = forcefield;
     // -------------------------------------
     // Small molecule FF + versions handling
     // -------------------------------------

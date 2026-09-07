@@ -15,8 +15,18 @@ from flask import (
     render_template,
     make_response,
     send_file,
+    redirect,
+    url_for,
+    abort,
 )
 from werkzeug.utils import secure_filename
+from openmmdl.openmmdl_setup.setup_tutorials import (
+    PDB_TUTORIAL_DIR,
+    PDB_TUTORIAL_FILES,
+    PDB_TUTORIAL_ID,
+    PDB_TUTORIAL_PAGES,
+    PDB_TUTORIAL_README,
+)
 import datetime
 import os
 import shutil
@@ -34,10 +44,10 @@ warnings.filterwarnings("ignore")
 
 
 if sys.version_info >= (3, 0):
-    from io import StringIO
+    from io import BytesIO, StringIO
 else:
     from cStringIO import StringIO
-
+    from io import BytesIO
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -48,6 +58,95 @@ uploadedFiles = {}
 fixer = None
 scriptOutput = None
 simulationProcess = None
+
+
+def _docs_base_url():
+    """Documentation matching the running Setup: the stable docs for a release, the
+    latest docs for a development build (versioningit marks those with '+' or 'dev')."""
+    from openmmdl import __version__
+
+    channel = "latest" if ("+" in __version__ or "dev" in __version__) else "stable"
+    return "https://openmmdl.readthedocs.io/en/%s/" % channel
+
+
+def _setup_tutorial_context(page_key=None):
+    """Tutorial panel configuration for the page being rendered, or None when no
+    tutorial is running or the page has no tutorial steps."""
+    if session.get("setupTutorial") != PDB_TUTORIAL_ID or page_key not in PDB_TUTORIAL_PAGES:
+        return None
+    tutorial = dict(PDB_TUTORIAL_PAGES[page_key])
+    tutorial["docsUrl"] = _docs_base_url() + tutorial.get("docsUrl", "")
+    tutorial["stopUrl"] = url_for("stopTutorial")
+    if tutorial.pop("showFiles", False):
+        tutorial["filesUrl"] = url_for("downloadPdbSmallMoleculeTutorialFiles")
+    return tutorial
+
+
+def _setup_tutorial_active():
+    return session.get("setupTutorial") is not None
+
+
+@app.context_processor
+def inject_setup_tutorial_helpers():
+    return {
+        "setup_tutorial_context": _setup_tutorial_context,
+        "setup_tutorial_active": _setup_tutorial_active,
+    }
+
+
+@app.context_processor
+def inject_static_version():
+    def static_versioned(filename):
+        """Static URL with the file's mtime appended so browsers fetch the
+        latest copy after each edit (no manual hard-refresh needed)."""
+        try:
+            mtime = int(os.path.getmtime(os.path.join(app.static_folder, filename)))
+        except OSError:
+            mtime = 0
+        return url_for("static", filename=filename) + "?v=" + str(mtime)
+
+    return {"static_versioned": static_versioned}
+
+
+@app.route("/tutorials")
+def showTutorials():
+    return render_template("tutorials.html")
+
+
+@app.route("/tutorial/pdb-small-molecule")
+def startPdbSmallMoleculeTutorial():
+    # The session flag is the only tutorial state; it survives Back, Start Over and
+    # direct links, and is cleared only by /tutorial/stop.
+    session["setupTutorial"] = PDB_TUTORIAL_ID
+    session.pop("fileType", None)
+    return redirect(url_for("showSelectFileType"))
+
+
+@app.route("/tutorial/stop")
+def stopTutorial():
+    session.pop("setupTutorial", None)
+    # Always return to the path-selection page when exiting the tutorial.
+    return redirect(url_for("showSelectFileType"))
+
+
+@app.route("/tutorial/pdb-small-molecule/files")
+def downloadPdbSmallMoleculeTutorialFiles():
+    missing = [name for name in PDB_TUTORIAL_FILES if not (PDB_TUTORIAL_DIR / name).is_file()]
+    if missing:
+        abort(404, "Tutorial files are missing from this installation: " + ", ".join(missing))
+    archive = BytesIO()
+    with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("README.txt", PDB_TUTORIAL_README)
+        for name in PDB_TUTORIAL_FILES:
+            zf.write(PDB_TUTORIAL_DIR / name, name)
+    archive.seek(0)
+    return send_file(
+        archive,
+        "application/zip",
+        True,
+        "openmmdl_pdb_small_molecule_tutorial_files.zip",
+        max_age=0,
+    )
 
 
 def _normalize_resname(value, default):
@@ -142,7 +241,7 @@ def headerControls():
 
 @app.route("/")
 def showSelectFileType():
-    return render_template("selectFileType.html")
+    return render_template("selectFileType.html", tutorial_page="select_file_type")
 
 
 @app.route("/selectFiles")
@@ -155,7 +254,7 @@ def showConfigureFiles():
     try:
         fileType = session["fileType"]
         if fileType == "pdb":
-            return render_template("configurePdbFile.html")
+            return render_template("configurePdbFile.html", tutorial_page="configure_pdb_file")
         elif fileType == "amber":
             return render_template("configureAmberFiles.html")
     except Exception:
@@ -990,7 +1089,7 @@ def showSelectChains():
     if len(chains) < 2 and not hasHeterogen:
         session["heterogens"] = "all"
         return showAddResidues()
-    return render_template("selectChains.html", chains=chains)
+    return render_template("selectChains.html", chains=chains, tutorial_page="select_chains")
 
 
 @app.route("/selectChains", methods=["POST"])
@@ -1018,7 +1117,7 @@ def showAddResidues():
         else:
             offset = int(chainResidues[-1].id)
         spans.append((chain.id, offset + 1, offset + len(residues), ", ".join(residues)))
-    return render_template("addResidues.html", spans=spans)
+    return render_template("addResidues.html", spans=spans, tutorial_page="add_residues")
 
 
 @app.route("/addResidues", methods=["POST"])
@@ -1043,7 +1142,9 @@ def showConvertResidues():
         else:
             replacements = nucleotides
         residues.append((residue.chain.id, residue.name, residue.id, replacements, replaceWith))
-    return render_template("convertResidues.html", residues=residues)
+    return render_template(
+        "convertResidues.html", residues=residues, tutorial_page="convert_residues"
+    )
 
 
 @app.route("/convertResidues", methods=["POST"])
@@ -1076,7 +1177,9 @@ def showAddHeavyAtoms():
         if residue in fixer.missingTerminals:
             atoms.extend(atom for atom in fixer.missingTerminals[residue])
         residues.append((residue.chain.id, residue.name, residue.id, ", ".join(atoms)))
-    return render_template("addHeavyAtoms.html", residues=residues)
+    return render_template(
+        "addHeavyAtoms.html", residues=residues, tutorial_page="add_heavy_atoms"
+    )
 
 
 @app.route("/addHeavyAtoms", methods=["POST"])
@@ -1096,7 +1199,12 @@ def showAddHydrogens():
         ).value_in_unit(unit.nanometer)
         for i in range(3)
     )
-    return render_template("addHydrogens.html", unitCell=unitCell, boundingBox=boundingBox)
+    return render_template(
+        "addHydrogens.html",
+        unitCell=unitCell,
+        boundingBox=boundingBox,
+        tutorial_page="add_hydrogens",
+    )
 
 
 @app.route("/addHydrogens", methods=["POST"])
@@ -1167,6 +1275,7 @@ def showSimulationOptions():
             display_save_script=True,
             display_processed_pdb=True,
             display_save_all_files=True,
+            tutorial_page="simulation_options",
         )
     elif file_type == "amber":
         return render_template(

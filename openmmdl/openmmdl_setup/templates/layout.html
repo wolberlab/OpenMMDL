@@ -13,7 +13,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
         <!-- Custom theme overrides (keeps Bootstrap 3 for compatibility) -->
-        <link rel="stylesheet" href="{{ url_for('static', filename='openmmdl.css') }}">
+        <link rel="stylesheet" href="{{ static_versioned('openmmdl.css') }}">
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
@@ -237,7 +237,8 @@
             })();
         </script>    
     </head>
-    <body>
+    {% set om_tutorial = setup_tutorial_context(tutorial_page|default(None)) %}
+    <body{% if om_tutorial %} class="om-tutorial-active"{% endif %}>
         <div class="container-fluid om-shell">
             <noscript>
                 <div style='color:red'>
@@ -256,6 +257,11 @@
             </div>
 
             <div class="om-actions">
+                {% if om_tutorial or setup_tutorial_active() %}
+                <a class="btn btn-default btn-sm" href="{{ url_for('stopTutorial') }}">Exit Tutorial</a>
+                {% else %}
+                <a class="btn btn-default btn-sm" href="{{ url_for('showTutorials') }}">Tutorials</a>
+                {% endif %}
                 {% block startover %}
                 <button type="submit" class="btn btn-default btn-sm" name="startOver" value="Start Over">Start Over</button>
                 {% endblock %}
@@ -272,6 +278,10 @@
                 </div>
             </div>
         </div>
+        {% if om_tutorial %}
+        <script>window.OpenMMDLTutorial = {{ om_tutorial|tojson }};</script>
+        <script src="{{ static_versioned('openmmdl_tutorial.js') }}"></script>
+        {% endif %}
         <div id="overlay">
             <div id="progressParent"></div>
             <div id="progressMessage">

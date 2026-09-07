@@ -6,13 +6,24 @@
 <div class="om-hero">
     <h2 class="om-hero-title">Welcome to the OpenMMDL Setup</h2>
     <div class="om-hero-sub">Choose the input format you have. You will be guided through validation, system preparation, and script generation.</div>
+    {% if not setup_tutorial_context(tutorial_page|default(None)) %}
+    <div class="om-tutorial-entry">
+        <div>
+            <h3>Need a guided example?</h3>
+            <p>Open the tutorial selection page to choose an interactive setup workflow. Currently available: PDB small molecule.</p>
+        </div>
+        <div class="om-tutorial-entry-actions">
+            <a href="{{ url_for('showTutorials') }}" class="btn btn-default">Open tutorials</a>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <form method="get" action="{{ url_for('selectFiles') }}" class="om-choice-form">
     <div class="row om-choice-grid">
         <div class="col-md-6">
             <label class="om-choice-card">
-                <input type="radio" name="type" value="pdb" checked/>
+                <input type="radio" name="type" value="pdb"/>
                 <div class="om-choice-content">
                     <div class="om-choice-title">PDB / mmCIF</div>
                     <div class="om-choice-desc">A PDB or PDBx/mmCIF file describing the system.</div>
@@ -30,10 +41,27 @@
         </div>
     </div>
 
-    <div class="om-footer-actions">
-        <button type="button" class="btn btn-default btn-back-red" disabled title="Unavailable">Back</button>
-        <input type="submit" value="Continue" class="btn"/>
+    <div class="om-footer-actions om-footer-actions-left">
+        <input type="submit" value="Continue" class="btn" id="continue" disabled/>
     </div>
 </form>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var continueButton = document.getElementById("continue");
+  var typeInputs = document.querySelectorAll("input[name='type']");
+
+  function updateContinueButton() {
+    var selected = document.querySelector("input[name='type']:checked");
+    continueButton.disabled = !selected;
+  }
+
+  typeInputs.forEach(function (input) {
+    input.addEventListener("change", updateContinueButton);
+  });
+
+  updateContinueButton();
+});
+</script>
 
 {% endblock %}

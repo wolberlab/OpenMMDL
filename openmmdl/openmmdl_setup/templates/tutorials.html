@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block title %}Tutorials{% endblock %}
+{% block body %}
+
+<div class="om-hero">
+    <h2 class="om-hero-title">OpenMMDL Setup Tutorials</h2>
+    <div class="om-hero-sub">
+        Choose a guided workflow. Tutorials open directly inside OpenMMDL Setup and highlight the controls needed for each step.
+    </div>
+</div>
+
+<div class="om-tutorial-grid">
+    <div class="om-tutorial-card om-tutorial-card-available">
+        <div class="om-tutorial-card-badge">Available</div>
+
+        <h3>PDB small molecule</h3>
+
+        <p>
+            Prepare the TLR8 receptor from PDB entry 5WYZ with both copies of its
+            ligand, then generate the OpenMMDL simulation package.
+        </p>
+
+        <ul>
+            <li>Select the PDB path</li>
+            <li>Upload the receptor and both ligand files, choose AMBER19 and SMIRNOFF</li>
+            <li>Remove the glycan chains, configure hydrogens, water, ions, and simulation length</li>
+        </ul>
+
+        <div class="om-tutorial-card-actions">
+            <a href="{{ url_for('downloadPdbSmallMoleculeTutorialFiles') }}"
+               class="btn btn-default">
+                Download files
+            </a>
+
+            <a href="{{ url_for('startPdbSmallMoleculeTutorial') }}" class="btn btn-primary">
+                Start tutorial
+            </a>
+        </div>
+    </div>
+
+    <div class="om-tutorial-card om-tutorial-card-disabled" aria-disabled="true">
+        <div class="om-tutorial-card-badge">Coming later</div>
+
+        <h3>Amber setup</h3>
+
+        <p>
+            A guided Amber topology and coordinate workflow can be added here later.
+        </p>
+
+        <span class="btn btn-default disabled">Not available yet</span>
+    </div>
+</div>
+
+<div class="om-footer-actions om-footer-actions-left">
+    <button type="button"
+            class="btn btn-default btn-back-red"
+            onclick="omGoBack('{{ url_for('showSelectFileType') }}')">
+        Back
+    </button>
+</div>
+
+{% endblock %}

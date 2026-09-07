@@ -22,10 +22,18 @@ Now that we have activated the `openmmdl` environment we can start **OpenMMDL Se
 
 This will open the **OpenMMDL Setup**, which you can use for the creation of the input files for **OpenMMDL Simulation**.
 
+Interactive tutorial mode
+-------------------------
+
+OpenMMDL Setup includes guided tutorial mode. Click the ``Tutorials`` button in the Setup header, or open the tutorial section on the first page, to reach the tutorial selection page. Currently the available workflow is ``PDB small molecule``. Starting it opens an in-app tutorial panel that highlights the relevant controls, explains the current step, links back to this documentation, and can apply the tutorial choices for you: ``AMBER19`` with its ``OPC3`` water model, ``Single complex`` with a second ligand copy as an additional molecule, ``SMIRNOFF`` for the small molecules, pH ``7.4``, a water box with ionic strength ``0.15 M``, and a ``10 ns`` simulation length. The :doc:`PDB Path </pdb_path>` page describes the same pages with their default settings and all available options, and points out where the interactive tutorial deviates from the defaults. How the tutorial panel works and which tutorials exist is described on the :doc:`Interactive Tutorials </tutorials>` page.
+
+The browser cannot select local files automatically. Use the ``Download files`` button in Setup to retrieve the bundled example files: the MOE-processed 5WYZ receptor (``5wyz_tutorial_receptor.pdb``, with the crystal N-glycans kept so the chain step has sugar chains to deselect) and the two copies of the CU-CPT9b ligand (``7VF``) taken from the crystal structure as separate files, ``7VF_A.sdf`` and ``7VF_B.sdf``. When the tutorial asks for them, upload the receptor, then ``7VF_A.sdf`` as the ligand and ``7VF_B.sdf`` as the additional molecule.
+
+
 There are two possible options to create the input files for **OpenMMDL Simulation**:
 
 1. The PDBFixer path, where a `pdb` file of the protein is used as an input for the preparation and simulation.
-The tutorial for the PDBFixer path can be found :doc:`here </tutorial_pdb_path>`.
+The PDBFixer path is described page by page :doc:`here </pdb_path>`.
 
 Here is the table of the currently available forcefields and water models for the PDBFixer path: 
 
@@ -95,7 +103,7 @@ Here is the table of the currently available forcefields and water models for th
      - ✓
 
 2. The Amber path, where `prmtop` and `inpcrd` files are used the preparation and simulation. This path allows us to either use already prepared `prmtop` and `inpcrd` as an input or create the `prmtop` and `inpcrd` from PDB files of the receptor and ligand.
-The tutorial for the Amber path can be found :doc:`here </tutorial_amber_path>`.
+The Amber path is described page by page :doc:`here </amber_path>`.
 
 .. figure:: /_static/images/amber_ff.png
    :figwidth: 725px

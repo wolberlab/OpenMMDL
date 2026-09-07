@@ -213,6 +213,22 @@ body {
   margin-top: 16px;
 }
 
+.om-footer-actions-left {
+  justify-content: flex-start;
+}
+
+.om-tutorial-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: auto;
+}
+
+.om-tutorial-card-actions .btn {
+  margin-top: 0;
+}
+
 .om-actions-right {
   justify-self: end;   /* pins actions to the right column */
 }
@@ -555,3 +571,315 @@ pre code { color: inherit; }
 .om-filedrop.is-dragover .om-filedrop-label {
   box-shadow: 0 0 0 2px rgba(15,23,42,0.25);
 }
+
+/* Tutorial selection */
+.om-tutorial-entry {
+  margin-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #dbe3ef;
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.om-tutorial-entry h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.om-tutorial-entry p {
+  margin: 0;
+  color: #64748b;
+}
+
+.om-tutorial-entry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.om-tutorial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 22px;
+  align-items: stretch;
+}
+
+.om-tutorial-card {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 260px;
+  padding: 28px 30px;
+  border: 1px solid #dbe3ef;
+  border-radius: 18px;
+  background: #ffffff;
+  color: #0f172a;
+  text-align: left;
+  text-decoration: none;
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+.om-tutorial-card:hover,
+.om-tutorial-card:focus {
+  color: #0f172a;
+  text-decoration: none;
+}
+
+.om-tutorial-card-available {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  border-color: #4f46e5;
+  color: #ffffff;
+}
+
+.om-tutorial-card-available:hover,
+.om-tutorial-card-available:focus {
+  color: #ffffff;
+  border-color: #4338ca;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.14), 0 18px 44px rgba(15, 23, 42, 0.18);
+  transform: translateY(-1px);
+}
+
+.om-tutorial-card h3 {
+  margin: 12px 0 12px;
+  font-size: 24px;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.om-tutorial-card p {
+  margin: 0 96px 14px 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.om-tutorial-card ul {
+  margin: 12px 0 20px;
+  padding-left: 20px;
+  color: #475569;
+  text-align: left;
+}
+
+.om-tutorial-card li {
+  margin-bottom: 7px;
+  line-height: 1.35;
+}
+
+.om-tutorial-card .btn {
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+.om-tutorial-card-available h3,
+.om-tutorial-card-available p,
+.om-tutorial-card-available ul,
+.om-tutorial-card-available li {
+  color: #ffffff;
+}
+
+.om-tutorial-card-available .btn {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+.om-tutorial-card-available .btn:hover,
+.om-tutorial-card-available .btn:focus {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.32);
+  color: #ffffff;
+}
+
+.om-tutorial-card-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.om-tutorial-card-available .om-tutorial-card-badge {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.om-tutorial-card-disabled {
+  opacity: 0.72;
+}
+
+/* In-app guided tutorial */
+/* Keep the page's last controls reachable above the fixed panel. The padding goes on
+   the shell, not on body: body is height 100% with border-box sizing, so padding there
+   would not extend the scrollable page. */
+body.om-tutorial-active .om-shell {
+  padding-bottom: 388px;
+}
+
+.om-tutorial-done {
+  margin-left: 8px;
+  color: #15803d;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.om-tutorial-panel {
+  position: fixed;
+  right: 8px;
+  bottom: 8px;
+  z-index: 1050;
+  width: min(560px, calc(100vw - 32px));
+  max-height: 320px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #c7d2fe;
+  border-radius: 18px;
+  box-shadow: 0 22px 70px rgba(15, 23, 42, 0.24);
+  padding: 14px 16px;
+}
+
+.om-tutorial-kicker {
+  color: #4f46e5;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.om-tutorial-heading {
+  margin: 4px 0 8px;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.om-tutorial-progress {
+  height: 6px;
+  overflow: hidden;
+  background: #e2e8f0;
+  border-radius: 999px;
+  margin: 6px 0 8px;
+}
+
+.om-tutorial-progress span {
+  display: block;
+  height: 100%;
+  background: #4f46e5;
+  border-radius: 999px;
+}
+
+.om-tutorial-step-count {
+  color: #64748b;
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.om-tutorial-step-title {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.om-tutorial-body {
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.35;
+  margin-bottom: 10px;
+}
+
+.om-tutorial-links,
+.om-tutorial-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.om-tutorial-links {
+  margin-bottom: 10px;
+}
+
+.om-tutorial-panel .btn {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.om-tutorial-highlight {
+  position: relative;
+  z-index: 1040;
+  outline: 4px solid rgba(79, 70, 229, 0.45);
+  outline-offset: 5px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 8px rgba(79, 70, 229, 0.12);
+  transition: outline-color 150ms ease, box-shadow 150ms ease;
+}
+
+.om-tutorial-input-hint,
+.om-tutorial-option-hint {
+  margin: 8px 0 0 !important;
+  display: block !important;
+  width: fit-content;
+  max-width: 100%;
+  padding: 8px 12px !important;
+  border-radius: 10px;
+  background: #4f46e5 !important;
+  border: 1px solid #4338ca !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  line-height: 1.25;
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.24);
+}
+
+.om-tutorial-input-hint::before,
+.om-tutorial-option-hint::before {
+  content: "Tutorial step: ";
+  opacity: 0.85;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .om-tutorial-entry {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .om-tutorial-entry-actions {
+    justify-content: flex-start;
+  }
+
+  .om-tutorial-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .om-tutorial-card {
+    min-height: auto;
+    padding: 22px;
+  }
+
+  .om-tutorial-card p {
+    margin-right: 0;
+  }
+
+  .om-tutorial-panel {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    max-height: 55vh;
+  }
+
+  body.om-tutorial-active .om-shell {
+    padding-bottom: 60vh;
+  }
+}
+
