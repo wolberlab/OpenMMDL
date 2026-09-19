@@ -54,10 +54,20 @@ def run_simulation(args) -> int:
                     print("Wrong coordinates file path, try the absolute path")
             else:
                 print("Wrong Format, don't forget the .inpcrd of the coordinate file")
+        for parameter_path in getattr(args, "ligand_parameters", []):
+            if os.path.isdir(parameter_path):
+                shutil.copytree(parameter_path, os.path.join(args.folder, os.path.basename(parameter_path)))
+            elif os.path.exists(parameter_path):
+                shutil.copy(parameter_path, args.folder)
+            else:
+                print(f"Wrong ligand parameter path, try the absolute path: {parameter_path}")
         os.chdir(args.folder)
 
         script_name = os.path.basename(args.script)
         keep_files = {script_name, os.path.basename(args.topology)}
+        keep_files.update(os.path.basename(path) for path in getattr(args, "ligand_parameters", []))
+        # a finished bespoke ligand fit is reused by the script instead of fitting again
+        keep_files.add("ligand_parameters")
 
         for ligand_file in ligand_files:
             keep_files.add(os.path.basename(ligand_file))

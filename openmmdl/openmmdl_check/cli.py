@@ -32,6 +32,8 @@ CHECKS = [
     CheckItem("NGLView", "nglview", "nglview", required=False),
     CheckItem("OpenFF Toolkit", "openff.toolkit", "openff-toolkit", required=False),
     CheckItem("OpenMM Force Fields", "openmmforcefields", "openmmforcefields", required=False),
+    CheckItem("OpenFF Interchange", "openff.interchange", "openff-interchange", required=False),
+    CheckItem("ParmEd", "parmed", "ParmEd", required=False),
 ]
 
 

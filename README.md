@@ -103,6 +103,15 @@ the address displayed in the console window (e.g. http://127.0.0.1:5000).
 Download the processed PDB file and Python script, which will serve as input
 for the **OpenMMDL Simulation** script.
 
+### Bespoke ligand parameters
+
+In both the PDB and the Amber path, the ligand can get bespoke torsion parameters
+fitted with [OpenFF BespokeFit](https://github.com/openforcefield/openff-bespokefit),
+or an existing SMIRNOFF `.offxml` file can be imported. Select this under
+**Ligand Parameters** in the setup; the fit itself runs when the downloaded script is
+executed. The same steps are available on the command line as `openmmdl ligand`.
+See [docs/bespoke_ligands.rst](docs/bespoke_ligands.rst).
+
 ### Interactive tutorial
 
 New users can click **Tutorials** in the Setup header to start a guided walkthrough
@@ -143,6 +152,9 @@ Start the simulation with the following Inputs:
 Repeat -l or pass multiple files after one -l.
 
 -c = Coordinates file of Amber
+
+-p = Bespoke ligand parameters used by the script: an .offxml file to import or a
+finished ligand_parameters directory to reuse
 
 --failure-retries = Number of reruns if OpenMM fails with "Particle coordinate is NaN"
 

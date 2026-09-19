@@ -18,7 +18,9 @@ dependencies:
   - mdtraj
   - pdbfixer
   - openff-toolkit
+  - openff-interchange
   - openmmforcefields
+  - parmed
   - openmm>=8.3.1
   - openmmtools
   - cuda-toolkit

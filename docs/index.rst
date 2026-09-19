@@ -58,6 +58,7 @@ simulation trajectories.
 
    pdb_path
    amber_path
+   bespoke_ligands
 
 .. toctree::
    :maxdepth: 1

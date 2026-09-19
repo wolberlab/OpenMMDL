@@ -1,0 +1,53 @@
+{# Bespoke parameters of the primary ligand; included by configurePdbFile.html and AmberOptions.html #}
+<div id="ligandParameterSection">
+    <div class="form-group">
+    <label for="ligandParameterMode" class="control-label col-md-2">Ligand Parameters</label>
+    <div class="col-md-10"><select name="ligandParameterMode" id="ligandParameterMode" class="form-control" title="Standard force field, or bespoke torsions fitted with OpenFF BespokeFit" onchange="ligandParameterModeChanged()">
+        <option value="standard" selected>Standard small molecule force field</option>
+        <option value="fit">Fit bespoke torsions with OpenFF BespokeFit</option>
+        <option value="import">Import a SMIRNOFF force field (.offxml)</option>
+    </select>
+    <p class="help-block">Bespoke parameters apply to the ligand file above, which must be an SDF file with explicit hydrogens.{% if session.get('fileType') == 'amber' %} The ligand gets the residue code BSP.{% endif %}</p>
+    {% if ligand_parameter_error %}<div class="alert alert-danger">{{ ligand_parameter_error }}</div>{% endif %}
+    </div>
+    </div>
+    <div id="ligandImportOptions" hidden>
+        <div class="form-group">
+        <label for="ligandOffxml" class="control-label col-md-2">Force Field File</label>
+        <div class="col-md-10"><input type="file" name="ligandOffxml" id="ligandOffxml" accept=".offxml" onchange="optionChanged()"/>
+        <p class="help-block">A SMIRNOFF force field that covers this ligand, for example the final .offxml of a BespokeFit run.</p></div>
+        </div>
+    </div>
+    <div id="ligandFitOptions" hidden>
+        <div class="form-group">
+        <label for="bespokeExecutable" class="control-label col-md-2">BespokeFit Executable</label>
+        <div class="col-md-10"><input type="text" name="bespokeExecutable" id="bespokeExecutable" class="form-control" placeholder="openff-bespoke" onchange="optionChanged()"/>
+        <p class="help-block">Path to openff-bespoke if BespokeFit and its QC program are installed in another conda environment.</p></div>
+        </div>
+        <div class="form-group">
+        <label for="bespokeQcSpec" class="control-label col-md-2">QC Level</label>
+        <div class="col-md-10"><select name="bespokeQcSpec" id="bespokeQcSpec" class="form-control" title="Quantum chemistry level of the torsion scans" onchange="optionChanged()">
+            <option value="psi4 b3lyp-d3bj dzvp" selected>B3LYP-D3BJ/DZVP with Psi4 (BespokeFit default)</option>
+            <option value="xtb gfn2xtb none">GFN2-xTB with xtb (fast, for testing)</option>
+        </select></div>
+        </div>
+        <div class="form-group">
+        <label class="control-label col-md-2">QC Resources</label>
+        <div class="col-md-10"><div class="row">
+            <div class="col-md-4"><input type="number" name="bespokeWorkers" id="bespokeWorkers" class="form-control" min="1" value="1" onchange="optionChanged()"/><p class="help-block">QC workers</p></div>
+            <div class="col-md-4"><input type="number" name="bespokeCores" id="bespokeCores" class="form-control" min="1" value="2" onchange="optionChanged()"/><p class="help-block">Cores per worker</p></div>
+            <div class="col-md-4"><input type="number" name="bespokeMemory" id="bespokeMemory" class="form-control" min="1" value="4" onchange="optionChanged()"/><p class="help-block">Memory per worker (GB)</p></div>
+        </div>
+        <p class="help-block">The fit runs when the downloaded script is executed and can take hours; its progress is written to fit.log.</p></div>
+        </div>
+    </div>
+</div>
+<script>
+function ligandParameterModeChanged() {
+    var mode = document.getElementById("ligandParameterMode").value;
+    document.getElementById("ligandImportOptions").hidden = (mode != "import");
+    document.getElementById("ligandFitOptions").hidden = (mode != "fit");
+    if (typeof optionChanged === "function")
+        optionChanged();
+}
+</script>

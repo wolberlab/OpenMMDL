@@ -28,6 +28,10 @@ COMMANDS: Dict[str, tuple[str, str]] = {
         "openmmdl.openmmdl_check.cli:main",
         "Check the OpenMMDL installation and environment",
     ),
+    "ligand": (
+        "openmmdl.ligand_parameters.cli:main",
+        "Fit or import bespoke ligand parameters (OpenFF BespokeFit)",
+    ),
 }
 
 

@@ -21,6 +21,9 @@ The rules for this file:
 talagayev, MarvinTaterra
 
 ### Added
+- Added bespoke ligand parameters with `OpenFF BespokeFit` (fit or import a
+  SMIRNOFF `.offxml`) to both `OpenMMDL Setup` paths and `openmmdl ligand`
+  (2026-09-19)
 - Added an interactive `PDB small molecule` tutorial inside `OpenMMDL Setup`
   (2026-09-06, PR#213)
 - Added native glycoprotein support in `OpenMMDL Setup` AMBER path

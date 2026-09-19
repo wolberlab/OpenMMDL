@@ -74,6 +74,7 @@ Select the pdb input file and options for how to model it.
                 <p class="help-block">Topology residue code. Use exactly 3 uppercase letters or digits. Default: UNK.</p>
             </div>
         </div>
+        {% include 'ligandParameters.html' %}
     </div>
     <div id="companionSection" hidden>
         <div class="form-group">
@@ -511,6 +512,8 @@ function optionChanged() {
         companionSection.hidden = false;
         highThroughputHint.hidden = false;
     }
+    // bespoke parameters are fitted for one ligand, not for a pose library
+    document.getElementById("ligandParameterSection").hidden = (smallMoleculeMode == "library");
 
 
     // -------------------------

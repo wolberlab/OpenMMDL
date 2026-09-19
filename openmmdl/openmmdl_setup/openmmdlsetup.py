@@ -20,6 +20,8 @@ from flask import (
     abort,
 )
 from werkzeug.utils import secure_filename
+from openmmdl.ligand_parameters.core import RESNAME as BESPOKE_RESNAME
+from openmmdl.openmmdl_setup.ligand_parameters import read_parameter_settings, amber_prepare_command
 from openmmdl.openmmdl_setup.setup_tutorials import (
     PDB_TUTORIAL_DIR,
     PDB_TUTORIAL_FILES,
@@ -303,6 +305,23 @@ def configureFiles():
         ]
         if not _resnames_are_unique(all_resnames):
             raise ValueError("Ligand topology codes must be unique.")
+        try:
+            session["ligandParameters"] = (
+                read_parameter_settings(
+                    request.form,
+                    uploadedFiles,
+                    "sdfFile",
+                    library=session["smallMoleculeMode"] == "library",
+                )
+                if session["sdfFile"]
+                else {"mode": "standard"}
+            )
+        except ValueError as exc:
+            return render_template(
+                "configurePdbFile.html",
+                tutorial_page="configure_pdb_file",
+                ligand_parameter_error=str(exc),
+            )
         configureDefaultOptions()
         file, name = uploadedFiles["file"][0]
         file.seek(0, 0)
@@ -409,6 +428,14 @@ def setAmberOptions():
     if session["nmLig"]:
         if "nmLigFile" not in uploadedFiles:
             return "# Upload a normal ligand PDB/SDF file to generate the AMBER setup script.\n"
+        try:
+            session["ligandParameters"] = read_parameter_settings(request.form, uploadedFiles, "nmLigFile")
+        except ValueError as exc:
+            # keep the error, so a download does not silently fall back to GAFF
+            session["ligandParameters"] = {"mode": "error", "error": str(exc)}
+            return "# %s\n" % exc
+    else:
+        session["ligandParameters"] = {"mode": "standard"}
 
     ## for special ligand
     if session["spLig"]:
@@ -452,6 +479,7 @@ def configureDefaultAmberOptions():
     session["lig_ff"] = "gaff2"
     session["charge_value"] = "0"
     session["charge_method"] = "bcc"
+    session["ligandParameters"] = {"mode": "standard"}
 
     # Receptor
     session["prot_ff"] = "ff19SB"
@@ -480,6 +508,10 @@ def configureDefaultAmberOptions():
 
 
 def createAmberBashScript():
+    bespoke = session.get("ligandParameters", {"mode": "standard"})
+    if "error" in bespoke:
+        return "# %s\n" % bespoke["error"]
+    custom_ligand = bespoke["mode"] != "standard"
     rcpType = session.get("rcpType", "")
     receptor_key_map = {
         "protRcp": "protFile",
@@ -521,6 +553,18 @@ def createAmberBashScript():
     """)
 
     a_script.append("#!/bin/bash\n")
+
+    # Bespoke ligand parameters
+    if custom_ligand:
+        a_script.append(
+            "########################### Bespoke Ligand Parameters ###########################"
+        )
+        a_script.append(
+            "## Fit or import SMIRNOFF parameters with OpenFF BespokeFit and export them as tleap library"
+        )
+        a_script.append(
+            amber_prepare_command(bespoke, uploadedFiles["nmLigFile"][0][1]) + " || exit 1\n"
+        )
 
     # Receptor
     a_script.append(
@@ -708,7 +752,10 @@ def createAmberBashScript():
         a_script.append(
             "################################## Ligand ######################################"
         )
-    if session["nmLig"]:
+    if custom_ligand:
+        a_script.append("# Normal Ligand with bespoke parameters (bespoke_ligand/), no antechamber needed")
+        a_script.append("lig_ff=%s # Ligand force field, only used for a special ligand \n" % session["lig_ff"])
+    elif session["nmLig"]:
         a_script.append("# Normal Ligand that is compatible with GAFF force field")
         nmLigFile = uploadedFiles["nmLigFile"][0][1]
         a_script.append(
@@ -785,7 +832,10 @@ def createAmberBashScript():
             a_script.append("source ${glycan_ff}")
         a_script.append("source leaprc.${lig_ff}")
         ## load the prepc and frcmod file for either normal or special ligand
-        if session["nmLig"]:
+        if custom_ligand:
+            a_script.append("\nloadamberparams bespoke_ligand/ligand.frcmod")
+            a_script.append("loadoff bespoke_ligand/ligand.lib\n")
+        elif session["nmLig"]:
             a_script.append("\nloadamberprep ${nmLigFile}.prepc")
             a_script.append("loadamberparams ${nmLigFile}.frcmod\n")
         if session["spLig"]:
@@ -796,12 +846,13 @@ def createAmberBashScript():
         if rcpType == "glycoprotRcp":
             # declare the glycosidic bonds on `rcp` before combine
             a_script.append("$(sed 's/system\\./rcp./g' tleap.bonds.txt)")
+        nmLigPdb = "bespoke_ligand/ligand.pdb" if custom_ligand else "rename_${nmLigFile}.pdb"
         if session["nmLig"] and session["spLig"]:
-            a_script.append("nmLig = loadpdb rename_${nmLigFile}.pdb ")
+            a_script.append("nmLig = loadpdb %s " % nmLigPdb)
             a_script.append("spLig = loadpdb ${spLigFile}_amber.pdb ")
             a_script.append("comp = combine{rcp nmLig spLig}")
         elif session["nmLig"]:
-            a_script.append("nmLig = loadpdb rename_${nmLigFile}.pdb ")
+            a_script.append("nmLig = loadpdb %s " % nmLigPdb)
             a_script.append("comp = combine{rcp nmLig}")
         elif session["spLig"]:
             a_script.append("spLig = loadpdb ${spLigFile}_amber.pdb")
@@ -976,7 +1027,10 @@ def createAmberBashScript():
     if addType == "addMembrane":
         a_script.append("source leaprc.${lipid_ff}")
     ## load the prepc and frcmod file
-    if session["nmLig"]:
+    if custom_ligand:
+        a_script.append("\nloadamberparams bespoke_ligand/ligand.frcmod")
+        a_script.append("loadoff bespoke_ligand/ligand.lib\n")
+    elif session["nmLig"]:
         a_script.append("\nloadamberprep ${nmLigFile}.prepc")
         a_script.append("loadamberparams ${nmLigFile}.frcmod\n")
     if session["spLig"]:
@@ -1018,6 +1072,11 @@ def createAmberBashScript():
     a_script.append("\nquit")
     a_script.append("\nEOF")
     a_script.append("\ntleap -s -f tleap.in > tleap.out")
+    if custom_ligand:
+        a_script.append("\n## tleap keeps only one of the three SMIRNOFF improper torsions per center; put the exact ligand parameters back")
+        a_script.append(
+            "openmmdl ligand restore --prmtop system.${water_ff}.prmtop --inpcrd system.${water_ff}.inpcrd --ligand-dir bespoke_ligand || exit 1"
+        )
 
     return "\n".join(a_script)
 
@@ -1503,6 +1562,9 @@ os.chdir(outputDir)""")
     script.append(
         "from openmmdl.openmmdl_simulation.scripts.cleaning_procedures import cleanup_post_md, close_reporters, create_directory_if_not_exists, copy_file, organize_files, post_md_file_movement \n"
     )
+    bespoke = session.get("ligandParameters", {"mode": "standard"})
+    if session["fileType"] == "pdb" and bespoke["mode"] != "standard":
+        script.append("from openmmdl.ligand_parameters.core import FitOptions, prepare_parameters")
 
     script.append("import simtk.openmm.app as app")
     script.append(
@@ -1609,6 +1671,9 @@ os.chdir(outputDir)""")
                 nmLigName = extractLigName(
                     nmLigFileName
                 )  # e.g '8QY' or 'UNL' # resname in topology
+                if session.get("ligandParameters", {"mode": "standard"})["mode"] != "standard":
+                    nmLigName = BESPOKE_RESNAME
+                    script.append("ligand_name = %r" % nmLigName)
             else:
                 nmLigFileName = None
                 nmLigName = None
@@ -1806,21 +1871,33 @@ protein_pdb = pdbfixer.PDBFixer(str(protein))
 prepared_ligands = [
     prepare_ligand(ligand_file, sanitization=sanitization, minimize_molecule=minimization)
     for ligand_file in ligands
-]
-forcefield_selected = ff_selection(ff)
+]""")
+            # bespoke parameters of the primary ligand: fitted or imported when the script runs
+            if bespoke["mode"] == "fit":
+                script.append(
+                    "ligand_offxml = prepare_parameters(ligand, 'ligand_parameters', options=FitOptions(**%r))"
+                    % bespoke["options"]
+                )
+            elif bespoke["mode"] == "import":
+                script.append(
+                    "ligand_offxml = prepare_parameters(ligand, 'ligand_parameters', offxml=%r)"
+                    % bespoke["offxml"]
+                )
+            ligand_offxml = ", ligand_offxml=ligand_offxml" if bespoke["mode"] != "standard" else ""
+            script.append("""forcefield_selected = ff_selection(ff)
 water_selected = water_forcefield_selection(water=water,forcefield_selection=ff_selection(ff))
 model_water = water_model_selection(water=water,forcefield_selection=ff_selection(ff))
 print("Forcefield and Water Model Selected")
 if add_membrane:
-    transitional_forcefield = generate_transitional_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=prepared_ligands)
-forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=prepared_ligands)
+    transitional_forcefield = generate_transitional_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=prepared_ligands%s)
+forcefield = generate_forcefield(protein_ff=forcefield_selected, solvent_ff=water_selected, add_membrane=add_membrane, smallMoleculeForceField=smallMoleculeForceField, smallMoleculeForceFieldVersion=smallMoleculeForceFieldVersion, rdkit_mol=prepared_ligands%s)
 complex_modeller = app.Modeller(protein_pdb.topology, protein_pdb.positions)
 for ligand_prepared, ligand_name in zip(prepared_ligands, ligand_names):
     omm_ligand = rdkit_to_openmm(ligand_prepared, ligand_name)
     complex_modeller.add(omm_ligand.topology, omm_ligand.positions)
 complex_topology = complex_modeller.topology
 complex_positions = complex_modeller.positions
-print("Complex topology has", complex_topology.getNumAtoms(), "atoms.")     """)
+print("Complex topology has", complex_topology.getNumAtoms(), "atoms.")     """ % (ligand_offxml, ligand_offxml))
         elif not has_pdb_ligands:
             script.append(
                 """

@@ -65,6 +65,18 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
     )
     parser.add_argument(
+        "-p",
+        "--ligand-parameters",
+        dest="ligand_parameters",
+        action="append",
+        default=[],
+        metavar="PATH",
+        help=(
+            "Bespoke ligand parameters used by the script: an .offxml file to import, "
+            "or a finished ligand_parameters directory to reuse. Repeat for several."
+        ),
+    )
+    parser.add_argument(
         "--failure-retries",
         dest="failure_retries",
         type=int,
