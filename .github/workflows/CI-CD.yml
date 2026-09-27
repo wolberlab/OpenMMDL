@@ -34,7 +34,7 @@ jobs:
 
       - name: Install linting tools
         run: |
-          python -m pip install shyaml flake8 black black-nb flake8-nb ruff
+          python -m pip install ruff
 
       - name: Check Ruff formatting
         id: ruff-format
@@ -46,10 +46,6 @@ jobs:
         if: steps.ruff-format.outcome == 'failure'
         run: |
           echo "::warning::Ruff formatting issues detected. Run 'ruff format .' locally to apply formatting fixes."
-
-      - name: Run black formatter
-        run: |
-          black -l 99 . --exclude '\.ipynb$'
 
       - name: Install pytest and run tests
         run: |

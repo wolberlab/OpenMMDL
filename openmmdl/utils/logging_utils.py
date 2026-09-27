@@ -94,10 +94,6 @@ def setup_logging(
     logging.getLogger("matplotlib").setLevel(logging.WARNING)
 
 
-def get_logger(name: str) -> logging.Logger:
-    return logging.getLogger(name)
-
-
 def _clear_handlers(logger: logging.Logger) -> None:
     for handler in list(logger.handlers):
         try:

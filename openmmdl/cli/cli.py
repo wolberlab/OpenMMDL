@@ -77,30 +77,17 @@ def _normalize_help_tokens(argv: List[str]) -> List[str]:
 
 def _run_target(target: str, forwarded: List[str], prog: str) -> int:
     """
-    Import target and call either:
-      - module:function     (callable)
-      - module              (expects main())
-    Forward argv via sys.argv.
+    Import 'module:function' target, call it, and forward argv via sys.argv.
     """
     old_argv = sys.argv
     sys.argv = [prog, *forwarded]
     try:
-        if ":" in target:
-            mod_name, func_name = target.split(":", 1)
-            mod = importlib.import_module(mod_name)
-            fn = getattr(mod, func_name, None)
-            if fn is None or not callable(fn):
-                raise RuntimeError(f"Module '{mod_name}' does not expose callable '{func_name}'.")
-            rc = fn()
-            return 0 if rc is None else int(rc)
-
-        mod = importlib.import_module(target)
-        if not hasattr(mod, "main"):
-            raise RuntimeError(
-                f"Module '{target}' does not expose a main() function. "
-                "Add def main(argv=None) and call it from __main__."
-            )
-        rc = mod.main()  # type: ignore[attr-defined]
+        mod_name, func_name = target.split(":", 1)
+        mod = importlib.import_module(mod_name)
+        fn = getattr(mod, func_name, None)
+        if fn is None or not callable(fn):
+            raise RuntimeError(f"Module '{mod_name}' does not expose callable '{func_name}'.")
+        rc = fn()
         return 0 if rc is None else int(rc)
     finally:
         sys.argv = old_argv

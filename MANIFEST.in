@@ -1,6 +1,5 @@
 include LICENSE
 include MANIFEST.in
-include versioneer.py
 
 graft openmmdl
 global-exclude *.py[cod] __pycache__ *.so
