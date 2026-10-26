@@ -7,6 +7,7 @@ def test_command_targets_use_cli_wrappers():
     assert cli.COMMANDS["setup"][0] == "openmmdl.openmmdl_setup.cli:main"
     assert cli.COMMANDS["simulation"][0] == "openmmdl.openmmdl_simulation.cli:main"
     assert cli.COMMANDS["analysis"][0] == "openmmdl.openmmdl_analysis.cli:main"
+    assert cli.COMMANDS["analysis-gui"][0] == "openmmdl.openmmdl_analysis_gui.cli:main"
     assert cli.COMMANDS["visualization"][0] == "openmmdl.openmmdl_visualization.cli:main"
     assert cli.COMMANDS["check"][0] == "openmmdl.openmmdl_check.cli:main"
 
@@ -17,11 +18,11 @@ def test_command_targets_use_cli_wrappers():
         ("setup", "Start the OpenMMDL setup UI"),
         ("simulation", "Folder Name for MD Simulation"),
         ("analysis", "Topology File after MD Simulation"),
+        ("analysis-gui", "Start the OpenMMDL Analysis GUI"),
         ("visualization", "Launch the OpenMMDL visualization notebook"),
         ("check", "Check the OpenMMDL installation and runtime environment"),
     ],
 )
-
 def test_subcommand_help_works(command, expected, capsys):
     rc = cli.main([command, "--help"])
 
@@ -30,6 +31,7 @@ def test_subcommand_help_works(command, expected, capsys):
 
     assert rc == 0
     assert expected in output
+
 
 def test_main_without_args_prints_help_and_returns_0(capsys):
     rc = cli.main([])

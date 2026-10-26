@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OpenMMDL Analysis</title>
+    <link rel="icon" href="{{ url_for('brand', name='Icon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='analysis_gui.css') }}?v={{ version }}">
+  </head>
+  <body>
+    <noscript>The OpenMMDL Analysis GUI needs JavaScript. Please enable it and reload this page.</noscript>
+    <div id="app"></div>
+    <script>
+      window.OPENMMDL_GUI = {
+        version: {{ version|tojson }},
+        logo: {{ url_for('static', filename='OpenMMDL_analysis_logo.png')|tojson }},
+        initial: {{ (initial or {})|tojson }}
+      };
+    </script>
+    <script src="{{ url_for('static', filename='analysis_gui.js') }}?v={{ version }}"></script>
+  </body>
+</html>

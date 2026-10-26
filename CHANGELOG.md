@@ -21,6 +21,8 @@ The rules for this file:
 talagayev, MarvinTaterra
 
 ### Added
+- Added `openmmdl analysis-gui`, a browser GUI to run `OpenMMDL Analysis`
+  and to explore its results interactively (2026-10-18)
 - Added an interactive `PDB small molecule` tutorial inside `OpenMMDL Setup`
   (2026-09-06, PR#213)
 - Added native glycoprotein support in `OpenMMDL Setup` AMBER path

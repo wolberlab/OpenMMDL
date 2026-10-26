@@ -7,3 +7,5 @@ build/
 
 # ignore all __pycache__ folders
 __pycache__/
+# analysis GUI frontend dependencies
+frontend/analysis_gui/node_modules/

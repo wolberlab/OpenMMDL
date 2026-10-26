@@ -20,6 +20,10 @@ COMMANDS: Dict[str, tuple[str, str]] = {
         "openmmdl.openmmdl_analysis.cli:main",
         "Analyze an OpenMMDL MD trajectory",
     ),
+    "analysis-gui": (
+        "openmmdl.openmmdl_analysis_gui.cli:main",
+        "Start the OpenMMDL Analysis GUI (run an analysis or explore its results)",
+    ),
     "visualization": (
         "openmmdl.openmmdl_visualization.cli:main",
         "Launch the visualization notebook",
@@ -48,7 +52,7 @@ def _build_top_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print OpenMMDL version and exit.",
     )
-    
+
     # We add subparsers only so argparse prints a clean command list in help.
     sub = parser.add_subparsers(dest="command", metavar="<command>")
     for name, (_, short_help) in COMMANDS.items():
@@ -124,7 +128,7 @@ def main(argv: List[str] | None = None) -> int:
     if not argv or argv[0] in HELP_ALIASES:
         _build_top_parser().print_help()
         return 0
-    
+
     command = argv[0]
     if command not in COMMANDS:
         sys.stderr.write(f"Unknown command: {command!r}\n\n")

@@ -1,0 +1,22 @@
+{
+  "name": "openmmdl-analysis-gui",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Browser frontend of the OpenMMDL Analysis GUI (openmmdl analysis-gui)",
+  "scripts": {
+    "build": "npm run vendor && esbuild src/main.ts --bundle --minify --target=es2020 --outfile=../../openmmdl/openmmdl_analysis_gui/static/analysis_gui.js",
+    "vendor": "node -e \"require('fs').copyFileSync('node_modules/vis-network/standalone/umd/vis-network.min.js', '../../openmmdl/openmmdl_analysis_gui/static/vis-network.min.js')\"",
+    "watch": "esbuild src/main.ts --bundle --sourcemap --target=es2020 --outfile=../../openmmdl/openmmdl_analysis_gui/static/analysis_gui.js --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types \"test/*.test.ts\""
+  },
+  "dependencies": {
+    "ngl": "2.5.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3",
+    "vis-network": "9.0.4"
+  }
+}

@@ -220,6 +220,16 @@ Start the analysis with the following Inputs:
 
     openmmdl analysis -t {path/to/topology} -d {path/to/trajectory} -n {Ligand_name}
 
+#### Analysis GUI
+The analysis can also be set up, run and explored in the browser:
+
+    openmmdl analysis-gui
+
+It runs `openmmdl analysis` with a live log, or opens the folder of a finished analysis to explore
+interactions, binding modes (2D depiction or ProLIF network next to the 3D structure, with
+interactions that can be switched on and off), the Markov chain of binding modes, RMSD and waters
+interactively.
+
 
 #### Visualization
 Most of the analysis outputs are JPEG images and do not need any further preparation to be viewed.

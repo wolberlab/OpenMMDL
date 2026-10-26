@@ -50,6 +50,7 @@ simulation trajectories.
    :caption: OpenMMDL-Analysis
    
    openmmdl_analysis
+   openmmdl_analysis_gui
    analysis_output
 
 .. toctree::
